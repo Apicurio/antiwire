@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  antiwire build skeleton (TASK-2).
+
+  Provisional coordinates: the intended groupId is io.apicurio, but that namespace is NOT
+  authorized yet (docs/decisions.md DEC-8). Until authorization is recorded, the neutral
+  placeholder io.github.paoloantinori is used so that local builds work. These coordinates
+  MUST NOT be published anywhere; maven.deploy.skip is set below as a guard. TASK-21 owns
+  the final publication decision.
+
+  These modules are empty shells that reserve package and module names only. They provide
+  no functionality and claim no Wire compatibility or parity. Module boundaries are the
+  fixed ones of OPEN-2: runtime standalone, schema depending on runtime, generator optional.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.github.paoloantinori</groupId>
+  <artifactId>antiwire-parent</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>antiwire parent (build skeleton)</name>
+  <description>
+    Build skeleton for the pure-Java Wire port. Empty module shells: no functionality or
+    parity is claimed. Production compilation uses --release 11 on a JDK 17+ toolchain (DEC-3).
+  </description>
+
+  <modules>
+    <module>wire-runtime-java</module>
+    <module>wire-schema-java</module>
+    <module>wire-java-generator</module>
+  </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- DEC-3: production bytecode targets Java 11 while the build toolchain stays JDK 17+. -->
+    <maven.compiler.release>11</maven.compiler.release>
+    <junit.version>5.10.2</junit.version>
+    <kotlin.version>2.1.21</kotlin.version>
+    <!-- Guard for DEC-8: provisional placeholder coordinates must never be deployed. -->
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib</artifactId>
+        <version>${kotlin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.paoloantinori</groupId>
+        <artifactId>wire-runtime-java</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.paoloantinori</groupId>
+        <artifactId>wire-schema-java</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <!--
+    Test tooling only (DEC-4): JUnit and the Kotlin standard library are declared test-scoped
+    so Kotlin test compilation is wired from day one. Test scope is not transitive, so these
+    never leak into published dependency metadata, and maven-enforcer below bans Kotlin from
+    production scope in every module.
+  -->
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.13.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.2.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.4.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.6.2</version>
+        <executions>
+          <execution>
+            <id>enforce-toolchain-and-production-dependency-policy</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>[3.6.3,)</version>
+                </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>[17,)</version>
+                  <message>Building antiwire requires JDK 17 or later. Production bytecode still targets Java 11 via maven.compiler.release (DEC-3); the Java 11 consumer check runs on a separately provisioned JVM.</message>
+                </requireJavaVersion>
+                <!--
+                  DEC-4: no Kotlin in production scope, including transitives. The scope field
+                  in each pattern keeps test-scoped Kotlin (allowed for test tooling) out of
+                  the ban. okio artifacts are banned in production scope because modern okio
+                  is Kotlin-backed; if a vendored okio subset is chosen under OPEN-1 it lands
+                  as port source, never as a production dependency.
+                -->
+                <bannedDependencies>
+                  <searchTransitive>true</searchTransitive>
+                  <message>Kotlin or a Kotlin-backed artifact appeared in production scope, which DEC-4 forbids. Move it to test scope (test tooling) or vendor it as port source; Kotlin-backed production dependencies are not allowed.</message>
+                  <excludes>
+                    <exclude>org.jetbrains.kotlin:*:*:*:compile:*</exclude>
+                    <exclude>org.jetbrains.kotlin:*:*:*:runtime:*</exclude>
+                    <exclude>org.jetbrains.kotlin:*:*:*:provided:*</exclude>
+                    <exclude>org.jetbrains.kotlinx:*:*:*:compile:*</exclude>
+                    <exclude>org.jetbrains.kotlinx:*:*:*:runtime:*</exclude>
+                    <exclude>org.jetbrains.kotlinx:*:*:*:provided:*</exclude>
+                    <exclude>com.squareup.okio:*:*:*:compile:*</exclude>
+                    <exclude>com.squareup.okio:*:*:*:runtime:*</exclude>
+                    <exclude>com.squareup.okio:*:*:*:provided:*</exclude>
+                  </excludes>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
+        Kotlin test compilation ONLY (DEC-4): the single execution binds test-compile with no
+        production execution anywhere. src/test/kotlin is the only Kotlin source root.
+      -->
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
+        <executions>
+          <execution>
+            <id>kotlin-test-compile</id>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+              </sourceDirs>
+              <jvmTarget>11</jvmTarget>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
+        Export the resolved classpaths that scripts/check-classpath.sh and
+        scripts/check-java11-bytecode.sh verify (duplicate-class prevention and Java 11
+        bytecode gate). Runtime scope here means what production consumers resolve;
+        test scope is the full port-under-test classpath.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.7.0</version>
+        <executions>
+          <execution>
+            <id>export-test-classpath</id>
+            <phase>generate-test-resources</phase>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+            <configuration>
+              <includeScope>test</includeScope>
+              <outputFile>${project.build.directory}/classpath-test.txt</outputFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>export-runtime-classpath</id>
+            <phase>generate-test-resources</phase>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+            <configuration>
+              <includeScope>runtime</includeScope>
+              <outputFile>${project.build.directory}/classpath-runtime.txt</outputFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

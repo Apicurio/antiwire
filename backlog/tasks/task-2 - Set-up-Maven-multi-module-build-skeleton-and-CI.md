@@ -1,10 +1,11 @@
 ---
 id: TASK-2
 title: Set up Maven multi-module build skeleton and CI
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - assistant
 created_date: '2026-09-29 09:22'
-updated_date: '2026-09-30 02:03'
+updated_date: '2026-09-30 02:05'
 labels: []
 milestone: m-6
 dependencies:

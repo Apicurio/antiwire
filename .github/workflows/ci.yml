@@ -1,0 +1,47 @@
+name: ci
+
+# Build and verification for the antiwire module shells. Nothing in this workflow claims
+# parity, compatibility certification, or test coverage: the suite registry printed by
+# scripts/verify.sh is the honest state (PENDING suites are listed as not run).
+#
+# One job, two toolchains, one execution: Maven runs on Temurin 17 while a Temurin 11
+# toolchain is exported as JAVA_HOME_11_X64, and scripts/verify.sh runs every suite,
+# including java11-consumer, on that real JDK 11 inside this same job. There is no second
+# consumer job and no artifact upload or download.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-verify:
+    name: build and verification entry point (JDK 17 build, JDK 11 consumer)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Java 11 is installed first so that the final JAVA_HOME and PATH stay on 17 while the
+      # 11 toolchain is exported as JAVA_HOME_11_X64; scripts/verify.sh discovers it there and
+      # runs the consumer smoke on it (DEC-3: consumer checks run on an actual Java 11 JVM).
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-
+
+      - name: run the verification entry point
+        run: scripts/verify.sh

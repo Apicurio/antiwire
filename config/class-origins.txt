@@ -1,0 +1,8 @@
+# Classes whose CodeSource origin is reported for each module test classpath by
+# scripts/check-classpath.sh (TASK-2 AC#4). A class absent from a given module's classpath
+# is reported as informational; a class resolving from two artifacts fails the duplicate
+# rule. TASK-5 and TASK-6 extend this list with real port-under-test classes so the check
+# proves where they load from with upstream implementations isolated.
+com.squareup.wire.package-info
+com.squareup.wire.schema.package-info
+com.squareup.wire.java.package-info
