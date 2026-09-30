@@ -1,10 +1,11 @@
 ---
 id: TASK-3
 title: Write Kotlin-to-Java translation conventions doc
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - assistant
 created_date: '2026-09-29 09:22'
-updated_date: '2026-09-30 01:18'
+updated_date: '2026-09-30 03:28'
 labels: []
 milestone: m-6
 dependencies:
