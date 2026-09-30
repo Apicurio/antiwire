@@ -62,7 +62,7 @@ These are recorded as open so that no document pretends they are decided. TASK-4
 
 ### OPEN-1 I/O strategy, namespaces, and the type bridge
 
-The exact I/O route is an M0 spike outcome. Candidates: reviewed pure-Java dependencies, a translated okio subset (under original or relocated package names), a scoped `java.nio` replacement, or a bounded combination. The inventory that any route must cover: ByteString and its companion operations, Buffer, Source/Sink and buffered variants, UTF-8 handling, exception types (okio IOException, EOFException, ProtocolException), Closeable, utf8Size, FileSystem, Path, FileHandle, in-memory sources, classpath resources, and ZIP loading (the loader's compression-relevant concern is ZIP, not gzip). No forced drop-in assumption: modern okio is Kotlin and barred from production scope; okio 1.x ended at 1.17.6 and its source purity is unverified, so it is not assumed to be a drop-in replacement. The chosen public namespaces constrain upstream test adaptation, generated code, and the Apicurio migration sites; all three consequences are recorded with the choice.
+The exact I/O route is an M0 spike outcome. Candidates: reviewed pure-Java dependencies, a translated okio subset (under original or relocated package names), a scoped `java.nio` replacement, or a bounded combination. The inventory that any route must cover: ByteString and its companion operations, Buffer, Source/Sink and buffered variants, UTF-8 handling, exception types (okio IOException, EOFException; okio ProtocolException appears at the pin only in test scope, per the compatibility matrix), Closeable, utf8Size, FileSystem, Path, FileHandle, in-memory sources, classpath resources, and ZIP loading (the loader's compression-relevant concern is ZIP, not gzip). No forced drop-in assumption: modern okio is Kotlin and barred from production scope; okio 1.x ended at 1.17.6 and its source purity is unverified, so it is not assumed to be a drop-in replacement. The chosen public namespaces constrain upstream test adaptation, generated code, and the Apicurio migration sites; all three consequences are recorded with the choice.
 
 ### OPEN-2 Publishing combination (module boundaries are fixed)
 
@@ -70,7 +70,7 @@ The development module boundaries are settled, not open: runtime and schema are 
 
 ### OPEN-3 Public API compatibility matrix
 
-TASK-1 inventories the actual public surface (Wire types, okio types embedded in it, parser ranges, profile APIs, generated-code APIs) against observed Apicurio call sites, using upstream `.api` dumps as a boundary checklist rather than a full-ABI gate, consistent with DEC-2.
+TASK-1 inventories the actual public surface (Wire types, okio types embedded in it, parser ranges, profile APIs, generated-code APIs) against observed Apicurio call sites, using upstream `.api` dumps as a boundary checklist rather than a full-ABI gate, consistent with DEC-2. The matrix lives at `docs/compatibility-matrix.md` and is updated whenever a keep-name exception, namespace choice, or migration site changes.
 
 ### OPEN-4 Golden-output exactness versus namespace choice
 

@@ -1,10 +1,11 @@
 ---
 id: TASK-1
 title: Finalize the compatibility contract and M0 architecture decisions
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - assistant
 created_date: '2026-09-29 09:22'
-updated_date: '2026-09-30 01:17'
+updated_date: '2026-09-30 01:19'
 labels: []
 milestone: m-6
 dependencies: []
