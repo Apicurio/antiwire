@@ -1,0 +1,21 @@
+antiwire
+Copyright 2026 the antiwire authors
+
+This product is a community pure-Java port of Square Wire
+(https://github.com/square/wire), tracked at upstream tag 7.1.0.
+
+It includes software developed at Square, Inc. (https://squareup.com):
+- Wire, licensed under the Apache License, Version 2.0
+- okio (portions vendored from okio 1.17.6, adapted to the okio 3 surface),
+  licensed under the Apache License, Version 2.0
+
+It includes software licensed by Google LLC under the Apache License,
+Version 2.0 (protobuf-derived code in the ProtoReader family, and
+R8-derived code in MathMethods).
+
+It includes software licensed by JetBrains s.r.o. under the Apache License,
+Version 2.0 (ArrayList utility classes).
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use these files except in compliance with the License. You may obtain a copy
+of the License at https://www.apache.org/licenses/LICENSE-2.0.

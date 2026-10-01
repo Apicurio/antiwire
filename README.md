@@ -1,6 +1,6 @@
 # antiwire
 
-A planned community port of [Square Wire](https://github.com/square/wire) to pure Java, with no Kotlin dependency. This repository currently holds the research, the project plan, and the execution backlog. There is no code yet. The purpose of publishing it now is to ask for a second opinion before execution starts.
+A community port of [Square Wire](https://github.com/square/wire) to pure Java, with no Kotlin dependency. Execution started: milestone M0 (spikes and conventions) is in progress on this repository. The research, plan, and backlog below are complete; feedback on them is still welcome while the port is built.
 
 ## The original request
 
@@ -14,7 +14,9 @@ Wire 7.1.0 is a Kotlin Multiplatform project. Its JVM artifacts pull kotlin-stdl
 
 ## What is in this repository
 
+- A Maven build (`io.apicurio:antiwire` parent, `wire-runtime-java` and `wire-schema-java` modules, bytecode target Java 11, CI on Temurin 17) with the zero-dependency rule enforced by the Maven enforcer plugin.
 - `docs/research-wire-java-port-2026-09-29.md`: the full research report (exhaustive depth, confidence-rated, with sources). It covers the current Wire module inventory, the verified dependency chains, the exact Wire APIs Apicurio imports, Kafka constraints, prior art, test-suite strategy, the phased project plan with gates, the risk register, and the open decisions.
+- `docs/decisions.md` and `docs/translation-conventions.md`: the adopted architecture decisions (D1 to D8) and the parity contract used by every translation.
 - `backlog/`: the execution backlog in [Backlog.md](https://backlog.md) format. Six milestones (M0 spikes through M5 release), 23 tasks, each with acceptance criteria and dependencies. The same-test-suite requirement becomes concrete gates: upstream test sources adopted verbatim (TASK-9, TASK-13, TASK-15) and a pinned-tag parity harness in CI (TASK-14).
 
 ## Where we want a second opinion

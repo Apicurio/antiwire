@@ -2,8 +2,8 @@
 
 The parity contract for all translation work in this port. Upstream tests assert the semantics
 listed here; a translation that breaks one of these rules fails the suite in ways that are easy
-to misread as test bugs. When in doubt, the upstream Kotlin source at tag 7.1.0 is the
-specification.
+to misread as test bugs. When in doubt, the upstream Kotlin source at the pinned tag
+(docs/decisions.md D8) is the specification.
 
 ## Exception parity
 
@@ -64,9 +64,12 @@ specification.
 
 ## Java 11 constraints (D3)
 
-No `sealed`, records, `var`, text blocks, `List.of` varargs order caveats (Java 11 has
-`List.of`; fine), `Optional.isEmpty` (Java 11), `String.isBlank` (Java 11 has it), or JDK 17
-APIs anywhere in main sources. CI compiles with `--release 11`, which enforces this.
+Not available at Java 11 bytecode, therefore banned in main sources: records (16), sealed
+classes and interfaces (17), text blocks (15), and switch expressions (14). Available and
+fine to use: `var` (Java 10), `List.of`/`Map.of` (9), `Optional.isEmpty` and `String.isBlank`
+(11). Prefer explicit types in translated code where upstream's Kotlin types carry information,
+but that is style, not a platform constraint. CI compiles with `--release 11`, which enforces
+the platform part.
 
 ## Attribution
 

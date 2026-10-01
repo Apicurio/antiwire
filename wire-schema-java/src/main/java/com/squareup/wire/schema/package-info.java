@@ -1,6 +1,7 @@
 /**
- * Pure-Java port of Wire's schema library (upstream: square/wire, tag 7.1.0): proto parser,
- * linker, and the Schema model. Classes in {@code internal.parser} stay public because Apicurio
- * Registry consumes them directly (Kotlin {@code internal} is public in JVM bytecode).
+ * Pure-Java port of Wire's schema library (upstream: square/wire, at the pinned tag recorded in
+ * docs/decisions.md D8): proto parser, linker, and the Schema model. Classes in
+ * {@code internal.parser} stay public despite upstream {@code internal} visibility; see the
+ * translation conventions.
  */
 package com.squareup.wire.schema;

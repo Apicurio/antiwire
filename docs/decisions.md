@@ -22,8 +22,8 @@ derivative work with attribution.
 
 `maven.compiler.release=11`, CI builds on Temurin 17. Reason: Kafka client modules require Java
 11 (`minClientJavaVersion = 11` in apache/kafka trunk); Apicurio requires more, so 11 is the
-intersection. Consequence: no `sealed`, records, `var`, or text blocks in main sources
-(recorded in the translation conventions, docs/translation-conventions.md).
+intersection. The concrete list of what that bans in main sources lives in one place: the
+translation conventions (docs/translation-conventions.md).
 
 ## D4. Maven build, Kotlin only in the test scope
 
@@ -63,6 +63,20 @@ Decisions:
 
 Rejected alternative: depend on `okio-jvm`. It is Kotlin-compiled and drags kotlin-stdlib,
 which defeats the port's purpose.
+
+Gzip decision (M0 spike outcome): the vendored subset omits `GzipSource`, `GzipSink`,
+`DeflaterSink`, `InflaterSource`, `Pipe`, the hashing wrappers, `PushableTimeout`, and
+okio's `package-info.java`. The wire 7.1.0 main sources import none of them (verified by import
+inventory over wire-runtime and wire-schema source sets); `openZip` will use the JDK zip
+filesystem directly. Revisit only if translated wire code or its verbatim tests demand one of
+these classes.
+
+Vendoring adaptations recorded for re-syncs: the jsr305 `javax.annotation.Nullable` annotations
+and the Animal Sniffer `@IgnoreJRERequirement` annotations are stripped from the vendored okio
+copies (the annotation API is a third-party dependency the zero-dependency rule forbids, and
+Animal Sniffer targets the retired Java 7 floor). A future re-copy from okio 1.17.6 must re-apply
+both strips; the enforcer rule in the parent pom enforces the zero-dependency invariant by
+banning compile- and runtime-scope dependencies (only in-reactor `io.apicurio` modules allowed).
 
 ## D6. kotlinpoet/javapoet out of the core artifacts
 
