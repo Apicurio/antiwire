@@ -480,10 +480,28 @@ public class ProtoReader {
     return byteCount;
   }
 
-  // readUnknownField(tag) and addUnknownField(tag, fieldEncoding, value) require ProtoAdapter
-  // (FieldEncoding.rawProtoAdapter) and are translated with the ProtoAdapter port (TASK-6).
-  // forEachTag(handler), an inline Kotlin extension used by generated Kotlin code and possibly
-  // by upstream Kotlin tests, is likewise deferred to TASK-6.
+  /**
+   * Read an unknown field and store temporarily. Once the entire message is read, call
+   * {@link #endMessageAndGetUnknownFields} to retrieve unknown fields.
+   */
+  public void readUnknownField(int tag) throws IOException {
+    FieldEncoding fieldEncoding = peekFieldEncoding();
+    ProtoAdapter<?> protoAdapter = fieldEncoding.rawProtoAdapter();
+    Object value = protoAdapter.decode(this);
+    addUnknownField(tag, fieldEncoding, value);
+  }
+
+  /**
+   * Store an already read field temporarily. Once the entire message is read, call
+   * {@link #endMessageAndGetUnknownFields} to retrieve unknown fields.
+   */
+  public void addUnknownField(int tag, FieldEncoding fieldEncoding, Object value)
+      throws IOException {
+    ProtoWriter unknownFieldsWriter = new ProtoWriter(bufferStack.get(recursionDepth - 1));
+    @SuppressWarnings("unchecked")
+    ProtoAdapter<Object> protoAdapter = (ProtoAdapter<Object>) fieldEncoding.rawProtoAdapter();
+    protoAdapter.encodeWithTag(unknownFieldsWriter, tag, value);
+  }
 
   /**
    * Returns the min length of the next field in bytes. Some encodings have a fixed length, while

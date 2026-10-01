@@ -30,8 +30,24 @@ public enum FieldEncoding {
     this.value = value;
   }
 
-  // rawProtoAdapter() is deferred to TASK-6: it returns ProtoAdapter, which is not translated
-  // yet.
+  /**
+   * Returns a Wire adapter that reads this field encoding without interpretation. For example,
+   * messages are returned as byte strings and enums are returned as integers.
+   */
+  public ProtoAdapter<?> rawProtoAdapter() {
+    switch (this) {
+      case VARINT:
+        return ProtoAdapter.UINT64;
+      case FIXED32:
+        return ProtoAdapter.FIXED32;
+      case FIXED64:
+        return ProtoAdapter.FIXED64;
+      case LENGTH_DELIMITED:
+        return ProtoAdapter.BYTES;
+      default:
+        throw new AssertionError();
+    }
+  }
 
   /** Returns the wire value of this encoding, the low three bits of a tag. */
   public int value() {

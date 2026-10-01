@@ -72,7 +72,8 @@ public final class FieldMask {
     return result;
   }
 
-  FieldMask append(List<String> paths) {
+  /** Upstream internal; public here per the translation conventions (internal is public in bytecode). */
+  public FieldMask append(List<String> paths) {
     if (paths.isEmpty()) return this;
     return new FieldMask(
         new PathChunks(pathChunks, new ArrayList<>(paths), size(pathChunks) + paths.size()));

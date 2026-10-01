@@ -16,8 +16,13 @@
 package com.squareup.wire.internal;
 
 import com.squareup.wire.FieldEncoding;
+import com.squareup.wire.FieldMask;
+import com.squareup.wire.ProtoAdapter;
+import com.squareup.wire.ProtoReader;
 import com.squareup.wire.ProtoWriter;
 import com.squareup.wire.ReverseProtoWriter;
+import okio.Buffer;
+import okio.ByteString;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -29,9 +34,8 @@ import java.util.Map;
  * Methods for generated code use only. Not subject to public API rules. Upstream declares these
  * as Kotlin file functions on class {@code Internal}; they become static methods here.
  *
- * <p>Batch scope note (TASK-6): the members that need ProtoAdapter or the 32-bit reader family
- * ({@code redactElements}, {@code decodeMessageOrMerge}, the {@code decodePrimitive_*} overloads
- * taking {@code ProtoReader32}) land with the ProtoAdapter batch; the Instant and Duration
+ * <p>Batch scope note (TASK-6): the {@code decodePrimitive_*} overloads taking the 32-bit reader
+ * family land with that family; the Instant and Duration
  * {@code commonEquals}/{@code commonHashCode} helpers exist only for non-JVM platforms where
  * those types are real classes, so they are not ported to the JVM-only artifact.
  */
@@ -238,6 +242,88 @@ public final class Internal {
   /** Maps {@code oneOfName} to the field of type {@code Set} holding the eligible keys. */
   public static String boxedOneOfKeysFieldName(String oneOfName) {
     return (oneOfName + "_keys").toUpperCase(Locale.ROOT);
+  }
+
+  public static <T> List<T> redactElements(List<T> list, ProtoAdapter<T> adapter) {
+    List<T> result = new ArrayList<>(list.size());
+    for (T value : list) {
+      result.add(adapter.redact(value));
+    }
+    return result;
+  }
+
+  public static <K, V> Map<K, V> redactElements(Map<K, V> map, ProtoAdapter<V> adapter) {
+    Map<K, V> result = new LinkedHashMap<>(map.size());
+    for (Map.Entry<K, V> entry : map.entrySet()) {
+      result.put(entry.getKey(), adapter.redact(entry.getValue()));
+    }
+    return result;
+  }
+
+  /**
+   * Decodes a message from {@code reader}, merging with {@code existing} if not null. Per the
+   * proto specification, when an embedded message field appears multiple times, the values are
+   * merged: repeated fields are concatenated, singular fields take the later value.
+   */
+  public static <E> E decodeMessageOrMerge(ProtoAdapter<E> adapter, ProtoReader reader, E existing)
+      throws java.io.IOException {
+    if (existing == null) return adapter.decode(reader);
+    if (adapter == ProtoAdapter.FIELD_MASK) {
+      return (E) ((FieldMask) existing).append(ProtoAdapter.FIELD_MASK.decode(reader).paths());
+    }
+    ByteString bytes = reader.readBytes();
+    Buffer buffer = new Buffer();
+    adapter.encode(buffer, existing);
+    buffer.write(bytes);
+    return adapter.decode(buffer);
+  }
+
+  public static double decodePrimitive_double(ProtoReader reader) throws java.io.IOException {
+    return Double.longBitsToDouble(reader.readFixed64());
+  }
+
+  public static int decodePrimitive_fixed32(ProtoReader reader) throws java.io.IOException {
+    return reader.readFixed32();
+  }
+
+  public static long decodePrimitive_fixed64(ProtoReader reader) throws java.io.IOException {
+    return reader.readFixed64();
+  }
+
+  public static float decodePrimitive_float(ProtoReader reader) throws java.io.IOException {
+    return Float.intBitsToFloat(reader.readFixed32());
+  }
+
+  public static int decodePrimitive_int32(ProtoReader reader) throws java.io.IOException {
+    return reader.readVarint32();
+  }
+
+  public static long decodePrimitive_int64(ProtoReader reader) throws java.io.IOException {
+    return reader.readVarint64();
+  }
+
+  public static int decodePrimitive_sfixed32(ProtoReader reader) throws java.io.IOException {
+    return reader.readFixed32();
+  }
+
+  public static long decodePrimitive_sfixed64(ProtoReader reader) throws java.io.IOException {
+    return reader.readFixed64();
+  }
+
+  public static int decodePrimitive_sint32(ProtoReader reader) throws java.io.IOException {
+    return ProtoWriter.decodeZigZag32(reader.readVarint32());
+  }
+
+  public static long decodePrimitive_sint64(ProtoReader reader) throws java.io.IOException {
+    return ProtoWriter.decodeZigZag64(reader.readVarint64());
+  }
+
+  public static int decodePrimitive_uint32(ProtoReader reader) throws java.io.IOException {
+    return reader.readVarint32();
+  }
+
+  public static long decodePrimitive_uint64(ProtoReader reader) throws java.io.IOException {
+    return reader.readVarint64();
   }
 
   public static void encodeArray_int32(int[] array, ReverseProtoWriter writer, int tag)
