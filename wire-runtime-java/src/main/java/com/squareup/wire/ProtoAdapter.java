@@ -160,6 +160,21 @@ public abstract class ProtoAdapter<E> {
   /** Read a non-null value from {@code reader}. */
   public abstract E decode(ProtoReader reader) throws IOException;
 
+  /** Read a non-null value from {@code reader}, a 32-bit-cursor reader. */
+  public E decode(ProtoReader32 reader) throws IOException {
+    return decode(reader.asProtoReader());
+  }
+
+  /**
+   * Reads a value and appends it to {@code destination} if this has data available. Otherwise,
+   * it will only clear the reader state.
+   */
+  public void tryDecode(ProtoReader32 reader, List<E> destination) throws IOException {
+    if (reader.beforePossiblyPackedScalar()) {
+      destination.add(decode(reader));
+    }
+  }
+
   /**
    * Read an encoded message from {@code bytes}. Like upstream's 32-bit-reader path, bare
    * decoding of top-level length-delimited scalars (a naked string or byte string) is not a
