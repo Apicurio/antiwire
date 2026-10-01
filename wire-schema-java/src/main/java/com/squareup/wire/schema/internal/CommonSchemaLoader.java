@@ -238,6 +238,21 @@ public final class CommonSchemaLoader implements Loader {
   }
 
   /** Deferred: upstream's callers live in SchemaLoaderTest, adopted in TASK-13. */
+  /** Releases the roots opened by {@link #initRoots}, including ZIP file systems. */
+  public void close() throws IOException {
+    if (sourcePathRoots != null) {
+      for (Root root : sourcePathRoots) {
+        root.close();
+      }
+    }
+    if (protoPathRoots != null) {
+      for (Root root : protoPathRoots) {
+        root.close();
+      }
+    }
+  }
+
+  /** Deferred: upstream's callers live in SchemaLoaderTest, adopted in TASK-13. */
   void reportLoadingErrors() {
     errors.throwIfNonEmpty();
   }

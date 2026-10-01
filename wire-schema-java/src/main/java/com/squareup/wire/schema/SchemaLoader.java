@@ -28,7 +28,7 @@ import okio.FileSystem;
  *
  * <p>Upstream's ProfileLoader surface is deferred to TASK-16 with the profile layer.
  */
-public final class SchemaLoader implements Loader {
+public final class SchemaLoader implements Loader, AutoCloseable {
   private final CommonSchemaLoader delegate;
 
   public SchemaLoader(java.nio.file.FileSystem fileSystem) {
@@ -102,5 +102,9 @@ public final class SchemaLoader implements Loader {
 
   public Schema loadSchema() throws IOException {
     return delegate.loadSchema();
+  }
+
+  @Override public void close() throws IOException {
+    delegate.close();
   }
 }

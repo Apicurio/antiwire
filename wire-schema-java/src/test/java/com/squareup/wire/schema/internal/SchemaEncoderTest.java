@@ -210,6 +210,69 @@ public class SchemaEncoderTest {
     assertEquals(".pkg.Rich", methods.get(0).get("output_type"));
   }
 
+  @Test public void encodesOneOfFields() throws Exception {
+    // Regression for the code-review crash: oneof fields used to carry a null type.
+    Schema schema = loadSchema("choice.proto", ""
+        + "syntax = \"proto3\";\n"
+        + "message Choice {\n"
+        + "  oneof selection {\n"
+        + "    string name = 1;\n"
+        + "    int32 number = 2;\n"
+        + "  }\n"
+        + "}\n");
+    ProtoFile protoFile = schema.protoFile("choice.proto");
+    SchemaEncoder encoder = new SchemaEncoder(schema);
+    Map<String, Object> descriptor = decodeFileDescriptorProto(schema, encoder.encode(protoFile));
+
+    List<Map<String, Object>> messageTypes =
+        (List<Map<String, Object>>) descriptor.get("message_type");
+    List<Map<String, Object>> oneofs =
+        (List<Map<String, Object>>) messageTypes.get(0).get("oneof_decl");
+    assertEquals(1, oneofs.size());
+    assertEquals("selection", oneofs.get(0).get("name"));
+
+    List<Map<String, Object>> fields =
+        (List<Map<String, Object>>) messageTypes.get(0).get("field");
+    assertEquals(2, fields.size());
+    assertEquals("TYPE_STRING", fields.get(0).get("type"));
+    assertEquals(0, fields.get(0).get("oneof_index"));
+    assertEquals("TYPE_INT32", fields.get(1).get("type"));
+    assertEquals(0, fields.get(1).get("oneof_index"));
+  }
+
+  @Test public void encodesExtendFieldsWithExtendee() throws Exception {
+    // Regression for the code-review crash: extension fields used to carry a null type, and
+    // custom options always reach the encoder through an extend block.
+    Schema schema = loadSchema("marked.proto", ""
+        + "syntax = \"proto2\";\n"
+        + "import \"google/protobuf/descriptor.proto\";\n"
+        + "extend google.protobuf.FieldOptions {\n"
+        + "  optional bool marked = 22300;\n"
+        + "}\n"
+        + "message Marked {\n"
+        + "  optional string s = 1 [deprecated = true];\n"
+        + "}\n");
+    ProtoFile protoFile = schema.protoFile("marked.proto");
+    SchemaEncoder encoder = new SchemaEncoder(schema);
+    Map<String, Object> descriptor = decodeFileDescriptorProto(schema, encoder.encode(protoFile));
+
+    List<Map<String, Object>> extensions =
+        (List<Map<String, Object>>) descriptor.get("extension");
+    assertEquals(1, extensions.size());
+    Map<String, Object> marked = extensions.get(0);
+    assertEquals("marked", marked.get("name"));
+    assertEquals(".google.protobuf.FieldOptions", marked.get("extendee"));
+    assertEquals("TYPE_BOOL", marked.get("type"));
+
+    // The deprecated option round-trips through the linked FileOptions adapter.
+    List<Map<String, Object>> messageTypes =
+        (List<Map<String, Object>>) descriptor.get("message_type");
+    List<Map<String, Object>> fields =
+        (List<Map<String, Object>>) messageTypes.get(0).get("field");
+    Map<String, Object> options = (Map<String, Object>) fields.get(0).get("options");
+    assertEquals(Boolean.TRUE, options.get("deprecated"));
+  }
+
   @Test public void encodingIsDeterministic() throws Exception {
     Schema schema = loadSchema("det.proto", ""
         + "syntax = \"proto3\";\n"

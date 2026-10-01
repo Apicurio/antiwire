@@ -35,6 +35,8 @@ final class MapLoader implements Loader {
     String source = sources.get(path);
     if (source == null) {
       if (CoreLoader.isWireRuntimeProto(path)) {
+        // A wire-runtime path missing from the classpath fails with CoreLoader's
+        // IllegalStateException rather than this loader's IllegalArgumentException.
         return CoreLoader.INSTANCE.load(path);
       }
       throw new IllegalArgumentException("unexpected path: " + path);

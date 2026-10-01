@@ -48,6 +48,13 @@ public abstract class Root {
   public abstract ProtoFilePath resolve(String importPath) throws IOException;
 
   /**
+   * Releases resources this root owns, like a ZIP file system opened from an archive on the
+   * source or proto path. Closing is the loader's job; see CommonSchemaLoader.close().
+   */
+  public void close() throws IOException {
+  }
+
+  /**
    * Returns this location's roots.
    *
    * @param baseToRoots cached roots to avoid opening the same .zip multiple times.
@@ -104,7 +111,7 @@ public abstract class Root {
       }
       FileSystem sourceFs = fileSystem.openZip(realPath);
       return Collections.singletonList(
-          new DirectoryRoot(location.path, sourceFs, Path.get("/")));
+          new DirectoryRoot(location.path, sourceFs, Path.get("/"), true));
     } catch (IOException e) {
       throw new IllegalArgumentException(
           "expected a directory, archive (.zip / .jar / etc.), or .proto: " + realPath, e);
@@ -164,10 +171,25 @@ public abstract class Root {
     /** The root to search. If this is a .zip file this is within its internal file system. */
     final Path rootDirectory;
 
+    /** True when this root opened {@link #fileSystem} from a .zip and must close it. */
+    private final boolean ownsFileSystem;
+
     DirectoryRoot(String base, FileSystem fileSystem, Path rootDirectory) {
+      this(base, fileSystem, rootDirectory, false);
+    }
+
+    DirectoryRoot(String base, FileSystem fileSystem, Path rootDirectory,
+        boolean ownsFileSystem) {
       this.base = base;
       this.fileSystem = fileSystem;
       this.rootDirectory = rootDirectory;
+      this.ownsFileSystem = ownsFileSystem;
+    }
+
+    @Override public void close() throws IOException {
+      if (ownsFileSystem) {
+        fileSystem.close();
+      }
     }
 
     @Override public String base() {

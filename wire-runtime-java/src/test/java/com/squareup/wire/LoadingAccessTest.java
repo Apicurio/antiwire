@@ -54,8 +54,11 @@ public class LoadingAccessTest {
     assertEquals("../a/b", Path.get("/a/b").relativeTo(Path.get("/x")).toString());
     assertEquals("b", Path.get("a/b").relativeTo(Path.get("a")).toString());
     assertEquals("a/b", Path.get("a/b").relativeTo(Path.get(".")).toString());
-    // String equality means cross-provider paths with equal text are equal.
-    assertEquals("c.txt", Path.get("/a/b/c.txt").relativeTo(Path.get("/a/b")).toString());
+    // '..' in the base past the common prefix is impossible, like okio.
+    assertThrows(IllegalArgumentException.class,
+        () -> Path.get("/a/b").relativeTo(Path.get("/a/../c")));
+    // '..' in this path is kept.
+    assertEquals("../b", Path.get("/a/../b").relativeTo(Path.get("/a")).toString());
   }
 
   /** A zipfs entry relativizes against a host-path base although their providers differ. */

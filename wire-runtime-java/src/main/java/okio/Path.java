@@ -120,22 +120,21 @@ public final class Path implements Comparable<Path> {
 
   /**
    * Returns this path relative to {@code base}, like okio 3: {@code /a/b/c.txt}.relativeTo({@code
-   * /a/b}) is {@code c.txt}, equal paths yield {@code .}, and a sibling needs {@code ..} hops.
-   * Verified against okio-jvm 3.18.2 behavior on 2026-10-02. The computation is purely lexical
-   * over the path strings, like okio and like this class's equals and compareTo: nio providers
-   * never participate, so a zip entry and a host path relativize no matter which provider built
-   * them, and file names that the host parser rejects stay usable.
+   * /a/b}) is {@code c.txt}, equal paths yield {@code .}, a sibling needs {@code ..} hops, and a
+   * base with an unresolvable {@code ..} throws. Verified against okio-jvm 3.18.2 behavior on
+   * 2026-10-02. The computation is purely lexical over the path strings, like okio and like this
+   * class's equals and compareTo: nio providers never participate, so a zip entry and a host path
+   * relativize no matter which provider built them. Both '/' and the platform separator count as
+   * segment boundaries because this class's strings come from nio paths.
    */
   public Path relativeTo(Path base) {
     String thisString = toString();
     String baseString = base.toString();
     if (thisString.equals(baseString)) return Path.get(".");
 
-    boolean thisAbsolute = thisString.startsWith("/");
-    boolean baseAbsolute = baseString.startsWith("/");
-    if (thisAbsolute != baseAbsolute) {
+    if (nioPath.isAbsolute() != base.nioPath.isAbsolute()) {
       throw new IllegalArgumentException(
-          "Cannot relativize " + thisString + " against " + baseString);
+          "Impossible relative path to resolve: " + thisString + " and " + baseString);
     }
 
     String[] thisSegments = segmentsOf(thisString);
@@ -149,6 +148,11 @@ public final class Path implements Comparable<Path> {
 
     StringBuilder result = new StringBuilder();
     for (int i = common; i < baseSegments.length; i++) {
+      if (baseSegments[i].equals("..")) {
+        // Like okio: a '..' in the base past the common prefix cannot be resolved lexically.
+        throw new IllegalArgumentException(
+            "Impossible relative path to resolve: " + thisString + " and " + baseString);
+      }
       if (result.length() > 0) result.append('/');
       result.append("..");
     }
@@ -162,8 +166,14 @@ public final class Path implements Comparable<Path> {
 
   private static String[] segmentsOf(String path) {
     List<String> segments = new ArrayList<>();
-    for (String segment : path.split("/")) {
-      if (!segment.isEmpty() && !segment.equals(".")) segments.add(segment);
+    int start = 0;
+    for (int i = 0; i <= path.length(); i++) {
+      char c = i < path.length() ? path.charAt(i) : '/';
+      if (c == '/' || c == java.io.File.separatorChar) {
+        String segment = path.substring(start, i);
+        if (!segment.isEmpty() && !segment.equals(".")) segments.add(segment);
+        start = i + 1;
+      }
     }
     return segments.toArray(new String[0]);
   }

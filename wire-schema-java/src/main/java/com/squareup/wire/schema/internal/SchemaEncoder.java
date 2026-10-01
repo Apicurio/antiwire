@@ -107,8 +107,8 @@ public final class SchemaEncoder {
       for (Extend extend : reversed) {
         List<EncodedField> encodedFields = new ArrayList<>();
         for (Field field : extend.fields()) {
-          encodedFields.add(new EncodedField(value.syntax(), field, null, dotName(extend.type()),
-              null));
+          encodedFields.add(new EncodedField(value.syntax(), field, field.type(),
+              dotName(extend.type()), null));
         }
         fieldEncoder.asRepeated().encodeWithTag(writer, 7, encodedFields);
       }
@@ -146,7 +146,8 @@ public final class SchemaEncoder {
       for (OneOf oneOf : value.oneOfs()) {
         List<EncodedField> oneOfFields = new ArrayList<>();
         for (Field field : oneOf.fields()) {
-          oneOfFields.add(new EncodedField(syntax, field, null, null, encodedOneOfs.size()));
+          oneOfFields.add(new EncodedField(syntax, field, field.type(), null,
+              encodedOneOfs.size()));
         }
         encodedOneOfs.add(new EncodedOneOf(oneOf.name(), oneOfFields));
       }
@@ -501,7 +502,7 @@ public final class SchemaEncoder {
     for (Map.Entry<ProtoMember, Object> entry : optionsMap.entrySet()) {
       Field field = schema.getField(entry.getKey());
       if (field == null) {
-        throw new IllegalArgumentException("unexpected options field: " + entry.getKey());
+        throw new IllegalStateException("unexpected options field: " + entry.getKey());
       }
       result.put(field.name(), toJson(field, entry.getValue()));
     }
