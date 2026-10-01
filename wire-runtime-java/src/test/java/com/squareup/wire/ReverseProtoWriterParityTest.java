@@ -79,12 +79,16 @@ public class ReverseProtoWriterParityTest {
             w.writeVarint64(l);
             // Kotlin-internal upstream member with the mangled name; '$' is legal in Java.
             w.writeSignedVarint32$wire_runtime(i);
+            w.writeFixed32(i);
+            w.writeFixed64(l);
             w.writeTag(field, upstreamEncoding);
           }),
           reverseBytes(w -> {
             w.writeVarint32(i);
             w.writeVarint64(l);
             w.writeSignedVarint32(i);
+            w.writeFixed32(i);
+            w.writeFixed64(l);
             w.writeTag(field, encoding);
           }));
     }

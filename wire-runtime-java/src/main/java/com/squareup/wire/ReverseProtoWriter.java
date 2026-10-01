@@ -233,4 +233,30 @@ public class ReverseProtoWriter {
     }
     array[offset] = (byte) value;
   }
+
+  /** Write a little-endian 32-bit integer. */
+  public void writeFixed32(int value) throws IOException {
+    require(4);
+    arrayLimit -= 4;
+    int offset = arrayLimit;
+    array[offset++] = (byte) (value & 0xff);
+    array[offset++] = (byte) ((value >>> 8) & 0xff);
+    array[offset++] = (byte) ((value >>> 16) & 0xff);
+    array[offset] = (byte) ((value >>> 24) & 0xff);
+  }
+
+  /** Write a little-endian 64-bit integer. */
+  public void writeFixed64(long value) throws IOException {
+    require(8);
+    arrayLimit -= 8;
+    int offset = arrayLimit;
+    array[offset++] = (byte) (value & 0xffL);
+    array[offset++] = (byte) ((value >>> 8) & 0xffL);
+    array[offset++] = (byte) ((value >>> 16) & 0xffL);
+    array[offset++] = (byte) ((value >>> 24) & 0xffL);
+    array[offset++] = (byte) ((value >>> 32) & 0xffL);
+    array[offset++] = (byte) ((value >>> 40) & 0xffL);
+    array[offset++] = (byte) ((value >>> 48) & 0xffL);
+    array[offset] = (byte) ((value >>> 56) & 0xffL);
+  }
 }
