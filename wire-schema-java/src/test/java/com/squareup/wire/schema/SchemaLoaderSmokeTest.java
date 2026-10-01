@@ -159,6 +159,30 @@ public class SchemaLoaderSmokeTest {
         e.getMessage());
   }
 
+  @Test public void runtimeProtosLoadFromTheClasspath() throws Exception {
+    // No proto path: descriptor.proto and wire/extensions.proto must come from CoreLoader.
+    Path sourcePath = Files.createDirectories(tempDir.resolve("source"));
+    write(sourcePath, "opts.proto", ""
+        + "syntax = \"proto2\";\n"
+        + "import \"google/protobuf/descriptor.proto\";\n"
+        + "extend google.protobuf.FieldOptions {\n"
+        + "  optional bool marked = 22300;\n"
+        + "}\n"
+        + "message Opts {\n"
+        + "  optional string s = 1 [deprecated = true];\n"
+        + "}\n");
+
+    SchemaLoader loader = new SchemaLoader(okio.FileSystem.SYSTEM);
+    loader.initRoots(Collections.singletonList(Location.get(sourcePath.toString())));
+    Schema schema = loader.loadSchema();
+
+    // descriptor.proto resolved from the classpath and the option linked through it.
+    assertNotNull(schema.getType("google.protobuf.FieldOptions"));
+    com.squareup.wire.schema.MessageType opts =
+        (com.squareup.wire.schema.MessageType) schema.getType("Opts");
+    assertTrue(opts.field("s").isDeprecated());
+  }
+
   @Test public void loadExhaustivelyIncludesTransitiveFiles() throws Exception {
     Path sourcePath = Files.createDirectories(tempDir.resolve("source"));
     write(sourcePath, "a.proto", ""

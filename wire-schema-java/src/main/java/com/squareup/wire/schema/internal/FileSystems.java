@@ -15,6 +15,7 @@
  */
 package com.squareup.wire.schema.internal;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import okio.BufferedSource;
@@ -23,6 +24,9 @@ import okio.Options;
 
 /** Port of upstream jvmMain fileSystems.kt. */
 public final class FileSystems {
+  private static final Charset UTF_32LE = Charset.forName("UTF-32LE");
+  private static final Charset UTF_32BE = Charset.forName("UTF-32BE");
+
   private static final Options UNICODE_BOMS = Options.of(
       ByteString.decodeHex("efbbbf"), // UTF-8
       ByteString.decodeHex("feff"), // UTF-16BE
@@ -31,18 +35,18 @@ public final class FileSystems {
       ByteString.decodeHex("0000feff") // UTF-32BE
   );
 
-  public static Charset readBomAsCharset(BufferedSource source) throws java.io.IOException {
+  public static Charset readBomAsCharset(BufferedSource source) throws IOException {
     return readBomAsCharset(source, StandardCharsets.UTF_8);
   }
 
   public static Charset readBomAsCharset(BufferedSource source, Charset defaultCharset)
-      throws java.io.IOException {
+      throws IOException {
     switch (source.select(UNICODE_BOMS)) {
       case 0: return StandardCharsets.UTF_8;
       case 1: return StandardCharsets.UTF_16BE;
-      case 2: return Charset.forName("UTF-32LE");
+      case 2: return UTF_32LE;
       case 3: return StandardCharsets.UTF_16LE;
-      case 4: return Charset.forName("UTF-32BE");
+      case 4: return UTF_32BE;
       case -1: return defaultCharset;
       default: throw new AssertionError();
     }

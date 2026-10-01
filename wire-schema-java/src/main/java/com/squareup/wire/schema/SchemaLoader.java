@@ -17,6 +17,7 @@ package com.squareup.wire.schema;
 
 import com.squareup.wire.schema.internal.CommonSchemaLoader;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import okio.FileSystem;
 
@@ -92,7 +93,7 @@ public final class SchemaLoader implements Loader {
   }
 
   public void initRoots(List<Location> sourcePath) throws IOException {
-    delegate.initRoots(sourcePath, java.util.Collections.emptyList());
+    delegate.initRoots(sourcePath, Collections.emptyList());
   }
 
   @Override public ProtoFile load(String path) {

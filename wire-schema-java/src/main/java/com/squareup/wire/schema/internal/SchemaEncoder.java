@@ -40,10 +40,12 @@ import com.squareup.wire.schema.Service;
 import com.squareup.wire.schema.Type;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import okio.ByteString;
 
 /**
@@ -101,7 +103,7 @@ public final class SchemaEncoder {
 
       // TODO(jwilson): can extension fields be maps?
       List<Extend> reversed = new ArrayList<>(value.extendList());
-      java.util.Collections.reverse(reversed);
+      Collections.reverse(reversed);
       for (Extend extend : reversed) {
         List<EncodedField> encodedFields = new ArrayList<>();
         for (Field field : extend.fields()) {
@@ -112,9 +114,9 @@ public final class SchemaEncoder {
       }
 
       serviceEncoder.asRepeated().encodeWithTag(writer, 6, value.services());
-      enumEncoder.asRepeated().encodeWithTag(writer, 5, enumTypes(value.types()));
-      messageEncoder.asRepeated().encodeWithTag(writer, 4, messageTypes(value.types()));
-      enclosingEncoder.asRepeated().encodeWithTag(writer, 4, enclosingTypes(value.types()));
+      enumEncoder.asRepeated().encodeWithTag(writer, 5, typesOf(value.types(), EnumType.class));
+      messageEncoder.asRepeated().encodeWithTag(writer, 4, typesOf(value.types(), MessageType.class));
+      enclosingEncoder.asRepeated().encodeWithTag(writer, 4, typesOf(value.types(), EnclosingType.class));
       // INT32.asRepeated().encodeWithTag(writer, 11, value.weak_dependency)
       List<String> allImports = new ArrayList<>(value.imports());
       allImports.addAll(value.publicImports());
@@ -157,8 +159,7 @@ public final class SchemaEncoder {
         EncodedField encodedField = new EncodedField(syntax, field, type, null, null);
         if (encodedField.isProto3Optional()) {
           encodedField = encodedField.withOneOfIndex(encodedOneOfs.size());
-          List<EncodedField> empty = new ArrayList<>();
-          encodedOneOfs.add(new EncodedOneOf("_" + field.name(), empty));
+          encodedOneOfs.add(new EncodedOneOf("_" + field.name(), Collections.emptyList()));
         }
         encodedFields.add(encodedField);
       }
@@ -198,9 +199,9 @@ public final class SchemaEncoder {
   };
 
   private void encodeNestedTypes(ReverseProtoWriter writer, List<Type> types) throws IOException {
-    enumEncoder.asRepeated().encodeWithTag(writer, 4, enumTypes(types));
-    messageEncoder.asRepeated().encodeWithTag(writer, 3, messageTypes(types));
-    enclosingEncoder.asRepeated().encodeWithTag(writer, 3, enclosingTypes(types));
+    enumEncoder.asRepeated().encodeWithTag(writer, 4, typesOf(types, EnumType.class));
+    messageEncoder.asRepeated().encodeWithTag(writer, 3, typesOf(types, MessageType.class));
+    enclosingEncoder.asRepeated().encodeWithTag(writer, 3, typesOf(types, EnclosingType.class));
   }
 
   private final Encoder<EnclosingType> enclosingEncoder = new Encoder<EnclosingType>() {
@@ -320,7 +321,7 @@ public final class SchemaEncoder {
       }
       fieldOptionsProtoAdapter.encodeWithTag(writer, 8, toJsonOptions(value.field.options()));
       if (value.syntax == Syntax.PROTO_2
-          && !java.util.Objects.equals(value.field.jsonName(), value.field.name())) {
+          && !Objects.equals(value.field.jsonName(), value.field.name())) {
         ProtoAdapter.STRING.encodeWithTag(writer, 10, value.field.jsonName());
       }
       ProtoAdapter.STRING.encodeWithTag(writer, 7, value.field.defaultValue());
@@ -452,26 +453,11 @@ public final class SchemaEncoder {
     }
   };
 
-  private static List<EnumType> enumTypes(List<Type> types) {
-    List<EnumType> result = new ArrayList<>();
+  /** The Java analog of upstream's filterIsInstance calls. */
+  private static <T extends Type> List<T> typesOf(List<Type> types, Class<T> kind) {
+    List<T> result = new ArrayList<>();
     for (Type type : types) {
-      if (type instanceof EnumType) result.add((EnumType) type);
-    }
-    return result;
-  }
-
-  private static List<MessageType> messageTypes(List<Type> types) {
-    List<MessageType> result = new ArrayList<>();
-    for (Type type : types) {
-      if (type instanceof MessageType) result.add((MessageType) type);
-    }
-    return result;
-  }
-
-  private static List<EnclosingType> enclosingTypes(List<Type> types) {
-    List<EnclosingType> result = new ArrayList<>();
-    for (Type type : types) {
-      if (type instanceof EnclosingType) result.add((EnclosingType) type);
+      if (kind.isInstance(type)) result.add(kind.cast(type));
     }
     return result;
   }
@@ -576,18 +562,11 @@ public final class SchemaEncoder {
 
   /** Kotlin's String.toUInt().toInt(): unsigned parse, then the same-bits signed int. */
   private static int parseUnsignedInt(String value) {
-    return (int) Long.parseLong(value);
+    return Integer.parseUnsignedInt(value);
   }
 
   /** Kotlin's String.toULong().toLong(): unsigned parse, then the same-bits signed long. */
   private static long parseUnsignedLong(String value) {
-    java.math.BigInteger parsed = new java.math.BigInteger(value);
-    byte[] bits = parsed.toByteArray();
-    byte[] truncated = new byte[8];
-    for (int i = 0; i < 8; i++) {
-      int sourceIndex = bits.length - 8 + i;
-      truncated[i] = sourceIndex >= 0 ? bits[sourceIndex] : (parsed.signum() < 0 ? (byte) -1 : 0);
-    }
-    return java.nio.ByteBuffer.wrap(truncated).getLong();
+    return Long.parseUnsignedLong(value);
   }
 }

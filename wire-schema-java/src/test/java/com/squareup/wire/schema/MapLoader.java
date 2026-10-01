@@ -17,9 +17,6 @@ package com.squareup.wire.schema;
 
 import com.squareup.wire.schema.internal.parser.ProtoFileElement;
 import com.squareup.wire.schema.internal.parser.ProtoParser;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,29 +33,14 @@ final class MapLoader implements Loader {
 
   @Override public ProtoFile load(String path) {
     String source = sources.get(path);
-    if (source == null && CoreLoader.isWireRuntimeProto(path)) {
-      source = loadRuntimeResource(path);
-    }
     if (source == null) {
+      if (CoreLoader.isWireRuntimeProto(path)) {
+        return CoreLoader.INSTANCE.load(path);
+      }
       throw new IllegalArgumentException("unexpected path: " + path);
     }
     ProtoFileElement element = ProtoParser.parse(Location.get(path), source);
     return ProtoFile.get(element);
-  }
-
-  private static String loadRuntimeResource(String path) {
-    InputStream stream = MapLoader.class.getClassLoader().getResourceAsStream(path);
-    if (stream == null) return null;
-    try {
-      return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } finally {
-      try {
-        stream.close();
-      } catch (IOException ignored) {
-      }
-    }
   }
 
   @Override public Loader withErrors(ErrorCollector errors) {

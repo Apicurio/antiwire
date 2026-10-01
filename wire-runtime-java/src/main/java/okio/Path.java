@@ -16,6 +16,8 @@
 package okio;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A path in a file system. The API follows okio 3's Path (Apache 2.0, Square), which wire's
@@ -118,21 +120,52 @@ public final class Path implements Comparable<Path> {
 
   /**
    * Returns this path relative to {@code base}, like okio 3: {@code /a/b/c.txt}.relativeTo({@code
-   * /a/b}) is {@code c.txt}. Verified against okio-jvm 3.18.2 behavior on 2026-10-02. Unlike a
-   * raw nio relativize this is provider-agnostic: okio's paths compare as strings, so a zip
-   * entry and a host path must relativize even though their nio providers differ. Both sides are
-   * routed through the default filesystem to get that neutral comparison.
+   * /a/b}) is {@code c.txt}, equal paths yield {@code .}, and a sibling needs {@code ..} hops.
+   * Verified against okio-jvm 3.18.2 behavior on 2026-10-02. The computation is purely lexical
+   * over the path strings, like okio and like this class's equals and compareTo: nio providers
+   * never participate, so a zip entry and a host path relativize no matter which provider built
+   * them, and file names that the host parser rejects stay usable.
    */
   public Path relativeTo(Path base) {
-    java.nio.file.Path thisNio = defaultProviderPath(nioPath);
-    java.nio.file.Path baseNio = defaultProviderPath(base.nioPath);
-    return wrap(baseNio.relativize(thisNio));
+    String thisString = toString();
+    String baseString = base.toString();
+    if (thisString.equals(baseString)) return Path.get(".");
+
+    boolean thisAbsolute = thisString.startsWith("/");
+    boolean baseAbsolute = baseString.startsWith("/");
+    if (thisAbsolute != baseAbsolute) {
+      throw new IllegalArgumentException(
+          "Cannot relativize " + thisString + " against " + baseString);
+    }
+
+    String[] thisSegments = segmentsOf(thisString);
+    String[] baseSegments = segmentsOf(baseString);
+
+    int common = 0;
+    while (common < thisSegments.length && common < baseSegments.length
+        && thisSegments[common].equals(baseSegments[common])) {
+      common++;
+    }
+
+    StringBuilder result = new StringBuilder();
+    for (int i = common; i < baseSegments.length; i++) {
+      if (result.length() > 0) result.append('/');
+      result.append("..");
+    }
+    for (int i = common; i < thisSegments.length; i++) {
+      if (result.length() > 0) result.append('/');
+      result.append(thisSegments[i]);
+    }
+
+    return Path.get(result.length() == 0 ? "." : result.toString());
   }
 
-  private static java.nio.file.Path defaultProviderPath(java.nio.file.Path path) {
-    return path.getFileSystem() == java.nio.file.FileSystems.getDefault()
-        ? path
-        : java.nio.file.Paths.get(path.toString());
+  private static String[] segmentsOf(String path) {
+    List<String> segments = new ArrayList<>();
+    for (String segment : path.split("/")) {
+      if (!segment.isEmpty() && !segment.equals(".")) segments.add(segment);
+    }
+    return segments.toArray(new String[0]);
   }
 
   /** Returns the parent of this path, or null when there is none. */

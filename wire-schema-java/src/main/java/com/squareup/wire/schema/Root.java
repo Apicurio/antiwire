@@ -15,9 +15,11 @@
  */
 package com.squareup.wire.schema;
 
+import com.squareup.wire.schema.internal.FileSystems;
 import com.squareup.wire.schema.internal.parser.ProtoFileElement;
 import com.squareup.wire.schema.internal.parser.ProtoParser;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -87,12 +89,12 @@ public abstract class Root {
       if (!location.base.isEmpty()) {
         throw new IllegalStateException("Check failed");
       }
-      return Collections.<Root>singletonList(
+      return Collections.singletonList(
           new DirectoryRoot(location.path, fileSystem, realPath));
     }
 
     if (realPath.toString().endsWith(".proto")) {
-      return Collections.<Root>singletonList(new ProtoFilePath(location, fileSystem, realPath));
+      return Collections.singletonList(new ProtoFilePath(location, fileSystem, realPath));
     }
 
     // Handle a .zip or .jar file by adding all .proto files within.
@@ -101,7 +103,7 @@ public abstract class Root {
         throw new IllegalStateException("Check failed");
       }
       FileSystem sourceFs = fileSystem.openZip(realPath);
-      return Collections.<Root>singletonList(
+      return Collections.singletonList(
           new DirectoryRoot(location.path, sourceFs, Path.get("/")));
     } catch (IOException e) {
       throw new IllegalArgumentException(
@@ -142,17 +144,11 @@ public abstract class Root {
     }
 
     public ProtoFile parse() throws IOException {
-      try {
-        BufferedSource source = Okio.buffer(fileSystem.source(path));
-        try {
-          java.nio.charset.Charset charset =
-              com.squareup.wire.schema.internal.FileSystems.readBomAsCharset(source);
-          String data = source.readString(charset);
-          ProtoFileElement element = ProtoParser.parse(location, data);
-          return ProtoFile.get(element);
-        } finally {
-          source.close();
-        }
+      try (BufferedSource source = Okio.buffer(fileSystem.source(path))) {
+        Charset charset = FileSystems.readBomAsCharset(source);
+        String data = source.readString(charset);
+        ProtoFileElement element = ProtoParser.parse(location, data);
+        return ProtoFile.get(element);
       } catch (IOException e) {
         throw new IOException("Failed to load " + path, e);
       }
@@ -182,8 +178,8 @@ public abstract class Root {
       List<ProtoFilePath> result = new ArrayList<>();
       for (Path descendant : fileSystem.listRecursively(rootDirectory)) {
         if (!descendant.toString().endsWith(".proto")) continue;
-        Location location = Location.get(base, withUnixSlashes(
-            descendant.relativeTo(rootDirectory).toString()));
+        Location location = Location.get(base,
+            descendant.relativeTo(rootDirectory).toString());
         result.add(new ProtoFilePath(location, fileSystem, descendant));
       }
       return result;
@@ -193,7 +189,7 @@ public abstract class Root {
       Path resolved = rootDirectory.div(importPath);
       if (!fileSystem.exists(resolved)) return null;
       return new ProtoFilePath(
-          Location.get(base, withUnixSlashes(Path.get(importPath).toString())),
+          Location.get(base, Path.get(importPath).toString()),
           fileSystem,
           resolved);
     }
@@ -203,7 +199,4 @@ public abstract class Root {
     }
   }
 
-  private static String withUnixSlashes(String path) {
-    return path.replace('\\', '/');
-  }
 }

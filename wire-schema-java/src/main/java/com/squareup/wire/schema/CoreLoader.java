@@ -17,9 +17,12 @@ package com.squareup.wire.schema;
 
 import com.squareup.wire.schema.internal.parser.ProtoFileElement;
 import com.squareup.wire.schema.internal.parser.ProtoParser;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import okio.BufferedSource;
+import okio.FileSystem;
+import okio.Okio;
+import okio.Path;
 
 /**
  * A loader that can only load built-in {@code .proto} files:
@@ -35,6 +38,9 @@ import java.nio.charset.StandardCharsets;
 public final class CoreLoader implements Loader {
   /** Upstream declares CoreLoader as a Kotlin object; this is its singleton. */
   public static final CoreLoader INSTANCE = new CoreLoader();
+
+  private final FileSystem resourceFileSystem =
+      FileSystem.asResourceFileSystem(CoreLoader.class.getClassLoader());
 
   static final String DESCRIPTOR_PROTO = "google/protobuf/descriptor.proto";
   static final String WIRE_EXTENSIONS_PROTO = "wire/extensions.proto";
@@ -54,22 +60,20 @@ public final class CoreLoader implements Loader {
     if (!isWireRuntimeProto(path)) {
       throw new IllegalStateException("unexpected load: " + path);
     }
-    InputStream stream = CoreLoader.class.getClassLoader().getResourceAsStream(path);
-    if (stream == null) {
-      throw new IllegalStateException("unexpected load: " + path);
-    }
     try {
-      String data = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-      Location location = Location.get(path);
-      ProtoFileElement element = ProtoParser.parse(location, data);
-      return ProtoFile.get(element);
+      BufferedSource source = Okio.buffer(resourceFileSystem.source(Path.get("/").div(path)));
+      try {
+        String data = source.readUtf8();
+        Location location = Location.get(path);
+        ProtoFileElement element = ProtoParser.parse(location, data);
+        return ProtoFile.get(element);
+      } finally {
+        source.close();
+      }
+    } catch (FileNotFoundException e) {
+      throw new IllegalStateException("unexpected load: " + path, e);
     } catch (IOException e) {
       throw new RuntimeException(e);
-    } finally {
-      try {
-        stream.close();
-      } catch (IOException ignored) {
-      }
     }
   }
 

@@ -23,7 +23,6 @@ import com.squareup.wire.ProtoAdapter;
 import com.squareup.wire.schema.Location;
 import com.squareup.wire.schema.ProtoFile;
 import com.squareup.wire.schema.Schema;
-import com.squareup.wire.schema.SchemaException;
 import com.squareup.wire.schema.SchemaLoader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

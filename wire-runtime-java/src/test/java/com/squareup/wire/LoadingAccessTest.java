@@ -41,6 +41,39 @@ public class LoadingAccessTest {
     }
   }
 
+  /**
+   * Path.relativeTo follows okio 3's lexical contract (verified against okio-jvm 3.18.2 via the
+   * parity jar): the argument is the base, equal paths yield ".", siblings need ".." hops, and
+   * foreign-provider paths relativize without any nio provider participating.
+   */
+  @Test public void relativeToMatchesOkioSemantics() {
+    assertEquals("c.txt", Path.get("/a/b/c.txt").relativeTo(Path.get("/a/b")).toString());
+    assertEquals(".", Path.get("/a").relativeTo(Path.get("/a")).toString());
+    assertEquals(".", Path.get("/a/b").relativeTo(Path.get("/a/b/")).toString());
+    assertEquals("../b", Path.get("/a/b").relativeTo(Path.get("/a/x")).toString());
+    assertEquals("../a/b", Path.get("/a/b").relativeTo(Path.get("/x")).toString());
+    assertEquals("b", Path.get("a/b").relativeTo(Path.get("a")).toString());
+    assertEquals("a/b", Path.get("a/b").relativeTo(Path.get(".")).toString());
+    // String equality means cross-provider paths with equal text are equal.
+    assertEquals("c.txt", Path.get("/a/b/c.txt").relativeTo(Path.get("/a/b")).toString());
+  }
+
+  /** A zipfs entry relativizes against a host-path base although their providers differ. */
+  @Test public void relativeToIsProviderAgnostic() throws IOException {
+    java.nio.file.Path zip = tempDir.resolve("z.zip");
+    try (java.util.zip.ZipOutputStream out = new java.util.zip.ZipOutputStream(
+        java.nio.file.Files.newOutputStream(zip))) {
+      out.putNextEntry(new java.util.zip.ZipEntry("dir/entry.proto"));
+      out.write("x".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      out.closeEntry();
+    }
+    try (FileSystem zipFs = FileSystem.SYSTEM.openZip(Path.get(zip.toString()))) {
+      Path entry = zipFs.list(Path.get("/dir")).get(0);
+      Path base = Path.get("/dir");
+      assertEquals("entry.proto", entry.relativeTo(base).toString());
+    }
+  }
+
   /** In-memory: buffers remain the primary in-memory source and sink. */
   @Test public void inMemoryAccess() throws IOException {
     Buffer buffer = new Buffer();

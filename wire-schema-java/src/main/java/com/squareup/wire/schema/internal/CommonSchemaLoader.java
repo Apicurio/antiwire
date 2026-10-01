@@ -192,14 +192,13 @@ public final class CommonSchemaLoader implements Loader {
       return CoreLoader.INSTANCE.load(path);
     }
 
-    StringBuilder searchPaths = new StringBuilder();
+    List<String> searchPaths = new ArrayList<>();
     for (Root protoPathRoot : protoPathRoots) {
-      if (searchPaths.length() > 0) searchPaths.append("\n    ");
-      searchPaths.append(protoPathRoot);
+      searchPaths.add(String.valueOf(protoPathRoot));
     }
     errors.add("unable to find " + path
         + "\n  searching " + protoPathRoots.size() + " proto paths:"
-        + "\n    " + searchPaths);
+        + "\n    " + String.join("\n    ", searchPaths));
     return ProtoFile.get(ProtoFileElement.empty(path));
   }
 
@@ -238,6 +237,7 @@ public final class CommonSchemaLoader implements Loader {
     return result;
   }
 
+  /** Deferred: upstream's callers live in SchemaLoaderTest, adopted in TASK-13. */
   void reportLoadingErrors() {
     errors.throwIfNonEmpty();
   }
