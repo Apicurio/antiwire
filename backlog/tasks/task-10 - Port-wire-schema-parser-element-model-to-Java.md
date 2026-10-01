@@ -4,7 +4,7 @@ title: Port wire-schema parser element model to Java
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-09-30 01:18'
+updated_date: '2026-10-02 00:25'
 labels: []
 milestone: m-8
 dependencies:
@@ -33,3 +33,8 @@ Translate the public parser element model and parsing behavior used by Apicurio:
 <!-- DOD:BEGIN -->
 - [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+## Comments
+
+#1 - 2026-10-02 00:25 (UTC)
+Progress: ProtoType.java landed in wire-schema-java (first production class of the schema module), including the constants, map-key restriction, SCALAR_TYPES/NUMERIC/WRAPPER registries and the get() family with exact messages. Dependency note for the remaining batches: the element classes reference Field.Label and ProtoType from the schema package, so the Field/Location foundations (or a minimal Field.Label skeleton completed by TASK-11's full Field) precede SyntaxReader/ProtoParser. Ordered plan: Location -> Field(Label)+ProtoType(done) -> internal schema helpers (appendDocumentation/appendOptions) -> element data classes -> SyntaxReader -> OptionReader -> ProtoParser -> schema-test corpus adoption.
