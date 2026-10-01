@@ -12,7 +12,10 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # The build modules, defined once here; the parent pom.xml <modules> block must match
 # (enforced by check_modules_consistency, which every consumer script runs at startup).
 # wire-upstream-shaded first: parity fixture packages before its consumers (see parent pom).
-MODULES=(wire-upstream-shaded wire-runtime-java wire-schema-java wire-java-generator)
+MODULES=(wire-upstream-shaded wire-runtime-java wire-schema-java wire-tests-java wire-java-generator)
+# wire-tests-java is a test-only module (never published) but stays in SHIPPED_MODULES
+# checks: its generated fixtures are compiled with the port's runtime and must stay clean.
+SHIPPED_MODULES=(wire-runtime-java wire-schema-java wire-java-generator)
 # Shipping modules only: the fixture is never-published test tooling with no target/classes,
 # so class-origin, bytecode and consumer checks must not iterate it.
 SHIPPED_MODULES=(wire-runtime-java wire-schema-java wire-java-generator)

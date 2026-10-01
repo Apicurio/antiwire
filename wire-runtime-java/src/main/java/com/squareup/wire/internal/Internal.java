@@ -80,6 +80,12 @@ public final class Internal {
   }
 
   public static <T> List<T> immutableCopyOf(String name, List<T> list) {
+    if (list == null) {
+      // Kotlin's non-null parameter guard message, asserted by upstream tests.
+      throw new NullPointerException(
+          "Parameter specified as non-null is null: method "
+              + "com.squareup.wire.internal.Internal__InternalKt.immutableCopyOf, parameter list");
+    }
     if (list instanceof MutableOnWriteList) {
       list = ((MutableOnWriteList<T>) list).mutableList;
     }
@@ -199,6 +205,13 @@ public final class Internal {
 
   /** Throw {@link NullPointerException} if any of {@code list}'s items is null. */
   public static void checkElementsNotNull(List<?> list) {
+    if (list == null) {
+      // Kotlin's non-null parameter guard message, which generated code and upstream tests
+      // assert on; the method reference is upstream's multifile-class name.
+      throw new NullPointerException(
+          "Parameter specified as non-null is null: method "
+              + "com.squareup.wire.internal.Internal__InternalKt.checkElementsNotNull, parameter list");
+    }
     for (int i = 0; i < list.size(); i++) {
       if (list.get(i) == null) {
         throw new NullPointerException("Element at index " + i + " is null");
@@ -282,12 +295,16 @@ public final class Internal {
     return (oneOfName + "_keys").toUpperCase(Locale.ROOT);
   }
 
+  /**
+   * Redacts each element in place and returns the list, matching the JVM multifile Internal's
+   * mutating contract that generated Java code relies on (it ignores the return value); the
+   * map-based common variant's only in-repo caller assigns the result, which stays correct.
+   */
   public static <T> List<T> redactElements(List<T> list, ProtoAdapter<T> adapter) {
-    List<T> result = new ArrayList<>(list.size());
-    for (T value : list) {
-      result.add(adapter.redact(value));
+    for (int i = 0; i < list.size(); i++) {
+      list.set(i, adapter.redact(list.get(i)));
     }
-    return result;
+    return list;
   }
 
   public static <K, V> Map<K, V> redactElements(Map<K, V> map, ProtoAdapter<V> adapter) {

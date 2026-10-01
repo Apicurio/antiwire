@@ -34,6 +34,7 @@
     <module>wire-upstream-shaded</module>
     <module>wire-runtime-java</module>
     <module>wire-schema-java</module>
+    <module>wire-tests-java</module>
     <module>wire-java-generator</module>
   </modules>
 

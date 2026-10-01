@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Upstream wire-tests/jvm-java-kotlin fixture and test module (TASK-9). The generated Java
+  protos come from scripts/generate-java-fixtures.sh, which runs the PINNED upstream
+  compiler 7.1.0 as an isolated build-time fixture tool (DEC-5; no dependency on the port's
+  own generator). Generated sources compile against the port's runtime only.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.paoloantinori</groupId>
+    <artifactId>antiwire-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>wire-tests-java</artifactId>
+
+  <name>antiwire wire-tests-java (upstream jvm-java-kotlin suite)</name>
+  <description>
+    Upstream's jvm-java-kotlin suite: generated fixtures from the pinned upstream compiler
+    plus the ported runtime behavior tests. Not published.
+  </description>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.github.paoloantinori</groupId>
+      <artifactId>wire-runtime-java</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.truth</groupId>
+      <artifactId>truth</artifactId>
+      <version>1.4.2</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- The JUnit platform provider needs the vintage engine to run the upstream JUnit 4
+         suites. -->
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>5.10.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
