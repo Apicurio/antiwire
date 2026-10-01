@@ -39,6 +39,21 @@ public final class OptionElement {
       this.kind = kind;
       this.value = value;
     }
+
+    public OptionPrimitive copy(Kind kind, Object value) {
+      return new OptionPrimitive(kind, value);
+    }
+
+    @Override public boolean equals(Object other) {
+      if (this == other) return true;
+      if (!(other instanceof OptionPrimitive)) return false;
+      OptionPrimitive that = (OptionPrimitive) other;
+      return kind == that.kind && java.util.Objects.equals(value, that.value);
+    }
+
+    @Override public int hashCode() {
+      return 31 * kind.hashCode() + java.util.Objects.hashCode(value);
+    }
   }
 
   public static final OptionElement PACKED_OPTION_ELEMENT =

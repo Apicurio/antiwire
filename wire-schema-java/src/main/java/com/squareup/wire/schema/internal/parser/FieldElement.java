@@ -116,4 +116,25 @@ public final class FieldElement {
         return OptionElement.Kind.ENUM;
     }
   }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof FieldElement)) return false;
+    FieldElement that = (FieldElement) other;
+    return true
+      && java.util.Objects.equals(this.location, that.location)
+      && java.util.Objects.equals(this.label, that.label)
+      && java.util.Objects.equals(this.type, that.type)
+      && java.util.Objects.equals(this.name, that.name)
+      && java.util.Objects.equals(this.defaultValue, that.defaultValue)
+      && java.util.Objects.equals(this.jsonName, that.jsonName)
+      && this.tag == that.tag
+      && java.util.Objects.equals(this.documentation, that.documentation)
+      && java.util.Objects.equals(this.options, that.options);
+  }
+
+  @Override public int hashCode() {
+    int result = java.util.Objects.hashCode(location);
+    result = 31 * result + java.util.Objects.hashCode(label);result = 31 * result + java.util.Objects.hashCode(type);result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(defaultValue);result = 31 * result + java.util.Objects.hashCode(jsonName);result = 31 * result + tag;result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(options);    return result;
+  }
 }

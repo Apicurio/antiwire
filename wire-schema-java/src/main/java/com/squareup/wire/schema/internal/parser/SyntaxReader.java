@@ -76,7 +76,9 @@ public final class SyntaxReader {
 
   /** Push back the most recently read character. */
   public void pushBack(char c) {
-    if (data[pos - 1] != c) throw unexpected("expected '" + c + "'");
+    if (data[pos - 1] != c) {
+      throw new IllegalArgumentException("Failed requirement.");
+    }
     pos--;
   }
 
@@ -337,7 +339,10 @@ public final class SyntaxReader {
         return documentation;
       }
     }
-    expect(pos < data.length && (data[pos] == '/' || data[pos] == '*'), "expected '//' or '/*'");
+    if (!(pos < data.length && (data[pos] == '/' || data[pos] == '*'))) {
+      pos--; // Backtrack to start of comment.
+      expect(false, "expected '//' or '/*'");
+    }
     boolean isStar = data[pos] == '*';
     pos++;
     // Skip a single leading space, if present.
@@ -371,8 +376,10 @@ public final class SyntaxReader {
       }
       end = pos - 1; // The character before '\n'.
     }
+    if (end == start) return documentation; // Empty comment: keep the original.
     String trailing = new String(data, start, end - start);
-    while (trailing.endsWith("\r")) {
+    while (!trailing.isEmpty()
+        && (trailing.endsWith(" ") || trailing.endsWith("\t") || trailing.endsWith("\r"))) {
       trailing = trailing.substring(0, trailing.length() - 1);
     }
     return documentation.isEmpty() ? trailing : documentation + "\n" + trailing;
@@ -420,6 +427,6 @@ public final class SyntaxReader {
 
   /** Upstream keeps the column without the +1 offset in this specific check. */
   public RuntimeException unexpectedAt(Location at, String message) {
-    return new IllegalStateException("Syntax error in " + at + ": " + message);
+    return unexpected(message, at);
   }
 }

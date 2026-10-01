@@ -153,4 +153,27 @@ public final class MessageElement implements TypeElement {
     }
     return null;
   }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof MessageElement)) return false;
+    MessageElement that = (MessageElement) other;
+    return true
+      && java.util.Objects.equals(this.location, that.location)
+      && java.util.Objects.equals(this.name, that.name)
+      && java.util.Objects.equals(this.documentation, that.documentation)
+      && java.util.Objects.equals(this.nestedTypes, that.nestedTypes)
+      && java.util.Objects.equals(this.options, that.options)
+      && java.util.Objects.equals(this.reserveds, that.reserveds)
+      && java.util.Objects.equals(this.fields, that.fields)
+      && java.util.Objects.equals(this.oneOfs, that.oneOfs)
+      && java.util.Objects.equals(this.extensions, that.extensions)
+      && java.util.Objects.equals(this.groups, that.groups)
+      && java.util.Objects.equals(this.extendDeclarations, that.extendDeclarations);
+  }
+
+  @Override public int hashCode() {
+    int result = java.util.Objects.hashCode(location);
+    result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(nestedTypes);result = 31 * result + java.util.Objects.hashCode(options);result = 31 * result + java.util.Objects.hashCode(reserveds);result = 31 * result + java.util.Objects.hashCode(fields);result = 31 * result + java.util.Objects.hashCode(oneOfs);result = 31 * result + java.util.Objects.hashCode(extensions);result = 31 * result + java.util.Objects.hashCode(groups);result = 31 * result + java.util.Objects.hashCode(extendDeclarations);    return result;
+  }
 }

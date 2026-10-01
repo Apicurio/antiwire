@@ -59,4 +59,19 @@ public final class ReservedElement {
     builder.append(";\n");
     return builder.toString();
   }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof ReservedElement)) return false;
+    ReservedElement that = (ReservedElement) other;
+    return true
+      && java.util.Objects.equals(this.location, that.location)
+      && java.util.Objects.equals(this.documentation, that.documentation)
+      && java.util.Objects.equals(this.values, that.values);
+  }
+
+  @Override public int hashCode() {
+    int result = java.util.Objects.hashCode(location);
+    result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(values);    return result;
+  }
 }

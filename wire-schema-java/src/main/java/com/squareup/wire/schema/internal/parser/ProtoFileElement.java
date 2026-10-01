@@ -107,4 +107,26 @@ public final class ProtoFileElement {
         java.util.Collections.emptyList(), java.util.Collections.emptyList(),
         java.util.Collections.emptyList(), java.util.Collections.emptyList());
   }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof ProtoFileElement)) return false;
+    ProtoFileElement that = (ProtoFileElement) other;
+    return true
+      && java.util.Objects.equals(this.location, that.location)
+      && java.util.Objects.equals(this.packageName, that.packageName)
+      && java.util.Objects.equals(this.syntax, that.syntax)
+      && java.util.Objects.equals(this.imports, that.imports)
+      && java.util.Objects.equals(this.publicImports, that.publicImports)
+      && java.util.Objects.equals(this.weakImports, that.weakImports)
+      && java.util.Objects.equals(this.types, that.types)
+      && java.util.Objects.equals(this.services, that.services)
+      && java.util.Objects.equals(this.extendDeclarations, that.extendDeclarations)
+      && java.util.Objects.equals(this.options, that.options);
+  }
+
+  @Override public int hashCode() {
+    int result = java.util.Objects.hashCode(location);
+    result = 31 * result + java.util.Objects.hashCode(packageName);result = 31 * result + java.util.Objects.hashCode(syntax);result = 31 * result + java.util.Objects.hashCode(imports);result = 31 * result + java.util.Objects.hashCode(publicImports);result = 31 * result + java.util.Objects.hashCode(weakImports);result = 31 * result + java.util.Objects.hashCode(types);result = 31 * result + java.util.Objects.hashCode(services);result = 31 * result + java.util.Objects.hashCode(extendDeclarations);result = 31 * result + java.util.Objects.hashCode(options);    return result;
+  }
 }

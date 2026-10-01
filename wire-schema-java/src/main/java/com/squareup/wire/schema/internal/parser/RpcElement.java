@@ -68,4 +68,24 @@ public final class RpcElement {
     builder.append(";\n");
     return builder.toString();
   }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof RpcElement)) return false;
+    RpcElement that = (RpcElement) other;
+    return true
+      && java.util.Objects.equals(this.location, that.location)
+      && java.util.Objects.equals(this.name, that.name)
+      && java.util.Objects.equals(this.documentation, that.documentation)
+      && java.util.Objects.equals(this.requestType, that.requestType)
+      && java.util.Objects.equals(this.responseType, that.responseType)
+      && this.requestStreaming == that.requestStreaming
+      && this.responseStreaming == that.responseStreaming
+      && java.util.Objects.equals(this.options, that.options);
+  }
+
+  @Override public int hashCode() {
+    int result = java.util.Objects.hashCode(location);
+    result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(requestType);result = 31 * result + java.util.Objects.hashCode(responseType);result = 31 * result + (requestStreaming ? 1 : 0);result = 31 * result + (responseStreaming ? 1 : 0);result = 31 * result + java.util.Objects.hashCode(options);    return result;
+  }
 }

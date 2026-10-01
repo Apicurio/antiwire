@@ -66,16 +66,16 @@ public final class ProtoParser {
         TypeElement element = (TypeElement) declaration;
         TypeElement duplicate = findNestedType(element.name());
         if (duplicate != null) {
-          throw reader.unexpected(element.name() + " (" + element.location() + ") is already"
-              + " defined at " + duplicate.location(), location);
+          throw new IllegalStateException(element.name() + " (" + element.location() + ") is"
+              + " already defined at " + duplicate.location());
         }
         nestedTypes.add(element);
       } else if (declaration instanceof ServiceElement) {
         ServiceElement element = (ServiceElement) declaration;
         ServiceElement duplicate = findService(element.name);
         if (duplicate != null) {
-          throw reader.unexpected(element.name + " (" + element.location + ") is already defined"
-              + " at " + duplicate.location, location);
+          throw new IllegalStateException(element.name + " (" + element.location + ") is already"
+              + " defined at " + duplicate.location);
         }
         services.add(element);
       } else if (declaration instanceof OptionElement) {
@@ -100,11 +100,18 @@ public final class ProtoParser {
     return null;
   }
 
-  /** Upstream normalizes import paths through okio; the port applies the same slash rule. */
+  /**
+   * Upstream normalizes import paths through okio's Path.withUnixSlashes: backslashes to
+   * forward slashes, duplicate slashes collapsed, and leading "./" segments resolved.
+   */
   private static List<String> withUnixSlashes(List<String> paths) {
     List<String> result = new ArrayList<>(paths.size());
     for (String path : paths) {
-      result.add(path.replace('\\', '/'));
+      String normalized = path.replace('\\', '/').replaceAll("/{2,}", "/");
+      while (normalized.startsWith("./")) {
+        normalized = normalized.substring(2);
+      }
+      result.add(normalized);
     }
     return result;
   }

@@ -54,4 +54,21 @@ public final class ServiceElement {
     builder.append("}\n");
     return builder.toString();
   }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof ServiceElement)) return false;
+    ServiceElement that = (ServiceElement) other;
+    return true
+      && java.util.Objects.equals(this.location, that.location)
+      && java.util.Objects.equals(this.name, that.name)
+      && java.util.Objects.equals(this.documentation, that.documentation)
+      && java.util.Objects.equals(this.rpcs, that.rpcs)
+      && java.util.Objects.equals(this.options, that.options);
+  }
+
+  @Override public int hashCode() {
+    int result = java.util.Objects.hashCode(location);
+    result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(rpcs);result = 31 * result + java.util.Objects.hashCode(options);    return result;
+  }
 }
