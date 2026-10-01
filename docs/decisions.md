@@ -100,9 +100,12 @@ skips. Namespace consequences, as required by OPEN-1: upstream test sources impo
 untouched; generated code stays source-compatible; no okio artifact ships, so the DEC-4
 production-Kotlin ban holds trivially for this layer. The gzip and zlib family is omitted
 with an import-inventory justification (the loader's compression-relevant concern is ZIP,
-not gzip). Still open under OPEN-1: the loading surface (FileSystem, Path, FileHandle,
-in-memory sources, classpath resources, ZIP) is inventoried as required but not implemented;
-TASK-4 and TASK-12 own it.
+not gzip). The loading surface, previously open, is now implemented and inventoried:
+okio.Path, okio.FileSystem (SYSTEM over java.nio, openZip over the JDK zip filesystem,
+asResourceFileSystem for classpath reads) and okio.FileMetadata, original code with the okio
+3 API shape; the pinned-source map with consequences and justified exclusions is
+docs/loading-api-inventory.md, and FakeFileSystem is deferred to M2 with the verbatim schema
+tests.
 
 ### OPEN-2: provisional grouping exercised
 

@@ -55,11 +55,18 @@ TASK-4 AC#5 requires.
   parallel artifacts (its own decisions/conventions text, skeleton, CI) are superseded and
   dropped in the merge where they conflict; unique evidence (conventions content already
   folded, gate negative-battery lessons) is preserved in the commit history.
-- TASK-4: In Progress. Done: AC#3 (okio's own tests run verbatim), the buffer half of AC#1
-  and AC#2, the namespace recording of AC#4 (this ledger plus decisions). Remaining: the
-  loading-API inventory map and the in-memory/filesystem/classpath/ZIP demonstration, the
-  full AC#4 decisions text, AC#5 recording (this document supplies the effort data), AC#6
-  grouping finalization.
+- TASK-4: In Progress. Done: AC#1 (docs/loading-api-inventory.md maps every required I/O
+  and loading API to the selected implementation with consequences and exclusions); AC#2
+  (LoadingAccessTest demonstrates in-memory, filesystem, classpath and ZIP access, plus
+  loader-critical path semantics, in the build suite and on the Java 11 consumer); AC#3
+  (okio's own tests run verbatim); AC#5 (effort data below and in the task record); the
+  namespace recording of AC#4 (decisions plus the inventory). The original loading layer
+  (okio.Path, okio.FileSystem, okio.FileMetadata over java.nio, with SYSTEM, openZip over
+  zipfs, and asResourceFileSystem for classpath reads) replaces the earlier "loading surface
+  not implemented" gap; FakeFileSystem is deferred to M2 with the verbatim schema tests.
+  Remaining: the loader-boundary and duplicate-class paragraphs of AC#4 folded into decisions
+  proper (they exist in the inventory; a decisions edit can carry them at grouping time),
+  and AC#6 grouping finalization.
 - TASK-5: In Progress. Done: AC#1 (byte parity including groups, packed, malformed
   lengths, via the isolated-oracle fixture); the runtime half of AC#2 (upstream
   ProtoWriterTest.kt compiles and runs against the Java slice with two individually
