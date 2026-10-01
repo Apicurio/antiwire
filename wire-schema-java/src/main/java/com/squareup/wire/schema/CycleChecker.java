@@ -53,7 +53,7 @@ class CycleChecker {
 
   private String cycleCheckPackageName(FileLinker fileLinker) {
     Object goPackage = fileLinker.protoFile.options.get(goPackageOption);
-    if (goPackage != null) return goPackage.toString();
+    if (goPackage instanceof String) return (String) goPackage;
     return fileLinker.protoFile.packageName != null
         ? fileLinker.protoFile.packageName
         : "<default>";

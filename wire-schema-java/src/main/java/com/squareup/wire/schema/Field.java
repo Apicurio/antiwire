@@ -231,7 +231,7 @@ public final class Field {
     if (useArray() && !isPacked()) {
       scoped.errors.add("wire.use_array=true only permitted on packed fields");
     }
-    if (useArray() && !(type != null && type.isScalar)) {
+    if (useArray() && (type == null || !type.isScalar)) {
       scoped.errors.add("wire.use_array=true only permitted on scalar fields");
     }
     if (isExtension) {

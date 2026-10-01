@@ -18,7 +18,6 @@ package com.squareup.wire.schema;
 import com.squareup.wire.schema.internal.parser.ExtendElement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public final class Extend {
   final Location location;

@@ -17,7 +17,6 @@ package com.squareup.wire.schema;
 
 import com.squareup.wire.schema.internal.parser.ProtoFileElement;
 import com.squareup.wire.schema.internal.parser.ProtoParser;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -25,13 +24,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * In-memory Loader for linking tests: serves test-declared .proto sources, falling back to the
- * runtime protos bundled on the classpath (mirroring upstream's CoreLoader behavior for
- * descriptor.proto and wire/extensions.proto).
+ * In-memory Loader for linking tests: serves test-declared .proto sources, delegating the nine
+ * wire-runtime protos to {@link CoreLoader} exactly as TASK-12's real loader must.
  */
 final class MapLoader implements Loader {
   private final Map<String, String> sources = new LinkedHashMap<>();
-  private ErrorCollector errors = new ErrorCollector();
 
   void add(String path, String source) {
     sources.put(path, source);
@@ -39,7 +36,7 @@ final class MapLoader implements Loader {
 
   @Override public ProtoFile load(String path) {
     String source = sources.get(path);
-    if (source == null) {
+    if (source == null && CoreLoader.isWireRuntimeProto(path)) {
       source = loadRuntimeResource(path);
     }
     if (source == null) {
@@ -53,13 +50,7 @@ final class MapLoader implements Loader {
     InputStream stream = MapLoader.class.getClassLoader().getResourceAsStream(path);
     if (stream == null) return null;
     try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      byte[] buffer = new byte[8192];
-      int read;
-      while ((read = stream.read(buffer)) != -1) {
-        out.write(buffer, 0, read);
-      }
-      return new String(out.toByteArray(), StandardCharsets.UTF_8);
+      return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);
     } finally {
@@ -71,9 +62,7 @@ final class MapLoader implements Loader {
   }
 
   @Override public Loader withErrors(ErrorCollector errors) {
-    MapLoader result = new MapLoader();
-    result.sources.putAll(sources);
-    result.errors = errors;
-    return result;
+    // Like CoreLoader, this loader never fails through the error collector.
+    return this;
   }
 }

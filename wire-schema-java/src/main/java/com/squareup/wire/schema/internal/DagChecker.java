@@ -107,9 +107,7 @@ public final class DagChecker<N> {
     // our strongly connected component. Include it in the result.
     if (tag.discoveryId == tag.lowestConnectedDiscoveryId) {
       List<Tag<N>> slice = new ArrayList<>(stack.subList(stackIndex, stack.size()));
-      for (int i = stack.size() - 1; i >= stackIndex; i--) {
-        stack.remove(i);
-      }
+      stack.subList(stackIndex, stack.size()).clear();
 
       List<N> component = new ArrayList<>();
       for (Tag<N> componentTag : slice) {

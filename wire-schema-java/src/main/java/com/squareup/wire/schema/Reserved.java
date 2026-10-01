@@ -17,6 +17,8 @@ package com.squareup.wire.schema;
 
 import com.squareup.wire.schema.internal.parser.ReservedElement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /** A reserved tag range or name list declared on a message or enum. */
@@ -67,13 +69,40 @@ public final class Reserved {
     Reserved that = (Reserved) other;
     return location.equals(that.location)
         && documentation.equals(that.documentation)
-        && values.equals(that.values);
+        && valuesEqual(values, that.values);
   }
 
   @Override public int hashCode() {
     int result = location.hashCode();
     result = 31 * result + documentation.hashCode();
-    result = 31 * result + values.hashCode();
+    result = 31 * result + valuesHashCode(values);
+    return result;
+  }
+
+  /** Ranges are int[] pairs; compare them structurally like upstream's IntRange. */
+  static boolean valuesEqual(List<Object> a, List<Object> b) {
+    if (a.size() != b.size()) return false;
+    Iterator<Object> bi = b.iterator();
+    for (Object value : a) {
+      Object other = bi.next();
+      if (value instanceof int[]) {
+        if (!(other instanceof int[]) || !Arrays.equals((int[]) value, (int[]) other)) {
+          return false;
+        }
+      } else if (!value.equals(other)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** Ranges are int[] pairs; hash them structurally like upstream's IntRange. */
+  static int valuesHashCode(List<Object> values) {
+    int result = 1;
+    for (Object value : values) {
+      result = 31 * result + (value instanceof int[] ? Arrays.hashCode((int[]) value)
+          : value.hashCode());
+    }
     return result;
   }
 

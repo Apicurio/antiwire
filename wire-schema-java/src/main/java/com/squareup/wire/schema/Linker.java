@@ -29,9 +29,6 @@ import java.util.Set;
 
 /** Links local field types and option types to the corresponding declarations. */
 public class Linker {
-  static final String DESCRIPTOR_PROTO = "google/protobuf/descriptor.proto";
-  static final String WIRE_EXTENSIONS_PROTO = "wire/extensions.proto";
-
   private final Loader loader;
   private final Map<String, FileLinker> fileLinkers;
   private final ArrayDeque<FileLinker> fileOptionsQueue;
@@ -108,11 +105,11 @@ public class Linker {
 
     // Ensure linking the descriptor.proto and wire_options.proto, if not provided. This ensures
     // we can resolve our java_package and wire_package options.
-    if (fileLinkers.get(DESCRIPTOR_PROTO) == null) {
-      sourceFiles.add(getFileLinker(DESCRIPTOR_PROTO));
+    if (fileLinkers.get(CoreLoader.DESCRIPTOR_PROTO) == null) {
+      sourceFiles.add(getFileLinker(CoreLoader.DESCRIPTOR_PROTO));
     }
-    if (fileLinkers.get(WIRE_EXTENSIONS_PROTO) == null) {
-      sourceFiles.add(getFileLinker(WIRE_EXTENSIONS_PROTO));
+    if (fileLinkers.get(CoreLoader.WIRE_EXTENSIONS_PROTO) == null) {
+      sourceFiles.add(getFileLinker(CoreLoader.WIRE_EXTENSIONS_PROTO));
     }
 
     // When loading exhaustively, every import (and transitive import!) is a source file.
@@ -518,26 +515,25 @@ public class Linker {
   }
 
   private void validateTypeUniqueness(List<FileLinker> fileLinkers) {
-    // Group (type, location-toString) pairs across files in this package.
-    Map<String, List<Map.Entry<ProtoType, Location>>> conflicting = new LinkedHashMap<>();
+    // Group types across files in this package by (type, location) identity.
+    Map<String, List<Type>> conflicting = new LinkedHashMap<>();
     for (FileLinker fileLinker : fileLinkers) {
       for (Type type : fileLinker.protoFile.types) {
         String key = type.type() + "->" + type.location();
-        conflicting.computeIfAbsent(key, k -> new ArrayList<>())
-            .add(new java.util.AbstractMap.SimpleImmutableEntry<>(type.type(), type.location()));
+        conflicting.computeIfAbsent(key, k -> new ArrayList<>()).add(type);
       }
     }
 
-    for (List<Map.Entry<ProtoType, Location>> typesAndLocations : conflicting.values()) {
+    for (List<Type> typesAndLocations : conflicting.values()) {
       if (typesAndLocations.size() <= 1) continue;
-      ProtoType type = typesAndLocations.get(0).getKey();
+      ProtoType type = typesAndLocations.get(0).type();
       StringBuilder error = new StringBuilder();
       error.append("same type '").append(type)
           .append("' from the same file loaded from different paths:");
       int index = 1;
-      for (Map.Entry<ProtoType, Location> entry : typesAndLocations) {
-        error.append("\n  ").append(index++).append(". base:").append(entry.getValue().base)
-            .append(", path:").append(entry.getValue().withoutBase());
+      for (Type entry : typesAndLocations) {
+        error.append("\n  ").append(index++).append(". base:").append(entry.location().base)
+            .append(", path:").append(entry.location().withoutBase());
       }
       errors.add(error.toString());
     }

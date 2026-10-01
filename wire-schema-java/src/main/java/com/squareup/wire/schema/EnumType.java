@@ -16,6 +16,7 @@
 package com.squareup.wire.schema;
 
 import com.squareup.wire.Syntax;
+import com.squareup.wire.schema.internal.SchemaUtil;
 import com.squareup.wire.schema.internal.parser.EnumElement;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -149,11 +150,12 @@ public final class EnumType extends Type {
     for (EnumConstant constant : constants) {
       for (Reserved reserved : reserveds) {
         if (reserved.matchesTag(constant.tag())) {
-          scoped.errors.add("tag " + constant.tag() + " is reserved (" + reserved.location() + ")");
+          scoped.errors.at(constant)
+              .add("tag " + constant.tag() + " is reserved (" + reserved.location() + ")");
         }
         if (reserved.matchesName(constant.name())) {
-          scoped.errors.add(
-              "name '" + constant.name() + "' is reserved (" + reserved.location() + ")");
+          scoped.errors.at(constant)
+              .add("name '" + constant.name() + "' is reserved (" + reserved.location() + ")");
         }
       }
     }
@@ -162,15 +164,9 @@ public final class EnumType extends Type {
   private void validateTagNameAmbiguity(boolean allowAlias, Linker linker) {
     Map<String, List<EnumConstant>> nameToConstants = new LinkedHashMap<>();
     for (EnumConstant constant : constants) {
-      StringBuilder lowered = new StringBuilder(constant.name().length());
-      for (char c : constant.name().toCharArray()) {
-        if (c >= 'A' && c <= 'Z') {
-          lowered.append((char) (c - ('A' - 'a')));
-        } else {
-          lowered.append(c);
-        }
-      }
-      String key = lowered.toString();
+      // Identifiers are ASCII-only ([a-zA-Z0-9_-]), so Locale.US lowercasing matches the
+      // upstream per-char A-Z fold exactly.
+      String key = SchemaUtil.toEnglishLowerCase(constant.name());
       List<EnumConstant> list = nameToConstants.get(key);
       if (list == null) {
         list = new ArrayList<>();

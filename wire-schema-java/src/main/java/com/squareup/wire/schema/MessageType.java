@@ -284,7 +284,7 @@ public final class MessageType extends Type {
 
     MessageType result = new MessageType(type, location, documentation, name,
         Field.retainAll(schema, markSet, type, declaredFields),
-        new ArrayList<>(Field.retainAll(schema, markSet, type, extensionFields)),
+        Field.retainAll(schema, markSet, type, extensionFields),
         retainedOneOfs, retainedNestedTypes, retainedNestedExtends, extensionsList, reserveds,
         options.retainAll(schema, markSet), syntax);
     result.deprecated = deprecated;
@@ -322,7 +322,7 @@ public final class MessageType extends Type {
 
     return new MessageType(type, location, documentation, name,
         Field.retainLinked(declaredFields),
-        new ArrayList<>(Field.retainLinked(extensionFields)),
+        Field.retainLinked(extensionFields),
         retainedOneOfs, retainedNestedTypes, retainedNestedExtends,
         Collections.emptyList(), Collections.emptyList(), options.retainLinked(), syntax);
   }

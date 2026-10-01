@@ -528,6 +528,8 @@ public final class Options {
    * and field names collide. This method prefers shorter package names though that is an
    * implementation detail.
    */
+  private static final java.util.regex.Pattern DOT_PATTERN = java.util.regex.Pattern.compile("\\.");
+
   public static String[] resolveFieldPath(String name, Set<String> fullyQualifiedNames) {
     // Try to resolve a local name.
     int pos = 0;
@@ -540,7 +542,7 @@ public final class Options {
         String remainder = chompedName.substring(pos);
         String[] path = remainder.isEmpty()
             ? new String[] { "" }
-            : remainder.split("\\.", -1);
+            : DOT_PATTERN.split(remainder, -1);
         path[0] = chompedName.substring(0, pos);
         return path;
       }

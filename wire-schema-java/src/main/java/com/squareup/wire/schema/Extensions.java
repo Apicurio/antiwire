@@ -73,13 +73,13 @@ public final class Extensions {
     Extensions that = (Extensions) other;
     return location.equals(that.location)
         && documentation.equals(that.documentation)
-        && values.equals(that.values);
+        && Reserved.valuesEqual(values, that.values);
   }
 
   @Override public int hashCode() {
     int result = location.hashCode();
     result = 31 * result + documentation.hashCode();
-    result = 31 * result + values.hashCode();
+    result = 31 * result + Reserved.valuesHashCode(values);
     return result;
   }
 

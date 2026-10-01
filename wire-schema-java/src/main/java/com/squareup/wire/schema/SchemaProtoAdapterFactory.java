@@ -42,47 +42,51 @@ final class SchemaProtoAdapterFactory {
   final Schema schema;
   private final boolean includeUnknown;
 
-  private final Map<ProtoType, ProtoAdapter<?>> adapterMap = new HashMap<>();
+  private static final Map<ProtoType, ProtoAdapter<?>> SCALAR_AND_WELL_KNOWN_ADAPTERS =
+      new HashMap<>();
 
-  {
-    adapterMap.put(ProtoType.BOOL, ProtoAdapter.BOOL);
-    adapterMap.put(ProtoType.BYTES, ProtoAdapter.BYTES);
-    adapterMap.put(ProtoType.DOUBLE, ProtoAdapter.DOUBLE);
-    adapterMap.put(ProtoType.FLOAT, ProtoAdapter.FLOAT);
-    adapterMap.put(ProtoType.FIXED32, ProtoAdapter.FIXED32);
-    adapterMap.put(ProtoType.FIXED64, ProtoAdapter.FIXED64);
-    adapterMap.put(ProtoType.INT32, ProtoAdapter.INT32);
-    adapterMap.put(ProtoType.INT64, ProtoAdapter.INT64);
-    adapterMap.put(ProtoType.SFIXED32, ProtoAdapter.SFIXED32);
-    adapterMap.put(ProtoType.SFIXED64, ProtoAdapter.SFIXED64);
-    adapterMap.put(ProtoType.SINT32, ProtoAdapter.SINT32);
-    adapterMap.put(ProtoType.SINT64, ProtoAdapter.SINT64);
-    adapterMap.put(ProtoType.STRING, ProtoAdapter.STRING);
-    adapterMap.put(ProtoType.UINT32, ProtoAdapter.UINT32);
-    adapterMap.put(ProtoType.UINT64, ProtoAdapter.UINT64);
-    adapterMap.put(ProtoType.ANY, (ProtoAdapter) AnyMessage.ADAPTER);
-    adapterMap.put(ProtoType.DURATION, ProtoAdapter.DURATION);
-    adapterMap.put(ProtoType.TIMESTAMP, ProtoAdapter.INSTANT);
-    adapterMap.put(ProtoType.EMPTY, ProtoAdapter.EMPTY);
-    adapterMap.put(ProtoType.FIELD_MASK, ProtoAdapter.FIELD_MASK);
-    adapterMap.put(ProtoType.STRUCT_MAP, ProtoAdapter.STRUCT_MAP);
-    adapterMap.put(ProtoType.STRUCT_VALUE, ProtoAdapter.STRUCT_VALUE);
-    adapterMap.put(ProtoType.STRUCT_NULL, ProtoAdapter.STRUCT_NULL);
-    adapterMap.put(ProtoType.STRUCT_LIST, ProtoAdapter.STRUCT_LIST);
-    adapterMap.put(ProtoType.DOUBLE_VALUE, ProtoAdapter.DOUBLE_VALUE);
-    adapterMap.put(ProtoType.FLOAT_VALUE, ProtoAdapter.FLOAT_VALUE);
-    adapterMap.put(ProtoType.INT64_VALUE, ProtoAdapter.INT64_VALUE);
-    adapterMap.put(ProtoType.UINT64_VALUE, ProtoAdapter.UINT64_VALUE);
-    adapterMap.put(ProtoType.INT32_VALUE, ProtoAdapter.INT32_VALUE);
-    adapterMap.put(ProtoType.UINT32_VALUE, ProtoAdapter.UINT32_VALUE);
-    adapterMap.put(ProtoType.BOOL_VALUE, ProtoAdapter.BOOL_VALUE);
-    adapterMap.put(ProtoType.STRING_VALUE, ProtoAdapter.STRING_VALUE);
-    adapterMap.put(ProtoType.BYTES_VALUE, ProtoAdapter.BYTES_VALUE);
+  static {
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.BOOL, ProtoAdapter.BOOL);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.BYTES, ProtoAdapter.BYTES);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.DOUBLE, ProtoAdapter.DOUBLE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FLOAT, ProtoAdapter.FLOAT);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FIXED32, ProtoAdapter.FIXED32);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FIXED64, ProtoAdapter.FIXED64);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.INT32, ProtoAdapter.INT32);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.INT64, ProtoAdapter.INT64);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.SFIXED32, ProtoAdapter.SFIXED32);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.SFIXED64, ProtoAdapter.SFIXED64);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.SINT32, ProtoAdapter.SINT32);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.SINT64, ProtoAdapter.SINT64);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRING, ProtoAdapter.STRING);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.UINT32, ProtoAdapter.UINT32);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.UINT64, ProtoAdapter.UINT64);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.ANY, AnyMessage.ADAPTER);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.DURATION, ProtoAdapter.DURATION);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.TIMESTAMP, ProtoAdapter.INSTANT);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.EMPTY, ProtoAdapter.EMPTY);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FIELD_MASK, ProtoAdapter.FIELD_MASK);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRUCT_MAP, ProtoAdapter.STRUCT_MAP);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRUCT_VALUE, ProtoAdapter.STRUCT_VALUE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRUCT_NULL, ProtoAdapter.STRUCT_NULL);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRUCT_LIST, ProtoAdapter.STRUCT_LIST);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.DOUBLE_VALUE, ProtoAdapter.DOUBLE_VALUE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FLOAT_VALUE, ProtoAdapter.FLOAT_VALUE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.INT64_VALUE, ProtoAdapter.INT64_VALUE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.UINT64_VALUE, ProtoAdapter.UINT64_VALUE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.INT32_VALUE, ProtoAdapter.INT32_VALUE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.UINT32_VALUE, ProtoAdapter.UINT32_VALUE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.BOOL_VALUE, ProtoAdapter.BOOL_VALUE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRING_VALUE, ProtoAdapter.STRING_VALUE);
+    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.BYTES_VALUE, ProtoAdapter.BYTES_VALUE);
   }
+
+  private final Map<ProtoType, ProtoAdapter<?>> adapterMap;
 
   SchemaProtoAdapterFactory(Schema schema, boolean includeUnknown) {
     this.schema = schema;
     this.includeUnknown = includeUnknown;
+    this.adapterMap = new HashMap<>(SCALAR_AND_WELL_KNOWN_ADAPTERS);
   }
 
   @SuppressWarnings("unchecked")

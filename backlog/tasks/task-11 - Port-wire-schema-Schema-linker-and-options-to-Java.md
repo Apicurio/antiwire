@@ -4,7 +4,7 @@ title: 'Port wire-schema Schema, linker, and options to Java'
 status: In Progress
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-02 02:30'
+updated_date: '2026-10-01 22:15'
 labels: []
 milestone: m-8
 dependencies:
@@ -34,6 +34,15 @@ Port Schema, ProtoFile, MessageType, Type, Field, Service, Pruner, Root, loader/
 <!-- DOD:BEGIN -->
 - [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+created: 2026-10-01 22:15
+---
+#2 - 2026-10-02 00:30 (UTC) Core translation landed in e4b1c11: all linking-layer files ported (Field full, OneOf, Extend, Type hierarchy, Service, Rpc, EnumConstant, Reserved, Extensions, ProtoFile, Options, LinkedOptionEntry, Multimap, ErrorCollector, SyntaxRules, LiteralValidation, Linker, FileLinker, CycleChecker, internal DagChecker, MarkSet, SemVer, PruningRules, EmittingRules, Pruner, Schema, SchemaProtoAdapterFactory). Nine runtime .proto resources vendored under src/main/resources mirroring upstream jvmMain layout; SchemaUtil.toEnglishLowerCase aligned to upstream lowercase(Locale.US). Tests: LinkingSmokeTest (17 cases) + MapLoader; module now 66 tests green; all 5 ACTIVE verify suites pass. Learned: wire.redacted does not exist in upstream 7.1.0 extensions.proto (redaction is the .*\.redacted qualified-name heuristic); proto3 message fields without 'optional' encode OMIT_IDENTITY; 'needs to import' fires when both files are sources. Gates: /simplify (4 agents) and code-review running before Done.
+---
+<!-- COMMENTS:END -->
 
 ## Comments
 

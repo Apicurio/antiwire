@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public final class ProtoFile {
@@ -221,6 +220,7 @@ public final class ProtoFile {
     }
 
     for (Extend extend : extendList) {
+      if (extend.type() != null) result.add(extend.type());
       for (Field field : extend.fields()) {
         if (field.type() != null) result.add(field.type());
       }
@@ -264,12 +264,7 @@ public final class ProtoFile {
     }
 
     // distinct() preserving first-seen order.
-    List<ProtoType> distinct = new ArrayList<>();
-    Set<ProtoType> seen = new LinkedHashSet<>();
-    for (ProtoType protoType : result) {
-      if (seen.add(protoType)) distinct.add(protoType);
-    }
-    return distinct;
+    return new ArrayList<>(new LinkedHashSet<>(result));
   }
 
   /** Returns a new proto file that omits unnecessary imports. */
