@@ -34,3 +34,8 @@ Port the Java-target CLI and Java generator in the optional module created by TA
 <!-- DOD:BEGIN -->
 - [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+## Comments
+
+#1 - 2026-10-02 01:10 (UTC)
+From TASK-11 close-out: the profile layer was deliberately not ported with the schema linking core. Waiting for this task: upstream wire-schema Profile.kt, ProfileLoader.kt, and internal/{ProfileFileElement, ProfileParser, TypeConfigElement}.kt, plus their tests. CoreLoader's classpath loading and the runtime-proto resource layout landed in TASK-11 (wire-schema-java/src/main/resources); the general file-system loading (SchemaLoader/CoreLoader fs wiring/Root) is TASK-12's.
