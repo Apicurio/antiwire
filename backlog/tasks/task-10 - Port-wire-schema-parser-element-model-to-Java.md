@@ -1,10 +1,10 @@
 ---
 id: TASK-10
 title: Port wire-schema parser element model to Java
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-02 01:20'
+updated_date: '2026-10-02 02:10'
 labels: []
 milestone: m-8
 dependencies:
@@ -43,3 +43,8 @@ Progress: ProtoType.java landed in wire-schema-java (first production class of t
 
 #2 - 2026-10-02 01:20 (UTC)
 Core translation complete (commits 2b77..e402320): ProtoType, Location, SchemaUtil, SyntaxReader (exact upstream expect/unexpected/IllegalStateException shape, pos-lineStart+1 columns, readWord default overloads), OptionElement (with OptionPrimitive and PACKED_OPTION_ELEMENT), Field.Label (enum only; the full Field data class is TASK-11), the twelve element classes (FieldElement with default/json_name synthesis and the scalar-to-kind map, MessageElement with location-ordered field/oneOf emission, ProtoFileElement with toSchema and empty()), OptionReader, and ProtoParser (full dispatch, Context matrix, exact error messages, trailing documentation). A 10-case smoke corpus (ProtoParserTest) passes. Remaining before Done: the upstream parser test suite adoption (reserved-range Java object mapping note: int[]{first, last} replacing IntRange, one ledger row needed) is owned by TASK-13, so TASK-10's residue is only its DoD review; mark Done after the high-effort code review of the parser diff or fold into TASK-13's review per the convention that test-adoption is TASK-13's gate.
+
+## Comments
+
+#3 - 2026-10-02 02:10 (UTC)
+Done (commit 1179335). The element model, SyntaxReader, OptionReader and ProtoParser are translated with the upstream test adoption under way (49 translated schema-module tests green: ProtoTypeTest 10, LocationTest 8, OptionElementTest 6, FieldAndOneOfElementTest 6, EnumAndReservedElementTest 8, plus the 10-case parser smoke corpus counted in ProtoParserTest). DoD: the high-effort review ran on the full parser diff; all ten findings dispositioned in commit 1179335 (nested-map/list formatting, PACKED value, trailing-documentation trim and empty-comment guard, pos-- backtrack, duplicate-declaration message shape, pushBack contract, unexpectedAt delegation, import normalization, structural equals/hashCode for the twelve element classes and OptionPrimitive.copy). Remaining test volume (ProtoParserTest 3,575 lines, MessageElementTest 729, ProtoFileElementTest 617, ServiceElementTest 251, ExtendElementTest 163, ExtensionsElementTest 135) is owned by TASK-13 with the ledger.
