@@ -102,9 +102,10 @@ output="$("$JDK11/bin/java" -cp "$cp_entries" placeholder.PlaceholderConsumerMai
 }
 echo "$output"
 
-if echo "$output" | grep -q '^placeholder-consumer-ok$'; then
+if echo "$output" | grep -q '^placeholder-consumer-ok$' \
+    && echo "$output" | grep -q '^spike-consumer-ok hex=960104030201$'; then
   echo "RESULT java11-consumer.status=PASS"
-  echo "RESULT java11-consumer.note=placeholder consumer compiled and ran on $JDK11_VERSION against the module jars; placeholder certifies nothing"
+  echo "RESULT java11-consumer.note=consumer compiled and ran on $JDK11_VERSION against the module jars and exercised the real spike surface (ProtoWriter on the vendored okio Buffer, deterministic bytes verified)"
   exit "$EXIT_OK"
 fi
 echo "RESULT java11-consumer.status=FAIL"

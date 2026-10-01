@@ -6,3 +6,12 @@
 com.squareup.wire.package-info
 com.squareup.wire.schema.package-info
 com.squareup.wire.java.package-info
+# Real port classes (TASK-5 AC#4): the check proves each resolves from the port artifact
+# alone on every module test classpath, with the relocated upstream oracle isolated.
+com.squareup.wire.ProtoReader
+com.squareup.wire.ProtoWriter
+com.squareup.wire.FieldEncoding
+com.squareup.wire.Syntax
+com.squareup.wire.internal.ProtocolException
+okio.ByteString
+okio.Buffer

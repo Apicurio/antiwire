@@ -61,11 +61,17 @@ TASK-4 AC#5 requires.
   full AC#4 decisions text, AC#5 recording (this document supplies the effort data), AC#6
   grouping finalization.
 - TASK-5: In Progress. Done: AC#1 (byte parity including groups, packed, malformed
-  lengths, via the isolated-oracle fixture) and the oracle isolation part of AC#4.
-  Remaining: AC#2 (upstream test compilation against the slice), AC#3 (pinned upstream
-  fixture generation), AC#5 (6.4.0 vs 7.1.0 baseline corpus and go/no-go record), AC#6
-  (executable null/exception boundary examples in the shared entry point), AC#7 (Java 11
-  consumer of the spike).
+  lengths, via the isolated-oracle fixture); the runtime half of AC#2 (upstream
+  ProtoWriterTest.kt compiles and runs against the Java slice with two individually
+  ledgered adaptations, in wire-runtime-java/src/test/kotlin with its adaptation ledger);
+  AC#4 (config/class-origins.txt now lists the real port classes, and the entry point
+  proves their single origin; the consumer exercises the spike); AC#6 (executable
+  null/exception boundary examples, BoundaryExamplesTest, run by the build suite);
+  AC#7 (the shared entry point's Java 11 consumer now exercises the real spike surface,
+  ProtoWriter over the vendored Buffer with deterministic bytes, on Temurin 11).
+  Remaining: the parser-model half of AC#2 (waits for the TASK-10 port), AC#3 (pinned
+  upstream fixture generation), AC#5 (6.4.0 vs 7.1.0 baseline corpus and go/no-go
+  record).
 
 ## Measured effort (TASK-4 AC#5)
 

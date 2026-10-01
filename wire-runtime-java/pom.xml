@@ -57,5 +57,15 @@
       <version>5.10.2</version>
       <scope>test</scope>
     </dependency>
+    <!-- Upstream runtime tests stay Kotlin (DEC-5) with assertk; the kotlin.test.Test
+         annotation maps to the Jupiter one already on the classpath (recorded per site in
+         src/test/kotlin/com/squareup/wire/UPSTREAM-TEST-ADAPTATIONS.md). assertk resolves
+         through its JVM artifact on Maven (the bare artifact is the KMP marker). -->
+    <dependency>
+      <groupId>com.willowtreeapps.assertk</groupId>
+      <artifactId>assertk-jvm</artifactId>
+      <version>0.28.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

@@ -23,6 +23,17 @@ public final class PlaceholderConsumerMain {
       System.out.println("loaded " + name + " from "
           + shellPackage.getProtectionDomain().getCodeSource().getLocation());
     }
+
+    // TASK-5 AC#7: the consumer exercises the real spike surface on this Java 11 JVM. The
+    // expected bytes are the classic varint 150 encoding (96 01) followed by little-endian
+    // fixed32 0x01020304 (04 03 02 01); the check script matches the exact output.
+    okio.Buffer buffer = new okio.Buffer();
+    com.squareup.wire.ProtoWriter writer = new com.squareup.wire.ProtoWriter(buffer);
+    writer.writeVarint32(150);
+    writer.writeFixed32(0x01020304);
+    String hex = buffer.readByteString().hex();
+    System.out.println("spike-consumer-ok hex=" + hex);
+
     System.out.println("placeholder-consumer-ok");
   }
 
