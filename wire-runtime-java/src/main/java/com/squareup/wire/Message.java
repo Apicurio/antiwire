@@ -29,7 +29,12 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
   private static final long serialVersionUID = 0L;
 
   /** The {@link ProtoAdapter} for encoding and decoding messages of this type. */
-  private final transient ProtoAdapter<M> adapter;
+  final transient ProtoAdapter<M> adapter;
+
+  /** The {@link ProtoAdapter} for encoding and decoding messages of this type. */
+  public ProtoAdapter<M> adapter() {
+    return adapter;
+  }
 
   private transient ByteString unknownFieldsMemoized;
 

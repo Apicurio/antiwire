@@ -307,15 +307,6 @@ public class ByteString implements Serializable, Comparable<ByteString> {
    * Returns a byte string that is a substring of this byte string, beginning at the specified
    * index until the end of this string. Returns this byte string if {@code beginIndex} is 0.
    */
-  /**
-   * Copies {@code byteCount} bytes of this value into {@code target} starting at
-   * {@code targetOffset}, reading this value from {@code sourceOffset}. Adaptation of the
-   * vendored okio 1.17.6 file: the okio 3 member set wire's ReverseProtoWriter calls.
-   */
-  public void copyInto(int sourceOffset, byte[] target, int targetOffset, int byteCount) {
-    System.arraycopy(data, sourceOffset, target, targetOffset, byteCount);
-  }
-
   public ByteString substring(int beginIndex) {
     return substring(beginIndex, data.length);
   }
@@ -325,6 +316,15 @@ public class ByteString implements Serializable, Comparable<ByteString> {
    * {@code beginIndex} and ends at the specified {@code endIndex}. Returns this byte string if
    * {@code beginIndex} is 0 and {@code endIndex} is the length of this byte string.
    */
+  /**
+   * Copies {@code byteCount} bytes of this value into {@code target} starting at
+   * {@code targetOffset}, reading this value from {@code sourceOffset}. Adaptation of the
+   * vendored okio 1.17.6 file: the okio 3 member set wire's ReverseProtoWriter calls.
+   */
+  public void copyInto(int sourceOffset, byte[] target, int targetOffset, int byteCount) {
+    System.arraycopy(data, sourceOffset, target, targetOffset, byteCount);
+  }
+
   public ByteString substring(int beginIndex, int endIndex) {
     if (beginIndex < 0) throw new IllegalArgumentException("beginIndex < 0");
     if (endIndex > data.length) {

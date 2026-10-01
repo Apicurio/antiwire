@@ -15,6 +15,7 @@
  */
 package com.squareup.wire;
 
+import com.squareup.wire.internal.Internal;
 import java.io.IOException;
 
 /**
@@ -30,19 +31,12 @@ public abstract class EnumAdapter<E extends WireEnum> extends ProtoAdapter<E> {
 
   /** Obsolete; for Java classes generated before identity was added. */
   protected EnumAdapter(Class<E> type, Syntax syntax) {
-    this(type, syntax, identityOrNull(type));
+    this(type, syntax, Internal.identityOrNull(type));
   }
 
   /** Obsolete; for Java classes generated before syntax was added. */
   protected EnumAdapter(Class<E> type) {
-    this(type, Syntax.PROTO_2, identityOrNull(type));
-  }
-
-  private static <E extends WireEnum> E identityOrNull(Class<E> type) {
-    for (E constant : type.getEnumConstants()) {
-      if (constant.getValue() == 0) return constant;
-    }
-    return null;
+    this(type, Syntax.PROTO_2, Internal.identityOrNull(type));
   }
 
   @Override public int encodedSize(E value) {

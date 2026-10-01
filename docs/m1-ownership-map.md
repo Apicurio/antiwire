@@ -47,6 +47,15 @@ MathMethods, MutableOnWriteList, Util, and any Internal helpers TASK-6 did not n
 - Kotlin `KClass<E>` constructor parameters (EnumAdapter, ProtoAdapter.create) become
   `Class<E>`; Kotlin callers pass `E::class.java` (mechanical adaptation, to be ledgered per
   site when the upstream tests are adopted).
+- AnyMessage.pack(adapter, value) with no type URL: upstream renders the Kotlin KClass and its
+  message mentions Kotlin reflection ("cannot pack class X (Kotlin reflection is not
+  available): ..."); the Java port renders the plain class name and omits the clause, because
+  KClass rendering is a Kotlin-runtime facility. Recorded as an accepted, documented
+  exception-text divergence (TASK-9 will keep any upstream assertion on the Kotlin form
+  adapted per site).
+- StructListAdapter passes Map.class as its type, matching upstream's commonStructList which
+  uses Map::class for a List adapter; a deliberate upstream quirk preserved so adapter.type
+  is reflection-identical.
 - Kotlin property accessors with @JvmName (Label.isRepeated etc.) become plain methods.
 - internal visibility becomes public per the translation conventions.
 - expect/actual pairs fold into a single Java class carrying the JVM actual's behavior.
@@ -54,7 +63,7 @@ MathMethods, MutableOnWriteList, Util, and any Internal helpers TASK-6 did not n
 ## Excluded here (already owned elsewhere)
 
 ProtoReader/ProtoWriter/FieldEncoding/Syntax/ProtocolException and the okio layer: M0/TASK-4.
-ProtoReader32/ByteArrayProtoReader32/ProtoReader32AsProtoReader: performance paths; they
-belong to TASK-6's scope but land after the core compiles (their decode overloads are part of
-the adapter contract; interim: adapters decode via ProtoReader only, matching the reader the
-M0 parity harness proves; the 32-bit family is translated before TASK-6 closes).
+ProtoReader32/ByteArrayProtoReader32/ProtoReader32AsProtoReader: translated in TASK-6 batch 5,
+with the adapter-side decode(ProtoReader32) as base-class defaults routing through the reader
+wrapper (byte-identical to upstream's JVM default); the per-adapter direct overloads are
+TASK-20 performance work.

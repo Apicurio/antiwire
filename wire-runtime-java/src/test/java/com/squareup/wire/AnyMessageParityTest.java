@@ -79,6 +79,71 @@ public class AnyMessageParityTest {
     assertTrue(e.getMessage().contains("no type URL"));
   }
 
+  /** A minimal concrete message proves pack(Message) through the adapter accessor. */
+  private static final class PackedMessage
+      extends Message<PackedMessage, PackedMessage.Builder> {
+    static final ProtoAdapter<PackedMessage> ADAPTER =
+        new ProtoAdapter<PackedMessage>(FieldEncoding.LENGTH_DELIMITED, PackedMessage.class,
+            "type.googleapis.com/antiwire.PackedMessage", Syntax.PROTO_3, null, null) {
+          @Override public int encodedSize(PackedMessage value) {
+            return STRING.encodedSizeWithTag(1, value.text);
+          }
+
+          @Override public void encode(ProtoWriter writer, PackedMessage value)
+              throws IOException {
+            STRING.encodeWithTag(writer, 1, value.text);
+          }
+
+          @Override public PackedMessage decode(ProtoReader reader) throws IOException {
+            throw new UnsupportedOperationException();
+          }
+
+          @Override public PackedMessage redact(PackedMessage value) {
+            throw new UnsupportedOperationException();
+          }
+        };
+
+    final String text;
+
+    PackedMessage(String text) {
+      super(ADAPTER, ByteString.EMPTY);
+      this.text = text;
+    }
+
+    @Override public int hashCode() {
+      return text.hashCode();
+    }
+
+    @Override public boolean equals(Object other) {
+      return other instanceof PackedMessage && ((PackedMessage) other).text.equals(text);
+    }
+
+    static final class Builder extends Message.Builder<PackedMessage, Builder> {
+      @Override public PackedMessage build() {
+        throw new UnsupportedOperationException();
+      }
+    }
+
+    @Override public Builder newBuilder() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  @Test public void packMessageThroughAdapterAccessor() throws IOException {
+    AnyMessage any = AnyMessage.pack(new PackedMessage("hello"));
+    assertEquals("type.googleapis.com/antiwire.PackedMessage", any.typeUrl);
+    // The packed value is the message encoding: tag 1, length 5, "hello".
+    assertEquals("0a0568656c6c6f", any.value.hex());
+  }
+
+  @Test public void oneOfStringValueSanitizes() {
+    // OneOf.toString sanitizes STRING and STRING_VALUE adapters (upstream branch).
+    OneOf.Key<String> key = new OneOf.Key<String>(1, ProtoAdapter.STRING_VALUE, "sv") {
+    };
+    OneOf<OneOf.Key<String>, String> oneOf = new OneOf<>(key, "a,b[c]{d}\\e");
+    assertEquals("sv=a\\,b\\[c\\]\\{d\\}\\\\e", oneOf.toString());
+  }
+
   @Test public void messageSerializationRoundTrip() throws Exception {
     FieldMask mask = new FieldMask(Arrays.asList("ser"));
     AnyMessage any = AnyMessage.pack(ProtoAdapter.FIELD_MASK, mask);

@@ -32,10 +32,13 @@ import okio.Okio;
 /**
  * Converts values of type {@code E} to and from their protobuf-encoded representation.
  *
- * <p>Scope notes for this port (docs/m1-ownership-map.md): the overloads taking the 32-bit
- * reader family are not translated yet and land with that family; byte arrays decode through
- * {@link ProtoReader} in the interim. The companion members that need reflection
- * (newMessageAdapter, newEnumAdapter, get) land with TASK-7.
+ * <p>Scope notes for this port (docs/m1-ownership-map.md): the base-class defaults
+ * {@code decode(ProtoReader32)} and {@code tryDecode(ProtoReader32)} route through the reader
+ * wrapper, byte-identical to upstream's JVM default; the per-adapter direct overloads are
+ * performance work owned by TASK-20. {@code decode(byte[])} stays on the long reader (proven
+ * transcript-identical by ProtoReader32ParityTest; recorded in the ownership map). The
+ * companion members that need reflection (newMessageAdapter, newEnumAdapter, get) land with
+ * TASK-7.
  */
 public abstract class ProtoAdapter<E> {
   final FieldEncoding fieldEncoding;
@@ -1456,7 +1459,9 @@ public abstract class ProtoAdapter<E> {
 
   private static final class StructListAdapter extends ProtoAdapter<List<?>> {
     StructListAdapter() {
-      super(FieldEncoding.LENGTH_DELIMITED, List.class,
+      // Upstream passes Map::class here (not List::class); the quirk is preserved so
+      // adapter.type matches upstream, and this comment records the non-obvious choice.
+      super(FieldEncoding.LENGTH_DELIMITED, Map.class,
           "type.googleapis.com/google.protobuf.ListValue", Syntax.PROTO_3, null, null);
     }
 

@@ -41,7 +41,7 @@ public final class OneOf<K extends OneOf.Key<T>, T> {
   @Override public String toString() {
     // TODO(Benoit) What if the field is redacted?
     String valueAsString;
-    if (key.adapter == ProtoAdapter.STRING) {
+    if (key.adapter == ProtoAdapter.STRING || key.adapter == ProtoAdapter.STRING_VALUE) {
       valueAsString = Internal.sanitize(String.valueOf(value));
     } else {
       valueAsString = String.valueOf(value);

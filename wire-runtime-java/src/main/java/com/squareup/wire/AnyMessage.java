@@ -53,15 +53,14 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
     return typeUrl.equals(adapter.typeUrl) ? adapter.decode(value) : null;
   }
 
-  /**
-   * Packs a generated {@link Message} using its built-in adapter. Requires the ADAPTER field
-   * lookup owned by TASK-7's reflection registry; the explicit-adapter overload serves callers
-   * meanwhile.
-   */
+  /** Packs a generated {@link Message} using its built-in adapter. */
   public static AnyMessage pack(Message<?, ?> message) throws IOException {
-    throw new UnsupportedOperationException(
-        "pack(Message) requires the reflection registry owned by TASK-7; use "
-            + "pack(ProtoAdapter, T) meanwhile");
+    ProtoAdapter<Object> adapter = (ProtoAdapter<Object>) message.adapter();
+    if (adapter.typeUrl == null) {
+      throw new IllegalStateException(
+          "recompile " + adapter.type.getName() + " to use it with AnyMessage");
+    }
+    return new AnyMessage(adapter.typeUrl, adapter.encodeByteString((Object) message));
   }
 
   /**

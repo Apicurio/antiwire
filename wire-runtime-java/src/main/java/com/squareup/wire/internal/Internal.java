@@ -34,8 +34,9 @@ import java.util.Map;
  * Methods for generated code use only. Not subject to public API rules. Upstream declares these
  * as Kotlin file functions on class {@code Internal}; they become static methods here.
  *
- * <p>Batch scope note (TASK-6): the {@code decodePrimitive_*} overloads taking the 32-bit reader
- * family land with that family; the Instant and Duration
+ * <p>Batch scope note (TASK-6): the {@code decodePrimitive_*} overloads taking the 32-bit
+ * reader stay unported (the reader defaults route through the adapter wrapper, byte-identical
+ * and owned by TASK-20 if the direct forms ever matter for performance); the Instant and Duration
  * {@code commonEquals}/{@code commonHashCode} helpers exist only for non-JVM platforms where
  * those types are real classes, so they are not ported to the JVM-only artifact.
  */
@@ -135,6 +136,14 @@ public final class Internal {
         "struct value " + name + " must be a JSON type "
             + "(null, Boolean, Double, String, List, or Map) but was " + value.getClass() + ": "
             + value);
+  }
+
+  /** Returns the enum constant of {@code type} with tag 0, or null. */
+  public static <E extends com.squareup.wire.WireEnum> E identityOrNull(Class<E> type) {
+    for (E constant : type.getEnumConstants()) {
+      if (constant.getValue() == 0) return constant;
+    }
+    return null;
   }
 
   public static boolean equals(Object a, Object b) {
