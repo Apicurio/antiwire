@@ -146,20 +146,23 @@ public final class Internal {
     return null;
   }
 
-  /** Upstream's camelCase helper from the Internal facade (one-line form). */
-  public static String camelCase(String value, boolean upperCamel) {
-    StringBuilder result = new StringBuilder();
-    boolean capitalize = upperCamel;
-    for (int i = 0; i < value.length(); i++) {
-      char c = value.charAt(i);
-      if (c == '_') {
-        capitalize = true;
-      } else if (capitalize) {
-        result.append(Character.toUpperCase(c));
-        capitalize = false;
-      } else {
-        result.append(c);
+  /** Upstream's JVM actual: code-point accurate, ASCII-only lowercasing to uppercase. */
+  public static String camelCase(String string, boolean upperCamel) {
+    StringBuilder result = new StringBuilder(string.length());
+    int index = 0;
+    boolean uppercase = upperCamel;
+    while (index < string.length()) {
+      int codePoint = string.codePointAt(index);
+      index += Character.charCount(codePoint);
+      if (codePoint == '_') {
+        uppercase = true;
+        continue;
       }
+      if (uppercase) {
+        if (codePoint >= 'a' && codePoint <= 'z') codePoint += 'A' - 'a';
+      }
+      result.appendCodePoint(codePoint);
+      uppercase = false;
     }
     return result.toString();
   }

@@ -63,6 +63,11 @@ MathMethods, MutableOnWriteList, Util, and any Internal helpers TASK-6 did not n
   uses Map::class for a List adapter; a deliberate upstream quirk preserved so adapter.type
   is reflection-identical.
 - Kotlin property accessors with @JvmName (Label.isRepeated etc.) become plain methods.
+- The primitive ArrayList family's `toArray()` collides with java.util.List.toArray() in Java
+  (Kotlin could shadow it); the primitive accessor is `toPrimitiveArray()` there, the one
+  generated code calls.
+- wire's internal Util.kt byte helpers (Byte.and/shl) are Kotlin compile-time sugar inlining to
+  int operations; they have no Java surface and are not ported.
 - internal visibility becomes public per the translation conventions.
 - expect/actual pairs fold into a single Java class carrying the JVM actual's behavior.
 
