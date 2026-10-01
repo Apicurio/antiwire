@@ -78,6 +78,32 @@ Animal Sniffer targets the retired Java 7 floor). A future re-copy from okio 1.1
 both strips; the enforcer rule in the parent pom enforces the zero-dependency invariant by
 banning compile- and runtime-scope dependencies (only in-reactor `io.apicurio` modules allowed).
 
+## D5a. Amendment (maintainer steer, 2026-10-01): functional port over signature freeze
+
+The port's requirement is functional compatibility, not 100% signature compatibility with
+upstream. Pure-Java types in the public API are preferred; keeping okio types in signatures is
+NOT a final requirement. Three layers follow from this:
+
+1. Engine (internal): the vendored okio buffer layer stays as the implementation engine inside
+   wire-runtime-java (zero external dependencies, 732 upstream okio tests green). It is an
+   implementation detail, allowed to shrink or be replaced (for example ProtoWriter on byte[])
+   once the suites are green and a measured benefit exists.
+2. Porting-phase API: where keeping upstream-shaped signatures (including okio types) lets the
+   upstream test suites run verbatim during M1/M2, we keep them. This is a milestone
+   accelerator, not a requirement.
+3. Public/consumer API (first-class deliverable): the surface Apicurio and Kafka consume must be
+   JDK-typed: java.nio.file.Path (not okio.Path) in SchemaLoader and file loading, no okio.*
+   types in consumer-facing signatures, byte[] or a wire-owned immutable bytes type at the
+   runtime boundary where ByteString adds no value. Evidence this matters: Apicurio's
+   ProtobufSchemaLoader today juggles okio.FileSystem, okio.Path, FileHandle, and
+   FakeFileSystem (setWorkingDirectory, setAllowSymlinks) just to load descriptors from the
+   classpath; a JDK-typed API removes that entire dance (tracked as TASK-25).
+
+Interpretation of the same-test-suite requirement under this steer: same tests, with only
+mechanical type-substitution edits where signatures changed (byte[] for ByteString,
+java.nio.file.Path for okio.Path, and similar). Every non-mechanical test deviation is
+documented individually. Where verbatim costs nothing, verbatim stays the default.
+
 ## D6. kotlinpoet/javapoet out of the core artifacts
 
 `wire-schema-java` ships without poet dependencies; `AdapterConstant`/`Profile` poet references
