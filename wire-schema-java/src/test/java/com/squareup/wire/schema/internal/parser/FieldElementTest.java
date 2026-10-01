@@ -19,7 +19,6 @@ import static com.squareup.wire.schema.internal.parser.OptionElement.Kind.BOOLEA
 import static com.squareup.wire.schema.internal.parser.OptionElement.Kind.ENUM;
 import static com.squareup.wire.schema.internal.parser.OptionElement.Kind.STRING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.squareup.wire.schema.Field.Label;
 import com.squareup.wire.schema.Location;
@@ -27,8 +26,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
-/** Upstream FieldElementTest and OneOfElementTest translated (assertk to JUnit 5). */
-public class FieldAndOneOfElementTest {
+/** Upstream FieldElementTest translated (assertk to JUnit 5). */
+public class FieldElementTest {
   private final Location location = Location.get("file.proto");
 
   @Test public void field() {
@@ -37,8 +36,11 @@ public class FieldAndOneOfElementTest {
             OptionElement.create("default", ENUM, "TEST"),
             OptionElement.create("deprecated", BOOLEAN, "true")));
 
-    assertEquals(2, field.options.size());
-    assertEquals("default", field.options.get(0).name);
+    // TASK-13 adaptation: assertk containsOnly (order-insensitive) maps to list equality;
+    // the order is fixed by construction so both assertions accept the same values.
+    assertEquals(Arrays.asList(
+        OptionElement.create("default", ENUM, "TEST"),
+        OptionElement.create("deprecated", BOOLEAN, "true")), field.options);
   }
 
   @Test public void addMultipleOptions() {
@@ -59,44 +61,28 @@ public class FieldAndOneOfElementTest {
 
   @Test public void jsonNameAndDefaultValue() {
     FieldElement field = new FieldElement(location, Label.REQUIRED, "string", "name",
-        "defaultValue", "json_value", 1, "", Collections.emptyList());
+        "defaultValue", "my_json", 1, "", Collections.emptyList());
 
     assertEquals("required string name = 1 [\n"
         + "  default = \"defaultValue\",\n"
-        + "  json_name = \"json_value\"\n"
+        + "  json_name = \"my_json\"\n"
         + "];\n", field.toSchema());
   }
 
+  @Test public void jsonName() {
+    FieldElement field = new FieldElement(location, Label.REQUIRED, "string", "name", null,
+        "my_json", 1, "", Collections.emptyList());
+
+    assertEquals("required string name = 1 [json_name = \"my_json\"];\n", field.toSchema());
+  }
+
+  // TASK-13 adaptation: retained from the earlier partial FieldAndOneOfElementTest; not present
+  // in upstream FieldElementTest at 7.1.0, kept so the partial's coverage is not lost.
   @Test public void deprecated() {
     OptionElement kitKat = OptionElement.create("kit", STRING, "kat");
     FieldElement field = new FieldElement(location, Label.OPTIONAL, "string", "kit", null, null,
         1, "", Collections.singletonList(kitKat));
 
     assertEquals("optional string kit = 1 [kit = \"kat\"];\n", field.toSchema());
-  }
-
-  @Test public void oneOfWithOptions() {
-    String elementAsString = "message Message {\n"
-        + "  // You have to take one.\n"
-        + "  oneof choice {\n"
-        + "    option (my_oneof_option) = \"Well done\";\n"
-        + "    option (my_other_oneof_option) = \"Yet again\";\n"
-        + "  \n"
-        + "    string one = 1;\n"
-        + "    string two = 2;\n"
-        + "  }\n"
-        + "}\n";
-
-    Object parsed = ProtoParser.parse(location, elementAsString).types.get(0);
-    MessageElement element = (MessageElement) parsed;
-    assertEquals("Message", element.name);
-    assertEquals(1, element.oneOfs.size());
-    OneOfElement choice = element.oneOfs.get(0);
-    assertEquals("choice", choice.name);
-    assertEquals("You have to take one.", choice.documentation);
-    assertEquals(2, choice.fields.size());
-    assertEquals(2, choice.options.size());
-    assertEquals("my_oneof_option", choice.options.get(0).name);
-    assertNull(choice.options.get(0).value.equals("Well done") ? null : "x");
   }
 }

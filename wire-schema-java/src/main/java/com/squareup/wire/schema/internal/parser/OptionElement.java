@@ -187,4 +187,27 @@ public final class OptionElement {
     }
     return String.valueOf(value);
   }
+
+  @Override public String toString() {
+    return "OptionElement(name=" + name + ", kind=" + kind + ", value=" + value
+        + ", isParenthesized=" + isParenthesized + ")";
+  }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof OptionElement)) return false;
+    OptionElement that = (OptionElement) other;
+    return this.name.equals(that.name)
+        && this.kind == that.kind
+        && java.util.Objects.equals(this.value, that.value)
+        && this.isParenthesized == that.isParenthesized;
+  }
+
+  @Override public int hashCode() {
+    int result = java.util.Objects.hashCode(name);
+    result = 31 * result + kind.hashCode();
+    result = 31 * result + java.util.Objects.hashCode(value);
+    result = 31 * result + (isParenthesized ? 1 : 0);
+    return result;
+  }
 }

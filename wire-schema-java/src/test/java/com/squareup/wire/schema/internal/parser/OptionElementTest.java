@@ -15,19 +15,19 @@
  */
 package com.squareup.wire.schema.internal.parser;
 
+import static com.squareup.wire.schema.internal.parser.OptionElement.Kind.BOOLEAN;
 import static com.squareup.wire.schema.internal.parser.OptionElement.Kind.LIST;
 import static com.squareup.wire.schema.internal.parser.OptionElement.Kind.MAP;
 import static com.squareup.wire.schema.internal.parser.OptionElement.Kind.OPTION;
 import static com.squareup.wire.schema.internal.parser.OptionElement.Kind.STRING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.squareup.wire.schema.internal.parser.OptionElement.Kind;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** Upstream commonTest translated (assertk to JUnit 5). */
+/** Upstream OptionElementTest translated (assertk to JUnit 5). */
 public class OptionElementTest {
   @Test public void simpleToSchema() {
     OptionElement option = OptionElement.create("foo", STRING, "bar");
@@ -64,10 +64,12 @@ public class OptionElementTest {
   }
 
   @Test public void booleanToSchema() {
-    OptionElement option = OptionElement.create("foo", Kind.BOOLEAN, true);
-    assertEquals("foo = true", option.toSchema());
+    OptionElement option = OptionElement.create("foo", BOOLEAN, "false");
+    assertEquals("foo = false", option.toSchema());
   }
 
+  // TASK-13 adaptation: retained from the earlier partial OptionElementTest; not present in
+  // upstream OptionElementTest at 7.1.0, kept so the partial's coverage is not lost.
   @Test public void escapedStringToSchema() {
     OptionElement option = OptionElement.create("foo", STRING, "b\"ar\\baz\n");
     assertEquals("foo = \"b\\\"ar\\\\baz\\n\"", option.toSchema());

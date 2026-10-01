@@ -15,74 +15,25 @@
  */
 package com.squareup.wire.schema.internal.parser;
 
-import static com.squareup.wire.schema.internal.parser.OptionElement.Kind.STRING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.squareup.wire.schema.Location;
+import com.squareup.wire.schema.internal.SchemaUtil;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** Upstream EnumElementTest (representative cases) and Reserved/Extensions formatting. */
+/**
+ * ReservedElement formatting cases; upstream has no standalone ReservedElementTest at 7.1.0, so
+ * these stay here. The former EnumElement and ExtensionsElement cases moved to the full
+ * EnumElementTest and ExtensionsElementTest translations (TASK-13).
+ */
 public class EnumAndReservedElementTest {
   private final Location location = Location.get("file.proto");
 
-  private static List<OptionElement> noOptions() {
-    return Collections.emptyList();
-  }
-
-  private EnumConstantElement constant(String name, int tag) {
-    return new EnumConstantElement(null, name, tag, "", Collections.emptyList());
-  }
-
-  @Test public void emptyToSchema() {
-    EnumElement element = new EnumElement(location, "Enum", "",
-        Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-    assertEquals("enum Enum {}\n", element.toSchema());
-  }
-
-  @Test public void simpleToSchema() {
-    EnumElement element = new EnumElement(location, "Enum", "",
-        noOptions(),
-        Arrays.asList(constant("ONE", 1), constant("TWO", 2), constant("SIX", 6)),
-        Collections.emptyList());
-    assertEquals("enum Enum {\n"
-        + "  ONE = 1;\n"
-        + "  TWO = 2;\n"
-        + "  SIX = 6;\n"
-        + "}\n", element.toSchema());
-  }
-
-  @Test public void simpleWithOptionsToSchema() {
-    EnumElement element = new EnumElement(location, "Enum", "",
-        Collections.singletonList(OptionElement.create("kit", STRING, "kat")),
-        Arrays.asList(constant("ONE", 1), constant("TWO", 2), constant("SIX", 6)),
-        Collections.emptyList());
-    assertEquals("enum Enum {\n"
-        + "  option kit = \"kat\";\n"
-        + "  ONE = 1;\n"
-        + "  TWO = 2;\n"
-        + "  SIX = 6;\n"
-        + "}\n", element.toSchema());
-  }
-
-  @Test public void simpleWithDocumentationToSchema() {
-    EnumElement element = new EnumElement(location, "Enum", "Hello",
-        noOptions(),
-        Arrays.asList(constant("ONE", 1), constant("TWO", 2), constant("SIX", 6)),
-        Collections.emptyList());
-    assertEquals("// Hello\n"
-        + "enum Enum {\n"
-        + "  ONE = 1;\n"
-        + "  TWO = 2;\n"
-        + "  SIX = 6;\n"
-        + "}\n", element.toSchema());
-  }
-
   @Test public void reservedWithMax() {
     ReservedElement element = new ReservedElement(location, "",
-        Arrays.asList(10, new int[] {12, (1 << 29) - 1}));
+        Arrays.asList(10, new int[] {12, SchemaUtil.MAX_TAG_VALUE}));
     assertEquals("reserved 10, 12 to max;\n", element.toSchema());
   }
 
@@ -96,11 +47,5 @@ public class EnumAndReservedElementTest {
     ReservedElement element = new ReservedElement(location, "",
         Arrays.<Object>asList("OLD", "NEW"));
     assertEquals("reserved \"OLD\", \"NEW\";\n", element.toSchema());
-  }
-
-  @Test public void extensionsWithRange() {
-    ExtensionsElement element = new ExtensionsElement(location, "",
-        Collections.singletonList(new int[] {100, (1 << 29) - 1}), Collections.emptyList());
-    assertEquals("extensions 100 to max;\n", element.toSchema());
   }
 }

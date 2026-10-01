@@ -67,11 +67,40 @@ public final class ReservedElement {
     return true
       && java.util.Objects.equals(this.location, that.location)
       && java.util.Objects.equals(this.documentation, that.documentation)
-      && java.util.Objects.equals(this.values, that.values);
+      && valuesEqual(this.values, that.values);
   }
 
   @Override public int hashCode() {
     int result = java.util.Objects.hashCode(location);
-    result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(values);    return result;
+    result = 31 * result + java.util.Objects.hashCode(documentation);
+    result = 31 * result + valuesHashCode(values);
+    return result;
+  }
+
+  /** Values mix Integers and int[] ranges; compare ranges structurally like IntRange. */
+  static boolean valuesEqual(java.util.List<Object> a, java.util.List<Object> b) {
+    if (a.size() != b.size()) return false;
+    java.util.Iterator<Object> bi = b.iterator();
+    for (Object value : a) {
+      Object other = bi.next();
+      if (value instanceof int[]) {
+        if (!(other instanceof int[]) || !java.util.Arrays.equals((int[]) value, (int[]) other)) {
+          return false;
+        }
+      } else if (!value.equals(other)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** Values mix Integers and int[] ranges; hash ranges structurally like IntRange. */
+  static int valuesHashCode(java.util.List<Object> values) {
+    int result = 1;
+    for (Object value : values) {
+      result = 31 * result
+          + (value instanceof int[] ? java.util.Arrays.hashCode((int[]) value) : value.hashCode());
+    }
+    return result;
   }
 }

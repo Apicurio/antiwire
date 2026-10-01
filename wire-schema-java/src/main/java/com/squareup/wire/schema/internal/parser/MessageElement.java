@@ -130,8 +130,8 @@ public final class MessageElement implements TypeElement {
       }
     }
     if (!extensions.isEmpty()) {
+      builder.append('\n');
       for (ExtensionsElement extension : extensions) {
-        builder.append('\n');
         SchemaUtil.appendIndented(builder, extension.toSchema());
       }
     }

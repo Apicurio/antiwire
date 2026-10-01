@@ -340,8 +340,11 @@ public final class SyntaxReader {
       }
     }
     if (!(pos < data.length && (data[pos] == '/' || data[pos] == '*'))) {
+      // Upstream's expect captures the error location through a default parameter evaluated
+      // before the lazy message runs its backtrack, so the reported column is one past the '/'.
+      Location at = location();
       pos--; // Backtrack to start of comment.
-      expect(false, "expected '//' or '/*'");
+      expect(false, at, "expected '//' or '/*'");
     }
     boolean isStar = data[pos] == '*';
     pos++;
@@ -370,19 +373,30 @@ public final class SyntaxReader {
         expect(c == ' ' || c == '\t' || c == '\r', "no syntax may follow trailing comment");
       }
     } else {
-      // Consume slash comment until it ends.
-      while (pos < data.length && data[pos] != '\n') {
-        pos++;
+      // Consume comment until newline. Upstream tracks end as the inclusive index of the
+      // last comment character: pos has stepped past the newline, hence the -2.
+      while (true) {
+        if (pos == data.length) {
+          end = pos - 1;
+          break;
+        }
+        char c = data[pos++];
+        if (c == '\n') {
+          newline();
+          end = pos - 2; // Account for stepping past the newline.
+          break;
+        }
       }
-      end = pos - 1; // The character before '\n'.
     }
-    if (end == start) return documentation; // Empty comment: keep the original.
-    String trailing = new String(data, start, end - start);
-    while (!trailing.isEmpty()
-        && (trailing.endsWith(" ") || trailing.endsWith("\t") || trailing.endsWith("\r"))) {
-      trailing = trailing.substring(0, trailing.length() - 1);
+    // Remove trailing whitespace. end stays the inclusive last-character index, so the
+    // substring below extends through end, unlike an exclusive Java substring bound.
+    while (end > start && (data[end] == ' ' || data[end] == '\t' || data[end] == '\r')) {
+      end--;
     }
-    return documentation.isEmpty() ? trailing : documentation + "\n" + trailing;
+    if (end == start) return documentation;
+    String trailingDocumentation = new String(data, start, end + 1 - start);
+    if (documentation.isEmpty()) return trailingDocumentation;
+    return documentation + "\n" + trailingDocumentation;
   }
 
   public Location location() {
