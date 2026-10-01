@@ -1,11 +1,11 @@
 ---
 id: TASK-3
 title: Write Kotlin-to-Java translation conventions doc
-status: In Progress
+status: Done
 assignee:
   - assistant
 created_date: '2026-09-29 09:22'
-updated_date: '2026-09-30 03:28'
+updated_date: '2026-10-02 00:10'
 labels: []
 milestone: m-6
 dependencies:
@@ -25,14 +25,19 @@ Write docs/translation-conventions.md as the behavioral contract for Java produc
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Conventions cover nullable and non-null parameters/results, null-check placement and exception types, including require versus checkNotNull, with small executable examples owned by TASK-5.
-- [ ] #2 Data-class and collection equality, hashCode, toString, collection mutability and unsigned integer parsing have documented Java equivalents and parity checks.
-- [ ] #3 Java 11 constraints are accurate; test-only Kotlin and permitted build-time generators are distinguished from forbidden Kotlin production dependencies.
-- [ ] #4 The test-adaptation record maps original cases to adapted cases and covers fixtures, setup, helpers, expected values and error paths; exclusions require declared non-ported functionality, never merely a failing test.
-- [ ] #5 The provenance policy preserves Google Nano BSD-style notices in the reader family and ProtoWriter, R8 notices in MathMethods, JetBrains Apache notices and mixed notices, plus the actual notices of any vendored dependency.
+- [x] #1 Conventions cover nullable and non-null parameters/results, null-check placement and exception types, including require versus checkNotNull, with small executable examples owned by TASK-5.
+- [x] #2 Data-class and collection equality, hashCode, toString, collection mutability and unsigned integer parsing have documented Java equivalents and parity checks.
+- [x] #3 Java 11 constraints are accurate; test-only Kotlin and permitted build-time generators are distinguished from forbidden Kotlin production dependencies.
+- [x] #4 The test-adaptation record maps original cases to adapted cases and covers fixtures, setup, helpers, expected values and error paths; exclusions require declared non-ported functionality, never merely a failing test.
+- [x] #5 The provenance policy preserves Google Nano BSD-style notices in the reader family and ProtoWriter, R8 notices in MathMethods, JetBrains Apache notices and mixed notices, plus the actual notices of any vendored dependency.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+## Comments
+
+#2 - 2026-10-02 00:10 (UTC)
+Done. docs/translation-conventions.md is the live parity contract; the M0 review round fixed its factual error (Java 11 constraints list) and the later review rounds kept it current (pack error KClass divergence ledgered in the ownership map; readString/readBytes top-level contract divergence recorded). Gates: the document was reviewed in the M0 /simplify and code-review rounds.
