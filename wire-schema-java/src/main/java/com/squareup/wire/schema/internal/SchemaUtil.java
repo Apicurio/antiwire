@@ -74,13 +74,8 @@ public final class SchemaUtil {
     }
   }
 
-  /** Upstream's toEnglishLowerCase: ASCII-only lowercasing. */
+  /** Upstream's UtilJVM actual: lowercase(Locale.US), which is Unicode-aware. */
   public static String toEnglishLowerCase(String value) {
-    StringBuilder result = new StringBuilder(value.length());
-    for (int i = 0; i < value.length(); i++) {
-      char c = value.charAt(i);
-      result.append(c >= 'A' && c <= 'Z' ? (char) (c + ('a' - 'A')) : c);
-    }
-    return result.toString();
+    return value.toLowerCase(java.util.Locale.US);
   }
 }
