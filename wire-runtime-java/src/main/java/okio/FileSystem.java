@@ -19,7 +19,9 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.DirectoryIteratorException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.FileSystemException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -35,13 +37,13 @@ import java.util.List;
  * A virtual or physical collection of files. The API follows the subset of okio 3's FileSystem
  * (Apache 2.0, Square) that wire's schema loader and its tests exercise; the implementation is
  * original, on top of {@link java.nio.file}. Members okio has that wire never calls
- * (FileHandle, symlink creation, copy, listRecursively) are omitted and listed with
- * justifications in docs/loading-api-inventory.md.
+ * (FileHandle, symlink creation, copy) are omitted and listed with justifications in
+ * docs/loading-api-inventory.md, which also records the known divergences.
  */
 public abstract class FileSystem implements Closeable {
 
   /** The current process's host file system. Closing it is a no-op. */
-  public static final FileSystem SYSTEM = new NioFileSystem(FileSystems.getDefault());
+  public static final FileSystem SYSTEM = new NioFileSystem(FileSystems.getDefault(), null);
 
   private FileSystem() {
   }
@@ -53,7 +55,7 @@ public abstract class FileSystem implements Closeable {
   /** Returns {@code path} with {@code .} and {@code ..} resolved and symlinks followed. */
   public abstract Path canonicalize(Path path) throws IOException;
 
-  /** Returns the metadata of {@code path}, or null if it does not exist. */
+  /** Returns the metadata of {@code path}, or null if it cannot be found or stated. */
   public abstract FileMetadata metadataOrNull(Path path) throws IOException;
 
   /** Like {@link #metadataOrNull}, but throws when {@code path} does not exist. */
@@ -73,6 +75,47 @@ public abstract class FileSystem implements Closeable {
 
   /** Like {@link #list}, but returns null when {@code dir} does not exist. */
   public abstract List<Path> listOrNull(Path dir) throws IOException;
+
+  /**
+   * Returns every path under {@code dir}, depth-first, parents before children, each directory
+   * in natural order. Directories are included alongside their contents. With
+   * {@code followSymlinks} a symlink to a directory is traversed; otherwise it is returned as
+   * a leaf. okio's Kotlin Sequence becomes this eager snapshot in the port (recorded as a
+   * mechanical adaptation for translated call sites).
+   */
+  public final List<Path> listRecursively(Path dir) throws IOException {
+    return listRecursively(dir, false);
+  }
+
+  /** See {@link #listRecursively(Path)}. */
+  public final List<Path> listRecursively(Path dir, boolean followSymlinks) throws IOException {
+    List<Path> result = new ArrayList<>();
+    listRecursivelyInto(dir, followSymlinks, result);
+    return result;
+  }
+
+  private void listRecursivelyInto(Path dir, boolean followSymlinks, List<Path> out)
+      throws IOException {
+    List<Path> entries = list(dir);
+    for (Path entry : entries) {
+      out.add(entry);
+      FileMetadata metadata = metadataOrNull(entry);
+      boolean traverse = metadata != null
+          && (metadata.isDirectory
+              || (followSymlinks && metadata.symlinkTarget != null && entryIsDirectory(entry)));
+      if (traverse) {
+        listRecursivelyInto(entry, followSymlinks, out);
+      }
+    }
+  }
+
+  private boolean entryIsDirectory(Path entry) throws IOException {
+    try {
+      return Files.isDirectory(entry.toNio());
+    } catch (UnsupportedOperationException e) {
+      return false;
+    }
+  }
 
   /** Opens {@code file} for reading. */
   public abstract Source source(Path file) throws IOException;
@@ -113,18 +156,38 @@ public abstract class FileSystem implements Closeable {
 
   /**
    * Opens the ZIP archive at {@code zipFile} and returns a read-only file system over its
-   * entries, rooted at {@code /}. The caller owns the returned handle: closing it releases
-   * the archive. Paths inside the returned system use the ZIP provider.
+   * entries, rooted at {@code /}. The archive is read through THIS file system's
+   * {@link #source}, so a resource file system can open zips from the classpath. The caller
+   * owns the returned handle: closing it releases the archive and removes the temporary copy
+   * the implementation materialized. Paths inside the returned system use the ZIP provider.
    */
   public FileSystem openZip(Path zipFile) throws IOException {
-    java.nio.file.FileSystem zipfs =
-        FileSystems.newFileSystem(zipFile.toNio(), (ClassLoader) null);
-    return new NioFileSystem(zipfs);
+    java.nio.file.Path temp = Files.createTempFile("antiwire-openzip", ".zip");
+    boolean success = false;
+    try {
+      try (Source in = source(zipFile);
+          BufferedSink out = Okio.buffer(Okio.sink(Files.newOutputStream(temp,
+              StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)))) {
+        out.writeAll(in);
+      }
+      java.nio.file.FileSystem zipfs = FileSystems.newFileSystem(temp, (ClassLoader) null);
+      success = true;
+      final java.nio.file.Path tempFinal = temp;
+      return new NioFileSystem(zipfs, () -> {
+        try {
+          zipfs.close();
+        } finally {
+          Files.deleteIfExists(tempFinal);
+        }
+      }); // the lambda targets CloseAction, which may throw IOException
+    } finally {
+      if (!success) Files.deleteIfExists(temp);
+    }
   }
 
   /** A file system backed by {@code nioFileSystem}. */
   public static FileSystem asOkioFileSystem(java.nio.file.FileSystem nioFileSystem) {
-    return new NioFileSystem(nioFileSystem);
+    return new NioFileSystem(nioFileSystem, null);
   }
 
   /**
@@ -137,16 +200,25 @@ public abstract class FileSystem implements Closeable {
     return new ResourceFileSystem(classLoader);
   }
 
+  /** An action closing a provider, allowed to throw {@link IOException}. */
+  interface CloseAction {
+    void run() throws IOException;
+  }
+
   static final class NioFileSystem extends FileSystem {
     private final java.nio.file.FileSystem nio;
+    private final CloseAction onClose;
 
-    NioFileSystem(java.nio.file.FileSystem nio) {
+    NioFileSystem(java.nio.file.FileSystem nio, CloseAction onClose) {
       this.nio = nio;
+      this.onClose = onClose;
     }
 
     /** Closes the wrapped provider unless it is the process default file system. */
     @Override public void close() throws IOException {
-      if (nio != FileSystems.getDefault()) {
+      if (onClose != null) {
+        onClose.run();
+      } else if (nio != FileSystems.getDefault()) {
         nio.close();
       }
     }
@@ -170,7 +242,8 @@ public abstract class FileSystem implements Closeable {
         // Follow nothing: a symlink must report as itself so symlinkTarget is populated.
         attrs = Files.readAttributes(nioPath(path), BasicFileAttributes.class,
             LinkOption.NOFOLLOW_LINKS);
-      } catch (NoSuchFileException e) {
+      } catch (FileSystemException e) {
+        // okio maps every stat failure, including access errors, to absent.
         return null;
       }
       Path symlinkTarget = attrs.isSymbolicLink()
@@ -188,10 +261,16 @@ public abstract class FileSystem implements Closeable {
     @Override public List<Path> listOrNull(Path dir) throws IOException {
       try (java.util.stream.Stream<java.nio.file.Path> stream = Files.list(nioPath(dir))) {
         List<Path> result = new ArrayList<>();
-        stream.forEach(entry -> result.add(Path.wrap(entry)));
+        try {
+          stream.forEach(entry -> result.add(Path.wrap(entry)));
+        } catch (DirectoryIteratorException e) {
+          throw e.getCause() instanceof IOException
+              ? (IOException) e.getCause()
+              : new IOException(e.getCause());
+        }
         result.sort(Comparator.naturalOrder());
         return result;
-      } catch (NotDirectoryException e) {
+      } catch (NoSuchFileException | NotDirectoryException e) {
         return null;
       }
     }
@@ -285,6 +364,8 @@ public abstract class FileSystem implements Closeable {
     }
 
     @Override public List<Path> listOrNull(Path dir) throws IOException {
+      // Keep the absent-means-null contract; enumeration of what does exist stays loud.
+      if (metadataOrNull(dir) == null) return null;
       return list(dir);
     }
 

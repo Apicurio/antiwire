@@ -81,6 +81,27 @@ public class LoadingAccessTest {
         () -> fs.createDirectories(base.div("a").div("b"), true));
   }
 
+  /** The absent-directory contract: listOrNull returns null, list throws FileNotFound. */
+  @Test public void absentDirectoryContract() throws IOException {
+    FileSystem fs = FileSystem.SYSTEM;
+    Path missing = Path.get(tempDir.toString()).div("does-not-exist");
+    assertNull(fs.listOrNull(missing));
+    assertThrows(FileNotFoundException.class, () -> fs.list(missing));
+  }
+
+  /** listRecursively walks depth-first, parents before children, directories included. */
+  @Test public void recursiveListing() throws IOException {
+    FileSystem fs = FileSystem.SYSTEM;
+    Path base = Path.get(tempDir.toString()).div("tree");
+    fs.createDirectories(base.div("b"), false);
+    writeString(fs, base.div("root.proto"), "r");
+    writeString(fs, base.div("b").div("nested.proto"), "n");
+    assertEquals(
+        java.util.Arrays.asList(
+            base.div("b"), base.div("b").div("nested.proto"), base.div("root.proto")),
+        fs.listRecursively(base));
+  }
+
   /** Symlinks report as themselves: symlinkTarget populated, not the target's attributes. */
   @Test public void symlinkMetadata() throws IOException {
     FileSystem fs = FileSystem.SYSTEM;
@@ -132,10 +153,13 @@ public class LoadingAccessTest {
       // An absolute child still replaces the left-hand side entirely.
       assertEquals(Path.get("/squareup/hello.proto"), dir.div(entry));
     }
-    // After close, the archive handle is released; reading from the closed system fails.
+    // After close, the archive handle is released; the provider rejects further use. The JDK
+    // zipfs signals a closed file system either as ClosedFileSystemException or as an NPE
+    // from its internals depending on the entry point, so the assertion targets the runtime
+    // failure itself rather than one specific JDK exception class.
     FileSystem closed = FileSystem.SYSTEM.openZip(Path.get(zip.toString()));
     closed.close();
-    assertThrows(Exception.class, () -> closed.listOrNull(Path.get("/squareup")));
+    assertThrows(RuntimeException.class, () -> closed.listOrNull(Path.get("/squareup")));
   }
 
   /** Path semantics the schema loader relies on: absolute div replaces, normalize resolves. */

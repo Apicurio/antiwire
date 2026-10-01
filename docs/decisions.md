@@ -107,11 +107,34 @@ asResourceFileSystem for classpath reads) and okio.FileMetadata, original code w
 docs/loading-api-inventory.md, and FakeFileSystem is deferred to M2 with the verbatim schema
 tests.
 
-### OPEN-2: provisional grouping exercised
+### OPEN-2: resolved
 
-The shells now carry a fourth module, `wire-upstream-shaded`, a never-published test fixture
-(maven.deploy.skip, enforcer exempt, relocation into the provisional namespace) holding the
-relocated upstream oracle. Final publication grouping remains open (TASK-4 AC#6).
+The publication grouping is separate artifacts with a transitive edge, matching upstream:
+`wire-runtime-java` and `wire-schema-java` are independently consumable, schema declares a
+compile dependency on runtime exactly as upstream `wire-schema` declares `wire-runtime`
+(api), and `wire-java-generator` is a separate optional artifact so no runtime or schema
+consumer pulls generator dependencies. The reactor additionally carries
+`wire-upstream-shaded`, a never-published test fixture (maven.deploy.skip, enforcer exempt,
+relocation into the provisional namespace) holding the relocated upstream oracle; it is test
+tooling, not a published grouping choice. Spike evidence: the whole M0 execution ran on this
+layout, and the java11-consumer suite compiled and ran a real consumer against exactly these
+module jars on Temurin 11.
+
+### Loader boundary and duplicate-class policy (TASK-4 AC#4 fold)
+
+The loader boundary is `okio.FileSystem` at the loading edge: translated wire-schema code
+takes a FileSystem (the JVM constructor also accepts `java.nio.file.FileSystem` via
+`asOkioFileSystem`), reads through `source` plus `metadataOrNull`, opens ZIP protoPath roots
+through the closeable `openZip` handle, and loads classpath descriptors through the read-only
+`asResourceFileSystem`; no okio artifact and no Kotlin type appears in production scope.
+Duplicate-class coexistence stays excluded per DEC-2, enforced mechanically: the vendored
+`okio` and `com.squareup.wire` classes exist only in the port's jars, the
+`duplicate-class-check` suite proves no retained-prefix class resolves from two artifacts on
+any module test classpath, and the parity fixture's in-reactor exclusion (its original pom
+declares the upstream dependency the dependency-reduced pom removes once installed) is
+recorded in wire-runtime-java's pom. Generated-code golden reconciliation under OPEN-4 is
+unaffected by the namespace choice: namespaces are unchanged from upstream, so byte-identical
+goldens remain the goal there.
 
 ### TASK-5 partial validation
 

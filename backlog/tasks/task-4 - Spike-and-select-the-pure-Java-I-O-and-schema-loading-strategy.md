@@ -1,10 +1,10 @@
 ---
 id: TASK-4
 title: Spike and select the pure-Java I/O and schema-loading strategy
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-29 09:22'
-updated_date: '2026-09-30 01:18'
+updated_date: '2026-10-01 17:55'
 labels: []
 milestone: m-6
 dependencies:
@@ -45,3 +45,6 @@ Merged execution state (m0-spikes reconciled with the reviewed scope). Done: AC#
 
 #2 - 2026-10-01 15:10 (UTC)
 AC map refresh (PR #1, additive commits): AC#1 done (docs/loading-api-inventory.md: pinned-source map, consequences, justified exclusions); AC#2 done (LoadingAccessTest: in-memory, filesystem, classpath, ZIP, path semantics; build suite + Java 11 consumer); AC#5 done (effort recorded in the M0 execution ledger). The loading layer is implemented: okio.Path, okio.FileSystem (SYSTEM over nio, openZip over zipfs, asResourceFileSystem for classpath), okio.FileMetadata; FakeFileSystem deferred to M2 with the verbatim schema tests (recorded in the inventory). Remaining: AC#4 final decisions fold (content exists in the inventory; lands with AC#6), AC#6 publication grouping. Evidence: mvn verify 759 tests 0 failures; scripts/verify.sh all 5 ACTIVE suites pass.
+
+#3 - 2026-10-01 17:55 (UTC)
+Done. All acceptance criteria closed: AC#1 the pinned-source map (docs/loading-api-inventory.md, corrected after review to include listRecursively, Root.kt's primary discovery path); AC#2 the demonstrations (LoadingAccessTest, 9 tests, every route plus contracts); AC#3 okio's own suite verbatim (732 tests); AC#4 namespaces, loader boundary, licenses and duplicate-class policy in docs/decisions.md; AC#5 measured effort in the M0 execution ledger; AC#6 OPEN-2 resolved (separate artifacts, schema-to-runtime transitive edge, optional generator, test-only fixture). DoD: the high-effort code-review ran on the final diff; of its ten findings, eight are fixed in this branch (absent-directory contract, stat-failure mapping, iterator exceptions, provider-routed openZip with a closeable temp-backed handle, cross-provider Path equality, listRecursively implementation, false documentation claims, missing contract tests) and two are documented divergences with TASK-12 as owner (backslash zip entries; jar directories without entries), recorded in the inventory's Known divergences section. Evidence: mvn verify 763 tests 0 failures; scripts/verify.sh all 5 ACTIVE suites pass including the loading round trip on Temurin 11.

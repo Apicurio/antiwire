@@ -64,9 +64,10 @@ TASK-4 AC#5 requires.
   (okio.Path, okio.FileSystem, okio.FileMetadata over java.nio, with SYSTEM, openZip over
   zipfs, and asResourceFileSystem for classpath reads) replaces the earlier "loading surface
   not implemented" gap; FakeFileSystem is deferred to M2 with the verbatim schema tests.
-  Remaining: the loader-boundary and duplicate-class paragraphs of AC#4 folded into decisions
-  proper (they exist in the inventory; a decisions edit can carry them at grouping time),
-  and AC#6 grouping finalization.
+  AC#4 and AC#6 are now closed in decisions.md: OPEN-2 resolved (separate artifacts with a
+  transitive schema-to-runtime edge, optional generator, fixture test-only) and the
+  loader-boundary and duplicate-class paragraphs folded. TASK-4 criteria are all satisfied;
+  the task closes pending its DoD code-review at high effort on the loading-layer diff.
 - TASK-5: In Progress. Done: AC#1 (byte parity including groups, packed, malformed
   lengths, via the isolated-oracle fixture); the runtime half of AC#2 (upstream
   ProtoWriterTest.kt compiles and runs against the Java slice with two individually

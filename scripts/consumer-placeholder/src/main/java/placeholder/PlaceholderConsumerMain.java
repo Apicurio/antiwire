@@ -34,6 +34,23 @@ public final class PlaceholderConsumerMain {
     String hex = buffer.readByteString().hex();
     System.out.println("spike-consumer-ok hex=" + hex);
 
+    // TASK-4 AC#2: the loading layer (okio.Path, okio.FileSystem over java.nio) runs a
+    // write/read/metadata/delete round trip on this same Java 11 JVM.
+    java.nio.file.Path temp = java.nio.file.Files.createTempFile("antiwire-loading", ".txt");
+    okio.Path loadingPath = okio.Path.get(temp.toString());
+    try (okio.BufferedSink sink =
+        okio.Okio.buffer(okio.FileSystem.SYSTEM.sink(loadingPath, false))) {
+      sink.writeUtf8("proto");
+    }
+    String readBack;
+    try (okio.BufferedSource source =
+        okio.Okio.buffer(okio.FileSystem.SYSTEM.source(loadingPath))) {
+      readBack = source.readUtf8();
+    }
+    boolean existed = okio.FileSystem.SYSTEM.metadataOrNull(loadingPath) != null;
+    okio.FileSystem.SYSTEM.delete(loadingPath, true);
+    System.out.println("loading-consumer-ok existed=" + existed + " read=" + readBack);
+
     System.out.println("placeholder-consumer-ok");
   }
 

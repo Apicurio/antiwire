@@ -36,13 +36,15 @@ the DEC-4 production-Kotlin ban holds trivially.
 | `FileSystem.metadataOrNull` (Roots: isDirectory, symlinkTarget) | `FileSystem.metadataOrNull` returning `FileMetadata` (isRegularFile, isDirectory, byteSize, symlinkTarget) | attributes read with NOFOLLOW so a symlink reports as itself and symlinkTarget is populated; Roots' symlink following survives |
 | `FileSystem.metadata` strict variant | final `metadata(Path)` throwing when absent | okio-shape convenience; the verbatim suites exercise it |
 | `FileSystem.canonicalize` | over `toRealPath` | okio core member, mapped for completeness |
-| `FileSystem.openZip` (Roots: protoPath entries that are jars; WireCompiler) | `FileSystem.openZip(Path)` over `java.nio.file` zipfs, entries rooted at `/` | ZIP is the loader's compression concern; gzip stays excluded |
+| `FileSystem.openZip` (Roots: protoPath entries that are jars; WireCompiler) | `FileSystem.openZip(Path)` reads the archive through the receiving file system's source (so a ResourceFileSystem opens classpath zips), materializes a temp copy, and returns a ZIP-provider view rooted at `/`; the caller-owned close releases the zipfs and removes the temp | ZIP is the loader's compression concern; gzip stays excluded |
 | `FileSystem.read(path) { }` extension (Roots) | composed as `Okio.buffer(fs.source(path))` at the Java call site; mechanical mapping recorded for M2 | no lambda form in Java; behavior identical |
-| `FileSystem.list`, `listOrNull`, `exists`, `source`, `sink`, `createDirectories`, `createDirectory`, `atomicMove`, `delete` (tests and compiler; FakeFileSystem parity) | implemented on the abstract class, nio-backed SYSTEM; `createDirectory` keeps okio's single-level semantics (no parent creation), `createDirectories` builds the chain | FakeFileSystem (okio's in-memory FS) is deferred to M2 where the verbatim schema tests need it; the classpath route below already covers Apicurio's descriptor loading |
+| `FileSystem.list`, `listOrNull`, `exists`, `source`, `sink`, `createDirectories`, `createDirectory`, `atomicMove`, `delete` (tests and compiler; FakeFileSystem parity) | implemented on the abstract class, nio-backed SYSTEM; `createDirectory` keeps okio's single-level semantics (no parent creation), `createDirectories` builds the chain; `listOrNull` returns null for an absent directory and `list` throws FileNotFoundException, per okio's contract; stat failures inside metadataOrNull map to absent like okio (FileSystemException) | FakeFileSystem (okio's in-memory FS) is deferred to M2 where the verbatim schema tests need it; the classpath route below already covers Apicurio's descriptor loading |
+| `FileSystem.listRecursively` (Root.kt allProtoFiles: the loader's primary sourcePath discovery) | eager depth-first snapshot over list/metadataOrNull, parents before children, directories included, natural order per directory | okio's lazy Kotlin Sequence maps to this snapshot in adaptations (recorded); followSymlinks flag supported |
 | `FileSystem.appendingSink` | implemented over the vendored `Okio.sink` nio overload | owner: the deferred M2 FakeFileSystem parity row |
 | `FileSystem` closeability (openZip handle) | `FileSystem implements Closeable`; closing a zip-backed system releases the archive, closing SYSTEM is a no-op; callers own the handle openZip returns | the lifecycle okio 3 gives the same operation; a long-running consumer (Apicurio) can reload roots without leaking descriptors |
 | `ClassLoader.asResourceFileSystem()` (CoreLoader) | `FileSystem.asResourceFileSystem(loader)` read-only, known-resource reads; list is unsupported across providers and throws with guidance; directories are reported (URL trailing-slash convention) but byteSize is not probed (one connection per call, and the loader never reads it here) | replaces Apicurio's FakeFileSystem/setWorkingDirectory choreography (TASK-25/TASK-18) |
 | `Path.isRelative`, `Path.isEmpty`, `Path.resolve` | trivial derivations kept for okio API shape; `resolve` is the Java-idiomatic alias of `div` used by translated call sites | mapped here so the surface stays traceable |
+| `Path.equals`/`hashCode`/`compareTo` across providers | string-based, like okio, so a zip entry and a host path with equal text are equal and sort together | nio's provider-scoped equality is deliberately not used |
 | `FileHandle` | not implemented | zero call sites in wire 7.1.0 runtime and schema main; it appears only in Apicurio's own loader; revisit if TASK-18's re-inventory finds otherwise |
 
 ## Excluded, with scope justification
@@ -50,9 +52,20 @@ the DEC-4 production-Kotlin ban holds trivially.
 - GzipSource/GzipSink, DeflaterSink, InflaterSource, Pipe, hashing wrappers, PushableTimeout,
   okio package-info: zero imports in the ported slice (verified by inventory); ZIP loading
   covers the loader's archive need.
-- FileHandle, openReadOnly/openReadWrite, createSymlink, copy, listRecursively: zero call
-  sites in the ported slice; each is a compatibility-matrix row away if M1/M2 evidence
-  demands it.
+- FileHandle, openReadOnly/openReadWrite, createSymlink, copy: zero call sites in the ported
+  slice; each is a compatibility-matrix row away if M1/M2 evidence demands it.
+
+## Known divergences from okio 3 (owners assigned, none silent)
+
+- ZIP entries whose names contain backslashes (Windows-built archives): the JDK zipfs lists
+  them as single opaque segments and cannot read them by path; okio 3 normalizes the
+  separators. A protoPath jar built that way fails at source() for entries the loader just
+  listed. Owner: TASK-12 (loading boundary), revisit with a name-normalizing wrapper.
+- ResourceFileSystem directories in jars that omit directory entries report as absent
+  (okio's resource implementation enumerates roots); known-resource reads are unaffected.
+  Owner: TASK-12, together with any listable-resource need.
+- listRecursively is an eager snapshot, not okio's lazy Sequence; adaptation recorded for
+  translated call sites.
 
 ## Source-compatibility and migration consequences
 
@@ -65,8 +78,10 @@ the DEC-4 production-Kotlin ban holds trivially.
 
 ## Demonstrated (TASK-4 AC#2, LoadingAccessTest, runs in the build suite)
 
-In-memory buffer round trip; host-filesystem write, read, metadata, list, atomic move,
-delete; classpath resource read plus absent-resource failure; ZIP archive open, entry read,
-entry metadata, list; path semantics including absolute-div replacement and normalization.
-All on JDK 17 build with `--release 11` bytecode, re-verified by the java11-consumer suite on
-a real Temurin 11.
+In-memory buffer round trip; host-filesystem write, read, metadata, list, recursive list,
+absent-directory contract, atomic move, delete, directory-creation semantics, symlink
+metadata; classpath resource read plus absent-resource failure; ZIP archive open, entry
+read, composition, list, close; path semantics including absolute-div replacement,
+normalization, and cross-provider equality. All on the JDK 17 build with `--release 11`
+bytecode; the java11-consumer suite exercises the buffer/writer spike and a full
+FileSystem write/read/metadata/delete round trip on a real Temurin 11.

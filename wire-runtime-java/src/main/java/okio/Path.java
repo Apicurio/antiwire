@@ -22,6 +22,10 @@ import java.nio.file.Paths;
  * schema loader navigates; the implementation wraps {@link java.nio.file.Path}, so separator,
  * root and volume-letter semantics come from the path's own provider. Paths created by
  * {@link FileSystem#openZip} wrap paths from the ZIP provider, not the default one.
+ *
+ * <p>Equality, hashing and ordering are string-based across providers, like okio's: a zip
+ * entry path and a host path with the same text are equal and order identically, even though
+ * their nio providers differ.
  */
 public final class Path implements Comparable<Path> {
   private final java.nio.file.Path nioPath;
@@ -123,15 +127,15 @@ public final class Path implements Comparable<Path> {
   }
 
   @Override public int compareTo(Path other) {
-    return nioPath.compareTo(other.nioPath);
+    return toString().compareTo(other.toString());
   }
 
   @Override public boolean equals(Object other) {
-    return other instanceof Path && nioPath.equals(((Path) other).nioPath);
+    return other instanceof Path && other.toString().equals(toString());
   }
 
   @Override public int hashCode() {
-    return nioPath.hashCode();
+    return toString().hashCode();
   }
 
   @Override public String toString() {
