@@ -146,11 +146,11 @@ public final class Options {
     }
     linker.request(field);
 
-    Map<ProtoMember, Object> result = new HashMap<>();
+    Map<ProtoMember, Object> result = new LinkedHashMap<>();
     Map<ProtoMember, Object> last = result;
     ProtoType lastProtoType = type.type();
     for (int i = 1; i < path.length; i++) {
-      Map<ProtoMember, Object> nested = new HashMap<>();
+      Map<ProtoMember, Object> nested = new LinkedHashMap<>();
       last.put(ProtoMember.get(lastProtoType, field), nested);
       lastProtoType = field.type();
 
@@ -169,7 +169,7 @@ public final class Options {
         canonicalizeValue(linker, field.type(), field.isRepeated(), option.value));
 
     if (result.size() != 1) {
-      throw new IllegalStateException("Check failed."); // TODO(benoit) might be safe to remove
+      throw new IllegalStateException("Check failed"); // TODO(benoit) might be safe to remove
     }
     Map.Entry<ProtoMember, Object> first = result.entrySet().iterator().next();
     return Collections.singletonList(new LinkedOptionEntry(option, first.getKey(),
@@ -180,7 +180,7 @@ public final class Options {
       Object value) {
     if (value instanceof OptionElement) {
       OptionElement element = (OptionElement) value;
-      Map<ProtoMember, Object> result = new HashMap<>();
+      Map<ProtoMember, Object> result = new LinkedHashMap<>();
       Field field = linker.dereference(context, element.name);
       if (field == null) {
         linker.errors.add("unable to resolve option " + element.name + " on " + context);
@@ -202,11 +202,11 @@ public final class Options {
             : canonicalizeValue(linker, context.keyType, false, mapFieldKeyAsString);
         Object mapFieldValue = mapFieldValueAsString == null ? null
             : canonicalizeValue(linker, context.valueType, false, mapFieldValueAsString);
-        Map<Object, Object> mapResult = new HashMap<>();
+        Map<Object, Object> mapResult = new LinkedHashMap<>();
         mapResult.put(mapFieldKey, mapFieldValue);
         return coerceValueForField(context, mapResult, isRepeated);
       } else {
-        Map<ProtoMember, Object> result = new HashMap<>();
+        Map<ProtoMember, Object> result = new LinkedHashMap<>();
         for (Map.Entry<?, ?> entry : map.entrySet()) {
           String name = (String) entry.getKey();
           Field field = linker.dereference(context, name);
@@ -389,7 +389,7 @@ public final class Options {
     if (o == null) return null;
 
     if (o instanceof Map) {
-      Map<ProtoMember, Object> map = new HashMap<>();
+      Map<ProtoMember, Object> map = new LinkedHashMap<>();
       for (Map.Entry<?, ?> entry : ((Map<?, ?>) o).entrySet()) {
         Object key = entry.getKey();
         if (!(key instanceof ProtoMember)) {

@@ -60,7 +60,7 @@ public final class MarkSet {
    */
   void root(ProtoMember protoMember) {
     if (pruningRules.prunes(protoMember)) {
-      throw new IllegalStateException("Check failed.");
+      throw new IllegalStateException("Check failed");
     }
     types.add(protoMember.type);
     rootMemberTypes.put(protoMember, UNKNOWN_TYPE);
@@ -71,7 +71,7 @@ public final class MarkSet {
   /** Marks {@code type}, throwing if it is explicitly excluded. */
   void root(ProtoType type) {
     if (pruningRules.prunes(type)) {
-      throw new IllegalStateException("Check failed.");
+      throw new IllegalStateException("Check failed");
     }
     types.add(type);
   }

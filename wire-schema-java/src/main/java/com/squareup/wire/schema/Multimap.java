@@ -33,7 +33,11 @@ public final class Multimap<K, V> {
   }
 
   public int size() {
-    return map.size();
+    int result = 0;
+    for (Collection<V> values : map.values()) {
+      result += values.size();
+    }
+    return result;
   }
 
   public boolean isEmpty() {

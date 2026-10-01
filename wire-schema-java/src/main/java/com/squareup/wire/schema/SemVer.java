@@ -106,8 +106,9 @@ final class SemVer implements Comparable<SemVer> {
   }
 
   private int compareSegment(String a, String b) {
-    boolean aAllDigits = !a.isEmpty() && allDigits(a);
-    boolean bAllDigits = !b.isEmpty() && allDigits(b);
+    // Note: an empty segment is vacuously all digits, like Kotlin's all(Char::isDigit).
+    boolean aAllDigits = allDigits(a);
+    boolean bAllDigits = allDigits(b);
     if (aAllDigits && bAllDigits) return compareNumber(a, b);
     if (aAllDigits) return -1;
     if (bAllDigits) return 1;

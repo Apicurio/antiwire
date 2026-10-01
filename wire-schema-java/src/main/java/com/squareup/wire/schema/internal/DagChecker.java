@@ -17,7 +17,7 @@ package com.squareup.wire.schema.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +39,7 @@ public final class DagChecker<N> {
   private int nextDiscoveryId = 0;
   private final Map<N, Tag<N>> tags = new HashMap<>();
   private final List<Tag<N>> stack = new ArrayList<>();
-  private final Set<List<N>> result = new HashSet<>();
+  private final Set<List<N>> result = new LinkedHashSet<>();
 
   public DagChecker(Iterable<N> nodes, Function<N, Iterable<N>> edges) {
     this.nodes = nodes;
@@ -60,7 +60,7 @@ public final class DagChecker<N> {
    */
   public Set<List<N>> check() {
     if (nextDiscoveryId != 0) {
-      throw new IllegalStateException("Check failed.");
+      throw new IllegalStateException("Check failed");
     }
 
     for (N node : nodes) {
