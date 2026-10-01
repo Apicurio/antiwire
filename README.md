@@ -14,7 +14,7 @@ Wire 7.1.0 is a Kotlin Multiplatform project. Its JVM artifacts pull kotlin-stdl
 
 ## What is in this repository
 
-- A Maven build (`io.apicurio:antiwire` parent, `wire-runtime-java` and `wire-schema-java` modules, bytecode target Java 11, CI on Temurin 17) with the zero-dependency rule enforced by the Maven enforcer plugin.
+- A Maven build (`io.apicurio:antiwire` parent, `wire-runtime-java` and `wire-schema-java` modules, bytecode target Java 11, CI on Temurin 17) with the zero-dependency rule enforced by the Maven enforcer plugin. The reactor also contains `wire-upstream-shaded`, a never-published test fixture holding a relocated copy of upstream wire-runtime-jvm 7.1.0 used by the parity tests as a live oracle. The canonical build command is `mvn verify` (plain `mvn test` fails: the parity fixture is packaged at the package phase, before which the parity classes do not exist).
 - `docs/research-wire-java-port-2026-09-29.md`: the full research report (exhaustive depth, confidence-rated, with sources). It covers the current Wire module inventory, the verified dependency chains, the exact Wire APIs Apicurio imports, Kafka constraints, prior art, test-suite strategy, the phased project plan with gates, the risk register, and the open decisions.
 - `docs/decisions.md` and `docs/translation-conventions.md`: the adopted architecture decisions (D1 to D8) and the parity contract used by every translation.
 - `backlog/`: the execution backlog in [Backlog.md](https://backlog.md) format. Six milestones (M0 spikes through M5 release), 23 tasks, each with acceptance criteria and dependencies. The same-test-suite requirement becomes concrete gates: upstream test sources adopted verbatim (TASK-9, TASK-13, TASK-15) and a pinned-tag parity harness in CI (TASK-14).

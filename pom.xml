@@ -14,6 +14,10 @@
   <url>https://github.com/Apicurio/antiwire</url>
 
   <modules>
+    <!-- Declared first: the reactor follows declaration order for test-scope
+         inter-module dependencies, and both shipped modules use this fixture on their
+         test classpaths, so it must build before them. -->
+    <module>wire-upstream-shaded</module>
     <module>wire-runtime-java</module>
     <module>wire-schema-java</module>
   </modules>
@@ -34,6 +38,26 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.6.1</version>
+        <executions>
+          <execution>
+            <!-- Writes each module's resolved dependency list to target/deps.txt during the
+                 normal lifecycle, so CI can assert the zero-dependency invariant from files
+                 produced in a session where reactor resolution is guaranteed (a standalone
+                 dependency:list invocation cannot resolve never-packaged reactor siblings). -->
+            <id>list-dependencies</id>
+            <phase>verify</phase>
+            <goals><goal>list</goal></goals>
+            <configuration>
+              <outputFile>${project.build.directory}/deps.txt</outputFile>
+              <excludeTransitive>false</excludeTransitive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>3.4.1</version>
         <executions>
@@ -52,6 +76,10 @@
                     <include>io.apicurio:*</include>
                     <!-- junit is test-scoped; every additional test library must be listed here -->
                     <include>junit:junit</include>
+                    <!-- kotlin-stdlib is test-scoped: needed by the shaded upstream parity
+                         fixture, and later by the verbatim upstream Kotlin test sources adopted
+                         in TASK-9 and TASK-13 -->
+                    <include>org.jetbrains.kotlin:kotlin-stdlib</include>
                   </includes>
                   <message>main artifacts must have zero non-JDK dependencies (decision D5/D6)</message>
                 </bannedDependencies>

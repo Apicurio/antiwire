@@ -26,11 +26,14 @@ jobs:
       - name: Build and test
         run: mvn -B --no-transfer-progress verify
       - name: Assert zero non-JDK compile/runtime dependencies
-        # The enforcer rule allows listed test libraries in any scope; this check
-        # pins the scope invariant exactly (only io.apicurio reactor modules may
-        # appear at compile or runtime scope).
+        # The enforcer rule allows listed test libraries in any scope; this check pins the
+        # scope invariant exactly: only io.apicurio reactor modules may appear at compile or
+        # runtime scope of the two SHIPPED modules. The dependency lists were written by the
+        # list-dependencies execution during mvn verify above; the never-published parity
+        # fixture wire-upstream-shaded is exempt and simply not inspected.
         run: |
-          deps=$(mvn -B --no-transfer-progress -q dependency:list 2>/dev/null | grep -E ':(compile|runtime)( |$)' | grep -v 'io\.apicurio' || true)
+          deps=$(cat wire-runtime-java/target/deps.txt wire-schema-java/target/deps.txt \
+            | grep -E ':(compile|runtime)( |$)' | grep -v 'io\.apicurio' || true)
           if [ -n "$deps" ]; then
             echo "Non-reactor compile/runtime dependencies found:"; echo "$deps"; exit 1
           fi
