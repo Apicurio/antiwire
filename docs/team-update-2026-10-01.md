@@ -31,7 +31,7 @@ Estimate, to be treated as an estimate: M1 and M2 are the bulk, roughly two to t
 
 ## What we would like from the Apicurio team
 
-The seven questions in the README (second-opinion section) are still open, and two matter most to this audience: whether the scope we excluded (gRPC client, Kotlin and Swift codegen, editions) covers everything Apicurio needs from wire-schema, and whether the JDK-typed loading API sketched in task 25 fits how the Registry wants to load descriptors (today's loader juggles okio FileSystem, Path, and FakeFileSystem). Concrete API wishes from the team are cheapest to incorporate now, before M2 freezes the surface.
+The README's second-opinion section now separates what M0 already settled (okio vendoring, namespaces, module boundaries, the functional-port stance) from what is genuinely open, each item with its owning task. Two open items matter most to this audience: the public API compatibility matrix (which surfaces stay upstream-shaped and which get JDK types is designed in task 25, before the Apicurio integration in task 18), and whether the JDK-typed loading API fits how the Registry wants to load descriptors (today's loader juggles okio FileSystem, Path, and FakeFileSystem). Concrete API wishes from the team are cheapest to incorporate now, before M2 freezes the surface.
 
 Feedback as GitHub issues on Apicurio/antiwire, or directly to Paolo.
 

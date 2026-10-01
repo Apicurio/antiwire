@@ -21,13 +21,24 @@ Wire 7.1.0 is a Kotlin Multiplatform project. Its JVM artifacts pull kotlin-stdl
 
 ## Where we want a second opinion
 
-1. Scope: we plan to exclude the Kotlin and Swift code generators, the gRPC client (okhttp plus coroutines), the moshi adapter, the Gradle plugin, and editions support (upstream Wire itself rejects editions today). Is that the right scope for the Apicurio and Kafka use cases?
-2. okio strategy: Wire's public API embeds okio types (ByteString, BufferedSource, BufferedSink), so we plan to vendor a minimal pure-Java okio subset inside the library rather than rewrite I/O on java.nio. Is that sound?
-3. Java baseline: Java 11 bytecode so the artifact is usable across Kafka client modules; Java 17 would be simpler. Right call?
-4. Naming: keep the `com.squareup.wire.*` Java packages for drop-in compatibility and test-suite reuse, but publish under a new Maven groupId. Is reusing Square's package namespace acceptable in practice?
-5. Parity harness: keep the upstream Kotlin test sources verbatim as our test scope (Kotlin as a dev-time only dependency), rather than translating tests to Java. Is that an acceptable trade?
-6. Effort: we estimate 4 to 6 months of focused single-engineer work, verification-dominated. Does that match anyone's experience with ports of this size?
-7. Alternatives: should this be a fork at all, or would a pure-Java module contributed upstream to square/wire, or a different approach entirely, serve the Apicurio and Kafka goals better?
+Status first, so the questions land in context. Milestone M0 (the spikes that prove feasibility) is complete: the okio buffer layer is vendored in pure Java and passes okio's own 732-test suite, the encoding core (ProtoReader and ProtoWriter) is translated and proven byte-for-byte and exception-for-exception against a live relocated copy of upstream wire-runtime-jvm 7.1.0, and the whole build is at 747 tests, 0 failures. So "is it feasible" is answered; the questions below are about direction and boundaries.
+
+Already settled (docs/decisions.md, with the evidence that settled them):
+
+- okio route: vendor a pure-Java subset (based on okio 1.17.6, the last Java-era release) inside the artifact rather than depending on okio-jvm or rewriting I/O from scratch. Settled by the M0 spike (TASK-4).
+- Namespaces: keep `com.squareup.wire.*` Java package names so upstream test sources and generated code stay compatible, publish under a new Maven groupId. Settled by the M0 spike (TASK-5, the parity harness depends on it).
+- Module boundaries: runtime and schema stay independently consumable artifacts; code generation (with javapoet) is an optional artifact. Settled in D6.
+- Functional port over signature freeze: JDK types in the consumer-facing API are a first-class deliverable; upstream-shaped signatures are kept only where they accelerate the test milestones (D5a).
+
+Still open, with named owners:
+
+- The public API compatibility matrix: exactly which surfaces stay upstream-shaped (porting-phase layer) and which get JDK types (consumer layer) is designed in TASK-25, before the Apicurio integration (TASK-18). Apicurio input on the loading API (java.nio.file.Path, classpath helper, no more FakeFileSystem dance) is cheapest to incorporate now.
+- Golden-exactness: generated Java code must be byte-identical to upstream's golden files (TASK-16); we have not yet learned whether formatting or codegen drift makes that goal need adjustment.
+- Parser fidelity details such as reserved-range handling in the element model are owned by TASK-10; upstream test material is the judge.
+- Performance thresholds (regression budget versus upstream wire and protobuf-java) are owned by TASK-20, decided after the JMH baselines exist, not before.
+- The fork-versus-upstream question: should a pure-Java variant exist as a fork at all, or would Square entertain Java modules upstream? Genuinely open; it shapes how we handle re-syncs.
+
+The 4-to-6-month estimate stays provisional. M0 finished fast (three working days of agent-driven execution), which suggests the estimate is conservative for the mechanical translation, but M1 and M2 are where the verification-dominated bulk sits, and no code of wire-schema itself exists yet.
 
 Feedback welcome as GitHub issues on this repository, or however you prefer to reach the maintainer.
 
