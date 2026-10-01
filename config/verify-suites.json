@@ -1,0 +1,65 @@
+{
+  "comment": "Suite registry for scripts/verify.sh (TASK-2). Status is ACTIVE (the entry point runs it now) or PENDING (the owning task has not built it yet). Only the owning task flips PENDING to ACTIVE, by editing this file. A PENDING suite is never run, is never printed as passed, and is not evidence of parity or compatibility.",
+  "suites": [
+    {
+      "name": "build",
+      "status": "ACTIVE",
+      "owner": "TASK-2",
+      "description": "mvn verify on JDK 17+ with production compilation at --release 11 (DEC-3); module shells only, no parity claimed"
+    },
+    {
+      "name": "dependency-policy",
+      "status": "ACTIVE",
+      "owner": "TASK-2",
+      "description": "maven-enforcer bans Kotlin, kotlinx and Kotlin-backed okio artifacts from production scope including transitives; test and build tooling exempt (DEC-4)"
+    },
+    {
+      "name": "bytecode-java11",
+      "status": "ACTIVE",
+      "owner": "TASK-2",
+      "description": "module jars and production dependency jars expose only class files Java 11 can select (major <= 55, multi-release aware); today the production dependency set is empty and is reported as such"
+    },
+    {
+      "name": "runtime-tests",
+      "status": "PENDING",
+      "owner": "TASK-9",
+      "description": "applicable upstream wire-runtime test cases with tracked adaptations (DEC-5)"
+    },
+    {
+      "name": "schema-tests",
+      "status": "PENDING",
+      "owner": "TASK-13",
+      "description": "applicable upstream wire-schema test cases with tracked adaptations (DEC-5)"
+    },
+    {
+      "name": "protoc-oracle",
+      "status": "PENDING",
+      "owner": "TASK-15",
+      "description": "protoc compatibility oracle at the pinned tag as a blocking CI check"
+    },
+    {
+      "name": "compiler-tests",
+      "status": "PENDING",
+      "owner": "TASK-16",
+      "description": "Java generator behavior tests and golden output checks"
+    },
+    {
+      "name": "security-corpus",
+      "status": "PENDING",
+      "owner": "TASK-17",
+      "description": "security regression corpus as permanent tests"
+    },
+    {
+      "name": "java11-consumer",
+      "status": "ACTIVE",
+      "owner": "TASK-2",
+      "description": "placeholder consumer main compiled and run on an actual Java 11 JVM against the module jars; the placeholder certifies nothing about compatibility, TASK-5 and TASK-21 carry the real smokes (DEC-3)"
+    },
+    {
+      "name": "duplicate-class-check",
+      "status": "ACTIVE",
+      "owner": "TASK-2",
+      "description": "class-origin report plus duplicate detection for com.squareup.wire and retained okio names on every module test classpath (compatibility matrix section G)"
+    }
+  ]
+}
