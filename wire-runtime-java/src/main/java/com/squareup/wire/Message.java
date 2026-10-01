@@ -38,8 +38,22 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
 
   private transient ByteString unknownFieldsMemoized;
 
-  /** If not {@code 0} then the serialized size of this message. */
-  public transient int cachedSerializedSize;
+  /** If not {@code 0} then the serialized size of this message. Internal cache; do not mutate. */
+  transient int cachedSerializedSize;
+
+  /**
+   * Internal serialized-size cache, read and written by the reflection machinery. Upstream
+   * reaches it through Kotlin internal visibility (bytecode public there); calling this as a
+   * consumer corrupts every later encodedSize result. Do not use.
+   */
+  public int getCachedSerializedSizeForReflection() {
+    return cachedSerializedSize;
+  }
+
+  /** Internal; see {@link #getCachedSerializedSizeForReflection()}. Do not use. */
+  public void setCachedSerializedSizeForReflection(int size) {
+    cachedSerializedSize = size;
+  }
 
   /** If non-zero, the hash code of this message. Accessed by generated code. */
   protected transient int hashCode = 0;

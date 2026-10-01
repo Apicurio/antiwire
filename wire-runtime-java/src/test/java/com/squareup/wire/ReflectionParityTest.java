@@ -236,4 +236,104 @@ public class ReflectionParityTest {
         "com.squareup.wire.ReflectionParityTest$ReflectedMessage#ADAPTER");
     assertEquals(ReflectedMessage.ADAPTER, adapter);
   }
+
+  /**
+   * A Kotlin-style message with no nested $Builder: the reflection falls back to
+   * KotlinConstructorBuilder, exercising the wireField-carrying builder getter (the null-WireField
+   * regression) on repeated fields and the primary-constructor build.
+   */
+  public static final class KtorBuilder
+      extends KotlinConstructorBuilder<KtorMessage, KtorBuilder> {
+    public KtorBuilder() {
+      super(KtorMessage.class);
+    }
+  }
+
+  public static class KtorMessage extends Message<KtorMessage, KtorBuilder> {
+    @WireField(tag = 1, adapter = "com.squareup.wire.ProtoAdapter#STRING")
+    public final String label;
+
+    @WireField(tag = 2, adapter = "com.squareup.wire.ProtoAdapter#INT32",
+        label = WireField.Label.REPEATED)
+    public final List<Integer> values;
+
+    public KtorMessage(String label, List<Integer> values, ByteString unknownFields) {
+      super(ADAPTER, unknownFields);
+      this.label = label;
+      this.values = values;
+    }
+
+    @Override public KtorBuilder newBuilder() {
+      return new KtorBuilder();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static final ProtoAdapter<KtorMessage> ADAPTER =
+        (ProtoAdapter<KtorMessage>) (ProtoAdapter<?>) Reflection.createRuntimeMessageAdapter(
+            KtorMessage.class, null, Syntax.PROTO_2);
+  }
+
+  @Test public void kotlinConstructorBuilderPathDecodesRepeatedFields() throws IOException {
+    okio.Buffer buffer = new okio.Buffer();
+    ProtoWriter writer = new ProtoWriter(buffer);
+    writer.writeTag(1, FieldEncoding.LENGTH_DELIMITED);
+    writer.writeVarint32(1);
+    writer.writeString("k");
+    writer.writeTag(2, FieldEncoding.VARINT);
+    writer.writeVarint32(10);
+    writer.writeTag(2, FieldEncoding.VARINT);
+    writer.writeVarint32(20);
+    byte[] bytes = buffer.readByteArray();
+
+    KtorMessage decoded = KtorMessage.ADAPTER.decode(bytes);
+    assertEquals("k", decoded.label);
+    assertEquals(Arrays.asList(10, 20), decoded.values);
+    assertArrayEquals(bytes, KtorMessage.ADAPTER.encode(decoded));
+  }
+
+  /** A private isXxx field with an isXxx() getter exercises the regex getter branch. */
+  public static class IsFieldMessage extends Message<IsFieldMessage, IsFieldMessage.Builder> {
+    @WireField(tag = 1, adapter = "com.squareup.wire.ProtoAdapter#BOOL")
+    private final Boolean isAwesome;
+
+    public IsFieldMessage(Boolean isAwesome, ByteString unknownFields) {
+      super(ADAPTER, unknownFields);
+      this.isAwesome = isAwesome;
+    }
+
+    public Boolean isAwesome() {
+      return isAwesome;
+    }
+
+    @Override public Builder newBuilder() {
+      throw new UnsupportedOperationException();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static final ProtoAdapter<IsFieldMessage> ADAPTER =
+        (ProtoAdapter<IsFieldMessage>) (ProtoAdapter<?>) Reflection.createRuntimeMessageAdapter(
+            IsFieldMessage.class, null, Syntax.PROTO_2);
+
+    public static final class Builder extends Message.Builder<IsFieldMessage, Builder> {
+      public Boolean isAwesome;
+
+      public Builder() {
+      }
+
+      @Override public IsFieldMessage build() {
+        return new IsFieldMessage(isAwesome, buildUnknownFields());
+      }
+    }
+  }
+
+  @Test public void privateIsFieldGetterSelected() throws IOException {
+    IsFieldMessage message = new IsFieldMessage(true, ByteString.EMPTY);
+    okio.Buffer buffer = new okio.Buffer();
+    ProtoWriter writer = new ProtoWriter(buffer);
+    writer.writeTag(1, FieldEncoding.VARINT);
+    writer.writeVarint32(1);
+    assertArrayEquals(buffer.readByteArray(), IsFieldMessage.ADAPTER.encode(message));
+    assertEquals(Boolean.TRUE, IsFieldMessage.ADAPTER.decode(
+        IsFieldMessage.ADAPTER.encodeByteString(message)).isAwesome());
+  }
 }

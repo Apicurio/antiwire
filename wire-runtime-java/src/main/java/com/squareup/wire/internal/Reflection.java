@@ -152,7 +152,8 @@ public final class Reflection {
     try {
       return (Class<B>) Class.forName(messageType.getName() + "$Builder", false,
           messageType.getClassLoader());
-    } catch (ClassNotFoundException e) {
+    } catch (ClassNotFoundException | LinkageError e) {
+      // Upstream wraps the lookup in runCatching (all Throwable) before the fallback.
       return (Class<B>) (Class<?>) KotlinConstructorBuilder.class;
     }
   }
@@ -198,11 +199,19 @@ public final class Reflection {
     }
 
     @Override public int getCachedSerializedSize(M message) {
-      return message.cachedSerializedSize;
+      return getCachedSize(message);
     }
 
     @Override public void setCachedSerializedSize(M message, int size) {
-      message.cachedSerializedSize = size;
+      setCachedSize(message, size);
+    }
+
+    private static int getCachedSize(Message<?, ?> message) {
+      return message.getCachedSerializedSizeForReflection();
+    }
+
+    private static void setCachedSize(Message<?, ?> message, int size) {
+      message.setCachedSerializedSizeForReflection(size);
     }
 
     @Override public B newBuilder() {

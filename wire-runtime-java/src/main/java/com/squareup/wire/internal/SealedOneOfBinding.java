@@ -36,6 +36,7 @@ public final class SealedOneOfBinding<M extends Message<M, B>, B extends Message
   private final boolean isKotlinConstructorBuilder;
   private final Field builderField;
   private volatile Field valueFieldMemoized;
+  private volatile ProtoAdapter<?> singleAdapterMemoized;
 
   public SealedOneOfBinding(Field messageField, Class<B> builderType, WireOneofField annotation,
       Class<?> subclassType, ClassLoader classLoader) {
@@ -95,7 +96,19 @@ public final class SealedOneOfBinding<M extends Message<M, B>, B extends Message
   }
 
   @Override public ProtoAdapter<?> singleAdapter() {
-    return ProtoAdapter.get(annotation.adapter(), classLoader);
+    // Upstream evaluates this once at construction (a stored val); the reflective lookup is
+    // on the decode hot path, so memoize it.
+    ProtoAdapter<?> result = singleAdapterMemoized;
+    if (result == null) {
+      synchronized (this) {
+        result = singleAdapterMemoized;
+        if (result == null) {
+          result = ProtoAdapter.get(annotation.adapter(), classLoader);
+          singleAdapterMemoized = result;
+        }
+      }
+    }
+    return result;
   }
 
   @Override public boolean writeIdentityValues() {

@@ -22,6 +22,8 @@ import com.squareup.wire.WireField;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -76,7 +78,7 @@ public final class FieldBinding<M extends Message<M, B>, B extends Message.Build
     this.writeIdentityValues = writeIdentityValues;
     this.classLoader = classLoader;
     this.builderSetter = getBuilderSetter(builderType, wireField, messageField, name);
-    this.builderGetter = getBuilderGetter(builderType, name);
+    this.builderGetter = getBuilderGetter(builderType, wireField, name);
     this.instanceGetter = getInstanceGetter(messageType, messageField, name);
   }
 
@@ -175,9 +177,10 @@ public final class FieldBinding<M extends Message<M, B>, B extends Message.Build
     };
   }
 
-  private static BuilderGetter getBuilderGetter(Class<?> builderType, String name) {
+  private static BuilderGetter getBuilderGetter(Class<?> builderType, WireField wireField,
+      String name) {
     if (KotlinConstructorBuilder.class.isAssignableFrom(builderType)) {
-      return builder -> ((KotlinConstructorBuilder<?, ?>) builder).get(null);
+      return builder -> ((KotlinConstructorBuilder<?, ?>) builder).get(wireField);
     }
     Field field;
     try {
@@ -197,12 +200,14 @@ public final class FieldBinding<M extends Message<M, B>, B extends Message.Build
   private static InstanceGetter getInstanceGetter(Class<?> messageType, Field messageField,
       String name) {
     if (Modifier.isPrivate(messageField.getModifiers())) {
+      // When the field name matches the isXxx convention the getter keeps the name verbatim;
+      // otherwise it is getXxx.
       String getterName = IS_GETTER_FIELD_NAME_REGEX.matcher(name).matches()
           ? name
-          : Character.toUpperCase(name.charAt(0)) + name.substring(1);
+          : "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
       Method getter;
       try {
-        getter = messageType.getMethod("get" + getterName);
+        getter = messageType.getMethod(getterName);
       } catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
       }
@@ -229,8 +234,14 @@ public final class FieldBinding<M extends Message<M, B>, B extends Message.Build
     if (label().isRepeated()) {
       Object list = getFromBuilder(builder);
       if (list instanceof List) {
-        if (list instanceof java.util.List) {
+        // Upstream branches on Kotlin MutableList versus read-only List (the copy-on-add
+        // fallback); Java has no mutability query, so attempt in-place add and copy on refusal.
+        try {
           ((List<Object>) list).add(value);
+        } catch (UnsupportedOperationException e) {
+          List<Object> mutable = new ArrayList<>((List<Object>) list);
+          mutable.add(value);
+          set(builder, mutable);
         }
       } else {
         throw new ClassCastException(
@@ -239,7 +250,13 @@ public final class FieldBinding<M extends Message<M, B>, B extends Message.Build
     } else if (isMap()) {
       Object map = getFromBuilder(builder);
       if (map instanceof Map) {
-        ((Map<Object, Object>) map).putAll((Map<?, ?>) value);
+        try {
+          ((Map<Object, Object>) map).putAll((Map<?, ?>) value);
+        } catch (UnsupportedOperationException e) {
+          Map<Object, Object> mutable = new LinkedHashMap<>((Map<Object, Object>) map);
+          mutable.putAll((Map<?, ?>) value);
+          set(builder, mutable);
+        }
       } else {
         throw new ClassCastException(
             "Expected a map type, got " + (map == null ? null : map.getClass()) + ".");
