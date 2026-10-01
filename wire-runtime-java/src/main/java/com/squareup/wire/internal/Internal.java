@@ -41,6 +41,12 @@ import java.util.Map;
  * those types are real classes, so they are not ported to the JVM-only artifact.
  */
 public final class Internal {
+  /**
+   * Upstream generates this from the build (BuildConfig); the port fixes it at the tracked
+   * upstream version. Serves the same purpose as upstream's wireVersion.
+   */
+  public static final String WIRE_VERSION = "7.1.0";
+
   private Internal() {
   }
 
@@ -229,8 +235,10 @@ public final class Internal {
     if (b != null) result++;
     if (c != null) result++;
     if (d != null) result++;
-    for (Object o : rest) {
-      if (o != null) result++;
+    if (rest != null) {
+      for (Object o : rest) {
+        if (o != null) result++;
+      }
     }
     return result;
   }
