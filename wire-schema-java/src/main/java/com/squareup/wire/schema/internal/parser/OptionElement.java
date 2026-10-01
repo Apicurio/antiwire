@@ -42,7 +42,7 @@ public final class OptionElement {
   }
 
   public static final OptionElement PACKED_OPTION_ELEMENT =
-      new OptionElement("packed", Kind.BOOLEAN, "false", false);
+      new OptionElement("packed", Kind.BOOLEAN, "true", false);
 
   public final String name;
   public final Kind kind;
@@ -147,20 +147,29 @@ public final class OptionElement {
         case NUMBER:
         case ENUM:
           return primitive.value.toString();
-        case LIST: {
-          StringBuilder builder = new StringBuilder();
-          SchemaUtil.appendOptions(builder, (List<OptionElement>) primitive.value);
-          return builder.toString();
-        }
         default:
-          throw new AssertionError();
+          return formatOptionMapValue(primitive.value);
       }
+    }
+    if (value instanceof Map) {
+      StringBuilder builder = new StringBuilder();
+      builder.append("{\n");
+      formatOptionMap(builder, (Map<String, ?>) value);
+      builder.append('}');
+      return builder.toString();
     }
     if (value instanceof List) {
       StringBuilder builder = new StringBuilder();
-      SchemaUtil.appendOptions(builder, (List<OptionElement>) value);
+      builder.append("[\n");
+      List<?> list = (List<?>) value;
+      int lastIndex = list.size() - 1;
+      for (int index = 0; index < list.size(); index++) {
+        String endl = index != lastIndex ? "," : "";
+        SchemaUtil.appendIndented(builder, formatOptionMapValue(list.get(index)) + endl);
+      }
+      builder.append(']');
       return builder.toString();
     }
-    throw new AssertionError();
+    return String.valueOf(value);
   }
 }
