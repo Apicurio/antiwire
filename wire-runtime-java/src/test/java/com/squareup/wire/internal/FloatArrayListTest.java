@@ -15,7 +15,6 @@
  */
 package com.squareup.wire.internal;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ public class FloatArrayListTest {
     arrayList.add((float) 2);
     arrayList.add((float) 3);
 
-    float[] array = arrayList.toPrimitiveArray();
+    float[] array = arrayList.toArray();
     assertEquals(3, array.length);
     for (int i = 0; i < 3; i++) {
       assertEquals((float) (i + 1), array[i], 0.0f);
@@ -44,7 +43,6 @@ public class FloatArrayListTest {
     arrayList.add((float) 2);
     arrayList.add((float) 3);
 
-    assertEquals(3, 3);
     assertEquals(java.util.Arrays.toString(new float[]{1, 2, 3}), arrayList.toString());
   }
 }

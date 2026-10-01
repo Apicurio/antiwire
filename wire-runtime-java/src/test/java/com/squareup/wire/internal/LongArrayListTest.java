@@ -15,7 +15,6 @@
  */
 package com.squareup.wire.internal;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ public class LongArrayListTest {
     arrayList.add((long) 2);
     arrayList.add((long) 3);
 
-    long[] array = arrayList.toPrimitiveArray();
+    long[] array = arrayList.toArray();
     assertEquals(3, array.length);
     for (int i = 0; i < 3; i++) {
       assertEquals((long) (i + 1), array[i]);
@@ -44,7 +43,6 @@ public class LongArrayListTest {
     arrayList.add((long) 2);
     arrayList.add((long) 3);
 
-    assertEquals(3, 3);
     assertEquals(java.util.Arrays.toString(new long[]{1, 2, 3}), arrayList.toString());
   }
 }

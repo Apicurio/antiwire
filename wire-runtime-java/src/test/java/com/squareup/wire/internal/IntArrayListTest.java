@@ -15,7 +15,6 @@
  */
 package com.squareup.wire.internal;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ public class IntArrayListTest {
     arrayList.add((int) 2);
     arrayList.add((int) 3);
 
-    int[] array = arrayList.toPrimitiveArray();
+    int[] array = arrayList.toArray();
     assertEquals(3, array.length);
     for (int i = 0; i < 3; i++) {
       assertEquals((int) (i + 1), array[i]);
@@ -44,7 +43,24 @@ public class IntArrayListTest {
     arrayList.add((int) 2);
     arrayList.add((int) 3);
 
-    assertEquals(3, 3);
     assertEquals(java.util.Arrays.toString(new int[]{1, 2, 3}), arrayList.toString());
+  }
+
+  @Test public void forDecodingClampsAndDivides() {
+    // Capacity is not observable until elements land (toArray truncates to size), so the
+    // contract under test is usability. The Int.MAX_VALUE clamp would itself exceed the VM's
+    // array limit if exercised with a huge minimum, exactly as upstream would; it is verified
+    // by reading, not by allocation.
+    IntArrayList sized = IntArrayList.forDecoding(10, 2);
+    sized.add(7);
+    assertEquals(1, sized.toArray().length);
+    assertEquals(7, sized.toArray()[0]);
+
+    IntArrayList longSized = IntArrayList.forDecoding(10_000_000L, 4);
+    longSized.add(9);
+    assertEquals(1, longSized.toArray().length);
+
+    IntArrayList empty = IntArrayList.forDecoding(0, 4);
+    assertEquals(0, empty.toArray().length);
   }
 }
