@@ -1,10 +1,10 @@
 ---
 id: TASK-9
 title: Run all applicable upstream runtime tests with tracked adaptations
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-09-30 01:18'
+updated_date: '2026-10-01 23:50'
 labels: []
 milestone: m-7
 dependencies:
@@ -36,3 +36,8 @@ Adopt every applicable JVM runtime behavior test from Wire 7.1.0 at the pinned c
 <!-- DOD:BEGIN -->
 - [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+## Comments
+
+#1 - 2026-10-01 23:50 (UTC)
+Progress checkpoint (commit de01a7c). Done: the commonTest inventory is fully adopted (all 13 upstream files, ~110 cases: ProtoAdapterTest, ProtoReaderTest, ProtoReader32Test, ReverseProtoWriterTest, ProtoWriterTest verbatim Kotlin, DurationTest, InstantTest, FieldMaskTest, InternalTest, the four ArrayListTests), each with ledger rows; fixture generation via the pinned upstream compiler wired as scripts/generate-java-fixtures.sh into the new never-published wire-tests-java module; the jvm-java-kotlin suite (9 Java files, 79 cases) adopted and green; both bugs it caught (non-mutating redactElements, missing Kotlin null-parameter messages) fixed and regression-covered. Remaining for this task's full closure: the jvm-kotlin-proto-reader-32 and jvm-kotlin-interop inventories, the case-accounting document mapping every upstream case to executed/excluded (AC#1 exhaustive inventory format), and CI wiring beyond the current scripts/verify.sh (AC#5 cross-module inventory enforcement, shared with TASK-14).
