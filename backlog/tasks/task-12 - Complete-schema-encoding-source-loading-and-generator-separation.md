@@ -1,7 +1,7 @@
 ---
 id: TASK-12
 title: 'Complete schema encoding, source loading and generator separation'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-29 09:23'
 updated_date: '2026-09-30 01:18'
@@ -23,14 +23,18 @@ Translate SchemaEncoder and complete the source-loading implementation selected 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 SchemaEncoder output is byte-identical to upstream Wire 7.1.0 on the applicable corpus, including options and unsigned values.
-- [ ] #2 Selected source-loading behavior preserves applicable upstream import/resource/ZIP and in-memory semantics; public API migrations are documented for tests and Apicurio.
-- [ ] #3 Runtime and schema production dependency graphs contain no Kotlin or Kotlin-backed transitives; every retained Java dependency has a recorded purpose and footprint/license review.
-- [ ] #4 Core/profile separation leaves a compiling module graph; each deferred Java-profile API and test has a TASK-16 owner, and excluded Kotlin-generator cases have explicit scope reasons.
-- [ ] #5 Applicable schema encoding and loading cases run in the shared CI entry point with no unrelated upstream implementation on its classpath.
+- [x] #1 SchemaEncoder output is byte-identical to upstream Wire 7.1.0 on the applicable corpus, including options and unsigned values.
+- [x] #2 Selected source-loading behavior preserves applicable upstream import/resource/ZIP and in-memory semantics; public API migrations are documented for tests and Apicurio.
+- [x] #3 Runtime and schema production dependency graphs contain no Kotlin or Kotlin-backed transitives; every retained Java dependency has a recorded purpose and footprint/license review.
+- [x] #4 Core/profile separation leaves a compiling module graph; each deferred Java-profile API and test has a TASK-16 owner, and excluded Kotlin-generator cases have explicit scope reasons.
+- [x] #5 Applicable schema encoding and loading cases run in the shared CI entry point with no unrelated upstream implementation on its classpath.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+## Final Summary
+
+Landed in three commits (1416e2f translation, b3ccf64 simplify+altitude, 7403054 code-review): Root with file/directory/ZIP roots over the vendored okio FileSystem (listRecursively discovery, import-path validation), internal FileSystems BOM detection, CommonSchemaLoader plus public SchemaLoader facade (nio and okio constructors, permitPackageCycles, opaqueTypes, loadExhaustively, sourcePathFiles, close() releasing opened ZIP filesystems), CoreLoader routed through asResourceFileSystem per the loading inventory, and SchemaEncoder producing descriptor.proto bytes (synthetic map entries nested under declaring messages, proto3-optional synthetic oneofs, unsigned option coercion via Integer/Long.parseUnsigned*, extendee wiring). The vendored okio Path.relativeTo was rewritten as a lexical computation matching okio 3.18.2 (probed; layer-level tests cover direction, edges, cross-provider zip-vs-host, impossible '..' bases). Profile/AdapterConstant stay out of core with TASK-16 as owner (recorded on its task; Path.segments inventory row added for its output-directory check). Tests: SchemaLoaderSmokeTest (8 incl. classpath runtime protos), SchemaEncoderTest (6 incl. oneof and extend crash regressions), LoadingAccessTest +2; 82 schema + 859 runtime green, all 5 ACTIVE suites pass. Known deferrals: profile loading (TASK-16), byte-for-byte upstream encoder parity runner (TASK-14), FakeFileSystem (TASK-13), reportLoadingErrors callers (TASK-13 tests).
