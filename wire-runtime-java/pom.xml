@@ -25,12 +25,23 @@
   </description>
 
   <dependencies>
-    <!-- Parity oracle fixture: upstream wire-runtime-jvm relocated, test scope only. -->
+    <!-- Parity oracle fixture: upstream wire-runtime-jvm relocated, test scope only.
+         The exclusion is required in-reactor: the fixture's original pom still declares
+         wire-runtime-jvm compile (the dependency-reduced pom applies only once installed),
+         which would leak the unrelocated upstream jar onto this test classpath next to the
+         port's own classes, violating DEC-2's duplicate-class rule. kotlin-stdlib still
+         arrives from the parent's test-scope declaration. -->
     <dependency>
       <groupId>io.github.paoloantinori</groupId>
       <artifactId>wire-upstream-shaded</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.squareup.wire</groupId>
+          <artifactId>wire-runtime-jvm</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- The vendored okio tests are JUnit 4; the vintage engine runs them next to the
          parent's JUnit 5 platform. -->

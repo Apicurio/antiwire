@@ -46,7 +46,7 @@ fi
 
 rc="$EXIT_OK"
 missing=0
-for module in "${MODULES[@]}"; do
+for module in "${SHIPPED_MODULES[@]}"; do
   cp_file="$ROOT/$module/target/classpath-test.txt"
   if [ ! -f "$cp_file" ]; then
     echo "MISSING classpath export for $module: $cp_file (run mvn verify first)"

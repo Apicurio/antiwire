@@ -51,7 +51,7 @@ echo "Java 11 toolchain: $JDK11 ($JDK11_VERSION)"
 
 module_jars=()
 missing_jar=0
-for module in "${MODULES[@]}"; do
+for module in "${SHIPPED_MODULES[@]}"; do
   jar="$(find_module_jar "$module")"
   if [ -z "$jar" ]; then
     missing_jar=1
@@ -69,7 +69,7 @@ if [ "$missing_jar" -ne 0 ]; then
     exit "$EXIT_NOT_RUN"
   fi
   module_jars=()
-  for module in "${MODULES[@]}"; do
+  for module in "${SHIPPED_MODULES[@]}"; do
     jar="$(find_module_jar "$module")"
     if [ -z "$jar" ]; then
       echo "java11-consumer NOT_RUN: module jar for $module still missing after the fallback build"

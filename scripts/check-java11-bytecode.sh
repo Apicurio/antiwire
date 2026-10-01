@@ -18,7 +18,7 @@ set -uo pipefail
 check_modules_consistency
 
 args=()
-for module in "${MODULES[@]}"; do
+for module in "${SHIPPED_MODULES[@]}"; do
   jar="$(find_module_jar "$module")"
   if [ -z "$jar" ]; then
     echo "MISSING module jar for $module (run mvn verify first)"
