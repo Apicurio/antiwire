@@ -39,7 +39,7 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
   private transient ByteString unknownFieldsMemoized;
 
   /** If not {@code 0} then the serialized size of this message. */
-  transient int cachedSerializedSize;
+  public transient int cachedSerializedSize;
 
   /** If non-zero, the hash code of this message. Accessed by generated code. */
   protected transient int hashCode = 0;

@@ -146,6 +146,24 @@ public final class Internal {
     return null;
   }
 
+  /** Upstream's camelCase helper from the Internal facade (one-line form). */
+  public static String camelCase(String value, boolean upperCamel) {
+    StringBuilder result = new StringBuilder();
+    boolean capitalize = upperCamel;
+    for (int i = 0; i < value.length(); i++) {
+      char c = value.charAt(i);
+      if (c == '_') {
+        capitalize = true;
+      } else if (capitalize) {
+        result.append(Character.toUpperCase(c));
+        capitalize = false;
+      } else {
+        result.append(c);
+      }
+    }
+    return result.toString();
+  }
+
   public static boolean equals(Object a, Object b) {
     return a == b || (a != null && a.equals(b));
   }

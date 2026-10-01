@@ -218,7 +218,7 @@ public abstract class ProtoAdapter<E> {
     return String.valueOf(value);
   }
 
-  ProtoAdapter<?> withLabel(WireField.Label label) {
+  public ProtoAdapter<?> withLabel(WireField.Label label) {
     if (label.isRepeated()) {
       return label.isPacked() ? asPacked() : asRepeated();
     }
@@ -282,6 +282,77 @@ public abstract class ProtoAdapter<E> {
   public static <K, V> ProtoAdapter<Map<K, V>> newMapAdapter(ProtoAdapter<K> keyAdapter,
       ProtoAdapter<V> valueAdapter) {
     return new MapProtoAdapter<K, V>(keyAdapter, valueAdapter);
+  }
+
+  /** Creates a new proto adapter for a generated message type through reflection. */
+  public static <M extends Message<M, B>, B extends Message.Builder<M, B>> ProtoAdapter<M>
+      newMessageAdapter(Class<M> type) {
+    return com.squareup.wire.internal.Reflection.createRuntimeMessageAdapter(type, null,
+        Syntax.PROTO_2);
+  }
+
+  /** Obsolete; for classes generated before syntax was added. */
+  public static <M extends Message<M, B>, B extends Message.Builder<M, B>> ProtoAdapter<M>
+      newMessageAdapter(Class<M> type, String typeUrl) {
+    return com.squareup.wire.internal.Reflection.createRuntimeMessageAdapter(type, typeUrl,
+        Syntax.PROTO_2);
+  }
+
+  /** Obsolete; for classes generated before classLoader was added. */
+  public static <M extends Message<M, B>, B extends Message.Builder<M, B>> ProtoAdapter<M>
+      newMessageAdapter(Class<M> type, String typeUrl, Syntax syntax) {
+    return com.squareup.wire.internal.Reflection.createRuntimeMessageAdapter(type, typeUrl,
+        syntax);
+  }
+
+  /** Creates a new proto adapter for {@code type}. */
+  public static <M extends Message<M, B>, B extends Message.Builder<M, B>> ProtoAdapter<M>
+      newMessageAdapter(Class<M> type, String typeUrl, Syntax syntax, ClassLoader classLoader) {
+    return com.squareup.wire.internal.Reflection.createRuntimeMessageAdapter(type, typeUrl,
+        syntax, classLoader);
+  }
+
+  /** Creates a new proto adapter for {@code type}. */
+  public static <E extends WireEnum> EnumAdapter<E> newEnumAdapter(Class<E> type) {
+    return new RuntimeEnumAdapter<>(type);
+  }
+
+  /** Returns the adapter for the type of {@code message}. */
+  public static <M extends Message<?, ?>> ProtoAdapter<M> get(M message) {
+    return (ProtoAdapter<M>) get(message.getClass());
+  }
+
+  /** Returns the adapter for {@code type}. */
+  public static <M> ProtoAdapter<M> get(Class<M> type) {
+    try {
+      return (ProtoAdapter<M>) type.getField("ADAPTER").get(null);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new IllegalArgumentException("failed to access " + type.getName() + "#ADAPTER", e);
+    }
+  }
+
+  /**
+   * Returns the adapter for a given {@code adapterString}, in the form
+   * {@code com.squareup.wire.protos.person.Person#ADAPTER}.
+   */
+  public static ProtoAdapter<?> get(String adapterString) {
+    return get(adapterString, ProtoAdapter.class.getClassLoader());
+  }
+
+  /**
+   * Returns the adapter for a given {@code adapterString} using {@code classLoader}, in the
+   * form {@code com.squareup.wire.protos.person.Person#ADAPTER}.
+   */
+  public static ProtoAdapter<?> get(String adapterString, ClassLoader classLoader) {
+    try {
+      int hash = adapterString.indexOf('#');
+      String className = adapterString.substring(0, hash);
+      String fieldName = adapterString.substring(hash + 1);
+      return (ProtoAdapter<Object>) Class.forName(className, true, classLoader)
+          .getField(fieldName).get(null);
+    } catch (IllegalAccessException | NoSuchFieldException | ClassNotFoundException e) {
+      throw new IllegalArgumentException("failed to access " + adapterString, e);
+    }
   }
 
   public static final ProtoAdapter<Boolean> BOOL = new BoolAdapter();

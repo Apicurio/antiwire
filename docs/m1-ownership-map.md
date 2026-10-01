@@ -29,11 +29,17 @@ their tests. Source: wire 7.1.0 wire-runtime commonMain/jvmMain inventory.
 
 ## TASK-7 (reflection machinery) owns
 
-ProtoAdapter's reflection paths (create(Class), the @WireField field binding machinery,
-RuntimeMessageAdapter, MessageBinding/FieldOrOneOfBinding), Wire.kt registry,
-RuntimeEnumAdapter, KotlinConstructorBuilder, AndroidMessage, MessageSerializedForm's
-readResolve reflection, JsonIntegration and the Duration/Instant/Enum/FieldMask JSON
-formatters, WireLogger JVM side.
+ProtoAdapter's reflection paths (createRuntimeMessageAdapter, the @WireField field binding
+machinery, RuntimeMessageAdapter, MessageBinding/FieldOrOneOfBinding), the Wire.get default
+helper, RuntimeEnumAdapter, KotlinConstructorBuilder, the ADAPTER-string and Class lookups on
+ProtoAdapter's companion (newMessageAdapter, newEnumAdapter, get overloads; landed 2026-10-01
+batch 6). Deferred with cause: AndroidMessage (Android-only, no consumer in scope until an
+Android consumer exists; needs a provided-scope android dependency to compile) and
+JsonIntegration with the JSON formatters (their only callers are the gson/moshi adapters that
+DEC-6 excludes from the initial release; RuntimeMessageAdapter.writeAllFields, their
+integration point, is translated). MessageSerializedForm's minimal direct-ADAPTER lookup
+landed in TASK-6 and needs no change when TASK-7's get() arrived (both read the same public
+static field).
 
 ## TASK-8 (well-known parity and internal helpers) owns
 

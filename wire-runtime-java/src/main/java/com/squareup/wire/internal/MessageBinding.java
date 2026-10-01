@@ -1,0 +1,46 @@
+/*
+ * Copyright (C) 2019 Square, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.squareup.wire.internal;
+
+import com.squareup.wire.FieldEncoding;
+import com.squareup.wire.Syntax;
+import java.util.Map;
+import okio.ByteString;
+
+/** Upstream commonMain interface, unchanged in shape. */
+public interface MessageBinding<M, B> {
+  Class<?> messageType();
+
+  Map<Integer, FieldOrOneOfBinding<M, B>> fields();
+
+  String typeUrl();
+
+  Syntax syntax();
+
+  ByteString unknownFields(M message);
+
+  int getCachedSerializedSize(M message);
+
+  void setCachedSerializedSize(M message, int size);
+
+  B newBuilder();
+
+  M build(B builder);
+
+  void addUnknownField(B builder, int tag, FieldEncoding fieldEncoding, Object value);
+
+  void clearUnknownFields(B builder);
+}
