@@ -116,9 +116,23 @@ public final class Path implements Comparable<Path> {
     return div(child);
   }
 
-  /** Returns a relative path from this path to {@code other}. */
-  public Path relativeTo(Path other) {
-    return wrap(nioPath.relativize(other.nioPath));
+  /**
+   * Returns this path relative to {@code base}, like okio 3: {@code /a/b/c.txt}.relativeTo({@code
+   * /a/b}) is {@code c.txt}. Verified against okio-jvm 3.18.2 behavior on 2026-10-02. Unlike a
+   * raw nio relativize this is provider-agnostic: okio's paths compare as strings, so a zip
+   * entry and a host path must relativize even though their nio providers differ. Both sides are
+   * routed through the default filesystem to get that neutral comparison.
+   */
+  public Path relativeTo(Path base) {
+    java.nio.file.Path thisNio = defaultProviderPath(nioPath);
+    java.nio.file.Path baseNio = defaultProviderPath(base.nioPath);
+    return wrap(baseNio.relativize(thisNio));
+  }
+
+  private static java.nio.file.Path defaultProviderPath(java.nio.file.Path path) {
+    return path.getFileSystem() == java.nio.file.FileSystems.getDefault()
+        ? path
+        : java.nio.file.Paths.get(path.toString());
   }
 
   /** Returns the parent of this path, or null when there is none. */

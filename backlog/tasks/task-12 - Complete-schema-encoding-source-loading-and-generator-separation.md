@@ -1,7 +1,7 @@
 ---
 id: TASK-12
 title: 'Complete schema encoding, source loading and generator separation'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-29 09:23'
 updated_date: '2026-09-30 01:18'

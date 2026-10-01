@@ -33,6 +33,9 @@ import java.nio.charset.StandardCharsets;
  * <p>If the user has provided their own version of these protos, those are preferred.
  */
 public final class CoreLoader implements Loader {
+  /** Upstream declares CoreLoader as a Kotlin object; this is its singleton. */
+  public static final CoreLoader INSTANCE = new CoreLoader();
+
   static final String DESCRIPTOR_PROTO = "google/protobuf/descriptor.proto";
   static final String WIRE_EXTENSIONS_PROTO = "wire/extensions.proto";
 
