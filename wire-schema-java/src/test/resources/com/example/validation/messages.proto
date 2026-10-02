@@ -1,0 +1,11 @@
+syntax = "proto3";
+package com.example.validation;
+
+option java_package = "com.example.validation";
+
+import "google/protobuf/timestamp.proto";
+
+message Order {
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+}

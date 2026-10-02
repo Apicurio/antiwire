@@ -351,6 +351,12 @@ public abstract class FileSystem implements Closeable {
 
     @Override public FileMetadata metadataOrNull(Path path) {
       String name = resourceName(path);
+      if (name.isEmpty()) {
+        // The classpath root is always a directory, even when the provider reports no URL
+        // for the empty resource name (jars-only classpaths like `java -jar` return null
+        // there); without this, a root Location cannot become a DirectoryRoot.
+        return new FileMetadata(false, true, null, null);
+      }
       URL url = classLoader.getResource(name);
       if (url == null) return null;
       // Classpath providers report directories as URLs ending in a slash; sizes are not

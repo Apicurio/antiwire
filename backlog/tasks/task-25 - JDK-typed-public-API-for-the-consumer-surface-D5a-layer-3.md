@@ -1,7 +1,7 @@
 ---
 id: TASK-25
 title: JDK-typed public API for the consumer surface (D5a layer 3)
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-01 07:30'
 labels: []

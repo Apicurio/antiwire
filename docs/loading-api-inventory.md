@@ -42,7 +42,7 @@ the DEC-4 production-Kotlin ban holds trivially.
 | `FileSystem.listRecursively` (Root.kt allProtoFiles: the loader's primary sourcePath discovery) | eager depth-first snapshot over list/metadataOrNull, parents before children, directories included, natural order per directory | okio's lazy Kotlin Sequence maps to this snapshot in adaptations (recorded); followSymlinks flag supported |
 | `FileSystem.appendingSink` | implemented over the vendored `Okio.sink` nio overload | owner: the deferred M2 FakeFileSystem parity row |
 | `FileSystem` closeability (openZip handle) | `FileSystem implements Closeable`; closing a zip-backed system releases the archive, closing SYSTEM is a no-op; callers own the handle openZip returns | the lifecycle okio 3 gives the same operation; a long-running consumer (Apicurio) can reload roots without leaking descriptors |
-| `ClassLoader.asResourceFileSystem()` (CoreLoader) | `FileSystem.asResourceFileSystem(loader)` read-only, known-resource reads; list is unsupported across providers and throws with guidance; directories are reported (URL trailing-slash convention) but byteSize is not probed (one connection per call, and the loader never reads it here) | replaces Apicurio's FakeFileSystem/setWorkingDirectory choreography (TASK-25/TASK-18) |
+| `ClassLoader.asResourceFileSystem()` (CoreLoader) | `FileSystem.asResourceFileSystem(loader)` read-only, known-resource reads; list is unsupported across providers and throws with guidance; directories are reported (URL trailing-slash convention) but byteSize is not probed (one connection per call, and the loader never reads it here); the root path is always reported as a directory, so a jars-only classpath (where `getResource("")` returns null) still yields a root DirectoryRoot for `forClasspath` | replaces Apicurio's FakeFileSystem/setWorkingDirectory choreography; consumed by `JdkSchemaLoader.forClasspath` (TASK-25), TASK-18 migrates the call sites |
 | `ForwardingFileSystem` (WireCompiler `--dry_run`) | vendored as an abstract delegating subclass covering exactly the vendored FileSystem's operations; the constructor of `FileSystem` is protected (upstream okio keeps it same-package-internal) so this subclass can exist outside the okio sources; upstream's `onPathParameter` path-mapping hook is omitted because no ported file system needs path translation | added with TASK-16: the CLI's `DryRunFileSystem` extends it to discard writes; the only subclass, and it uses identical paths in both systems |
 | `Path.segments` (SchemaHandler.checkPathInOutDirectory: output-directory escape check) | not yet implemented; add a string-splitting accessor on `okio.Path` when TASK-16 ports the check, consistent with the class's string-based equality | owner: TASK-16 (flagged by the TASK-12 altitude review so the security check stays a faithful translation instead of a caller-side string split) |
 | `Path.isRelative`, `Path.isEmpty`, `Path.resolve` | trivial derivations kept for okio API shape; `resolve` is the Java-idiomatic alias of `div` used by translated call sites | mapped here so the surface stays traceable |
@@ -74,9 +74,15 @@ the DEC-4 production-Kotlin ban holds trivially.
 - Java callers of the port see the same `okio.Path`/`FileSystem` names as upstream, so
   translated wire-schema code compiles unchanged; the names live in the port's own jar
   (duplicate-class policy: the origin check proves no coexistence with a real okio artifact).
-- Apicurio's migration sites (DEC-2) gain a simpler route: classpath descriptor loading via
-  `asResourceFileSystem`, no FakeFileSystem; TASK-18 re-inventories the site list before
-  editing.
+- Apicurio's migration sites (DEC-2) gain a simpler route: `JdkSchemaLoader.forClasspath`
+  (TASK-25) wraps `asResourceFileSystem` behind a JDK-typed facade, no FakeFileSystem; the
+  migration sketch for `ProtobufSchemaLoader` lives in `JdkSchemaLoader`'s javadoc, and
+  `JdkSchemaLoaderValidationTest` in wire-schema-java simulates the consumer and enforces the
+  no-okio-signature rule by reflection. TASK-18 re-inventories the site list before editing.
+- The consumer surface is `JdkSchemaLoader` alone; `SchemaLoader` in the same package keeps its
+  okio-typed constructor as the engine surface (the port's own suites build on it, and TASK-25
+  is additive). Migrating consumers must not import `SchemaLoader`; the reflection test scopes
+  the no-okio rule to the facade and this note records the exclusion.
 
 ## Demonstrated (TASK-4 AC#2, LoadingAccessTest, runs in the build suite)
 
