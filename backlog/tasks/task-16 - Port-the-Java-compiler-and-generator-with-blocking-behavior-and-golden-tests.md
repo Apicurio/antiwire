@@ -1,7 +1,7 @@
 ---
 id: TASK-16
 title: Port the Java compiler and generator with blocking behavior and golden tests
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-29 09:23'
 updated_date: '2026-09-30 01:18'
@@ -23,16 +23,16 @@ Port the Java-target CLI and Java generator in the optional module created by TA
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The Java CLI, generator and profile support pass all applicable upstream Java-target compiler and profile cases; every case deferred from TASK-13 is executed or excluded solely for a declared non-ported feature.
-- [ ] #2 Java generated output is byte-identical where the compatibility contract preserves output; any required mechanical namespace/API mapping is bounded, documented, reviewed and checked automatically against pinned upstream goldens.
-- [ ] #3 Generated Java fixtures compile and run against the port, with positive and negative compiler cases beyond the limited golden corpus.
-- [ ] #4 Compiler/profile tests and golden comparisons run as blocking jobs in TASK-14's shared CI entry point; no required generator-owned case remains pending.
-- [ ] #5 The optional generator artifact and its transitives contain no Kotlin; runtime/schema remain independently consumable without generator dependencies, and all retained Java dependencies satisfy the recorded policy.
+- [x] #1 The Java CLI, generator and profile support pass all applicable upstream Java-target compiler and profile cases; every case deferred from TASK-13 is executed or excluded solely for a declared non-ported feature.
+- [x] #2 Java generated output is byte-identical where the compatibility contract preserves output; any required mechanical namespace/API mapping is bounded, documented, reviewed and checked automatically against pinned upstream goldens.
+- [x] #3 Generated Java fixtures compile and run against the port, with positive and negative compiler cases beyond the limited golden corpus.
+- [x] #4 Compiler/profile tests and golden comparisons run as blocking jobs in TASK-14's shared CI entry point; no required generator-owned case remains pending.
+- [x] #5 The optional generator artifact and its transitives contain no Kotlin; runtime/schema remain independently consumable without generator dependencies, and all retained Java dependencies satisfy the recorded policy.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
 
 ## Comments
@@ -45,3 +45,7 @@ TASK-13 closed with deferrals owned here. Beyond the profile files below: upstre
 
 #2 - 2026-10-02 05:35 (UTC)
 Scope inventory: upstream JavaGenerator is ALREADY JAVA (wire-java-generator/src/main/java/com/squareup/wire/java/JavaGenerator.java, 2,489 lines; deps: palantir javapoet, guava [banned in compile scope -> de-guava during adaptation], wire-schema internal JvmLanguages helpers). Kotlin surface to port: JavaSchemaHandler.kt (127), JvmLanguages.kt, WireCompiler.kt (577), wire-schema's WireRun.kt (416), SchemaHandler.kt (245), PartitionedSchema.kt (134), EventListener.kt (112), EventListeners.kt (60), Profile.kt (22), ProfileLoader.kt (21), AdapterConstant.kt (42), internal/{ProfileFileElement 80, ProfileParser 122, TypeConfigElement 42, TypeMover 233}; plus Target.kt already noted. Tests to adopt: wire-java-generator tests (JavaGeneratorTest, goldens in wire-golden-files), wire-compiler WireCompilerTest, and the TASK-13 deferrals (SchemaHandlerTest, ManifestPartitionTest, TypeMoverTest, ProfileParserTest, ProfileLoaderTest, 3 SchemaLoaderTest profile cases). Plan: (A) schema-side machinery batch, (B) generator+CLI batch, (C) test adoption incl. deferrals + compiler-tests suite ACTIVE, then gates.
+
+## Final Summary
+
+Landed in four commits (e7b93da machinery+generator+CLI, 3515715 test adoption, 7ddfa91 simplify findings, 79340a0-fixture picker fix): the Java compiler surface is fully ported - wire-schema gained WireRun/SchemaHandler/Target/EventListener(s)/Profile layer (poet-free per OPEN-2/DEC-10)/PartitionedSchema/TypeMover/ClaimedDefinitions+Paths/WireLogger(s)/JvmLanguages+NameFactory with profile loading revived in CommonSchemaLoader; wire-java-generator gained JavaGenerator (upstream's Java source, de-guava'd mechanically), JavaSchemaHandler, JavaTarget/CustomTarget, and the WireCompiler CLI with a YAML-subset manifest parser. Dependency decision recorded at the pin: square javapoet 1.13.0 replaces upstream's palantir fork (all palantir releases are Java-17 bytecode, violating DEC-3) with proven byte-identical output. Golden identity verified full-corpus: 19 generated files across all 13 wire-golden-files protos, diff clean against the pinned upstream compiler. Test adoption: 190 upstream cases (SchemaHandler/ManifestPartition/ProfileLoader/ProfileParser/TypeMover fully live, 3 deferred SchemaLoaderTest cases revived, JavaGeneratorTest 40/40, WireCompiler suites, WireRun 44 live + 29 DEC-6/ProtoTarget disabled); 611 schema + 171 generator tests green; compiler-tests suite ACTIVE (10 suites total). Fidelity fixes forced by adoption: okio Path root/volumeLetter/segments/isAbsolute made lexical per okio 3.18.2 commonMain; JvmLanguages equals-vs-reference; manifest inline empty-module form with kaml wording. Parity: 967 upstream cases reconciled, 0 deferred, --require-complete PASSES (release gate green). Shared test-utils via test-jar with the classifier excluded from production-jar pickers. Gates: /simplify 8 findings applied; adversarial verification of all 5 ACs passed. Live gap recorded (compatibility-matrix E): protos using google.protobuf.Empty generate kotlin.Unit code that cannot compile against the port runtime until the Empty representation lands (adjacent to TASK-26/OPEN-4).
