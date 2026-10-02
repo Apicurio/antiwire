@@ -35,9 +35,24 @@
       <artifactId>protobuf-java</artifactId>
       <version>4.36.1</version>
     </dependency>
+    <!-- JsonFormat: the upstream compatibility cases assert protoc's own JSON printing and
+         parsing behavior. Test scope only; the port's JSON adapters are a DEC-6 exclusion. -->
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java-util</artifactId>
+      <version>4.36.1</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- SchemaEncoderInteropTest loads the pinned module protos through the port's own
+         schema machinery. Test scope only. -->
+    <dependency>
+      <groupId>io.github.paoloantinori</groupId>
+      <artifactId>wire-schema-java</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

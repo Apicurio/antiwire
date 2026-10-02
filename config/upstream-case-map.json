@@ -250,6 +250,53 @@
           "reason": "manual main() harness, zero assertions (task13 ledger)"
         }
       }
+    },
+    "wire-protoc-compatibility-tests": {
+      "root": "wire-protoc-compatibility-tests/src/test/java",
+      "files": {
+        "com/squareup/wire/InteropChecker.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/InteropChecker.java"
+        },
+        "com/squareup/wire/InteropTest.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/InteropTest.java"
+        },
+        "com/squareup/wire/Proto2WireProtocCompatibilityTests.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/Proto2WireProtocCompatibilityTests.java"
+        },
+        "com/squareup/wire/Proto3WireProtocCompatibilityTests.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/Proto3WireProtocCompatibilityTests.java"
+        },
+        "com/squareup/wire/LargeFieldNumberInteropTest.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/LargeFieldNumberInteropTest.java"
+        },
+        "com/squareup/wire/StructTest.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/StructTest.java"
+        },
+        "com/squareup/wire/EmptyRoundTripTest.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/EmptyRoundTripTest.java"
+        },
+        "com/squareup/wire/DurationRoundTripTest.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/DurationRoundTripTest.java"
+        },
+        "com/squareup/wire/InstantRoundTripTest.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/InstantRoundTripTest.java"
+        },
+        "com/squareup/wire/FieldMaskRoundTripTest.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/FieldMaskRoundTripTest.java"
+        },
+        "com/squareup/wire/SchemaEncoderInteropTest.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/SchemaEncoderInteropTest.java"
+        },
+        "com/squareup/wire/ProtocWrappersHelper.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/ProtocWrappersHelper.java"
+        },
+        "com/squareup/wire/ProtocStructHelper.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/ProtocStructHelper.java"
+        },
+        "com/squareup/wire/UnwantedValueStripper.kt": {
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/UnwantedValueStripper.java"
+        }
+      }
     }
   },
   "excluded_upstream_modules": {
@@ -266,7 +313,6 @@
     "wire-gradle-plugin": "DEC-6: Gradle plugin outside the port surface",
     "wire-gradle-plugin-playground": "DEC-6: plugin playground",
     "wire-golden-files": "TASK-16: golden comparisons move to the compiler suite",
-    "wire-protoc-compatibility-tests": "TASK-15: protoc oracle corpus",
     "wire-reflector": "DEC-6: Kotlin reflection surface",
     "wire-test-utils": "test utilities; the port mirrors the pieces it needs in com.squareup.wire.testing.TestFiles",
     "wire-schema-tests": "upstream test-support module (SchemaBuilder); the port carries its own SchemaBuilder",

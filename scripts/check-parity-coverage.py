@@ -89,6 +89,9 @@ def extract_test_names(path):
                 pending = True
             continue
         if pending:
+            if stripped.startswith("@") or stripped.startswith("+"):
+                # Annotation continuations (multi-line @Disabled("..." + "...") bodies).
+                continue
             m = DECL_RE.match(stripped)
             if m:
                 names.add(m.group(1).strip("`"))

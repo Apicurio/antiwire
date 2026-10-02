@@ -1521,9 +1521,16 @@ public abstract class ProtoAdapter<E> {
 
     @Override public Map<String, ?> redact(Map<String, ?> value) {
       if (value == null) return null;
+      // Upstream is `value?.mapValues { STRUCT_VALUE.redact(it) }`: `it` is the Map.Entry and
+      // Kotlin passes it without re-checking the key's type, so any non-empty map throws
+      // IllegalArgumentException("unexpected struct value: ...") from the value dispatch
+      // before the key matters. Verified against the pinned 7.1.0 artifact (TASK-15 finding);
+      // the quirk is preserved, which is why the loop iterates the raw map.
+      Map<?, ?> raw = value;
       java.util.LinkedHashMap<String, Object> result = new java.util.LinkedHashMap<>();
-      for (Map.Entry<String, ?> entry : value.entrySet()) {
-        result.put(entry.getKey(), STRUCT_VALUE.redact(entry.getValue()));
+      for (Map.Entry<?, ?> entry : raw.entrySet()) {
+        Object redacted = STRUCT_VALUE.redact((Object) entry);
+        result.put((String) entry.getKey(), redacted);
       }
       return result;
     }

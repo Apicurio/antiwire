@@ -147,6 +147,7 @@ module_tests_suite() { # <suite> <artifactId>
 if [ "$build_ok" -eq 1 ]; then
   module_tests_suite runtime-tests wire-runtime-java
   module_tests_suite schema-tests wire-schema-java
+  module_tests_suite protoc-oracle wire-protoc-compat-java
   run_suite parity-coverage scripts/parity-coverage.sh
   run_suite duplicate-class-check scripts/check-classpath.sh
   run_suite bytecode-java11 scripts/check-java11-bytecode.sh
