@@ -21,13 +21,21 @@ import java.util.List;
 
 /**
  * A path in a file system. The API follows okio 3's Path (Apache 2.0, Square), which wire's
- * schema loader navigates; the implementation wraps {@link java.nio.file.Path}, so separator,
- * root and volume-letter semantics come from the path's own provider. Paths created by
- * {@link FileSystem#openZip} wrap paths from the ZIP provider, not the default one.
+ * schema loader navigates; the implementation wraps {@link java.nio.file.Path}. Paths created
+ * by {@link FileSystem#openZip} wrap paths from the ZIP provider, not the default one.
  *
  * <p>Equality, hashing and ordering are string-based across providers, like okio's: a zip
  * entry path and a host path with the same text are equal and order identically, even though
  * their nio providers differ.
+ *
+ * <p>{@link #root()}, {@link #volumeLetter()}, {@link #segments()}, and {@link #isAbsolute()}
+ * are computed lexically from the path string exactly like okio 3.18.2
+ * (okio/src/commonMain/kotlin/okio/internal/Path.kt, rootLength and commonSegmentsBytes,
+ * verified against that tag's source on 2026-10-02), not through the nio provider: okio
+ * recognizes {@code \\server} UNC roots, drive letters, and {@code \} as a separator on every
+ * platform, and {@code SchemaHandler.checkPathInOutDirectory} depends on that cross-platform
+ * parsing (upstream SchemaHandlerTest's UNC cases). Empty and {@code .} segments are dropped,
+ * matching what okio's canonicalizing construction guarantees for every path it can build.
  */
 public final class Path implements Comparable<Path> {
   private final java.nio.file.Path nioPath;
@@ -49,14 +57,14 @@ public final class Path implements Comparable<Path> {
     return nioPath;
   }
 
-  /** True if this path starts at a root, like {@code /} or {@code C:\}. */
+  /** True if this path starts at a root, like {@code /}, {@code C:\}, or {@code \\server}. */
   public boolean isAbsolute() {
-    return nioPath.isAbsolute();
+    return rootLength() != -1;
   }
 
   /** True if this path does not start at a root. */
   public boolean isRelative() {
-    return !nioPath.isAbsolute();
+    return rootLength() == -1;
   }
 
   /** True if this path has no root and no segments at all. */
@@ -65,27 +73,27 @@ public final class Path implements Comparable<Path> {
   }
 
   /**
-   * Returns the root of this path, like {@code /} on Unix or {@code C:\} on Windows, or null
-   * if this path is relative.
+   * Returns the root of this path, like {@code /} on Unix, {@code C:\} on Windows, or
+   * {@code \\server} for a UNC path, or null if this path is relative. Lexical, like okio.
    */
   public Path root() {
-    return wrap(nioPath.getRoot());
+    int rootLength = rootLength();
+    return rootLength == -1 ? null : wrap(Paths.get(toString().substring(0, rootLength)));
   }
 
   /**
-   * Returns the volume letter of this path, like {@code C} for {@code C:\}, or null when the
-   * platform has no volume letters.
+   * Returns the volume letter of this path, like {@code C} for {@code C:\} or {@code C:foo},
+   * or null when there is none. Lexical, like okio: null whenever the path contains a
+   * {@code /} anywhere.
    */
   public Character volumeLetter() {
-    java.nio.file.Path root = nioPath.getRoot();
-    if (root == null) return null;
-    String s = root.toString();
-    if (s.length() == 3 && s.charAt(1) == ':'
-        && (s.charAt(2) == '/' || s.charAt(2) == '\\')
-        && Character.isLetter(s.charAt(0))) {
-      return s.charAt(0);
-    }
-    return null;
+    String path = toString();
+    if (path.indexOf('/') != -1) return null;
+    if (path.length() < 2) return null;
+    if (path.charAt(1) != ':') return null;
+    char c = path.charAt(0);
+    if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z')) return null;
+    return c;
   }
 
   /**
@@ -180,13 +188,67 @@ public final class Path implements Comparable<Path> {
 
   /**
    * Returns the non-empty, non-{@code .} segments of this path, like {@code ["a", "b", "c"]} for
-   * {@code /a/b/c}; the root is not a segment. Like this class's equals and compareTo, the split
-   * is purely lexical over the path string, with {@code /} and the platform separator both
-   * counting as boundaries.
+   * {@code /a/b/c} and {@code ["generated", "Message.java"]} for {@code \\trusted\generated\Message.java};
+   * the root is not a segment. Lexical, like okio: the split runs over the path string past the
+   * root, with both {@code /} and {@code \} counting as boundaries on every platform.
    */
   public List<String> segments() {
-    return java.util.Collections.unmodifiableList(
-        new ArrayList<>(java.util.Arrays.asList(segmentsOf(toString()))));
+    String path = toString();
+    List<String> segments = new ArrayList<>();
+    int segmentStart = rootLength();
+    // segmentStart should always follow a `\`, but for UNC paths it doesn't.
+    if (segmentStart == -1) {
+      segmentStart = 0;
+    } else if (segmentStart < path.length() && path.charAt(segmentStart) == '\\') {
+      segmentStart++;
+    }
+    for (int i = segmentStart; i < path.length(); i++) {
+      char c = path.charAt(i);
+      if (c == '/' || c == '\\') {
+        addSegment(segments, path, segmentStart, i);
+        segmentStart = i + 1;
+      }
+    }
+    if (segmentStart < path.length()) {
+      addSegment(segments, path, segmentStart, path.length());
+    }
+    return java.util.Collections.unmodifiableList(segments);
+  }
+
+  private static void addSegment(List<String> segments, String path, int start, int end) {
+    String segment = path.substring(start, end);
+    if (!segment.isEmpty() && !segment.equals(".")) segments.add(segment);
+  }
+
+  /**
+   * Returns the length of the prefix of this path that is the root, or -1 if it has no root.
+   * Lexical, like okio's rootLength: {@code /} and single {@code \} roots are one character,
+   * {@code \\server} UNC roots run through the server name, and {@code X:\} drive roots are
+   * three characters.
+   */
+  private int rootLength() {
+    String path = toString();
+    if (path.isEmpty()) return -1;
+    if (path.charAt(0) == '/') return 1;
+
+    if (path.charAt(0) == '\\') {
+      if (path.length() > 2 && path.charAt(1) == '\\') {
+        // Look for a root like `\\localhost`.
+        int uncRootEnd = path.indexOf('\\', 2);
+        if (uncRootEnd == -1) uncRootEnd = path.length();
+        return uncRootEnd;
+      }
+      // We found a root like `\`.
+      return 1;
+    }
+
+    // Look for a root like `C:\`.
+    if (path.length() > 2 && path.charAt(1) == ':' && path.charAt(2) == '\\') {
+      char c = path.charAt(0);
+      if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') return 3;
+    }
+
+    return -1;
   }
 
   /** Returns the parent of this path, or null when there is none. */

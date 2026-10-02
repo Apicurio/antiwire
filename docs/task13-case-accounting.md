@@ -47,6 +47,10 @@ internal/SchemaEncoderTest (6), ProtoParserTest (10), SemVerTest (3), EnumAndRes
 
 ## Deferred with an owner
 
+Resolved 2026-10-02 by TASK-16 batch C: every row below is adopted and running in the port; see
+[task16-case-accounting.md](task16-case-accounting.md) for the per-file adaptation records and
+the case map (config/upstream-case-map.json) for the current reconciliation.
+
 | Upstream file | Cases | Owner | Reason |
 |---|---|---|---|
 | SchemaLoaderTest locationsToCheck, pathsToAttempt, pathsToAttemptMultipleRoots | 3 | TASK-16 | CommonSchemaLoader.locationsToCheck sits in the unported profile layer; bodies preserved verbatim as comments in the ported test. |

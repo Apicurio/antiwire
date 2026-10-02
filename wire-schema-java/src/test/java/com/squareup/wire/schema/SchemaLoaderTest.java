@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.squareup.wire.schema.internal.CommonSchemaLoader;
+import com.squareup.wire.testing.TestFiles;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -31,9 +32,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import okio.ByteString;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -461,75 +462,65 @@ public class SchemaLoaderTest {
     }
   }
 
-  // TASK-13 adaptation: deferred. locationsToCheck() belongs to the profile layer the port
-  // defers to TASK-16 (see CommonSchemaLoader's class comment), so there is no API to call yet.
-  // Upstream's case and expected values are preserved below for TASK-16 to revive verbatim.
-  @Disabled("TASK-16: the profile layer (locationsToCheck) is not ported yet")
+  // TASK-16 revival: the profile layer is ported, so these run upstream's bodies verbatim
+  // (assertk's containsExactlyInAnyOrder maps onto TestFiles.assertContainsExactlyInAnyOrder).
   @Test public void locationsToCheck() {
-    // val newSchemaLoader = CommonSchemaLoader(fs)
-    // val result = newSchemaLoader.locationsToCheck(
-    //   "java",
-    //   listOf(
-    //     Location.get("shared-protos.jar", "squareup/cash/money/Money.proto"),
-    //     Location.get("src/main/proto", "squareup/cash/Service.proto"),
-    //     Location.get("src/main/proto", "squareup/cash/cashtags/Cashtag.proto"),
-    //     Location.get("src/main/proto", "squareup/cash/payments/Payment.proto"),
-    //   ),
-    // )
-    // assertThat(result).containsExactlyInAnyOrder(
-    //   Location.get("shared-protos.jar", "java.wire"),
-    //   Location.get("shared-protos.jar", "squareup/cash/java.wire"),
-    //   Location.get("shared-protos.jar", "squareup/cash/money/java.wire"),
-    //   Location.get("shared-protos.jar", "squareup/java.wire"),
-    //   Location.get("src/main/proto", "java.wire"),
-    //   Location.get("src/main/proto", "squareup/cash/cashtags/java.wire"),
-    //   Location.get("src/main/proto", "squareup/cash/java.wire"),
-    //   Location.get("src/main/proto", "squareup/cash/payments/java.wire"),
-    //   Location.get("src/main/proto", "squareup/java.wire"),
-    // )
+    CommonSchemaLoader newSchemaLoader = new CommonSchemaLoader(okio.FileSystem.SYSTEM);
+    Set<Location> result = newSchemaLoader.locationsToCheck(
+        "java",
+        Arrays.asList(
+            Location.get("shared-protos.jar", "squareup/cash/money/Money.proto"),
+            Location.get("src/main/proto", "squareup/cash/Service.proto"),
+            Location.get("src/main/proto", "squareup/cash/cashtags/Cashtag.proto"),
+            Location.get("src/main/proto", "squareup/cash/payments/Payment.proto")));
+    TestFiles.assertContainsExactlyInAnyOrder(
+        Arrays.asList(
+            Location.get("shared-protos.jar", "java.wire"),
+            Location.get("shared-protos.jar", "squareup/cash/java.wire"),
+            Location.get("shared-protos.jar", "squareup/cash/money/java.wire"),
+            Location.get("shared-protos.jar", "squareup/java.wire"),
+            Location.get("src/main/proto", "java.wire"),
+            Location.get("src/main/proto", "squareup/cash/cashtags/java.wire"),
+            Location.get("src/main/proto", "squareup/cash/java.wire"),
+            Location.get("src/main/proto", "squareup/cash/payments/java.wire"),
+            Location.get("src/main/proto", "squareup/java.wire")),
+        new ArrayList<>(result));
   }
 
-  // TASK-13 adaptation: deferred with locationsToCheck(); see above.
-  @Disabled("TASK-16: the profile layer (locationsToCheck) is not ported yet")
   @Test public void pathsToAttempt() {
-    // val newSchemaLoader = CommonSchemaLoader(fs)
-    // val result = newSchemaLoader.locationsToCheck(
-    //   "android",
-    //   listOf(
-    //     Location.get("/a/b", "c/d/e.proto"),
-    //   ),
-    // )
-    // assertThat(result).containsExactlyInAnyOrder(
-    //   Location.get("/a/b", "c/d/android.wire"),
-    //   Location.get("/a/b", "c/android.wire"),
-    //   Location.get("/a/b", "android.wire"),
-    // )
+    CommonSchemaLoader newSchemaLoader = new CommonSchemaLoader(okio.FileSystem.SYSTEM);
+    Set<Location> result = newSchemaLoader.locationsToCheck(
+        "android",
+        Collections.singletonList(Location.get("/a/b", "c/d/e.proto")));
+    TestFiles.assertContainsExactlyInAnyOrder(
+        Arrays.asList(
+            Location.get("/a/b", "c/d/android.wire"),
+            Location.get("/a/b", "c/android.wire"),
+            Location.get("/a/b", "android.wire")),
+        new ArrayList<>(result));
   }
 
-  // TASK-13 adaptation: deferred with locationsToCheck(); see above.
-  @Disabled("TASK-16: the profile layer (locationsToCheck) is not ported yet")
   @Test public void pathsToAttemptMultipleRoots() {
-    // val newSchemaLoader = CommonSchemaLoader(fs)
-    // val result = newSchemaLoader.locationsToCheck(
-    //   "android",
-    //   listOf(
-    //     Location.get("/a/b", "c/d/e.proto"),
-    //     Location.get("/a/b", "c/f/g/h.proto"),
-    //     Location.get("/i/j.zip", "k/l/m.proto"),
-    //     Location.get("/i/j.zip", "k/l/m/n.proto"),
-    //   ),
-    // )
-    // assertThat(result).containsExactlyInAnyOrder(
-    //   Location.get("/a/b", "c/d/android.wire"),
-    //   Location.get("/a/b", "c/android.wire"),
-    //   Location.get("/a/b", "android.wire"),
-    //   Location.get("/a/b", "c/f/g/android.wire"),
-    //   Location.get("/a/b", "c/f/android.wire"),
-    //   Location.get("/i/j.zip", "k/l/android.wire"),
-    //   Location.get("/i/j.zip", "k/android.wire"),
-    //   Location.get("/i/j.zip", "android.wire"),
-    //   Location.get("/i/j.zip", "k/l/m/android.wire"),
-    // )
+    CommonSchemaLoader newSchemaLoader = new CommonSchemaLoader(okio.FileSystem.SYSTEM);
+    Set<Location> result = newSchemaLoader.locationsToCheck(
+        "android",
+        Arrays.asList(
+            Location.get("/a/b", "c/d/e.proto"),
+            Location.get("/a/b", "c/f/g/h.proto"),
+            Location.get("/i/j.zip", "k/l/m.proto"),
+            Location.get("/i/j.zip", "k/l/m/n.proto")));
+    TestFiles.assertContainsExactlyInAnyOrder(
+        Arrays.asList(
+            Location.get("/a/b", "c/d/android.wire"),
+            Location.get("/a/b", "c/android.wire"),
+            Location.get("/a/b", "android.wire"),
+            Location.get("/a/b", "c/f/g/android.wire"),
+            Location.get("/a/b", "c/f/android.wire"),
+            Location.get("/i/j.zip", "k/l/android.wire"),
+            Location.get("/i/j.zip", "k/android.wire"),
+            Location.get("/i/j.zip", "android.wire"),
+            Location.get("/i/j.zip", "k/l/m/android.wire")),
+        new ArrayList<>(result));
   }
 
   @Test public void exhaustiveLoad() throws Exception {

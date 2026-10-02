@@ -137,9 +137,7 @@
           "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/SemVerFullTest.java"
         },
         "com/squareup/wire/schema/SchemaHandlerTest.kt": {
-          "status": "deferred",
-          "owner": "TASK-16",
-          "reason": "SchemaHandler is compiler machinery"
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/SchemaHandlerTest.java"
         },
         "com/squareup/wire/schema/internal/DagCheckerTest.kt": {
           "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/DagCheckerTest.java"
@@ -148,9 +146,7 @@
           "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/UtilTest.java"
         },
         "com/squareup/wire/schema/internal/ProfileParserTest.kt": {
-          "status": "deferred",
-          "owner": "TASK-16",
-          "reason": "profile layer"
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/ProfileParserTest.java"
         },
         "com/squareup/wire/schema/internal/parser/EnumElementTest.kt": {
           "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/EnumElementTest.java"
@@ -195,17 +191,13 @@
           "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/DynamicSerializationTest.java"
         },
         "com/squareup/wire/schema/ManifestPartitionTest.kt": {
-          "status": "deferred",
-          "owner": "TASK-16",
-          "reason": "PartitionedSchema not ported"
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/ManifestPartitionTest.java"
         },
         "com/squareup/wire/schema/OptionsTest.kt": {
           "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/OptionsTest.java"
         },
         "com/squareup/wire/schema/ProfileLoaderTest.kt": {
-          "status": "deferred",
-          "owner": "TASK-16",
-          "reason": "profile layer"
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/ProfileLoaderTest.java"
         },
         "com/squareup/wire/schema/PrunerTest.kt": {
           "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/PrunerTest.java"
@@ -214,12 +206,7 @@
           "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/RootTest.java"
         },
         "com/squareup/wire/schema/SchemaLoaderTest.kt": {
-          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/SchemaLoaderTest.java",
-          "missing": {
-            "locationsToCheck": "profile layer, TASK-16 (bodies preserved in the port)",
-            "pathsToAttempt": "profile layer, TASK-16 (bodies preserved in the port)",
-            "pathsToAttemptMultipleRoots": "profile layer, TASK-16 (bodies preserved in the port)"
-          }
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/SchemaLoaderTest.java"
         },
         "com/squareup/wire/schema/SchemaProtoAdapterTest.kt": {
           "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/SchemaProtoAdapterTest.java"
@@ -241,9 +228,7 @@
           }
         },
         "com/squareup/wire/schema/internal/TypeMoverTest.kt": {
-          "status": "deferred",
-          "owner": "TASK-16",
-          "reason": "TypeMover is compiler machinery"
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/TypeMoverTest.java"
         },
         "com/squareup/wire/schema/internal/parser/ParsingTester.kt": {
           "status": "excluded",
@@ -297,6 +282,62 @@
           "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/UnwantedValueStripper.java"
         }
       }
+    },
+    "wire-java-generator/src/test/java": {
+      "root": "wire-java-generator/src/test/java",
+      "files": {
+        "com/squareup/wire/java/JavaGeneratorTest.java": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/java/JavaGeneratorTest.java"
+        },
+        "com/squareup/wire/java/JavaGeneratorHelper.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/java/JavaGeneratorHelper.java",
+          "fixture": true
+        },
+        "com/squareup/wire/java/JavaWithProfilesGenerator.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/java/JavaWithProfilesGenerator.java",
+          "fixture": true
+        }
+      }
+    },
+    "wire-compiler/src/test/java": {
+      "root": "wire-compiler/src/test/java",
+      "files": {
+        "com/squareup/wire/CommandLineOptionsTest.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/CommandLineOptionsTest.java"
+        },
+        "com/squareup/wire/ManifestParseTest.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/ManifestParseTest.java"
+        },
+        "com/squareup/wire/StringWireLogger.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/StringWireLogger.java",
+          "fixture": true
+        },
+        "com/squareup/wire/WireCompilerErrorTest.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/WireCompilerErrorTest.java"
+        },
+        "com/squareup/wire/WireCompilerTest.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/WireCompilerTest.java",
+          "renames": {
+            "default": "default_"
+          }
+        },
+        "com/squareup/wire/schema/CycleCheckerTest.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/schema/CycleCheckerTest.java"
+        },
+        "com/squareup/wire/schema/LinkerTest.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/schema/LinkerTest.java"
+        },
+        "com/squareup/wire/schema/MarkdownHandler.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/schema/MarkdownHandlerFactory.java",
+          "fixture": true
+        },
+        "com/squareup/wire/schema/OptionsLinkingTest.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/schema/OptionsLinkingTest.java"
+        },
+        "com/squareup/wire/schema/WireRunTest.kt": {
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/schema/WireRunTest.java"
+        }
+      }
     }
   },
   "excluded_upstream_modules": {
@@ -307,12 +348,10 @@
     "wire-tests/multiplatform": "DEC-6: Kotlin multiplatform harness",
     "wire-tests/wire-json-shared-kotlin-tests": "DEC-6: JSON adapter shared suite",
     "wire-tests/fixtures": "fixture corpus, not an executable suite; consumed by scripts/generate-java-fixtures.sh and wire-tests-java",
-    "wire-compiler": "TASK-16: compiler and generator",
-    "wire-java-generator": "TASK-16: Java generator",
     "wire-kotlin-generator": "DEC-6/TASK-16: Kotlin codegen",
     "wire-gradle-plugin": "DEC-6: Gradle plugin outside the port surface",
     "wire-gradle-plugin-playground": "DEC-6: plugin playground",
-    "wire-golden-files": "TASK-16: golden comparisons move to the compiler suite",
+    "wire-golden-files": "fixture corpus, not an executable suite; TASK-16 golden and compiler cases read the pinned goldens from the $ANTIWIRE_UPSTREAM clone (default /tmp/wire)",
     "wire-reflector": "DEC-6: Kotlin reflection surface",
     "wire-test-utils": "test utilities; the port mirrors the pieces it needs in com.squareup.wire.testing.TestFiles",
     "wire-schema-tests": "upstream test-support module (SchemaBuilder); the port carries its own SchemaBuilder",

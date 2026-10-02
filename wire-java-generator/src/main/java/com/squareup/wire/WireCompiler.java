@@ -527,7 +527,8 @@ public final class WireCompiler {
    * list of strings, written either inline ({@code [a, b]}) or as block list items
    * ({@code "- a"} lines indented under the key).
    */
-  private static Map<String, WireRun.Module> parseManifestModules(String yaml) {
+  /** Upstream's {@code internal} Manifest.kt parseManifestModules; package-private here. */
+  static Map<String, WireRun.Module> parseManifestModules(String yaml) {
     Set<String> defaultRoots = Collections.singleton("*");
     Set<String> defaultPrunes = Collections.emptySet();
 
@@ -543,10 +544,15 @@ public final class WireCompiler {
       String trimmed = line.trim();
 
       if (indent == 0 && !trimmed.startsWith("- ")) {
-        if (!trimmed.endsWith(":")) {
+        // Upstream's kaml accepts the inline empty-module form `name: {}` (asserted by the
+        // adopted upstream ManifestParseTest and WireCompilerTest manifest cases).
+        boolean inlineEmptyModule = trimmed.endsWith(": {}");
+        if (!trimmed.endsWith(":") && !inlineEmptyModule) {
           throw manifestError(i, "expected 'module:' but was '" + trimmed + "'");
         }
-        currentModule = trimmed.substring(0, trimmed.length() - 1);
+        currentModule = inlineEmptyModule
+            ? trimmed.substring(0, trimmed.length() - 4)
+            : trimmed.substring(0, trimmed.length() - 1);
         if (currentModule.isEmpty()) throw manifestError(i, "empty module name");
         modules.put(currentModule, new LinkedHashMap<>());
         currentList = null;
@@ -563,7 +569,10 @@ public final class WireCompiler {
         String key = trimmed.substring(0, colon).trim();
         String inlineValue = trimmed.substring(colon + 1).trim();
         if (!key.equals("dependencies") && !key.equals("roots") && !key.equals("prunes")) {
-          throw manifestError(i, "unsupported manifest key '" + key + "'");
+          // Upstream's kaml parser rejects unknown keys with "Unknown property 'x'"; the exact
+          // fragment is asserted by the adopted upstream ManifestParseTest, so this port's
+          // hand-rolled parser reproduces it (2026-10-02, TASK-16).
+          throw manifestError(i, "Unknown property '" + key + "'");
         }
         List<String> list = new ArrayList<>();
         modules.get(currentModule).put(key, list);
