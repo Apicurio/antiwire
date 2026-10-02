@@ -18,7 +18,6 @@ package com.squareup.wire.schema;
 import com.squareup.wire.ProtoAdapter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +48,9 @@ public final class Schema {
     sorted.sort(Comparator.comparing(protoFile -> protoFile.location.path));
     this.protoFiles = sorted;
 
-    Map<ProtoType, ProtoFile> index = new HashMap<>();
+    // Insertion-ordered like upstream's mutableMapOf: types() iterates protoFilesIndex.keySet()
+    // and Apicurio's descriptor conversion emits entries in that order (TASK-18 Oracle A).
+    Map<ProtoType, ProtoFile> index = new LinkedHashMap<>();
     this.typesIndex = buildTypesIndex(this.protoFiles, index);
     this.servicesIndex = buildServicesIndex(this.protoFiles, index);
     this.protoFilesIndex = index;
@@ -167,7 +168,7 @@ public final class Schema {
 
   private static Map<String, Type> buildTypesIndex(List<ProtoFile> protoFiles,
       Map<ProtoType, ProtoFile> protoFilesIndex) {
-    Map<String, Type> typesByName = new HashMap<>();
+    Map<String, Type> typesByName = new LinkedHashMap<>();
 
     for (ProtoFile protoFile : protoFiles) {
       for (Type type : protoFile.types) {
