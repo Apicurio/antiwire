@@ -43,5 +43,18 @@ jobs:
           key: maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: maven-
 
+      # TASK-14: the parity-coverage suite needs the pinned upstream clone; cache it per
+      # tag so reconciliation runs against the exact sources the pins name.
+      - uses: actions/cache@v4
+        with:
+          path: ~/antiwire-upstream
+          key: upstream-${{ hashFiles('config/parity-pins.json') }}
+      - name: fetch the pinned upstream clone
+        run: scripts/fetch-upstream.sh ~/antiwire-upstream
+        env:
+          ANTIWIRE_UPSTREAM: ~/antiwire-upstream
+
       - name: run the verification entry point
         run: scripts/verify.sh
+        env:
+          ANTIWIRE_UPSTREAM: ~/antiwire-upstream

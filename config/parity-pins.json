@@ -1,0 +1,15 @@
+{
+  "comment": "TASK-14: pinned upstream identity for the parity runner. scripts/fetch-upstream.sh retrieves and verifies these; scripts/check-parity-coverage.py reconciles test-case inventories against them. Bump procedure: docs/parity-runner.md.",
+  "upstream": {
+    "repository": "https://github.com/square/wire",
+    "tag": "7.1.0",
+    "annotated_tag_object": "da24c33ee1fe772a7a04617018087f46f26d1708",
+    "resolved_commit": "9f62097dfe4995b5709d001ca0187e30ca0530ef"
+  },
+  "clone_path_env": "ANTIWIRE_UPSTREAM",
+  "clone_path_default": "/tmp/wire",
+  "fixtures": {
+    "wire_compiler_jars": "7.1.0 from Maven Central (scripts/generate-java-fixtures.sh)",
+    "protobuf_java_test_oracle": "4.36.1 (wire-schema-java pom, test scope)"
+  }
+}

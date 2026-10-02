@@ -1,7 +1,7 @@
 ---
 id: TASK-14
 title: Complete the pinned-tag parity runner and coverage enforcement in CI
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-29 09:23'
 updated_date: '2026-09-30 01:18'

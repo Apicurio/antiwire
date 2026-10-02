@@ -32,6 +32,12 @@
       "description": "applicable upstream wire-schema test cases with tracked adaptations (DEC-5); interim key is the wire-schema-java module total inside mvn verify (adapted plus port-only cases); per-case ledger docs/task13-case-accounting.md, reconciliation TASK-14"
     },
     {
+      "name": "parity-coverage",
+      "status": "ACTIVE",
+      "owner": "TASK-14",
+      "description": "pinned upstream tag provenance verified and every in-scope upstream test file reconciled against port artifacts (config/upstream-case-map.json); unaccounted files, lost cases, or missing reasons fail the run"
+    },
+    {
       "name": "protoc-oracle",
       "status": "PENDING",
       "owner": "TASK-15",

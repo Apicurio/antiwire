@@ -1,0 +1,264 @@
+{
+  "comment": "TASK-14: reconciliation map from pinned upstream test files to port artifacts. statuses: adopted (name-set equality modulo renames/missing), partial (only ported_names carried), deferred (owner required, no port yet), excluded (reason required). missing entries carry per-case reasons. Sources: docs/task9-case-accounting.md, docs/task13-case-accounting.md.",
+  "modules": {
+    "wire-runtime/src/commonTest/kotlin": {
+      "root": "wire-runtime/src/commonTest/kotlin",
+      "files": {
+        "com/squareup/wire/ProtoWriterTest.kt": {
+          "port": "wire-runtime-java/src/test/kotlin/com/squareup/wire/ProtoWriterTest.kt"
+        },
+        "com/squareup/wire/ProtoReaderTest.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/ProtoReaderTest.java"
+        },
+        "com/squareup/wire/ProtoReader32Test.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/ProtoReader32Test.java"
+        },
+        "com/squareup/wire/ReverseProtoWriterTest.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/ReverseProtoWriterTest.java"
+        },
+        "com/squareup/wire/ProtoAdapterTest.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/ProtoAdapterTest.java"
+        },
+        "com/squareup/wire/DurationTest.kt": {
+          "port": "wire-runtime-java/src/test/kotlin/com/squareup/wire/DurationTest.java"
+        },
+        "com/squareup/wire/InstantTest.kt": {
+          "port": "wire-runtime-java/src/test/kotlin/com/squareup/wire/InstantTest.java",
+          "missing": {
+            "negativeNearZero": "common-only ofEpochSecond normalization; JVM actual covered by negativeNanoRejectedLikeTheJvmUpstream boundary lock (task9 ledger)",
+            "negativeValues": "common-only ofEpochSecond normalization; JVM actual covered by negativeNanoRejectedLikeTheJvmUpstream boundary lock (task9 ledger)"
+          }
+        },
+        "com/squareup/wire/FieldMaskTest.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/FieldMaskTest.java"
+        },
+        "com/squareup/wire/internal/InternalTest.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/internal/InternalTest.java"
+        },
+        "com/squareup/wire/internal/IntArrayListTest.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/internal/IntArrayListTest.java"
+        },
+        "com/squareup/wire/internal/LongArrayListTest.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/internal/LongArrayListTest.java"
+        },
+        "com/squareup/wire/internal/FloatArrayListTest.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/internal/FloatArrayListTest.java"
+        },
+        "com/squareup/wire/internal/DoubleArrayListTest.kt": {
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/internal/DoubleArrayListTest.java"
+        }
+      }
+    },
+    "wire-tests/jvm-java-kotlin": {
+      "root": "wire-tests/jvm-java-kotlin/src/test/java",
+      "files": {
+        "com/squareup/wire/WireTest.java": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/WireTest.java"
+        },
+        "com/squareup/wire/ParseTest.java": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/ParseTest.java"
+        },
+        "com/squareup/wire/SerializableTest.java": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/SerializableTest.java"
+        },
+        "com/squareup/wire/UnknownFieldsTest.java": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/UnknownFieldsTest.java"
+        },
+        "com/squareup/wire/OneOfTest.java": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/OneOfTest.java"
+        },
+        "com/squareup/wire/RuntimeMessageAdapterRedactTest.java": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/RuntimeMessageAdapterRedactTest.java"
+        },
+        "com/squareup/wire/TestAllTypes.java": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/TestAllTypes.java",
+          "fixture": true
+        },
+        "com/squareup/wire/TestAllTypesData.java": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/TestAllTypesData.java",
+          "fixture": true
+        },
+        "com/squareup/wire/ProtoAdapterTest.java": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/ProtoAdapterTest.java"
+        },
+        "com/squareup/wire/MapTest.kt": {
+          "status": "excluded",
+          "reason": "DEC-6: gson JSON adapter; JSON-only surface"
+        },
+        "com/squareup/wire/MoshiRedactedTest.kt": {
+          "status": "excluded",
+          "reason": "DEC-6: moshi JSON adapter; JSON-only surface"
+        }
+      }
+    },
+    "wire-tests/jvm-kotlin-proto-reader-32": {
+      "root": "wire-tests/jvm-kotlin-proto-reader-32/src/test/kotlin",
+      "files": {
+        "com/squareup/wire/ProtoReader32AdapterTest.kt": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/ProtoReader32AllTypesTest.java",
+          "status": "partial",
+          "renames": {
+            "decodeProtoReader32AsProtoReader": "decodeThroughAsProtoReaderWrapper"
+          },
+          "missing": {
+            "decodeMixAndMatchProtoReaderEnclosed": "Kotlin boxed Inner fixture; DEC-6 (task9 ledger)"
+          }
+        },
+        "com/squareup/wire/ProtoReader32OneOfTest.kt": {
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/ProtoReader32OneOfTest.java",
+          "missing": {
+            "oneOfFieldDoesNotMergeAcrossAnOccurrenceOfAnotherField": "requires the Kotlin Inner/OneOfMessageWithMessages fixture (DEC-6); merge semantics covered by repeatedOccurrencesOfTheSameOneOfFieldMerge and lastOneOfFieldWins"
+          }
+        }
+      }
+    },
+    "wire-schema/src/commonTest/kotlin": {
+      "root": "wire-schema/src/commonTest/kotlin",
+      "files": {
+        "com/squareup/wire/schema/EmittingRulesTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/EmittingRulesTest.java"
+        },
+        "com/squareup/wire/schema/PruningRulesTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/PruningRulesTest.java"
+        },
+        "com/squareup/wire/schema/MavenVersionsTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/MavenVersionsTest.java"
+        },
+        "com/squareup/wire/schema/LocationTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/LocationTest.java"
+        },
+        "com/squareup/wire/schema/ProtoFileTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/ProtoFileTest.java"
+        },
+        "com/squareup/wire/schema/ProtoTypeTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/ProtoTypeTest.java"
+        },
+        "com/squareup/wire/schema/SemVerTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/SemVerFullTest.java"
+        },
+        "com/squareup/wire/schema/SchemaHandlerTest.kt": {
+          "status": "deferred",
+          "owner": "TASK-16",
+          "reason": "SchemaHandler is compiler machinery"
+        },
+        "com/squareup/wire/schema/internal/DagCheckerTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/DagCheckerTest.java"
+        },
+        "com/squareup/wire/schema/internal/UtilTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/UtilTest.java"
+        },
+        "com/squareup/wire/schema/internal/ProfileParserTest.kt": {
+          "status": "deferred",
+          "owner": "TASK-16",
+          "reason": "profile layer"
+        },
+        "com/squareup/wire/schema/internal/parser/EnumElementTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/EnumElementTest.java"
+        },
+        "com/squareup/wire/schema/internal/parser/ExtendElementTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/ExtendElementTest.java"
+        },
+        "com/squareup/wire/schema/internal/parser/ExtensionsElementTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/ExtensionsElementTest.java"
+        },
+        "com/squareup/wire/schema/internal/parser/FieldElementTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/FieldElementTest.java"
+        },
+        "com/squareup/wire/schema/internal/parser/MessageElementTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/MessageElementTest.java"
+        },
+        "com/squareup/wire/schema/internal/parser/OneOfElementTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/OneOfElementTest.java"
+        },
+        "com/squareup/wire/schema/internal/parser/OptionElementTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/OptionElementTest.java"
+        },
+        "com/squareup/wire/schema/internal/parser/ProtoFileElementTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/ProtoFileElementTest.java"
+        },
+        "com/squareup/wire/schema/internal/parser/ProtoParserTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/ProtoParserFullTest.java"
+        },
+        "com/squareup/wire/schema/internal/parser/ServiceElementTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/parser/ServiceElementTest.java"
+        },
+        "com/squareup/wire/schema/Assertions.kt": {
+          "status": "excluded",
+          "reason": "shared assertk display helper, zero test cases (task13 ledger)"
+        }
+      }
+    },
+    "wire-schema/src/jvmTest/kotlin": {
+      "root": "wire-schema/src/jvmTest/kotlin",
+      "files": {
+        "com/squareup/wire/schema/DynamicSerializationTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/DynamicSerializationTest.java"
+        },
+        "com/squareup/wire/schema/ManifestPartitionTest.kt": {
+          "status": "deferred",
+          "owner": "TASK-16",
+          "reason": "PartitionedSchema not ported"
+        },
+        "com/squareup/wire/schema/OptionsTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/OptionsTest.java"
+        },
+        "com/squareup/wire/schema/ProfileLoaderTest.kt": {
+          "status": "deferred",
+          "owner": "TASK-16",
+          "reason": "profile layer"
+        },
+        "com/squareup/wire/schema/PrunerTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/PrunerTest.java"
+        },
+        "com/squareup/wire/schema/RootTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/RootTest.java"
+        },
+        "com/squareup/wire/schema/SchemaLoaderTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/SchemaLoaderTest.java",
+          "missing": {
+            "locationsToCheck": "profile layer, TASK-16 (bodies preserved in the port)",
+            "pathsToAttempt": "profile layer, TASK-16 (bodies preserved in the port)",
+            "pathsToAttemptMultipleRoots": "profile layer, TASK-16 (bodies preserved in the port)"
+          }
+        },
+        "com/squareup/wire/schema/SchemaProtoAdapterTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/SchemaProtoAdapterTest.java"
+        },
+        "com/squareup/wire/schema/SchemaTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/SchemaFullTest.java"
+        },
+        "com/squareup/wire/schema/DirectedAcyclicGraphTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/DirectedAcyclicGraphTest.java"
+        },
+        "com/squareup/wire/schema/internal/SchemaEncoderTest.kt": {
+          "port": "wire-schema-java/src/test/java/com/squareup/wire/schema/internal/SchemaEncoderFullTest.java",
+          "renames": {
+            "encode schema": "encodeSchema",
+            "encode extension range": "encodeExtensionRange",
+            "encode nested enums": "encodeNestedEnums",
+            "oneof tag order": "oneofTagOrder",
+            "encode import public dependency": "encodeImportPublicDependency"
+          }
+        },
+        "com/squareup/wire/schema/internal/TypeMoverTest.kt": {
+          "status": "deferred",
+          "owner": "TASK-16",
+          "reason": "TypeMover is compiler machinery"
+        },
+        "com/squareup/wire/schema/internal/parser/ParsingTester.kt": {
+          "status": "excluded",
+          "reason": "manual main() harness, zero assertions (task13 ledger)"
+        }
+      }
+    }
+  },
+  "excluded_upstream_modules": {
+    "wire-tests/jvm-json-java": "DEC-6: JSON adapters",
+    "wire-tests/jvm-json-kotlin": "DEC-6: JSON adapters",
+    "wire-tests/jvm-kotlin-interop": "DEC-6: Kotlin interop surface",
+    "wire-tests/jvm-annotations-interop": "DEC-6: Kotlin annotation interop",
+    "wire-tests/multiplatform": "DEC-6: Kotlin multiplatform harness",
+    "wire-tests/wire-json-shared-kotlin-tests": "DEC-6: JSON adapter shared suite",
+    "wire-tests/fixtures": "fixture corpus, not an executable suite; consumed by scripts/generate-java-fixtures.sh and wire-tests-java"
+  }
+}
