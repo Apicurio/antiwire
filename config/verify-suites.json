@@ -21,15 +21,15 @@
     },
     {
       "name": "runtime-tests",
-      "status": "PENDING",
+      "status": "ACTIVE",
       "owner": "TASK-9",
-      "description": "applicable upstream wire-runtime test cases with tracked adaptations (DEC-5)"
+      "description": "applicable upstream wire-runtime test cases with tracked adaptations (DEC-5); 857 adapted cases green inside mvn verify (flip owed since TASK-9 closed, recorded by TASK-13)"
     },
     {
       "name": "schema-tests",
-      "status": "PENDING",
+      "status": "ACTIVE",
       "owner": "TASK-13",
-      "description": "applicable upstream wire-schema test cases with tracked adaptations (DEC-5)"
+      "description": "applicable upstream wire-schema test cases with tracked adaptations (DEC-5); 590 cases green inside mvn verify, ledger docs/task13-case-accounting.md"
     },
     {
       "name": "protoc-oracle",

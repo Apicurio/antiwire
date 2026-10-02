@@ -142,7 +142,7 @@ public final class CommonSchemaLoader implements Loader {
   }
 
   /** Returns the files in the source path. */
-  List<ProtoFile> loadSourcePathFiles() throws IOException {
+  public List<ProtoFile> loadSourcePathFiles() throws IOException {
     if (sourcePathRoots == null || protoPathRoots == null) {
       throw new IllegalStateException("call initRoots() before calling loadSourcePathFiles()");
     }
@@ -237,7 +237,6 @@ public final class CommonSchemaLoader implements Loader {
     return result;
   }
 
-  /** Deferred: upstream's callers live in SchemaLoaderTest, adopted in TASK-13. */
   /** Releases the roots opened by {@link #initRoots}, including ZIP file systems. */
   public void close() throws IOException {
     if (sourcePathRoots != null) {
@@ -252,8 +251,11 @@ public final class CommonSchemaLoader implements Loader {
     }
   }
 
-  /** Deferred: upstream's callers live in SchemaLoaderTest, adopted in TASK-13. */
-  void reportLoadingErrors() {
+  /**
+   * Reports the errors accumulated by direct {@link #load} calls, without the file context the
+   * linker attaches. Upstream's jvmTest drives this member module-internally.
+   */
+  public void reportLoadingErrors() {
     errors.throwIfNonEmpty();
   }
 

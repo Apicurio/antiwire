@@ -18,25 +18,97 @@ package com.squareup.wire.schema;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Upstream commonTest translated (assertk to JUnit 5; see UPSTREAM-TEST-ADAPTATIONS.md, the
- * schema module's rows land beside the runtime module's).
+ * Upstream commonTest translated (assertk to JUnit 5; try/fail/catch collapsed to assertThrows).
+ * Kotlin property reads become member calls: {@code simpleName}, {@code typeUrl}, and {@code
+ * enclosingTypeOrPackage} are methods in the port; {@code isScalar} is a public field on both
+ * sides.
  */
 public class ProtoTypeTest {
+  @Test public void get() {
+    assertSame(ProtoType.INT32, ProtoType.get("int32"));
+    assertEquals(ProtoType.get("Person"), ProtoType.get("Person"));
+    assertEquals(ProtoType.get("squareup.protos.person", "Person"),
+        ProtoType.get("squareup.protos.person.Person"));
+  }
+
   @Test public void simpleName() {
-    assertEquals("Squaretime", ProtoType.get("Squaretime").simpleName());
-    assertEquals("Money", ProtoType.get("squareup.Cash.Money").simpleName());
+    ProtoType person = ProtoType.get("squareup.protos.person.Person");
+    assertEquals("Person", person.simpleName());
+  }
+
+  @Test public void scalarToString() {
+    assertEquals("int32", ProtoType.INT32.toString());
+    assertEquals("string", ProtoType.STRING.toString());
+    assertEquals("bytes", ProtoType.BYTES.toString());
+  }
+
+  @Test public void nestedType() {
+    assertEquals(ProtoType.get("squareup.protos.person.Person.PhoneType"),
+        ProtoType.get("squareup.protos.person.Person").nestedType("PhoneType"));
+  }
+
+  @Test public void primitivesCannotNest() {
+    assertThrows(IllegalStateException.class, () -> ProtoType.INT32.nestedType("PhoneType"));
+  }
+
+  @Test public void mapsCannotNest() {
+    assertThrows(IllegalStateException.class,
+        () -> ProtoType.get("map<string, string>").nestedType("PhoneType"));
+  }
+
+  @Test public void mapFormat() {
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> ProtoType.get("map<string>"));
+    assertEquals("expected ',' in map type: map<string>", e.getMessage());
+  }
+
+  @Test public void mapKeyScalarType() {
+    assertThrows(IllegalArgumentException.class, () -> ProtoType.get("map<bytes, string>"));
+    assertThrows(IllegalArgumentException.class, () -> ProtoType.get("map<double, string>"));
+    assertThrows(IllegalArgumentException.class, () -> ProtoType.get("map<float, string>"));
+    assertThrows(IllegalArgumentException.class, () -> ProtoType.get("map<some.Message, string>"));
+  }
+
+  @Test public void messageToString() {
+    ProtoType person = ProtoType.get("squareup.protos.person.Person");
+    assertEquals("squareup.protos.person.Person", person.toString());
+
+    ProtoType phoneType = person.nestedType("PhoneType");
+    assertEquals("squareup.protos.person.Person.PhoneType", phoneType.toString());
+  }
+
+  @Test public void fieldMask() {
+    assertEquals(ProtoType.get("google.protobuf.FieldMask"), ProtoType.FIELD_MASK);
+    assertEquals("type.googleapis.com/google.protobuf.FieldMask", ProtoType.FIELD_MASK.typeUrl());
   }
 
   @Test public void enclosingTypeOrPackage() {
-    assertNull(ProtoType.get("Squaretime").enclosingTypeOrPackage());
-    assertEquals("squareup.Cash", ProtoType.get("squareup.Cash.Money").enclosingTypeOrPackage());
+    assertNull(ProtoType.STRING.enclosingTypeOrPackage());
+
+    ProtoType person = ProtoType.get("squareup.protos.person.Person");
+    assertEquals("squareup.protos.person", person.enclosingTypeOrPackage());
+
+    ProtoType phoneType = person.nestedType("PhoneType");
+    assertEquals("squareup.protos.person.Person", phoneType.enclosingTypeOrPackage());
   }
+
+  @Test public void isScalar() {
+    assertTrue(ProtoType.INT32.isScalar);
+    assertTrue(ProtoType.STRING.isScalar);
+    assertTrue(ProtoType.BYTES.isScalar);
+    assertFalse(ProtoType.get("squareup.protos.person.Person").isScalar);
+  }
+
+  // TASK-13 adaptation: the cases above are the full upstream file. The cases below are
+  // port-authored carryovers from the previous partial ProtoTypeTest retained because upstream
+  // 7.1.0 has no counterpart for them (map-name quirks, key/value accessors, scalar typeUrl).
 
   @Test public void simpleNameEnclosingTypeOrPackageIsNotDecomposedWithMap() {
     ProtoType money = ProtoType.get("map<string, squareup.Cash.Money>");
@@ -46,41 +118,12 @@ public class ProtoTypeTest {
     assertEquals("Money>", money.simpleName());
   }
 
-  @Test public void scalar() {
-    assertTrue(ProtoType.get("int32").isScalar);
-    assertTrue(ProtoType.get("uint64").isScalar);
-    assertTrue(ProtoType.get("sint32").isScalar);
-    // Non-scalar names are not normalized into scalars.
-    assertFalse(ProtoType.get("fixed16").isScalar);
-  }
-
-  @Test public void mapKeyMustBeScalar() {
-    assertThrows(IllegalArgumentException.class,
-        () -> ProtoType.get("map<squareup.Cash.Money, string>"));
-  }
-
-  @Test public void mapKeyMustNotBeBytesFloatOrDouble() {
-    assertThrows(IllegalArgumentException.class, () -> ProtoType.get("map<bytes, string>"));
-    assertThrows(IllegalArgumentException.class, () -> ProtoType.get("map<float, string>"));
-    assertThrows(IllegalArgumentException.class, () -> ProtoType.get("map<double, string>"));
-  }
-
   @Test public void protoTypeIsScalarOrMap() {
     ProtoType money = ProtoType.get("squareup.Cash.Money");
     assertFalse(money.isScalar);
     assertFalse(money.isMap);
     assertNull(money.keyType);
     assertNull(money.valueType);
-  }
-
-  @Test public void toStringReturnsString() {
-    assertEquals("squareup.Cash.Money", ProtoType.get("squareup.Cash.Money").toString());
-  }
-
-  @Test public void nestedType() {
-    ProtoType protoType = ProtoType.get("squareup.protos.simple.Person");
-    assertEquals("squareup.protos.simple.Person.PhoneNumber",
-        protoType.nestedType("PhoneNumber").toString());
   }
 
   @Test public void typeUrl() {

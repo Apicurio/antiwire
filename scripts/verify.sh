@@ -112,7 +112,35 @@ else
   fi
 fi
 
+# Module test suites (runtime-tests TASK-9, schema-tests TASK-13): their evidence is the
+# per-module surefire summary inside the green mvn verify log above.
+module_test_summary() { # <artifactId>
+  awk -v prefix="] Building antiwire $1 " '
+    /] Building antiwire / {
+      inmod = index($0, prefix) > 0
+      if (inmod) last = ""
+    }
+    inmod && /^\[(INFO|WARNING)\] Tests run: [0-9]+, Failures: [0-9]+, Errors: [0-9]+/ { last = $0 }
+    END { print last }
+  ' "$LOG"
+}
+
+module_tests_suite() { # <suite> <artifactId>
+  local suite="$1" artifact="$2" summary count
+  summary="$(module_test_summary "$artifact")"
+  count="$(printf '%s\n' "$summary" | sed -n 's/^.*Tests run: \([0-9][0-9]*\),.*$/\1/p')"
+  if [ -n "$count" ] && printf '%s\n' "$summary" | grep -q "Failures: 0, Errors: 0"; then
+    res "$suite.status=PASS"
+    res "$suite.note=$count $artifact cases green inside mvn verify (Failures: 0, Errors: 0)"
+  else
+    res "$suite.status=FAIL"
+    res "$suite.note=missing or failing surefire summary for $artifact; see $LOG"
+  fi
+}
+
 if [ "$build_ok" -eq 1 ]; then
+  module_tests_suite runtime-tests wire-runtime-java
+  module_tests_suite schema-tests wire-schema-java
   run_suite duplicate-class-check scripts/check-classpath.sh
   run_suite bytecode-java11 scripts/check-java11-bytecode.sh
   run_suite java11-consumer scripts/consumer-check-java11.sh

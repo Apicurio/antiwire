@@ -25,5 +25,15 @@
       <groupId>io.github.paoloantinori</groupId>
       <artifactId>wire-runtime-java</artifactId>
     </dependency>
+    <!-- TASK-13 adaptation: upstream wire-schema's jvmTest suite depends on
+         com.google.protobuf:protobuf-java (4.36.1 at the pin, gradle/libs.versions.toml) so
+         SchemaEncoderTest can parse encoded descriptors with FileDescriptorProto.parseFrom;
+         this port mirrors that test-scoped dependency for the translated SchemaEncoderFullTest. -->
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>4.36.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

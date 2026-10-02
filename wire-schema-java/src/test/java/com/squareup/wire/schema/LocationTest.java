@@ -21,6 +21,45 @@ import org.junit.jupiter.api.Test;
 
 /** Upstream commonTest translated (assertk to JUnit 5). */
 public class LocationTest {
+  @Test public void getWithForwardSlashes() {
+    Location location = Location.get("base/dir", "sub/file.proto");
+    assertEquals("base/dir", location.base);
+    assertEquals("sub/file.proto", location.path);
+  }
+
+  @Test public void getTrimsTrailingSlashFromBase() {
+    Location location = Location.get("base/dir/", "file.proto");
+    assertEquals("base/dir", location.base);
+  }
+
+  @Test public void getNormalizesWindowsBackslashesInBase() {
+    Location location = Location.get("C:\\Users\\username\\protos", "language\\language.proto");
+    assertEquals("C:/Users/username/protos", location.base);
+    assertEquals("language/language.proto", location.path);
+  }
+
+  @Test public void getNormalizesWindowsBackslashesInPath() {
+    Location location = Location.get("", "language\\language.proto");
+    assertEquals("language/language.proto", location.path);
+  }
+
+  @Test public void getWithMixedSeparatorsInBase() {
+    Location location = Location.get("C:\\Users\\username\\protos/", "file.proto");
+    assertEquals("C:/Users/username/protos", location.base);
+  }
+
+  @Test public void getPreservesWindowsDriveRootBackslashInPath() {
+    // okio requires 'C:\' (backslash) to recognize Windows absolute paths; 'C:/' is not supported
+    // in older okio versions. Preserve the root backslash while converting internal separators.
+    Location location = Location.get("", "C:\\Users\\protos");
+    assertEquals("C:\\Users/protos", location.path);
+  }
+
+  // TASK-13 adaptation: the six cases above are the full upstream file. The cases below are
+  // port-authored carryovers from the previous partial LocationTest; upstream 7.1.0 covers only
+  // Location.get normalization, so these stay to keep at()/withoutBase()/withPathOnly()/toString()
+  // under direct test.
+
   @Test public void location() {
     Location location = Location.get("src/main/proto/squareup/dinosaurs/dinosaur.proto");
     assertEquals("src/main/proto/squareup/dinosaurs/dinosaur.proto", location.toString());
@@ -52,17 +91,5 @@ public class LocationTest {
   @Test public void withPathOnly() {
     Location location = Location.get("src/main/proto", "dinosaur.proto").at(10, 20);
     assertEquals("dinosaur.proto", location.withPathOnly().toString());
-  }
-
-  @Test public void windowsPaths() {
-    Location location = Location.get("C:\\src\\main\\proto", "dinosaur.proto");
-    assertEquals("C:/src/main/proto/dinosaur.proto", location.toString());
-  }
-
-  @Test public void windowsDriveRootPreserved() {
-    // The preservation branch applies to a path argument carrying the drive root.
-    Location location = Location.get("", "C:\\dinosaur.proto");
-    assertEquals("C:\\dinosaur.proto", location.path);
-    assertEquals("C:\\dinosaur.proto", location.toString());
   }
 }
