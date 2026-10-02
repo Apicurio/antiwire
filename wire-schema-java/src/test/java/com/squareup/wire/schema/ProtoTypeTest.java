@@ -99,6 +99,14 @@ public class ProtoTypeTest {
     assertEquals("squareup.protos.person.Person", phoneType.enclosingTypeOrPackage());
   }
 
+  /**
+   * TASK-13 adaptation: the port-authored lookalike-negative guard (fixed16 is not a scalar),
+   * restored after the partial-file merge; upstream has no equivalent case.
+   */
+  @Test public void lookalikeScalarNameIsNotScalar() {
+    assertFalse(ProtoType.get("fixed16").isScalar);
+  }
+
   @Test public void isScalar() {
     assertTrue(ProtoType.INT32.isScalar);
     assertTrue(ProtoType.STRING.isScalar);

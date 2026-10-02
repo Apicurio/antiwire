@@ -133,12 +133,14 @@ module_tests_suite() { # <suite> <artifactId>
     *"Failures: 0, Errors: 0"*) zero_failures=1 ;;
     *) zero_failures=0 ;;
   esac
+  skipped="$(printf '%s\n' "$summary" | sed -n 's/^.*Skipped: \([0-9][0-9]*\)$/\1/p')"
   if [ -n "$count" ] && [ "$zero_failures" -eq 1 ]; then
     res "$suite.status=PASS"
-    res "$suite.note=$count $artifact cases green inside mvn verify (Failures: 0, Errors: 0)"
+    res "$suite.note=$count $artifact cases inside mvn verify, $skipped skipped (Failures: 0, Errors: 0)"
   else
+    KEEP_LOG=1
     res "$suite.status=FAIL"
-    res "$suite.note=missing or failing surefire summary for $artifact; see $LOG"
+    res "$suite.note=missing or failing surefire summary for $artifact; mvn log kept at $LOG"
   fi
 }
 

@@ -79,31 +79,14 @@ public final class Reserved {
     return result;
   }
 
-  /** Ranges are int[] pairs; compare them structurally like upstream's IntRange. */
+  /** Ranges are int[] pairs; compared structurally like upstream's IntRange via SchemaUtil. */
   static boolean valuesEqual(List<Object> a, List<Object> b) {
-    if (a.size() != b.size()) return false;
-    Iterator<Object> bi = b.iterator();
-    for (Object value : a) {
-      Object other = bi.next();
-      if (value instanceof int[]) {
-        if (!(other instanceof int[]) || !Arrays.equals((int[]) value, (int[]) other)) {
-          return false;
-        }
-      } else if (!value.equals(other)) {
-        return false;
-      }
-    }
-    return true;
+    return com.squareup.wire.schema.internal.SchemaUtil.valuesEqual(a, b);
   }
 
-  /** Ranges are int[] pairs; hash them structurally like upstream's IntRange. */
+  /** Ranges are int[] pairs; hashed structurally like upstream's IntRange via SchemaUtil. */
   static int valuesHashCode(List<Object> values) {
-    int result = 1;
-    for (Object value : values) {
-      result = 31 * result + (value instanceof int[] ? Arrays.hashCode((int[]) value)
-          : value.hashCode());
-    }
-    return result;
+    return com.squareup.wire.schema.internal.SchemaUtil.valuesHashCode(values);
   }
 
   @Override public String toString() {
