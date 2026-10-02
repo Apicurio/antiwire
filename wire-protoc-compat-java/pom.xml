@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TASK-15 protoc interoperability oracle module. Never published (test-only):
+  it hosts the protoc-generated reference models and the ported upstream
+  wire-protoc-compatibility-tests cases. Maven central deploy is blocked by
+  maven.deploy.skip from the parent.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.paoloantinori</groupId>
+    <artifactId>antiwire-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>wire-protoc-compat-java</artifactId>
+
+  <name>antiwire wire-protoc-compat-java (protoc oracle)</name>
+  <description>protoc 4.36.1 interoperability oracle: reference models from the pinned
+    protoc and the pinned upstream wire compiler 7.1.0, plus the ported upstream
+    compatibility test cases. Never published.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.github.paoloantinori</groupId>
+      <artifactId>wire-runtime-java</artifactId>
+    </dependency>
+    <!-- Reference implementation runtime: the protoc-generated models and the interop
+         assertions run against the real protobuf-java, isolated from the port. -->
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>4.36.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

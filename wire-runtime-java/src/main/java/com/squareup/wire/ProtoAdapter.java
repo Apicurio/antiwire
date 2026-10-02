@@ -392,7 +392,8 @@ public abstract class ProtoAdapter<E> {
   public static final ProtoAdapter<FieldMask> FIELD_MASK = new FieldMaskAdapter();
   public static final ProtoAdapter<Map<String, ?>> STRUCT_MAP = new StructMapAdapter();
   public static final ProtoAdapter<List<?>> STRUCT_LIST = new StructListAdapter();
-  public static final ProtoAdapter<Object> STRUCT_NULL = new StructNullAdapter();
+  /** Upstream types this ProtoAdapter<Nothing?>; the Java-interop rendering is Void. */
+  public static final ProtoAdapter<Void> STRUCT_NULL = new StructNullAdapter();
   public static final ProtoAdapter<Object> STRUCT_VALUE = new StructValueAdapter();
   @SuppressWarnings("unchecked")
   public static final ProtoAdapter<Double> DOUBLE_VALUE =
@@ -1585,48 +1586,48 @@ public abstract class ProtoAdapter<E> {
   }
 
   @SuppressWarnings("rawtypes")
-  private static final class StructNullAdapter extends ProtoAdapter<Object> {
+  private static final class StructNullAdapter extends ProtoAdapter<Void> {
     StructNullAdapter() {
       super(FieldEncoding.VARINT, Void.class,
           "type.googleapis.com/google.protobuf.NullValue", Syntax.PROTO_3, null, null);
     }
 
-    @Override public int encodedSize(Object value) {
+    @Override public int encodedSize(Void value) {
       return ProtoWriter.varint32Size(0);
     }
 
-    @Override public int encodedSizeWithTag(int tag, Object value) {
+    @Override public int encodedSizeWithTag(int tag, Void value) {
       int size = encodedSize(value);
       return ProtoWriter.tagSize(tag) + ProtoWriter.varint32Size(size);
     }
 
-    @Override public void encode(ProtoWriter writer, Object value) throws IOException {
+    @Override public void encode(ProtoWriter writer, Void value) throws IOException {
       writer.writeVarint32(0);
     }
 
-    @Override public void encode(ReverseProtoWriter writer, Object value) throws IOException {
+    @Override public void encode(ReverseProtoWriter writer, Void value) throws IOException {
       writer.writeVarint32(0);
     }
 
-    @Override public void encodeWithTag(ProtoWriter writer, int tag, Object value)
+    @Override public void encodeWithTag(ProtoWriter writer, int tag, Void value)
         throws IOException {
       writer.writeTag(tag, fieldEncoding);
       encode(writer, value);
     }
 
-    @Override public void encodeWithTag(ReverseProtoWriter writer, int tag, Object value)
+    @Override public void encodeWithTag(ReverseProtoWriter writer, int tag, Void value)
         throws IOException {
       encode(writer, value);
       writer.writeTag(tag, fieldEncoding);
     }
 
-    @Override public Object decode(ProtoReader reader) throws IOException {
+    @Override public Void decode(ProtoReader reader) throws IOException {
       int value = reader.readVarint32();
       if (value != 0) throw new IOException("expected 0 but was " + value);
       return null;
     }
 
-    @Override public Object redact(Object value) {
+    @Override public Void redact(Void value) {
       return null;
     }
   }
@@ -1639,7 +1640,7 @@ public abstract class ProtoAdapter<E> {
     }
 
     private static int dispatchEncodedSize(Object value) {
-      if (value == null) return STRUCT_NULL.encodedSizeWithTag(1, value);
+      if (value == null) return STRUCT_NULL.encodedSizeWithTag(1, (Void) value);
       if (value instanceof Number) return DOUBLE.encodedSizeWithTag(2, ((Number) value).doubleValue());
       if (value instanceof String) return STRING.encodedSizeWithTag(3, (String) value);
       if (value instanceof Boolean) return BOOL.encodedSizeWithTag(4, (Boolean) value);
@@ -1652,7 +1653,7 @@ public abstract class ProtoAdapter<E> {
 
     private static void dispatchEncode(ProtoWriter writer, Object value) throws IOException {
       if (value == null) {
-        STRUCT_NULL.encodeWithTag(writer, 1, value);
+        STRUCT_NULL.encodeWithTag(writer, 1, (Void) value);
       } else if (value instanceof Number) {
         DOUBLE.encodeWithTag(writer, 2, ((Number) value).doubleValue());
       } else if (value instanceof String) {
@@ -1671,7 +1672,7 @@ public abstract class ProtoAdapter<E> {
     private static void dispatchEncode(ReverseProtoWriter writer, Object value)
         throws IOException {
       if (value == null) {
-        STRUCT_NULL.encodeWithTag(writer, 1, value);
+        STRUCT_NULL.encodeWithTag(writer, 1, (Void) value);
       } else if (value instanceof Number) {
         DOUBLE.encodeWithTag(writer, 2, ((Number) value).doubleValue());
       } else if (value instanceof String) {
@@ -1763,7 +1764,7 @@ public abstract class ProtoAdapter<E> {
     }
 
     @Override public Object redact(Object value) {
-      if (value == null) return STRUCT_NULL.redact(value);
+      if (value == null) return STRUCT_NULL.redact((Void) value);
       if (value instanceof Number) return value;
       if (value instanceof String) return null;
       if (value instanceof Boolean) return value;

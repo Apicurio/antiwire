@@ -35,6 +35,8 @@
     <module>wire-runtime-java</module>
     <module>wire-schema-java</module>
     <module>wire-tests-java</module>
+    <!-- TASK-15: protoc interoperability oracle module; never published (test-only). -->
+    <module>wire-protoc-compat-java</module>
     <module>wire-java-generator</module>
   </modules>
 
