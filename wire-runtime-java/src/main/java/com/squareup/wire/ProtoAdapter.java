@@ -185,12 +185,14 @@ public abstract class ProtoAdapter<E> {
    * through their tagged form inside a message.
    */
   public E decode(byte[] bytes) throws IOException {
-    return decode(new ProtoReader(new Buffer().write(bytes)));
+    // TASK-20: upstream's commonDecode enters via the array-backed 32-bit reader; the buffer
+    // wrap below copies the whole payload into segments (docs/performance.md, decode cells).
+    return decode(new ByteArrayProtoReader32(bytes));
   }
 
   /** Read an encoded message from {@code bytes}. See {@link #decode(byte[])}. */
   public E decode(ByteString bytes) throws IOException {
-    return decode(new ProtoReader(new Buffer().write(bytes)));
+    return decode(new ByteArrayProtoReader32(bytes.toByteArray()));
   }
 
   /** Read an encoded message from {@code source}. */
