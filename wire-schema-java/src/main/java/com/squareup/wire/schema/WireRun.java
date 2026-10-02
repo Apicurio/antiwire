@@ -48,7 +48,7 @@ import okio.Path;
  *       that haven't already been emitted by an earlier target.
  * </ol>
  *
- * <h3>Source Directories and Archives</h3>
+ * <h2>Source Directories and Archives</h2>
  *
  * <p>The {@link #sourcePath} and {@link #protoPath} lists contain locations that are of the
  * following forms:
@@ -68,7 +68,7 @@ import okio.Path;
  * <p>Although the content and structure of {@link #sourcePath} and {@link #protoPath} are the
  * same, only types defined in {@link #sourcePath} are used to generate sources.
  *
- * <h3>Matching Packages, Types, and Members</h3>
+ * <h2>Matching Packages, Types, and Members</h2>
  *
  * <p>The {@link #treeShakingRoots}, {@link #treeShakingRubbish}, {@link Target#includes} and
  * {@link Target#excludes} lists contain strings that select proto types and members. Strings in

@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * the read should be retried later. If writing to a sink times out, the same
  * rules apply: close the sink and retry later.
  *
- * <h3>Timeouts and Deadlines</h3>
+ * <h2>Timeouts and Deadlines</h2>
  * This class offers two complementary controls to define a timeout policy.
  *
  * <p><strong>Timeouts</strong> specify the maximum time to wait for a single

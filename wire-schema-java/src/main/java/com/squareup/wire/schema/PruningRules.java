@@ -28,7 +28,7 @@ import java.util.Set;
  *
  * <p>Despite the builder, instances of this class are not safe for concurrent use.
  *
- * <h3>Identifier Matching</h3>
+ * <h2>Identifier Matching</h2>
  *
  * <p>If a member is a root in the set, its type is implicitly also considered a root. A type
  * that is a root without a specific member implicitly set all of that type's members as roots,
@@ -59,7 +59,7 @@ import java.util.Set;
  * <p>If the roots set is empty, that implies that all elements are considered roots. Use this
  * to prune unwanted types and members without also marking everything else as roots.
  *
- * <h3>Version Matching</h3>
+ * <h2>Version Matching</h2>
  *
  * <p>Members may be declared with {@code wire.since} and {@code wire.until} options. For
  * example, these options declare a field {@code age} that was replaced with {@code birth_date}

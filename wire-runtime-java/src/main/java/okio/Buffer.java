@@ -1876,7 +1876,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable, By
    * its own invariants. Instead, it assumes a careful user who has studied Okio's implementation
    * details and their consequences.
    *
-   * <h3>Buffer Internals</h3>
+   * <h2>Buffer Internals</h2>
    *
    * <p>Most code should use {@code Buffer} as a black box: a class that holds 0 or more bytes of
    * data with efficient APIs to append data to the end and to consume data from the front. Usually

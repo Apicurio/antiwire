@@ -395,7 +395,7 @@ public abstract class ProtoAdapter<E> {
   public static final ProtoAdapter<FieldMask> FIELD_MASK = new FieldMaskAdapter();
   public static final ProtoAdapter<Map<String, ?>> STRUCT_MAP = new StructMapAdapter();
   public static final ProtoAdapter<List<?>> STRUCT_LIST = new StructListAdapter();
-  /** Upstream types this ProtoAdapter<Nothing?>; the Java-interop rendering is Void. */
+  /** Upstream types this {@code ProtoAdapter<Nothing?>}; the Java-interop rendering is Void. */
   public static final ProtoAdapter<Void> STRUCT_NULL = new StructNullAdapter();
   public static final ProtoAdapter<Object> STRUCT_VALUE = new StructValueAdapter();
   @SuppressWarnings("unchecked")

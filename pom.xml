@@ -133,6 +133,34 @@
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.4.2</version>
         </plugin>
+        <!--
+          TASK-21 release plumbing: versions and shared configuration for the sources and
+          javadoc jars. Only the three shipped modules declare the executions (their poms);
+          the never-published modules (fixture, tests, protoc oracle) attach nothing.
+
+          Doclint scoping is deliberate. The javadoc tool's default (-Xdoclint:all) fails the
+          build on pre-existing upstream doc conventions preserved verbatim by the port:
+          h3 headings without a preceding h2 (okio Timeout/Sink/Source/Buffer and schema
+          PruningRules/WireRun/EmittingRules) and legacy table attributes (okio Utf8). The
+          html group is disabled to tolerate those; reference and syntax checks stay on, so
+          a broken {@link} or malformed javadoc still fails the build. The missing group is
+          disabled to suppress the hundreds of upstream @param/@return omissions, which are
+          warnings only and never failed the build. Full-baseline record (11 errors at the
+          time of this change): docs/license-inventory.md appendix D.
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.3.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.12.0</version>
+          <configuration>
+            <doclint>all,-missing,-html</doclint>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
 

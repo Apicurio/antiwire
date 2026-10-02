@@ -25,7 +25,7 @@ import java.util.Set;
  *
  * <p>Despite the builder, instances of this class are not safe for concurrent use.
  *
- * <h3>Identifier Matching</h3>
+ * <h2>Identifier Matching</h2>
  *
  * <p>Identifiers in this set may be in the following forms:
  *

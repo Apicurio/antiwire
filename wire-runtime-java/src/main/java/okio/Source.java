@@ -31,7 +31,7 @@ import java.io.IOException;
  * <p>Sources are easy to test: just use a {@link Buffer} in your tests, and
  * fill it with the data your application is to read.
  *
- * <h3>Comparison with InputStream</h3>
+ * <h2>Comparison with InputStream</h2>
  * This interface is functionally equivalent to {@link java.io.InputStream}.
  *
  * <p>{@code InputStream} requires multiple layers when consumed data is

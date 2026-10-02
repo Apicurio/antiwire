@@ -46,4 +46,36 @@
       <artifactId>javapoet</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- TASK-21 release plumbing: attach -sources and -javadoc jars at package for this
+           shipped module. Versions and the doclint scoping live in the parent
+           pluginManagement. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

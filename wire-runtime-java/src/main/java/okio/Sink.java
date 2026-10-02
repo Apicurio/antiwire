@@ -32,7 +32,7 @@ import java.io.IOException;
  * <p>Sinks are easy to test: just use a {@link Buffer} in your tests, and
  * read from it to confirm it received the data that was expected.
  *
- * <h3>Comparison with OutputStream</h3>
+ * <h2>Comparison with OutputStream</h2>
  * This interface is functionally equivalent to {@link java.io.OutputStream}.
  *
  * <p>{@code OutputStream} requires multiple layers when emitted data is
