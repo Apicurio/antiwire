@@ -113,6 +113,18 @@ public final class SchemaBuilder {
     }
   }
 
+  /**
+   * Rewrites this builder's absolute source and proto path roots in {@code message} to the
+   * {@code /sourcePath} and {@code /protoPath} prefixes that upstream's in-memory FakeFileSystem
+   * produces, so adapted tests can assert upstream's exact error strings (the TASK-13 adaptation
+   * for this builder's real-filesystem roots).
+   */
+  public String normalizeLocations(String message) {
+    return message
+        .replace(Location.get(sourcePath.toString()).path, "/sourcePath")
+        .replace(Location.get(protoPath.toString()).path, "/protoPath");
+  }
+
   private static void deleteTempDirs() {
     for (Path dir : TEMP_DIRS) {
       deleteRecursively(dir);

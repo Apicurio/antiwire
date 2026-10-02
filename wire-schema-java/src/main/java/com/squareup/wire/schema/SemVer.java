@@ -52,7 +52,9 @@ final class SemVer implements Comparable<SemVer> {
 
   final String version;
 
-  private SemVer(String version) {
+  // TASK-13 adaptation: package-private, matching upstream's module-internal constructor, so
+  // same-package tests can construct versions directly (SemVerTest.uppercaseVersionsForbidden).
+  SemVer(String version) {
     if (!SchemaUtil.toEnglishLowerCase(version).equals(version)) {
       throw new IllegalArgumentException("version must be lowercase: " + version);
     }
