@@ -1526,11 +1526,10 @@ public abstract class ProtoAdapter<E> {
       // IllegalArgumentException("unexpected struct value: ...") from the value dispatch
       // before the key matters. Verified against the pinned 7.1.0 artifact (TASK-15 finding);
       // the quirk is preserved, which is why the loop iterates the raw map.
-      Map<?, ?> raw = value;
       java.util.LinkedHashMap<String, Object> result = new java.util.LinkedHashMap<>();
-      for (Map.Entry<?, ?> entry : raw.entrySet()) {
-        Object redacted = STRUCT_VALUE.redact((Object) entry);
-        result.put((String) entry.getKey(), redacted);
+      for (Map.Entry<?, ?> entry : value.entrySet()) {
+        // Always throws for a Map.Entry; kept in the mapValues shape to mirror upstream.
+        STRUCT_VALUE.redact(entry);
       }
       return result;
     }
@@ -1647,7 +1646,7 @@ public abstract class ProtoAdapter<E> {
     }
 
     private static int dispatchEncodedSize(Object value) {
-      if (value == null) return STRUCT_NULL.encodedSizeWithTag(1, (Void) value);
+      if (value == null) return STRUCT_NULL.encodedSizeWithTag(1, null);
       if (value instanceof Number) return DOUBLE.encodedSizeWithTag(2, ((Number) value).doubleValue());
       if (value instanceof String) return STRING.encodedSizeWithTag(3, (String) value);
       if (value instanceof Boolean) return BOOL.encodedSizeWithTag(4, (Boolean) value);
@@ -1660,7 +1659,7 @@ public abstract class ProtoAdapter<E> {
 
     private static void dispatchEncode(ProtoWriter writer, Object value) throws IOException {
       if (value == null) {
-        STRUCT_NULL.encodeWithTag(writer, 1, (Void) value);
+        STRUCT_NULL.encodeWithTag(writer, 1, null);
       } else if (value instanceof Number) {
         DOUBLE.encodeWithTag(writer, 2, ((Number) value).doubleValue());
       } else if (value instanceof String) {
@@ -1679,7 +1678,7 @@ public abstract class ProtoAdapter<E> {
     private static void dispatchEncode(ReverseProtoWriter writer, Object value)
         throws IOException {
       if (value == null) {
-        STRUCT_NULL.encodeWithTag(writer, 1, (Void) value);
+        STRUCT_NULL.encodeWithTag(writer, 1, null);
       } else if (value instanceof Number) {
         DOUBLE.encodeWithTag(writer, 2, ((Number) value).doubleValue());
       } else if (value instanceof String) {
@@ -1771,7 +1770,7 @@ public abstract class ProtoAdapter<E> {
     }
 
     @Override public Object redact(Object value) {
-      if (value == null) return STRUCT_NULL.redact((Void) value);
+      if (value == null) return STRUCT_NULL.redact(null);
       if (value instanceof Number) return value;
       if (value instanceof String) return null;
       if (value instanceof Boolean) return value;

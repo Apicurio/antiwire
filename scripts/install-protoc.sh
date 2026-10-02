@@ -6,7 +6,6 @@
 # Usage: scripts/install-protoc.sh [install-dir]
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROTOC_VERSION=4.36.1
 PROTOC_SHA256_OSX_AARCH64=dbd9a127dbbadd379bbea9a28a4349a0c9b1ad34b4c06f03fbe0f3853583a014
 PROTOC_SHA256_OSX_X86_64=445b53a77c8ec0e2597c6fcb3ec3668fe378371903371150b1fb5a78f56fb0a4
@@ -23,7 +22,9 @@ INSTALL_DIR="${1:-${PROTOC_HOME:-$HOME/.cache/antiwire-protoc}/$PROTOC_VERSION-$
 mkdir -p "$INSTALL_DIR"
 EXE="$INSTALL_DIR/protoc"
 
-if [ ! -x "$EXE" ]; then
+# The checksum guards the download AND the cache: a corrupt-but-executable cached binary
+# is re-verified every run rather than trusted.
+if [ ! -x "$EXE" ] || [ "$(shasum -a 256 "$EXE" | cut -d' ' -f1)" != "$SHA256" ]; then
   TMP="$(mktemp)"
   trap 'rm -f "$TMP"' EXIT
   curl -sfL -o "$TMP" \

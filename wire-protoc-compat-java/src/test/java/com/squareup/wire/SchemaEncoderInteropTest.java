@@ -172,20 +172,7 @@ public class SchemaEncoderInteropTest {
         unwantedValueStripper.stripOptionsAndDefaults(wireDescriptor));
   }
 
-  /**
-   * Confirm the encoded {@code wireProtoFile} and the re-encoded {@code protocProtoFile} match. We must
-   * re-encode to strip extension name and type information because that data isn't retained in the
-   * encoded form.
-   */
-  private void checkFileSchemaOptionsMatch(
-      ProtoFile wireProtoFile,
-      FileDescriptorProto protocProtoFile) throws IOException {
-    byte[] wireBytes = new SchemaEncoder(schema).encode(wireProtoFile).toByteArray();
-    FileDescriptorProto wireDescriptor =
-        FileDescriptorProto.parseFrom(wireBytes, extensionRegistry);
-    FileDescriptorProto protocDescriptorReencoded = FileDescriptorProto.parseFrom(
-        protocProtoFile.toByteArray(),
-        extensionRegistry);
-    assertEquals(wireDescriptor, protocDescriptorReencoded);
-  }
+  // The upstream-only checkFileSchemaOptionsMatch helper (called solely by the disabled
+  // proto2AllOptions case, whose body is preserved above) is intentionally not retained;
+  // see that case's Javadoc for what it asserted.
 }

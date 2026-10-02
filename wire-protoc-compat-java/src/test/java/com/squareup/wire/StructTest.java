@@ -174,14 +174,12 @@ public class StructTest {
   }
 
   /**
-   * Parity finding (port bug, not an adaptation): the encode and encodedSize arms pass
-   * (ClassCastException from the String checkcast on the Integer key), but the redact arm
-   * diverges. Upstream STRUCT_MAP.redact is {@code value?.mapValues { STRUCT_VALUE.redact(it) }}
-   * where {@code it} is the Map.Entry, so ANY non-empty map throws IllegalArgumentException
+   * Upstream STRUCT_MAP.redact is {@code value?.mapValues { STRUCT_VALUE.redact(it) }} where
+   * {@code it} is the Map.Entry, so ANY non-empty map throws IllegalArgumentException
    * ("unexpected struct value: 5=android", verified against the pinned 7.1.0 artifact via
-   * wire-upstream-shaded). The port's StructMapAdapter.redact redacts the value instead and
-   * surfaces ClassCastException from the key checkcast. The case stays disabled until
-   * wire-runtime-java's StructMapAdapter.redact matches upstream.
+   * wire-upstream-shaded); the port preserves the quirk (TASK-15 fix). Encode and encodedSize
+   * surface ClassCastException from the String checkcast on the Integer key, like upstream's
+   * JVM.
    */
   @Test
   @SuppressWarnings("unchecked") // Totally unsafe.

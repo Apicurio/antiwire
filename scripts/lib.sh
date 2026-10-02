@@ -13,7 +13,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # (enforced by check_modules_consistency, which every consumer script runs at startup).
 # wire-upstream-shaded first: parity fixture packages before its consumers (see parent pom).
 MODULES=(wire-upstream-shaded wire-runtime-java wire-schema-java wire-tests-java wire-protoc-compat-java wire-java-generator)
-# wire-tests-java is a test-only module (never published) but stays in SHIPPED_MODULES
+# wire-tests-java is a test-only module (never published) and is checked alongside the
+# shipped set for classpath and bytecode hygiene
 # checks: its generated fixtures are compiled with the port's runtime and must stay clean.
 SHIPPED_MODULES=(wire-runtime-java wire-schema-java wire-java-generator)
 # Shipping modules only: the fixture is never-published test tooling with no target/classes,
@@ -98,4 +99,30 @@ find_module_jar() {
     echo "  stale or unexpected jars are present; run mvn clean (or remove the stray jars) and rebuild"
   } >&2
   return "$EXIT_FAIL"
+}
+
+# Downloads the pinned upstream wire-compiler 7.1.0 toolchain jars into $1 and prints the
+# classpath string for `java -cp` (shared by the fixture generators; DEC-5 build-time tools).
+fetch_wire_compiler_jars() { # <dir>
+  local dir="$1"
+  (
+    cd "$dir"
+    fetch_maven() {
+      curl -sL -o "$2" "https://repo1.maven.org/maven2/$1"
+    }
+    fetch_maven com/squareup/wire/wire-compiler/7.1.0/wire-compiler-7.1.0.jar wire-compiler.jar
+    fetch_maven com/squareup/wire/wire-schema-jvm/7.1.0/wire-schema-jvm-7.1.0.jar wire-schema.jar
+    fetch_maven com/squareup/wire/wire-runtime-jvm/7.1.0/wire-runtime-jvm-7.1.0.jar wire-runtime.jar
+    fetch_maven com/squareup/wire/wire-kotlin-generator/7.1.0/wire-kotlin-generator-7.1.0.jar wire-kotlin-generator.jar
+    fetch_maven com/squareup/wire/wire-java-generator/7.1.0/wire-java-generator-7.1.0.jar wire-java-generator.jar
+    fetch_maven com/squareup/wire/wire-swift-generator/7.1.0/wire-swift-generator-7.1.0.jar wire-swift-generator.jar
+    fetch_maven com/squareup/wire/wire-grpc-client-jvm/7.1.0/wire-grpc-client-jvm-7.1.0.jar wire-grpc-client.jar
+    fetch_maven com/squareup/kotlinpoet/kotlinpoet-jvm/2.3.0/kotlinpoet-jvm-2.3.0.jar kotlinpoet.jar
+    fetch_maven com/squareup/okio/okio-jvm/3.18.2/okio-jvm-3.18.2.jar okio.jar
+    fetch_maven org/jetbrains/kotlin/kotlin-stdlib/2.0.21/kotlin-stdlib-2.0.21.jar kotlin-stdlib.jar
+    fetch_maven com/google/guava/guava/33.7.1-jre/guava-33.7.1-jre.jar guava.jar
+    fetch_maven com/palantir/javapoet/javapoet/0.19.0/javapoet-0.19.0.jar javapoet.jar
+    fetch_maven com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar failureaccess.jar
+  )
+  echo "wire-compiler.jar:wire-schema.jar:wire-runtime.jar:wire-kotlin-generator.jar:wire-java-generator.jar:wire-swift-generator.jar:wire-grpc-client.jar:kotlinpoet.jar:okio.jar:kotlin-stdlib.jar:guava.jar:javapoet.jar:failureaccess.jar"
 }

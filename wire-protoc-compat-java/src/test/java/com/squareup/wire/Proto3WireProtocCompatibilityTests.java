@@ -44,7 +44,6 @@ import squareup.proto3.java.alltypes.AllWrappersOuterClass;
 import squareup.proto3.java.interop.InteropDuration;
 import squareup.proto3.java.interop.InteropMessage;
 import squareup.proto3.java.interop.InteropMessageOuterClass;
-import squareup.proto3.java.interop.InteropRepeatedEnums;
 import squareup.proto3.java.interop.InteropTest;
 import squareup.proto3.java.interop.type.EnumProto3;
 import squareup.proto3.java.interop.type.MessageProto3;
@@ -1369,12 +1368,8 @@ public class Proto3WireProtocCompatibilityTests {
     if (in == null) {
       throw new IllegalStateException("missing JSON fixture " + fileName);
     }
-    try (java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
-      byte[] buffer = new byte[8192];
-      for (int read; (read = in.read(buffer)) != -1; ) {
-        out.write(buffer, 0, read);
-      }
-      return new String(out.toByteArray(), StandardCharsets.UTF_8);
+    try (InputStream stream = in) {
+      return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new IllegalStateException("cannot read JSON fixture " + fileName, e);
     }
