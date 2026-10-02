@@ -98,10 +98,11 @@ material.
 The root `NOTICE` file states Google LLC licenses "the protobuf-derived code in the
 ProtoReader family, and R8-derived code in MathMethods" under the Apache License 2.0, but
 those files carry BSD-style 3-clause notices (see the table above). DEC-12 also says the
-NOTICE file "carries the BSD-style notices verbatim", which it did not until the 2026-10-02 NOTICE correction (this repository), which now reproduces them. This
-audit does not edit the attribution wording (a maintainer decision, confirmed
-2026-10-02); the discrepancy itself was closed the same day by the NOTICE
-correction in this repository, so the record above reflects the corrected state.
+NOTICE file "carries the BSD-style notices verbatim": resolved 2026-10-02, NOTICE now
+reproduces both notices verbatim. Scope note: the verbatim requirement was applied to the
+five translated source files; the eight google/protobuf/*.proto resources shipped in the
+wire-schema-java jar keep their intact in-jar Google 2008 BSD notices (7 full 3-clause +
+descriptor.proto short form), covered by their presence rather than by NOTICE reproduction.
 
 ## Per-file listing
 
