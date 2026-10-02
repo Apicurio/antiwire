@@ -82,6 +82,9 @@ find_module_jar() {
     [ -f "$jar" ] || continue
     case "$jar" in
       *-sources.jar|*-javadoc.jar) continue ;;
+      # Test-classifier jars (wire-schema-java's shared test-utils, TASK-16) are test
+      # artifacts, not the module's production jar; exclude them from the production pick.
+      *-tests.jar) continue ;;
     esac
     candidates+=("$jar")
   done
