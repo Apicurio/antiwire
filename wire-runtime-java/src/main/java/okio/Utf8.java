@@ -78,6 +78,13 @@ public final class Utf8 {
    * Returns the number of bytes used to encode the slice of {@code string} as UTF-8 when using
    * {@link BufferedSink#writeUtf8(String, int, int)}.
    */
+  // Port note: diverges from upstream okio 1.17.6, whose size() classifies every character
+  // independently. This copy adds an ASCII run-length fast path, mirroring the scan in
+  // Buffer.writeUtf8 (keep the two loops in sync), and keeps the whole scan in one
+  // self-contained method: the run path measured 2.3x on the encode-forward workload, and an
+  // unsplit scan runs as its own compiled unit instead of being absorbed into generated
+  // adapter encodings, where its per-character code shape depends on the caller's branch
+  // history. See docs/performance.md section 6, finding 3.
   public static long size(String string, int beginIndex, int endIndex) {
     if (string == null) throw new IllegalArgumentException("string == null");
     if (beginIndex < 0) throw new IllegalArgumentException("beginIndex < 0: " + beginIndex);
@@ -97,6 +104,14 @@ public final class Utf8 {
         // A 7-bit character with 1 byte.
         result++;
         i++;
+
+        // Fast-path contiguous runs of ASCII characters; run-length, as in Buffer.writeUtf8.
+        while (i < endIndex) {
+          c = string.charAt(i);
+          if (c >= 0x80) break;
+          result++;
+          i++;
+        }
 
       } else if (c < 0x800) {
         // An 11-bit character with 2 bytes.

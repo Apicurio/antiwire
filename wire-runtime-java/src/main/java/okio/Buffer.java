@@ -990,7 +990,8 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable, By
         data[segmentOffset + i++] = (byte) c; // 0xxxxxxx
 
         // Fast-path contiguous runs of ASCII characters. This is ugly, but yields a ~4x performance
-        // improvement over independent calls to writeByte().
+        // improvement over independent calls to writeByte(). Keep in sync with the matching run
+        // scan in Utf8.size, which mirrors this loop for byte counting.
         while (i < runLimit) {
           c = string.charAt(i);
           if (c >= 0x80) break;
