@@ -16,6 +16,7 @@
 package com.squareup.wire;
 
 import static com.squareup.wire.testing.TestFiles.readUtf8;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -88,7 +89,7 @@ public class WireCompilerErrorTest {
         + "message Simple {\n"
         + "  optional int32 f = 0;\n"
         + "}\n"));
-    assertEqualsMessage(""
+    assertEquals(""
         + "tag is out of range: 0\n"
         + "  for field f (" + source + "/test_1.proto:3:3)\n"
         + "  in message com.squareup.protos.test.Simple (" + source + "/test_1.proto:2:1)",
@@ -104,7 +105,7 @@ public class WireCompilerErrorTest {
         + "  optional int32 f = 1;\n"
         + "  optional int32 g = 1;\n"
         + "}\n"));
-    assertEqualsMessage(""
+    assertEquals(""
         + "multiple fields share tag 1:\n"
         + "  1. f (" + source + "/test_1.proto:3:3)\n"
         + "  2. g (" + source + "/test_1.proto:4:3)\n"
@@ -128,7 +129,7 @@ public class WireCompilerErrorTest {
         + "    QUIX = 1;\n"
         + "  }\n"
         + "}\n"));
-    assertEqualsMessage(""
+    assertEquals(""
         + "multiple enums share constant QUIX:\n"
         + "  1. com.squareup.protos.test.Foo.Bar.QUIX (" + source + "/test_1.proto:4:5)\n"
         + "  2. com.squareup.protos.test.Foo.Bar2.QUIX (" + source + "/test_1.proto:10:5)\n"
@@ -153,7 +154,7 @@ public class WireCompilerErrorTest {
         + "  BAZ = 0;\n"
         + "  QUIX = 1;\n"
         + "}\n"));
-    assertEqualsMessage(""
+    assertEquals(""
         + "multiple enums share constant QUIX:\n"
         + "  1. com.squareup.protos.test.Bar.QUIX (" + source + "/test_1.proto:4:3)\n"
         + "  2. com.squareup.protos.test.Bar2.QUIX (" + source + "/test_2.proto:5:3)\n"
@@ -176,7 +177,7 @@ public class WireCompilerErrorTest {
         + "  BAZ = 0;\n"
         + "  QUIX = 1;\n"
         + "}\n"));
-    assertEqualsMessage(""
+    assertEquals(""
         + "multiple enums share constant QUIX:\n"
         + "  1. com.squareup.protos.test.Bar.QUIX (" + source + "/test_1.proto:4:3)\n"
         + "  2. com.squareup.protos.test.Bar2.QUIX (" + source + "/test_1.proto:10:3)\n"
@@ -189,10 +190,6 @@ public class WireCompilerErrorTest {
     compile("message Simple { optional int32 f = 1; }");
     // Output should not have a 'package' declaration.
     assertFalse(readFile("target/Simple.java").contains("package"));
-  }
-
-  private static void assertEqualsMessage(String expected, String actual) {
-    assertTrue(expected.equals(actual), "expected:<" + expected + "> but was:<" + actual + ">");
   }
 
   private String readFile(String path) throws IOException {

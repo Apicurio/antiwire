@@ -25,6 +25,7 @@
       <groupId>io.github.paoloantinori</groupId>
       <artifactId>wire-runtime-java</artifactId>
     </dependency>
+
     <!-- TASK-13 adaptation: upstream wire-schema's jvmTest suite depends on
          com.google.protobuf:protobuf-java (4.36.1 at the pin, gradle/libs.versions.toml) so
          SchemaEncoderTest can parse encoded descriptors with FileDescriptorProto.parseFrom;
@@ -36,4 +37,20 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+    <build>
+      <plugins>
+        <!-- Shares the test utilities (SchemaBuilder, TestFiles) with wire-java-generator
+             the way upstream's wire-test-utils module does; consumed with type test-jar. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <executions>
+            <execution>
+              <goals><goal>test-jar</goal></goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+
 </project>

@@ -116,13 +116,7 @@ public final class JavaGenerator {
   static final ClassName CREATOR = ClassName.get("android.os", "Parcelable", "Creator");
 
   // Guava Ordering replaced by a plain comparator; sortedCopy becomes copy-then-sort.
-  private static final Comparator<Field> TAG_ORDERING =
-      new Comparator<Field>() {
-        @Override
-        public int compare(Field o1, Field o2) {
-          return Integer.compare(o1.tag(), o2.tag());
-        }
-      };
+  private static final Comparator<Field> TAG_ORDERING = Comparator.comparingInt(Field::tag);
 
   public static boolean builtInType(ProtoType protoType) {
     return BUILT_IN_TYPES_MAP.containsKey(protoType);

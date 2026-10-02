@@ -100,6 +100,30 @@ public final class TestFiles {
     return new ArrayList<>(Arrays.asList(values));
   }
 
+  /**
+   * Upstream wire-test-utils' {@code FileSystem.findFiles}: every non-directory file under
+   * {@code dir}, recursively, as forward-slash paths relative to {@code dir}.
+   */
+  public static java.util.Set<String> findFiles(java.nio.file.Path dir) throws IOException {
+    java.util.Set<String> result = new java.util.LinkedHashSet<>();
+    try (java.util.stream.Stream<java.nio.file.Path> walk = Files.walk(dir)) {
+      walk.filter(Files::isRegularFile)
+          .forEach(path -> result.add(dir.relativize(path).toString().replace('\\', '/')));
+    }
+    return result;
+  }
+
+  /** Upstream wire-test-utils' {@code FileSystem.readUtf8}. */
+  public static String readUtf8(java.nio.file.Path file) throws IOException {
+    return new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
+  }
+
+  /** Upstream wire-test-utils' {@code containsExactlyInAnyOrderAsRelativePaths}. */
+  public static void assertContainsExactlyInAnyOrderAsRelativePaths(
+      java.util.Set<String> actual, String... values) {
+    assertContainsExactlyInAnyOrder(java.util.Arrays.asList(values), new java.util.ArrayList<>(actual));
+  }
+
   private TestFiles() {
     throw new AssertionError("no instances");
   }

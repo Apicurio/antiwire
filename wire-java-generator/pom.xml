@@ -30,6 +30,13 @@
       <groupId>io.github.paoloantinori</groupId>
       <artifactId>wire-runtime-java</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.github.paoloantinori</groupId>
+      <artifactId>wire-schema-java</artifactId>
+      <version>${project.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
     <!-- Explicitly permitted pure-Java dependency of the optional generator module (OPEN-2).
          Square JavaPoet 1.13.0, not upstream Wire's palantir fork: see the javapoet.version
          property comment in the parent pom (DEC-3 Java 11 floor + proven byte-identical
