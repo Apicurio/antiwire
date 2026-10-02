@@ -1,7 +1,7 @@
 ---
 id: TASK-22
 title: Define a deferred Kafka use case and validate an adoption proposal
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-29 09:23'
 updated_date: '2026-09-30 01:18'
