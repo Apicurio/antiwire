@@ -47,7 +47,8 @@ public class SchemaHandlerTest {
         () -> schemaHandler.checkGeneratedPath(generatedPath, outDirectory));
   }
 
-  private static final class TestSchemaHandler extends SchemaHandler {
+  /** Package-visible so the TASK-17 corpus can drive the same shim without a second copy. */
+  static final class TestSchemaHandler extends SchemaHandler {
     void checkGeneratedPath(Path filePath, Path outDirectory) {
       checkPathInOutDirectory(filePath, outDirectory);
     }

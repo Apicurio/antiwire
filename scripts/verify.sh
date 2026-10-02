@@ -125,10 +125,14 @@ module_test_summary() { # <artifactId>
   ' "$LOG"
 }
 
+surefire_count() { # <surefire-summary-line>: the Tests run: N value
+  printf '%s\n' "$1" | sed -n 's/^.*Tests run: \([0-9][0-9]*\),.*$/\1/p'
+}
+
 module_tests_suite() { # <suite> <artifactId>
   local suite="$1" artifact="$2" summary count
   summary="$(module_test_summary "$artifact")"
-  count="$(printf '%s\n' "$summary" | sed -n 's/^.*Tests run: \([0-9][0-9]*\),.*$/\1/p')"
+  count="$(surefire_count "$summary")"
   case "$summary" in
     *"Failures: 0, Errors: 0"*) zero_failures=1 ;;
     *) zero_failures=0 ;;
@@ -144,11 +148,57 @@ module_tests_suite() { # <suite> <artifactId>
   fi
 }
 
+# TASK-17 security corpus: the regression cases for docs/security-regression-inventory.md run
+# inside mvn verify as SecurityCorpusTest classes in three modules; this suite reconciles their
+# surefire summaries out of the same build log, so it cannot pass on a build that did not
+# execute them. Each class must appear, be green, and carry at least its floor of cases; the
+# floor is the count the inventory doc's rows pin to the class, so thinning the corpus below
+# the registry fails the suite. Growing a class needs no script change: floors are minimums.
+security_corpus_suite() {
+  local required_classes=(
+      com.squareup.wire.RuntimeSecurityCorpusTest:10
+      com.squareup.wire.schema.SchemaSecurityCorpusTest:10
+      com.squareup.wire.java.JavaGeneratorSecurityCorpusTest:4
+  )
+  local problems="" entry class floor summary count skipped
+  for entry in "${required_classes[@]}"; do
+    class="${entry%:*}"
+    floor="${entry##*:}"
+    summary="$(grep -E "^\[INFO\] Tests run: .* -- in ${class}$" "$LOG" | head -n 1)"
+    count="$(surefire_count "$summary")"
+    skipped="$(printf '%s\n' "$summary" | sed -n 's/^.*Skipped: \([0-9][0-9]*\).*$/\1/p')"
+    case "$summary" in
+      *"Failures: 0, Errors: 0"*)
+        if [ -z "$count" ] || [ "$((count - skipped))" -lt "$floor" ]; then
+          problems="$problems ${class}(ran $count cases, $skipped skipped, floor is $floor)"
+        fi
+        ;;
+      "")
+        problems="$problems ${class}(absent from the build)"
+        ;;
+      *)
+        problems="$problems ${class}(failing)"
+        ;;
+    esac
+  done
+  if [ -z "$problems" ]; then
+    res "security-corpus.status=PASS"
+    res "security-corpus.note=SecurityCorpusTest classes green inside mvn verify (runtime, schema, generator); registry docs/security-regression-inventory.md"
+  else
+    KEEP_LOG=1
+    res "security-corpus.status=FAIL"
+    res "security-corpus.note=corpus classes not all green:$problems; mvn log kept at $LOG"
+  fi
+}
+
 if [ "$build_ok" -eq 1 ]; then
   module_tests_suite runtime-tests wire-runtime-java
   module_tests_suite schema-tests wire-schema-java
   module_tests_suite protoc-oracle wire-protoc-compat-java
   module_tests_suite compiler-tests wire-java-generator
+
+  security_corpus_suite
+
   run_suite parity-coverage scripts/parity-coverage.sh
   run_suite duplicate-class-check scripts/check-classpath.sh
   run_suite bytecode-java11 scripts/check-java11-bytecode.sh

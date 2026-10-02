@@ -51,9 +51,9 @@
     },
     {
       "name": "security-corpus",
-      "status": "PENDING",
+      "status": "ACTIVE",
       "owner": "TASK-17",
-      "description": "security regression corpus as permanent tests"
+      "description": "security regression corpus as permanent tests: the three SecurityCorpusTest classes run inside mvn verify; registry and per-item pinned-source evidence in docs/security-regression-inventory.md"
     },
     {
       "name": "java11-consumer",
