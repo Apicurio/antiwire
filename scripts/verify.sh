@@ -23,7 +23,7 @@ MANIFEST="$ROOT/config/verify-suites.json"
 RESULTS="$(mktemp)"
 LOG="$(mktemp)"
 KEEP_LOG=0
-trap 'rm -f "$RESULTS"; [ "$KEEP_LOG" -eq 1 ] || rm -f "$LOG"' EXIT
+trap 'rm -f "$RESULTS"; [ -n "${WATCH_LOG:-}" ] && rm -f "$WATCH_LOG"; [ "$KEEP_LOG" -eq 1 ] || rm -f "$LOG"' EXIT
 
 res() { printf 'RESULT %s\n' "$1" >> "$RESULTS"; }
 
@@ -111,6 +111,22 @@ else
     res "dependency-policy.note=build failed; artifact results not attributable to the current revision (log: $LOG)"
   fi
 fi
+
+# TASK-23 upstream watch: informational and artifact-independent, so it runs whichever way
+# the build went. This block deliberately does not reuse run_suite: run_suite binds $LOG,
+# which still holds the mvn output the module-summary suites below read, so the watch gets
+# its own log file (cleaned by the EXIT trap). PASS here means the watch RAN AND REPORTED,
+# with state=CURRENT/BEHIND or PIN_MOVED in the note; an upstream release must not fail the
+# build. Only a watch that could not run (network, malformed pins) records NOT_RUN, which
+# fails the run as MISSING, exactly like any other suite that never executed.
+WATCH_LOG="$(mktemp)"
+echo
+echo "--- suite: upstream-watch (scripts/check-upstream.sh --informational) ---"
+bash "$ROOT/scripts/check-upstream.sh" --informational >"$WATCH_LOG" 2>&1
+watch_rc=$?
+cat "$WATCH_LOG"
+record_suite upstream-watch "$watch_rc" "$WATCH_LOG"
+rm -f "$WATCH_LOG"
 
 # Module test suites (runtime-tests TASK-9, schema-tests TASK-13): their evidence is the
 # per-module surefire summary inside the green mvn verify log above.

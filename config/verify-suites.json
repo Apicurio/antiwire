@@ -66,6 +66,12 @@
       "status": "ACTIVE",
       "owner": "TASK-2",
       "description": "class-origin report plus duplicate detection for com.squareup.wire and retained okio names on every module test classpath (compatibility matrix section G)"
+    },
+    {
+      "name": "upstream-watch",
+      "status": "ACTIVE",
+      "owner": "TASK-23",
+      "description": "informational upstream tag watch: scripts/check-upstream.sh compares the newest square/wire tag from git ls-remote with the pin in config/parity-pins.json and checks the pinned tag object still matches the remote. PASS means the watch RAN AND REPORTED; the note carries state=CURRENT/BEHIND/PIN_MOVED, so an upstream release never fails the run, and only a watch that could not run (network, malformed pins) records NOT_RUN and fails. The weekly GitHub-advisories page review is the owned manual checklist in docs/upstream-sync.md (advisories need auth, so detection is tag-based plus manual)"
     }
   ]
 }
