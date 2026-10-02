@@ -1,5 +1,5 @@
 {
-  "comment": "TASK-14: reconciliation map from pinned upstream test files to port artifacts. statuses: adopted (name-set equality modulo renames/missing), partial (only ported_names carried), deferred (owner required, no port yet), excluded (reason required). missing entries carry per-case reasons. Sources: docs/task9-case-accounting.md, docs/task13-case-accounting.md.",
+  "comment": "TASK-14: reconciliation map from pinned upstream test files to port artifacts. statuses: adopted (name-set equality modulo renames/missing), partial (adopted semantics plus a recorded missing set), deferred (owner required, no port yet), excluded (reason required). missing entries carry per-case reasons. Sources: docs/task9-case-accounting.md, docs/task13-case-accounting.md.",
   "modules": {
     "wire-runtime/src/commonTest/kotlin": {
       "root": "wire-runtime/src/commonTest/kotlin",
@@ -259,6 +259,35 @@
     "wire-tests/jvm-annotations-interop": "DEC-6: Kotlin annotation interop",
     "wire-tests/multiplatform": "DEC-6: Kotlin multiplatform harness",
     "wire-tests/wire-json-shared-kotlin-tests": "DEC-6: JSON adapter shared suite",
-    "wire-tests/fixtures": "fixture corpus, not an executable suite; consumed by scripts/generate-java-fixtures.sh and wire-tests-java"
+    "wire-tests/fixtures": "fixture corpus, not an executable suite; consumed by scripts/generate-java-fixtures.sh and wire-tests-java",
+    "wire-compiler": "TASK-16: compiler and generator",
+    "wire-java-generator": "TASK-16: Java generator",
+    "wire-kotlin-generator": "DEC-6/TASK-16: Kotlin codegen",
+    "wire-gradle-plugin": "DEC-6: Gradle plugin outside the port surface",
+    "wire-gradle-plugin-playground": "DEC-6: plugin playground",
+    "wire-golden-files": "TASK-16: golden comparisons move to the compiler suite",
+    "wire-protoc-compatibility-tests": "TASK-15: protoc oracle corpus",
+    "wire-reflector": "DEC-6: Kotlin reflection surface",
+    "wire-test-utils": "test utilities; the port mirrors the pieces it needs in com.squareup.wire.testing.TestFiles",
+    "wire-schema-tests": "upstream test-support module (SchemaBuilder); the port carries its own SchemaBuilder",
+    "wire-grpc-client": "DEC-6: gRPC (Kotlin/okhttp) surface",
+    "wire-grpc-mockwebserver": "DEC-6: gRPC testing",
+    "wire-grpc-tests": "DEC-6: gRPC (Kotlin) suite",
+    "wire-gson-support": "DEC-6: JSON adapters",
+    "wire-gson-support-test": "DEC-6: JSON adapters",
+    "wire-moshi-adapter": "DEC-6: JSON adapters",
+    "wire-moshi-adapter-test": "DEC-6: JSON adapters",
+    "wire-runtime-swift": "DEC-6: Swift target",
+    "wire-swift-generator": "DEC-6: Swift generator",
+    "wire-benchmarks": "benchmarks, not a test suite",
+    "wire-bom": "bill of materials",
+    "wire-test-proto-generation": "fixture generation harness",
+    "build-support": "build logic",
+    "samples": "samples",
+    "docs": "documentation",
+    "gradle": "build logic",
+    "kotlin-js-store": "toolchain state",
+    "wire-tests-swift": "DEC-6: Swift target suite",
+    "wire-tests-proto3-swift": "DEC-6: Swift target suite"
   }
 }

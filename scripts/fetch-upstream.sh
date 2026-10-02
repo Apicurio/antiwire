@@ -37,11 +37,13 @@ verify_pin() {
 
 if [ ! -d "$CLONE_PATH/.git" ]; then
   mkdir -p "$(dirname "$CLONE_PATH")"
-  git clone "$REPO" "$CLONE_PATH"
+  git clone --branch "$TAG" "$REPO" "$CLONE_PATH"
 fi
 
-# A depth-1 clone of the default branch may not carry the pinned tag.
+# An existing clone (cache refill, default-branch checkout) may not carry the pinned tag.
 if ! git -C "$CLONE_PATH" rev-parse -q --verify "$TAG^{tag}" >/dev/null; then
   git -C "$CLONE_PATH" fetch origin "refs/tags/$TAG:refs/tags/$TAG" --force
 fi
 verify_pin
+# The pin constrains refs; reconciliation reads the working tree, so put the tree AT the pin.
+git -C "$CLONE_PATH" checkout --quiet --detach "$COMMIT"

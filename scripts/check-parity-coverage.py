@@ -32,10 +32,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PINS_PATH = os.path.join(ROOT, "config", "parity-pins.json")
 MAP_PATH = os.path.join(ROOT, "config", "upstream-case-map.json")
 
-TEST_RE = re.compile(r"@(?:ParameterizedTest|org\.junit\.(?:jupiter\.)?Test|Test)(?=$|\s|\()")
+TEST_RE = re.compile(
+    r"@(?:org\.junit\.jupiter\.api\.Test|org\.junit\.jupiter\.params\.ParameterizedTest"
+    r"|org\.junit\.Test|ParameterizedTest|Test)(?=$|\s|\()")
 
 DECL_RE = re.compile(r"(?:@\w+(?:\([^)]*\))?\s+)*"
-                     r"(?:public\s+|internal\s+|private\s+)?(?:final\s+)?"
+                     r"(?:public\s+|protected\s+|internal\s+|private\s+)?"
+                     r"(?:final\s+|open\s+|override\s+|inline\s+|suspend\s+)?"
                      r"(?:fun|void)\s+(`[^`]+`|\w+)\s*\(")
 
 
@@ -125,16 +128,25 @@ def main():
     if not os.path.isdir(os.path.join(clone, ".git")):
         problems.append("upstream clone missing at %s; run scripts/fetch-upstream.sh" % clone)
     else:
+        report["pin_verified"] = False
         try:
             tag = pins["upstream"]["tag"]
             tag_object = git_rev_parse(clone, "%s^{tag}" % tag)
             commit = git_rev_parse(clone, "%s^{commit}" % tag)
+            head = git_rev_parse(clone, "HEAD")
             if tag_object != pins["upstream"]["annotated_tag_object"] \
                     or commit != pins["upstream"]["resolved_commit"]:
                 problems.append(
                     "upstream clone at %s does not match the pin (tag %s -> %s, object %s)"
                     % (clone, tag, commit, tag_object))
-            report["pin_verified"] = True
+            elif head != pins["upstream"]["resolved_commit"]:
+                # fetch-upstream.sh must leave the worktree at the pin; reconciliation
+                # reads files, not refs.
+                problems.append(
+                    "upstream worktree at %s is not checked out at the pinned commit "
+                    "(HEAD %s); run scripts/fetch-upstream.sh" % (clone, head))
+            else:
+                report["pin_verified"] = True
         except subprocess.CalledProcessError as e:
             problems.append("cannot resolve pinned tag in %s: %s" % (clone, e))
 
@@ -151,6 +163,10 @@ def main():
             status = entry.get("status", "adopted")
             record = {"status": status}
             module_report["files"][relative] = record
+            if status not in ("adopted", "partial", "deferred", "excluded"):
+                problems.append("%s/%s has an unrecognized status %r"
+                                % (module, relative, status))
+                continue
 
             if entry.get("fixture"):
                 record["note"] = "fixture class carried by an executable suite"
@@ -161,6 +177,9 @@ def main():
                     problems.append("%s/%s deferred without an owner" % (module, relative))
                 if not entry.get("reason"):
                     problems.append("%s/%s excluded/deferred without a reason" % (module, relative))
+                if "port" in entry:
+                    problems.append("%s/%s is %s but still claims a port file"
+                                    % (module, relative, status))
                 report["totals"]["%s_files" % status] += 1
                 continue
 
@@ -198,6 +217,29 @@ def main():
         for relative in stale:
             problems.append("map entry for a file absent upstream: %s/%s" % (module, relative))
         report["modules"][module] = module_report
+
+    # Module-level drift: every upstream top-level module must be claimed by the map,
+    # either as an in-scope root or as an excluded module with a reason.
+    in_scope_modules = {m.split("/")[0] for m in case_map["modules"]}
+    for top in sorted(os.listdir(clone)):
+        if not os.path.isdir(os.path.join(clone, top)) or top.startswith("."):
+            continue
+        if top in in_scope_modules or top in case_map["excluded_upstream_modules"]:
+            continue
+        problems.append("unaccounted upstream module: %s (add it to the case map or to "
+                        "excluded_upstream_modules with a reason)" % top)
+    for top in sorted(case_map["excluded_upstream_modules"]):
+        if not os.path.isdir(os.path.join(clone, top)):
+            problems.append("excluded_upstream_modules names a module absent upstream: %s" % top)
+
+    fixtures_script = os.path.join(ROOT, "scripts", "generate-java-fixtures.sh")
+    if os.path.exists(fixtures_script):
+        with open(fixtures_script) as f:
+            fixtures_text = f.read()
+        if pins["upstream"]["tag"] not in fixtures_text:
+            problems.append("scripts/generate-java-fixtures.sh does not reference the pinned "
+                            "tag %s; the fixture corpus and this reconciliation would diverge"
+                            % pins["upstream"]["tag"])
 
     deferred_total = report["totals"]["deferred_files"]
     if args.require_complete and deferred_total:
