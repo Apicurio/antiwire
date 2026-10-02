@@ -1,8 +1,12 @@
 # Runtime and Apicurio schema performance comparison (TASK-20)
 
-Measured on 2026-10-02 in two sessions: 12:08-12:56 CEST (initial full matrix, 15 wire
-benchmarks) and 13:36-13:50 CEST (decode re-measurement after the decode entry-point
-fix: the four decode cells plus three encode control cells, identical JMH configuration).
+Measured on 2026-10-02 in three sessions: 12:08-12:56 CEST (initial full matrix, 15 wire
+benchmarks), 13:36-13:50 CEST (decode re-measurement after the decode entry-point
+fix: the four decode cells plus three encode control cells, identical JMH configuration),
+and 18:55-19:19 CEST (encode-forward fix session, marked "session 3" below: the /tmp/aw-perf
+harness had been lost to a machine reboot and was rebuilt from this document, then the
+encode-forward path was fixed and the full 12-cell runtime matrix re-measured on the
+renewed candidate; two repetitions, interleaved upstream, port, upstream, port).
 Every number below comes from a JMH run whose
 command and raw output are recorded; nothing is transcribed by hand from memory. The
 scratch harness lives outside this repo at `/tmp/aw-perf` (JMH never enters the antiwire
@@ -23,17 +27,22 @@ phase of the same script and consumes only the band derived in phase 1.
 | antiwire revision, decode re-measurement (cells marked "re-measured") | `c0a215213c85b8a75d1d046f87f894b8988d792c` (branch `m0-spikes`; the decode entry-point fix of section 6 is the only runtime code delta vs the initial candidate) |
 | Tree state at re-measurement build | only `backlog/tasks/task-20 ...md` modified (documentation; no code delta vs the committed tree) |
 | Build, re-measurement | `JAVA_HOME=~/.sdkman/candidates/java/17.0.12-tem mvn -pl wire-runtime-java -am install -DskipTests`, exit 0 |
+| antiwire revision, session 3 (rows marked "session 3") | `2d175e2` (branch `main`; the `okio.Utf8.size` ASCII run-length fix of section 6 is the only runtime code delta vs `bda14cc`; HEAD otherwise at the TASK-21 groundwork commits `a0214e8`..`bda14cc`) |
+| Tree state at session 3 build | clean (fix committed before measurement) |
+| Build, session 3 | `JAVA_HOME=~/.sdkman/candidates/java/17.0.12-tem mvn -pl wire-runtime-java install -DskipTests`, exit 0 |
+| Test gate at session 3 | `mvn -pl wire-runtime-java,wire-tests-java,wire-protoc-compat-java test` green: 869 / 80 / 122 tests, 0 failures, 0 errors (4 / 3 / 50 skipped); `./scripts/verify.sh`: `VERDICT: all 12 ACTIVE suites passed.` |
 | Oracle | upstream Wire 7.1.0 artifacts resolved from Maven Central (never built from source); the same oracle jar measured in both sessions |
 | Verify run | `./scripts/verify.sh` at the initial revision: `VERDICT: all 11 ACTIVE suites passed.` |
 | Test gate at the re-measurement revision | `mvn -pl wire-runtime-java,wire-tests-java,wire-protoc-compat-java test` green: 869 / 80 / 122 tests, 0 failures, 0 errors (4 / 3 / 50 skipped) |
 
-Measured antiwire artifacts (`io.github.paoloantinori`, version `0.1.0-SNAPSHOT`):
+Measured antiwire artifacts (`io.github.paoloantinori`, version `0.1.0-SNAPSHOT`; coordinates
+moved to `io.apicurio` before session 3, see the coordinate-update note at the end):
 
-| Artifact | SHA-256 initial run (`0e87bde`) | SHA-256 decode re-run (`c0a2152`) |
-|---|---|---|
-| `wire-runtime-java` | `cc7f4cac0a5d611f9e0f6959ba2106327124e06380532850d64030764ed897be` | `43c810fb5f970fec29bf2a2a0465e30b5ee7aa1dc1dbbf4d11c9249455c1307c` |
-| `wire-schema-java` | `7bc11249a3af12457c9caeff66cc942eb5ebf8f6d0d2502cb132076015cacaf5` | same (jar not rebuilt by `-pl wire-runtime-java -am install`; verified) |
-| `wire-java-generator` | `c7d9753c3a5c37728c37d86209869b039c64f8803118adf45ec2ec63685a8b6c` | same (jar not rebuilt; verified) |
+| Artifact | SHA-256 initial run (`0e87bde`) | SHA-256 decode re-run (`c0a2152`) | SHA-256 session 3 (`2d175e2`, `io.apicurio`) |
+|---|---|---|---|
+| `wire-runtime-java` | `cc7f4cac0a5d611f9e0f6959ba2106327124e06380532850d64030764ed897be` | `43c810fb5f970fec29bf2a2a0465e30b5ee7aa1dc1dbbf4d11c9249455c1307c` | `f504460d1a9e63d2872d48e2934feded9697795de96dcc489051225bd15ef96a` |
+| `wire-schema-java` | `7bc11249a3af12457c9caeff66cc942eb5ebf8f6d0d2502cb132076015cacaf5` | same (jar not rebuilt by `-pl wire-runtime-java -am install`; verified) | `cc60325f250f6aac155387b6ea600a351e1a31f0f63077035276196521b6048d` (source unchanged vs `c0a2152`; rebuilt through the TASK-21 packaging changes) |
+| `wire-java-generator` | `c7d9753c3a5c37728c37d86209869b039c64f8803118adf45ec2ec63685a8b6c` | same (jar not rebuilt; verified) | `e5ae5f9696f5a6f09186dce6726c6211b5806544497e03b9cb261448fe0c558d` (source unchanged vs `c0a2152`; rebuilt through the TASK-21 packaging changes) |
 
 Oracle jars (Maven Central, checksums of the exact files used):
 
@@ -68,13 +77,24 @@ Invalidation rule (AC#5): any change to `wire-runtime-java`, `wire-schema-java`,
 any change to the harness workloads invalidates these results and the acceptance state;
 renewed measurements and renewed maintainer acceptance are required before TASK-21. A
 candidate other than the revisions and checksums above cannot use this record. The rule
-fired once: the decode entry-point fix (`c0a2152`, the only runtime code delta vs
+fired twice: the decode entry-point fix (`c0a2152`, the only runtime code delta vs
 `0e87bde`) invalidated the initial matrix, and the 13:36 session renewed exactly the
 affected surface: all four decode cells plus, as controls, the three encode cells that
 sat closest to their noise bands (email forward writer, packed and bytes reverse
 writers). Encode and schema code paths are source-identical between the two candidates,
 so the unmarked encode, schema, and protobuf-java numbers carry over from the initial
-session under that stated equivalence.
+session under that stated equivalence. The second firing is the session-3 encode-forward
+fix (`2d175e2`, the `okio.Utf8.size` change of section 6, plus the TASK-21 packaging
+commits `a0214e8`..`bda14cc` that intervened on `main`): it renewed the full 12-cell
+runtime matrix on the rebuilt harness. Two limitations are recorded rather than papered
+over: (1) the rebuilt harness covers the four runtime workload benches only, so the
+three schema cells and the eight protobuf-java reference cells were not re-measured in
+session 3; parse and link+load do not encode strings and cannot be reached by the fix,
+while descriptor conversion does call the fixed primitive (STRING.encodedSize ->
+Utf8.size) and its recorded 1.160x port-faster level can only move in the improvement
+direction, but the renewal is due before TASK-21 acceptance; (2) the session-3 bands are
+derived from the rebuilt harness's own oracle repetitions per the same pre-declared rule
+(phase 1 of `tools/analyze.py`, written before any session-3 port result existed).
 
 ## 1. Environment
 
@@ -197,6 +217,28 @@ benchmark; allocation is the `gc.alloc.rate.norm` median of repetition 1.
 
 ### Reproduction commands
 
+#### Harness rebuild (session 3)
+
+The original `/tmp/aw-perf` was lost to a machine reboot; the harness was rebuilt from this
+document before the encode-forward fix was measured. Reconstruction provenance, recorded per
+the doc's own workload table:
+
+- Same layout, pom profiles (`io.apicurio:wire-runtime-java:0.1.0-SNAPSHOT` vs the pinned
+  upstream oracle set), JMH 1.37, annotations, interleave, and the two-phase
+  `tools/analyze.py` discipline (bands from the oracle before any port number).
+- Workload inputs: (a) email decodes the same `medium_value.bytes` resource; the rebuilt
+  harness reproduces the original fingerprints exactly (`cc02806d...` 672 B,
+  `ba3c8a31...` 483 B for all_types built from every in-message field of
+  `all_types_proto2.json`). (c)/(d) content choices under-specified by the doc are
+  recorded in the harness: `rep_string[i]` is a run of 's' of length 28 (i < 86) or 29
+  (i >= 86) chosen to hit the documented 18,437 B, and the blob label is the 11-char
+  ASCII string `blob-label-` chosen to hit 17,472 B; both sides measure the same data
+  (`perf.IdentityCheck` outputs diff-clean across the two classpaths).
+- Both model trees regenerated with the two CLIs (upstream `wire-compiler` 7.1.0 pins and
+  the antiwire generator CLI); `diff -rq gen/port gen/upstream` clean, 7 files.
+- Diagnosis tooling added by the fix session (kept in the harness): `PrimitiveBench`
+  (isolated `Utf8.size` / adapter / full-size-pass benches) and `tools/jfr_top.py`.
+
 ```bash
 # 1. fresh antiwire install (record revision + jar checksums)
 cd /Users/pantinor/data/repo/work/antiwire
@@ -256,6 +298,15 @@ python3 /tmp/aw-perf/tools/analyze.py
 
 Both profiles therefore measure the same operation on the same data (AC#4), and the
 generated model classes are the same code compiled against each implementation.
+
+Rebuilt-harness identity (session 3): email and all_types fingerprints reproduce the
+values above exactly; the packed and blob fingerprints differ from the lost harness's
+because the string and label contents were re-chosen to the same documented sizes
+(section 2, harness rebuild), giving `sha256:df973ccf3317ca95ae20f323198e39ffcecf288022f7035eeb2d47d8a7306ddb`
+(18,437 B packed) and `sha256:4d49caabe2cf4a551f9d4187f40e2cb293b19f7a347712b3f65bd62d4148836c`
+(17,472 B blob). Forward and reverse encodings and the decode-reencode round trips are
+mutually identical under both classpaths, diff-clean across port and upstream, and
+unchanged by the `2d175e2` fix.
 
 ## 4. Noise band derived from the oracle, before judging the port (AC#2)
 
@@ -346,6 +397,40 @@ and entered the long `ProtoReader`. Superseded values, format: upstream median
 | (c) packed encodeReverse | 62,399 [61,275-62,893]; 59,875 [56,213-61,361]; 0.960; 200 / 176 |
 | (d) bytes encodeReverse | 1,311,620 [1,222,807-1,432,649]; 1,275,030 [1,203,631-1,428,197]; 0.972; 200 / 176 |
 
+### Session 3 results (2026-10-02 18:55-19:19 CEST, candidate `2d175e2`, rebuilt harness)
+
+Full 12-cell runtime matrix, two repetitions per profile interleaved `upstream, port,
+upstream, port` (start times 18:55, 19:01, 19:07, 19:13; last run finished 19:19), identical
+JMH configuration (40 iterations per profile and cell). Bands re-derived from this session's
+own oracle repetitions by phase 1 of the unchanged two-phase rule: global ±25%, per-cell own
+bands listed in section 6. Medians [min-max] over all iterations of both repetitions;
+allocation is the `gc.alloc.rate.norm` median of repetition 1.
+
+| Cell | upstream 7.1.0 ops/s median [min-max] | antiwire ops/s median [min-max] | ratio | alloc/op upstream / port (B) | own band |
+|---|---|---|---|---|---|
+| email encodeForward | 606,703 [566,891-613,874] | 1,361,770 [1,287,234-1,378,661] | **2.245** | 16 / 16 | ±5% |
+| email encodeReverse | 2,984,030 [2,573,108-3,210,739] | 2,954,707 [2,701,608-3,044,417] | 0.990 | 200 / 176 | ±25% |
+| email decode | 2,489,580 [2,078,635-2,611,748] | 2,176,538 [1,966,236-2,292,869] | 0.874 | 4,092 / 4,224 | ±20% |
+| all_types encodeForward | 942,623 [882,954-962,125] | 1,021,125 [953,680-1,074,868] | 1.083 | 16 / 16 | ±5% |
+| all_types encodeReverse | 1,350,778 [1,232,360-1,392,995] | 1,517,083 [1,430,164-1,560,069] | 1.123 | 200 / 176 | ±10% |
+| all_types decode | 530,638 [509,611-544,149] | 538,543 [522,648-552,267] | 1.015 | 8,184 / 8,904 | ±5% |
+| packed encodeForward | 42,701 [38,157-43,459] | 42,359 [39,363-42,597] | 0.992 | 16 / 16 | ±15% |
+| packed encodeReverse | 65,912 [62,721-68,543] | 68,779 [63,013-69,933] | 1.043 | 200 / 176 | ±5% |
+| packed decode | 26,446 [24,851-27,558] | 33,138 [31,088-34,402] | 1.253 | 116,192 / 116,456 | ±5% |
+| bytes encodeForward | 2,058,783 [1,979,481-2,258,966] | 2,134,440 [2,030,052-2,264,013] | 1.037 | 16 / 16 | ±10% |
+| bytes encodeReverse | 1,364,777 [1,221,711-1,505,475] | 1,347,841 [1,206,280-1,539,763] | 0.988 | 200 / 176 | ±15% |
+| bytes decode | 1,585,211 [1,369,911-1,799,822] | 1,263,904 [1,203,039-1,651,674] | 0.797 | 19,020 / 19,064 | ±25% |
+
+Mandate judgment (TASK-20 zero-regression gate): `EmailSearchBench.encodeForward` =
+2.245 overall, and 2.218 / 2.250 per repetition, each far above the required 0.95; every
+other cell is inside its own oracle-derived band. The bytes-decode cell deserves the honest
+note: this session's oracle measured that cell's own fork spread at 23.7% (16.7% in the
+initial session), so the pre-declared rule gives it an own band of ±25% and 0.797 sits
+inside; judged against the initial session's band (±20%, floor 0.800) it would sit 0.003
+below the floor, i.e. the cell is statistically indistinguishable from its recorded
+0.810 level while the oracle's own noise in it nearly tripled. Allocations are unchanged
+or better on every cell (email decode 4,224 vs the recorded 4,296).
+
 ### Workload 2: Apicurio schema operations
 
 | operation | upstream 7.1.0 ops/s median [min-max] | antiwire ops/s median [min-max] | ratio port/upstream | alloc/op upstream (B) | alloc/op port (B) |
@@ -360,8 +445,9 @@ Reading notes:
   the port: parse 1.118x, link+load 1.084x, descriptor conversion 1.160x, the last with
   22% less allocation per op.
 - Runtime encode is at parity (within per-benchmark noise) or better on 7 of 8 measured
-  cells across the forward and reverse writers; the exception is the email
-  forward-writer cell (0.867 initial, 0.790 re-measured, finding 3 below, still open).
+  cells across the forward and reverse writers in the first two sessions; the exception
+  was the email forward-writer cell (0.867 initial, 0.790 re-measured), resolved in
+  session 3 by the `okio.Utf8.size` fix (2.245x, section 6).
   `all_types` reverse encode is 1.181x faster with 12% less allocation; the packed and
   bytes reverse-writer cells re-measured at 1.013x and 1.026x confirm their initial
   0.960/0.972 readings were noise-edge parity, not deficits.
@@ -372,15 +458,16 @@ Reading notes:
   remain within 9% of upstream everywhere (all_types +8.8%, email +5.3%, packed +0.2%,
   bytes +0.2%), so the residual bytes-heavy deficit is CPU-path, not garbage.
 
-## 6. Acceptance: PENDING maintainer (AC#3)
+## 6. Acceptance: all four findings resolved by fixes (AC#3)
 
 No regression is accepted by this document. The initial run flagged four findings: under
 the pre-declared global band (±25%) exactly one was a regression, and the stricter
 per-benchmark oracle band (section 4) added three more for review. Per AC#3 each required
 an explicit maintainer acceptance record or a fix before TASK-21. Findings 1, 2, and 4
 were fixed at the decode entry point (candidate `c0a2152`) and closed by re-measurement
-under the identical configuration and the unchanged bands; finding 3 is outside that
-fix's reach and remains open.
+under the identical configuration and the unchanged bands; finding 3 was fixed at the
+`okio.Utf8.size` primitive (candidate `2d175e2`) and closed by the session-3 full-matrix
+re-measurement. No finding is pending maintainer acceptance.
 
 ### Resolved by the decode entry-point fix (re-measured within their bands)
 
@@ -394,26 +481,57 @@ medians order: up r1, up r2, port r1, port r2 (ops/s).
 | 2 | `perf.EmailSearchBench.decode` | 0.799 / 1,812,167 / 2,269,059; 2,323,509; 1,789,157; 1,812,167 | 0.904 / 2,243,927 / 2,501,968; 2,371,751; 2,256,531; 2,205,160 | 2.4% / 15.9% | RESOLVED (within own ±20%) |
 | 4 | `perf.PackedBench.decode` | 0.897 / 22,299 / 25,098; 24,239; 22,318; 21,877 | 1.221 / 29,125 / 21,963; 24,802; 30,150; 27,090 | 3.5% / 2.1% | RESOLVED, now faster (upstream rep 1 wobbled, min iteration 9,365, so read 1.221 as at-or-above parity) |
 
-### Still PENDING maintainer
+### Resolved by the encode-forward fix (session 3, candidate `2d175e2`)
 
-| # | Benchmark | initial: ratio / per-run medians | re-measured: ratio / per-run medians | own oracle noise (run2run / fork) | band exceeded | status |
-|---|---|---|---|---|---|---|
-| 3 | `perf.EmailSearchBench.encodeForward` | 0.867 / 606,311; 598,849; 499,066; 531,901 | 0.790 / 607,701; 607,410; 504,921; 416,981 | 1.2% / 2.0% | own ±5%, in both sessions | PENDING maintainer |
+"Before" is the 13:36 re-measurement (candidate `c0a2152`), "after" the session-3 full
+matrix (candidate `2d175e2`, rebuilt harness, same JMH configuration and interleave).
 
-Finding 3 doubled as the re-run's control for the fix's scope: `encodeForward` constructs
-no reader, the decode entry-point change cannot reach it, and it did not move (allocation
-still identical at 16 B/op; upstream stable at ~607k ops/s across both re-run repetitions
-while the port read 505k/417k). The deficit reproduces in the forward-writer path and
-still requires an explicit maintainer acceptance record or a fix before TASK-21.
+| # | Benchmark | before: ratio / port median | after: ratio / port median / per-rep ratios | own band (before / after) | status |
+|---|---|---|---|---|---|
+| 3 | `perf.EmailSearchBench.encodeForward` | 0.790 / 480,113 | 2.245 / 1,361,770 / 2.218 and 2.250 | ±5% / ±5% | RESOLVED, port now 2.2x faster (mandate floor 0.95 exceeded in both repetitions) |
 
-Adjacent cells re-measured as controls, all now inside their own bands (no acceptance
-needed): `AllTypesBench.decode` 0.980 (own band ±10%), `PackedBench.encodeReverse` 1.013
-and `BytesBench.encodeReverse` 1.026 (own bands ±5%); these supersede the initial 0.938,
-0.960, and 0.972 readings.
+Finding 3 doubled as the decode re-run's control for the fix's scope: `encodeForward`
+constructs no reader, the decode entry-point change could not reach it, and it did not
+move (allocation identical at 16 B/op in every session; upstream stable at ~607k ops/s
+across all repetitions while the port read 505k/417k before the fix and 1.34M/1.37M
+after).
 
-Mechanism evidence gathered (read, not inferred; then confirmed by intervention):
+Mechanism (profiled, then confirmed by intervention): JFR flight recordings and
+async-profiler CPU traces of the port's `encodeForward`, plus a decomposition bench set
+(`perf.PrimitiveBench` in the harness), attributed ~80% of the op to the forward writer's
+length-prefix size pass: `ProtoAdapter.STRING.encodedSize` -> `okio.Utf8.size` walking
+every string character once to size it (plus the write pass's own `writeUtf8` walk); on
+this workload the 672-byte mailbox message carries a 508-character non-Latin1 body, so
+the size pass dominates. The generated adapters and the writer glue are byte-identical
+between the two implementations, and in isolation the port's `Utf8.size` loop measured
+FASTER than upstream's (1.28x-1.4x). The deficit appeared only when the scan was
+compiled inside the adapter call context: the port's javac-built loop (228 bytes of
+bytecode) is small enough for HotSpot to inline into the large generated-adapter
+compilations, where its per-character code ran ~3x slower (real `StringUTF16.charAt`
+and `checkIndex` frames dominating the JFR stacks); okio 3's Kotlin-built loop (334
+bytes) is never inlined and always runs as its own compiled unit. Two probes confirmed
+the axis: forcing the loop out-of-line (a temporary `synchronized` variant) recovered
+the loss entirely (sanity run 1.20x), while a branch-minimized rewrite that stayed
+inlinable did not (0.86). The fix reshapes the port's scan into the ASCII run-length
+form `Buffer.writeUtf8` already uses (one self-contained scan), making the
+per-character cost independent of the caller's compilation context; it preserves the
+byte count for every input class (ASCII, 2- and 3-byte, surrogate pairs, malformed
+surrogates; `perf.IdentityCheck` fingerprints identical; battery green 869/80/122).
+Touched-cell before/after: email encodeForward 0.790 -> 2.245; the other encode cells
+all sit between 0.988 and 1.123 (recorded before: 1.004-1.181); decode cells are
+unchanged within noise (email 0.904 -> 0.874, all_types 0.980 -> 1.015, packed
+1.221 -> 1.253, bytes 0.810 -> 0.797, the last inside this session's ±25% own band,
+see the honest note in section 5).
 
-- Decode findings: upstream 7.1.0 `ProtoAdapter.kt` routes `decode(bytes: ByteArray)`
+Adjacent cells re-measured as controls in the 13:36 session, all inside their own bands
+(no acceptance needed): `AllTypesBench.decode` 0.980 (own band ±10%),
+`PackedBench.encodeReverse` 1.013 and `BytesBench.encodeReverse` 1.026 (own bands ±5%);
+these superseded the initial 0.938, 0.960, and 0.972 readings.
+
+Mechanism evidence for the decode findings (gathered in the 13:36 session, read, not
+inferred; then confirmed by intervention):
+
+- Upstream 7.1.0 `ProtoAdapter.kt` routes `decode(bytes: ByteArray)`
   through `ProtoReader32(bytes)` (`commonDecode`, lines 354-357 of the common source);
   the port's `ProtoAdapter.java` `decode(byte[])` built `new ProtoReader(new
   Buffer().write(bytes))` instead. The generated adapters (byte-identical trees)
@@ -430,11 +548,6 @@ Mechanism evidence gathered (read, not inferred; then confirmed by intervention)
   now identical, whatever remains sits downstream of them; the port's array-backed
   reader implementation is the remaining port-specific code on this path, but a profiler
   has not yet attributed it (read this as location-by-elimination, not a diagnosis).
-- `EmailSearchBench.encodeForward` (0.867 initial, 0.790 re-measured): mechanism not
-  identified in this task. Allocation is identical (16 B/op); the reverse-writer path on
-  the same message is at parity (1.007), so the cost sits in the forward-writer path
-  specifically. Unverified hypothesis, offered as a lead only: tag/varint write loops in
-  the ported `ProtoWriter`.
 
 Improvements found (no acceptance required, reported for the record): all three schema
 operations faster (1.084x-1.160x, descriptor with 22% less allocation), `all_types`
@@ -451,18 +564,33 @@ implementation (different codegen, different algorithms). These cells were not r
 
 ## 8. Provenance
 
-Raw material: `/tmp/aw-perf/results/` (12 JMH JSON files + text logs from the initial
-session, plus the re-measurement's `rt2-{upstream,port}-{1,2}.{json,txt}` and
-`analysis-rerun.json`; identity fingerprints including `identity-port-rerun.txt`, oracle
-checksums, `analysis.txt`, `analysis.json`), `/tmp/aw-perf/logs/`. The band rule and both
-criteria live in `/tmp/aw-perf/tools/analyze.py`; that script was written before the
-first port result existed (file mtime 12:09:24, first port result file 12:26:29) and was
-not modified afterwards. The re-measurement lives in `/tmp/aw-perf/run-decode-rerun.sh`
-and `/tmp/aw-perf/tools/analyze_rerun.py`, which consumes only the bands the initial
-session derived.
+Sessions 1 and 2 (original harness, since lost to a machine reboot): raw material was
+`/tmp/aw-perf/results/` (12 JMH JSON files + text logs from the initial session, plus the
+re-measurement's `rt2-{upstream,port}-{1,2}.{json,txt}` and `analysis-rerun.json`;
+identity fingerprints including `identity-port-rerun.txt`, oracle checksums,
+`analysis.txt`, `analysis.json`) and `/tmp/aw-perf/logs/`. The band rule and both
+criteria lived in `/tmp/aw-perf/tools/analyze.py`, written before the first port result
+existed (file mtime 12:09:24, first port result file 12:26:29) and not modified
+afterwards. The re-measurement lived in `/tmp/aw-perf/run-decode-rerun.sh` and
+`/tmp/aw-perf/tools/analyze_rerun.py`, which consumed only the bands the initial session
+derived. Those files are gone; the numbers above are the record of what they measured.
 
-This document is a measurement record; it grants no acceptance. TASK-21 is blocked on
-finding 3, the remaining PENDING row, per AC#3.
+Session 3 (rebuilt harness): raw material is `/tmp/aw-perf/results/` again
+(`rt-{upstream,port}-{1,2}.{json}` + `logs/rt-*.txt` from `run-all.sh` at 18:55-19:19;
+`analysis.txt` and `analysis.json` from the same two-phase script rewritten for the
+rebuilt harness BEFORE any session-3 port result existed; `identity-port.txt` /
+`identity-upstream.txt`, diff-clean; `candidate-revision.txt`,
+`candidate-jar-checksums.txt`), plus the diagnosis artifacts in `/tmp/aw-perf/jfr/`
+(JFR recordings of encodeForward and the isolated size pass, both profiles) and
+`tools/jfr_top.py`. The session-3 `tools/analyze.py` encodes the same two-phase rule and
+the same pre-declared mandate: `EmailSearchBench.encodeForward >= 0.95` per repetition,
+every other cell inside its own oracle-derived band.
+
+This document is a measurement record; it grants no acceptance. All four findings of the
+initial matrix are resolved by fixes and closed by re-measurement under the pre-declared
+bands, so AC#3 no longer carries a pending gate; the TASK-21 acceptance still requires
+the maintainer's explicit record, including renewal of the schema and protobuf-java
+reference cells on the `2d175e2` candidate per the invalidation rule (section 0).
 
 ### Coordinate update 2026-10-02
 
