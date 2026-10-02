@@ -33,3 +33,7 @@ Define and rehearse ongoing maintenance before publishing 0.1.0. Track the pinne
 <!-- DOD:BEGIN -->
 - [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+#2 - 2026-10-02 08:40 (UTC)
+TASK-17 hand-off: the security regression inventory is docs/security-regression-inventory.md (10 in-scope items with source-linked evidence and named regression cases running as the security-corpus suite; 12 exclusion rows with reasons). Changelog and advisory monitoring should treat it as the authoritative list - it deliberately includes fixes no advisory covers (the pre-window recursion limit) and records two attribution conflicts (tag vs changelog).
+
