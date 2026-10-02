@@ -20,7 +20,7 @@ public class ReverseProtoWriterParityTest {
   }
 
   private interface UpstreamReverseBlock {
-    void write(io.github.paoloantinori.antiwire.parity.wire.ReverseProtoWriter writer)
+    void write(io.apicurio.antiwire.parity.wire.ReverseProtoWriter writer)
         throws IOException;
   }
 
@@ -33,11 +33,11 @@ public class ReverseProtoWriterParityTest {
   }
 
   private static byte[] reverseBytesUpstream(UpstreamReverseBlock block) throws IOException {
-    io.github.paoloantinori.antiwire.parity.wire.ReverseProtoWriter writer =
-        new io.github.paoloantinori.antiwire.parity.wire.ReverseProtoWriter();
+    io.apicurio.antiwire.parity.wire.ReverseProtoWriter writer =
+        new io.apicurio.antiwire.parity.wire.ReverseProtoWriter();
     block.write(writer);
-    io.github.paoloantinori.antiwire.parity.okio.Buffer out =
-        new io.github.paoloantinori.antiwire.parity.okio.Buffer();
+    io.apicurio.antiwire.parity.okio.Buffer out =
+        new io.apicurio.antiwire.parity.okio.Buffer();
     writer.writeTo(out);
     return out.readByteArray();
   }
@@ -70,8 +70,8 @@ public class ReverseProtoWriterParityTest {
       final long l = random.nextLong();
       final int field = 1 + random.nextInt((1 << 28) - 1);
       final FieldEncoding encoding = FieldEncoding.values()[random.nextInt(4)];
-      final io.github.paoloantinori.antiwire.parity.wire.FieldEncoding upstreamEncoding =
-          io.github.paoloantinori.antiwire.parity.wire.FieldEncoding.values()[encoding.ordinal()];
+      final io.apicurio.antiwire.parity.wire.FieldEncoding upstreamEncoding =
+          io.apicurio.antiwire.parity.wire.FieldEncoding.values()[encoding.ordinal()];
 
       assertArrayEquals("sequence " + sequence,
           reverseBytesUpstream(w -> {

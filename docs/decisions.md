@@ -56,6 +56,8 @@ The port is Apache 2.0 overall and preserves upstream attribution verbatim, per 
 
 The release task (TASK-21) depends on the footprint report (TASK-19), the performance report (TASK-20), and the upstream sync demonstration (TASK-23). The transitive closure of those three covers the execution tasks TASK-1 through TASK-20 and TASK-23; the Kafka path (TASK-22) is outside the release gate by DEC-7. M5 therefore carries explicit release gates: measured footprint accepted, measured performance accepted or regressions explicitly accepted, sync procedure demonstrated, full required CI suite green with no pending required case, a release-time recheck that published dependency metadata contains no Kotlin, the Java 11 consumer smoke of DEC-3 run on the final candidate, and freshness checks that every measurement and acceptance record identifies the final candidate's artifact checksums, build revision, and resolved dependency set, with records invalidated by later relevant changes refused.
 
+**DEC-8 resolved 2026-10-02 (maintainer directive):** the provisional `io.github.paoloantinori` coordinates are replaced by `io.apicurio` everywhere (group IDs, the wire-upstream-shaded parity relocation package `io.apicurio.antiwire.parity`, BUILD/docs references). The maintainer's message is the org authorization this decision was waiting on. Measurement docs (footprint, performance) carry dated coordinate-update notes; jar bytes are unchanged by a coordinate switch, recorded checksums remain valid.
+
 ## Open technical decisions assigned to M0 (not settled here)
 
 These are recorded as open so that no document pretends they are decided. TASK-4 owns the evaluation, TASK-5 validates it, and the results land back in this file as M0 outputs.

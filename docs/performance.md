@@ -463,3 +463,7 @@ session derived.
 
 This document is a measurement record; it grants no acceptance. TASK-21 is blocked on
 finding 3, the remaining PENDING row, per AC#3.
+
+### Coordinate update 2026-10-02
+
+The maintainer resolved DEC-8: coordinates are now `io.apicurio` (was `io.github.paoloantinori`). A Maven coordinate switch does not change jar bytes; the recorded SHA-256 checksums remain valid and the measured artifact set is unchanged. Re-resolve paths mentally as `~/.m2/repository/io/apicurio/...` when reproducing; the invalidation rule in this document applies to code/dependency/packaging changes, not to the coordinate rename itself.

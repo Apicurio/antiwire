@@ -4,7 +4,7 @@
 
   Provisional coordinates: the intended groupId is io.apicurio, but that namespace is NOT
   authorized yet (docs/decisions.md DEC-8). Until authorization is recorded, the neutral
-  placeholder io.github.paoloantinori is used so that local builds work. These coordinates
+  placeholder io.apicurio is used so that local builds work. These coordinates
   MUST NOT be published anywhere; maven.deploy.skip is set below as a guard. TASK-21 owns
   the final publication decision.
 
@@ -17,7 +17,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.github.paoloantinori</groupId>
+  <groupId>io.apicurio</groupId>
   <artifactId>antiwire-parent</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -75,12 +75,12 @@
         <version>${kotlin.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.github.paoloantinori</groupId>
+        <groupId>io.apicurio</groupId>
         <artifactId>wire-runtime-java</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.github.paoloantinori</groupId>
+        <groupId>io.apicurio</groupId>
         <artifactId>wire-schema-java</artifactId>
         <version>${project.version}</version>
       </dependency>

@@ -551,3 +551,7 @@ The acceptance row is deliberately unsigned. The measured candidate to accept is
 identified in section 0 (revision, checksums, resolved identities), under the invalidation
 rule stated there. The open point the maintainer should weigh with it is the guava pin
 observation in section 4.4.
+
+### Coordinate update 2026-10-02
+
+The maintainer resolved DEC-8: coordinates are now `io.apicurio` (was `io.github.paoloantinori`). A Maven coordinate switch does not change jar bytes; the recorded SHA-256 checksums remain valid and the measured artifact set is unchanged. Re-resolve paths mentally as `~/.m2/repository/io/apicurio/...` when reproducing; the invalidation rule in this document applies to code/dependency/packaging changes, not to the coordinate rename itself.

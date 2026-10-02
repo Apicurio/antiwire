@@ -15,7 +15,7 @@ and plan are in `docs/`, the decision record in [docs/decisions.md](docs/decisio
 
 `mvn test -pl <module> -am` fails in `wire-runtime-java` with `TestEngine with ID
 'junit-vintage' failed to discover tests` (root cause: `NoClassDefFoundError` on a relocated
-`io.github.paoloantinori.antiwire.parity.*` class). The shaded fixture's relocation output is
+`io.apicurio.antiwire.parity.*` class). The shaded fixture's relocation output is
 produced by the shade plugin in the `package` phase, so a `test`-scoped reactor run resolves
 the `wire-upstream-shaded` dependency to its empty `target/classes` instead of a jar, and the
 JUnit 4 parity tests cannot link. This predates the generator work (surefire dumps from
@@ -72,7 +72,7 @@ upload or download.
 
 ## Coordinates
 
-The groupId `io.github.paoloantinori` is a provisional placeholder. The intended groupId is
+The groupId `io.apicurio` is a provisional placeholder. The intended groupId is
 `io.apicurio`, not authorized yet (DEC-8); deployment is disabled (`maven.deploy.skip`) and
 these coordinates must never be published.
 

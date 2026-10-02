@@ -18,16 +18,16 @@ import org.junit.Test;
  * the same adapters on both sides, plus the hashCode caching contract.
  */
 public class AnyMessageParityTest {
-  private static final io.github.paoloantinori.antiwire.parity.wire.ProtoAdapter<io.github.paoloantinori.antiwire.parity.wire.FieldMask>
-      THEIR_FIELD_MASK = io.github.paoloantinori.antiwire.parity.wire.ProtoAdapter.FIELD_MASK;
+  private static final io.apicurio.antiwire.parity.wire.ProtoAdapter<io.apicurio.antiwire.parity.wire.FieldMask>
+      THEIR_FIELD_MASK = io.apicurio.antiwire.parity.wire.ProtoAdapter.FIELD_MASK;
 
   @Test public void fieldMaskRoundTrip() throws IOException {
     FieldMask mask = new FieldMask(Arrays.asList("a.b", "c"));
     AnyMessage any = AnyMessage.pack(ProtoAdapter.FIELD_MASK, mask);
-    io.github.paoloantinori.antiwire.parity.wire.AnyMessage theirAny =
-        io.github.paoloantinori.antiwire.parity.wire.AnyMessage.Companion.pack(
+    io.apicurio.antiwire.parity.wire.AnyMessage theirAny =
+        io.apicurio.antiwire.parity.wire.AnyMessage.Companion.pack(
             THEIR_FIELD_MASK,
-            new io.github.paoloantinori.antiwire.parity.wire.FieldMask(Arrays.asList("a.b", "c")));
+            new io.apicurio.antiwire.parity.wire.FieldMask(Arrays.asList("a.b", "c")));
 
     assertArrayEquals("Any bytes", theirAny.encode(), any.encode());
     assertEquals("Any toString", theirAny.toString(), any.toString());
