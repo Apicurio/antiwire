@@ -90,10 +90,9 @@ final class DirectedAcyclicGraph<N> {
     // LinkedHashMap: upstream's mutableMapOf; queue seeding follows insertion order.
     Map<N, Integer> incomingEdges = new LinkedHashMap<>();
     for (N vertex : nodes) {
-      if (!incomingEdges.containsKey(vertex)) incomingEdges.put(vertex, 0);
+      incomingEdges.putIfAbsent(vertex, 0);
       for (N edge : edges.apply(vertex)) {
-        Integer count = incomingEdges.get(edge);
-        incomingEdges.put(edge, count == null ? 1 : count + 1);
+        incomingEdges.merge(edge, 1, Integer::sum);
       }
     }
 

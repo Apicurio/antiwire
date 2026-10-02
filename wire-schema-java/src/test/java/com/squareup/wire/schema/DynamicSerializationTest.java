@@ -23,7 +23,6 @@ import com.squareup.wire.SchemaBuilder;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import okio.ByteString;
 import org.junit.jupiter.api.Disabled;
@@ -72,8 +71,8 @@ public class DynamicSerializationTest {
     // TASK-13 adaptation: upstream expects "empty_field" to Kotlin's Unit here. The port's
     // google.protobuf.Empty adapter is ProtoAdapter<Void> and RuntimeMessageAdapter skips null
     // field values on encode, so a present-but-empty Empty field cannot round-trip through the
-    // port's Map model; the entry is omitted and the divergence reported rather than papered
-    // over by editing other expectations.
+    // port's Map model; the entry is omitted and the divergence is owned by TASK-26 rather than
+    // papered over by editing other expectations.
     Map<String, Object> expected = map(
         "duration_field", Duration.ofSeconds(60L * 60 * 48, 0L), // 2 days.
         "timestamp_field", Instant.ofEpochSecond(123131234L, 23432423L),
@@ -191,10 +190,6 @@ public class DynamicSerializationTest {
 
   /** Kotlin mapOf: alternating key/value arguments, insertion-ordered. */
   private static Map<String, Object> map(Object... keysAndValues) {
-    Map<String, Object> result = new LinkedHashMap<>();
-    for (int i = 0; i < keysAndValues.length; i += 2) {
-      result.put((String) keysAndValues[i], keysAndValues[i + 1]);
-    }
-    return result;
+    return com.squareup.wire.testing.TestFiles.map(keysAndValues);
   }
 }

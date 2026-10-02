@@ -24,7 +24,6 @@ import com.squareup.wire.internal.ProtocolException;
 import java.io.EOFException; // TASK-13 adaptation: upstream imports okio.EOFException; the port's
 // vendored okio subset surfaces the reader's end-of-input as the JDK type.
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import okio.Buffer;
 import okio.ByteString;
@@ -261,10 +260,6 @@ public class SchemaProtoAdapterTest {
 
   /** Kotlin mapOf: alternating key/value arguments, insertion-ordered. */
   private static Map<String, Object> map(Object... keysAndValues) {
-    Map<String, Object> result = new LinkedHashMap<>();
-    for (int i = 0; i < keysAndValues.length; i += 2) {
-      result.put((String) keysAndValues[i], keysAndValues[i + 1]);
-    }
-    return result;
+    return com.squareup.wire.testing.TestFiles.map(keysAndValues);
   }
 }

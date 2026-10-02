@@ -30,6 +30,10 @@ import java.util.List;
  * Builds a schema out of written {@code .proto} files. Java port of upstream's wire-schema-tests
  * SchemaBuilder; where upstream writes into an in-memory FakeFileSystem, this port writes into a
  * per-builder temp directory deleted on JVM exit (the recorded TASK-13 adaptation).
+ *
+ * <p>Successor condition: when an in-memory or path-mapping FileSystem joins the vendored okio
+ * layer (loading-api-inventory's FakeFileSystem row, TASK-25 scope), port this builder onto it and
+ * delete {@link #normalizeLocations}; until then the temp roots are the permanent shape.
  */
 public final class SchemaBuilder {
   private static final List<Path> TEMP_DIRS = new ArrayList<>();

@@ -36,8 +36,8 @@ Upstream counts are `@Test` methods; port counts include merged non-upstream cas
 | jvmTest PrunerTest.kt | 99 | PrunerTest (99, 4 @Disabled mirroring upstream @Ignore) | Byte-exact toSchema expectations. |
 | jvmTest SchemaLoaderTest.kt | 16 | SchemaLoaderTest (16, 3 @Disabled) | 3 profile cases deferred with TASK-16 (below). loadSourcePathFiles/reportLoadingErrors widened to public (pre-annotated). |
 | jvmTest RootTest.kt | 6 | RootTest (6) | Symlink targets absolute (port resolves them itself); skip when the host refuses symlinks, mirroring upstream's Windows guard. |
-| jvmTest SchemaProtoAdapterTest.kt | 11 | SchemaProtoAdapterTest (11) | One model-level divergence: Empty/Unit (TASK-26). |
-| jvmTest DynamicSerializationTest.kt | 6 | DynamicSerializationTest (6, 1 @Disabled mirroring upstream @Ignore) | JDK time types; EOF/Protocol exception relocations. |
+| jvmTest SchemaProtoAdapterTest.kt | 11 | SchemaProtoAdapterTest (11) | |
+| jvmTest DynamicSerializationTest.kt | 6 | DynamicSerializationTest (6, 1 @Disabled mirroring upstream @Ignore) | JDK time types; EOF/Protocol exception relocations. One model-level divergence: Empty/Unit (TASK-26). |
 | jvmTest internal/SchemaEncoderTest.kt | 5 | internal/SchemaEncoderFullTest (5) | protobuf-java test-scoped (upstream's own jvmTest pin 4.36.1); FileDescriptorProto oracle comparison. |
 | jvmTest DirectedAcyclicGraphTest.kt | 6 | DirectedAcyclicGraphTest (6) | DirectedAcyclicGraph ported to main (its production user PartitionedSchema is TASK-16 scope). |
 
@@ -73,3 +73,12 @@ internal/SchemaEncoderTest (6), ProtoParserTest (10), SemVerTest (3), EnumAndRes
   structural at both the element and schema levels (IntRange semantics).
 - okio.EOFException to java.io.EOFException and okio.ProtocolException to the internal
   ProtocolException (the vendored subset keeps JDK/package-internal exception types).
+- Kotlin `internal` maps to public inside `.internal` packages (the compatibility-matrix rule)
+  and to package-private elsewhere; both sites carry in-code justification comments.
+- Full corpora are named `*FullTest` (ProtoParserFullTest, SchemaFullTest, SemVerFullTest,
+  SchemaEncoderFullTest) when the port-authored partial keeps the upstream-colliding name;
+  ProtoParserFullTest lives in package com.squareup.wire (upstream's is internal.parser). The
+  per-file rows above are TASK-14's reconciliation input.
+- Ranges ride int[] (upstream IntRange); equality is structural at both element and schema
+  layers via shared valuesEqual/valuesHashCode helpers. Data-class toString renders ranges as
+  array text, a latent divergence no test asserts today; revisit on an upstream sync.

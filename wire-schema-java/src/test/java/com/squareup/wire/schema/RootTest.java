@@ -22,15 +22,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -178,22 +175,7 @@ public class RootTest {
    * fs.addZip.
    */
   private Path addZip(String relativePath, String... nameContentPairs) throws IOException {
-    if (nameContentPairs.length % 2 != 0) {
-      throw new IllegalArgumentException("expected name/content pairs");
-    }
-    Path zip = tempDir.resolve(relativePath);
-    if (zip.getParent() != null) {
-      Files.createDirectories(zip.getParent());
-    }
-    try (OutputStream out = Files.newOutputStream(zip);
-        ZipOutputStream zipOut = new ZipOutputStream(out)) {
-      for (int i = 0; i < nameContentPairs.length; i += 2) {
-        zipOut.putNextEntry(new ZipEntry(nameContentPairs[i]));
-        zipOut.write(nameContentPairs[i + 1].getBytes(StandardCharsets.UTF_8));
-        zipOut.closeEntry();
-      }
-    }
-    return zip;
+    return com.squareup.wire.testing.TestFiles.addZip(tempDir, relativePath, nameContentPairs);
   }
 
   private static List<Location> locations(List<Root.ProtoFilePath> protoFilePaths) {
@@ -206,10 +188,7 @@ public class RootTest {
 
   /** assertk's containsExactlyInAnyOrder / containsOnly, on JUnit 5. */
   @SafeVarargs private static <T> void assertContainsOnly(List<T> actual, T... expected) {
-    List<T> remaining = new ArrayList<>(actual);
-    for (T element : expected) {
-      assertTrue(remaining.remove(element), "expected " + element + " in " + actual);
-    }
-    assertTrue(remaining.isEmpty(), "unexpected elements " + remaining);
+    com.squareup.wire.testing.TestFiles.assertContainsExactlyInAnyOrder(
+        java.util.Arrays.asList(expected), actual);
   }
 }

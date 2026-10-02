@@ -23,13 +23,13 @@
       "name": "runtime-tests",
       "status": "ACTIVE",
       "owner": "TASK-9",
-      "description": "applicable upstream wire-runtime test cases with tracked adaptations (DEC-5); 857 adapted cases green inside mvn verify (flip owed since TASK-9 closed, recorded by TASK-13)"
+      "description": "applicable upstream wire-runtime test cases with tracked adaptations (DEC-5); interim key is the wire-runtime-java module total inside mvn verify (adapted plus port-only cases); TASK-14 owns per-case reconciliation"
     },
     {
       "name": "schema-tests",
       "status": "ACTIVE",
       "owner": "TASK-13",
-      "description": "applicable upstream wire-schema test cases with tracked adaptations (DEC-5); 590 cases green inside mvn verify, ledger docs/task13-case-accounting.md"
+      "description": "applicable upstream wire-schema test cases with tracked adaptations (DEC-5); interim key is the wire-schema-java module total inside mvn verify (adapted plus port-only cases); per-case ledger docs/task13-case-accounting.md, reconciliation TASK-14"
     },
     {
       "name": "protoc-oracle",

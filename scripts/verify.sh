@@ -129,7 +129,11 @@ module_tests_suite() { # <suite> <artifactId>
   local suite="$1" artifact="$2" summary count
   summary="$(module_test_summary "$artifact")"
   count="$(printf '%s\n' "$summary" | sed -n 's/^.*Tests run: \([0-9][0-9]*\),.*$/\1/p')"
-  if [ -n "$count" ] && printf '%s\n' "$summary" | grep -q "Failures: 0, Errors: 0"; then
+  case "$summary" in
+    *"Failures: 0, Errors: 0"*) zero_failures=1 ;;
+    *) zero_failures=0 ;;
+  esac
+  if [ -n "$count" ] && [ "$zero_failures" -eq 1 ]; then
     res "$suite.status=PASS"
     res "$suite.note=$count $artifact cases green inside mvn verify (Failures: 0, Errors: 0)"
   else
