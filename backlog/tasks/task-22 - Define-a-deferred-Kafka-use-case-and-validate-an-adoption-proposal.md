@@ -33,3 +33,8 @@ Kafka is a later adoption target and does not block the Apicurio-first 0.1.0 rel
 <!-- DOD:BEGIN -->
 - [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+## Comments
+
+#1 - 2026-10-02 13:19 (UTC)
+Decision package prepared and committed: docs/kafka-use-case-proposal.md. Kafka researched read-only at shallow-clone commit 4c7bc0e4cebaa1fb9e26bde350594926586780a2 (trunk, 4.5.0-SNAPSHOT). Candidates: C1 registry-free protobuf client stack on vanilla kafka-clients, new optional wire-kafka-example module (RECOMMENDED); C2 Apicurio serdes + ProtobufConverter run against the pinned broker (later follow-up, overlaps TASK-18); C3 serving Kafka's own protocol/metadata schemas (rejected at this pin: zero .proto files, JSON-defined protocol compiled by :generator, no Rust sources on trunk, protobuf-java 3.25.5 present only as the shaded OpenTelemetry dependency). Kafka Java facts recorded: :clients compiles at --release 11 (build.gradle:53-55), matching the port's floor; broker modules at 17. No AC ticked: AC#1 awaits the maintainer approving one scenario and the draft end-to-end acceptance criteria (doc section 5) before any POC implementation starts.
