@@ -6,7 +6,6 @@
     "annotated_tag_object": "da24c33ee1fe772a7a04617018087f46f26d1708",
     "resolved_commit": "9f62097dfe4995b5709d001ca0187e30ca0530ef"
   },
-  "clone_path_env": "ANTIWIRE_UPSTREAM",
   "clone_path_default": "/tmp/wire",
   "fixtures": {
     "wire_compiler_jars": "7.1.0 from Maven Central (scripts/generate-java-fixtures.sh)",

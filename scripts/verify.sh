@@ -147,17 +147,7 @@ module_tests_suite() { # <suite> <artifactId>
 if [ "$build_ok" -eq 1 ]; then
   module_tests_suite runtime-tests wire-runtime-java
   module_tests_suite schema-tests wire-schema-java
-  if ./scripts/fetch-upstream.sh >"$LOG" 2>&1 \
-      && python3 scripts/check-parity-coverage.py >>"$LOG" 2>&1; then
-    tail -n 4 "$LOG"
-    res "parity-coverage.status=PASS"
-    res "parity-coverage.note=pinned tag verified and upstream cases reconciled against port artifacts; report above"
-  else
-    cat "$LOG"
-    KEEP_LOG=1
-    res "parity-coverage.status=FAIL"
-    res "parity-coverage.note=provenance or case reconciliation failed; mvn log kept at $LOG"
-  fi
+  run_suite parity-coverage scripts/parity-coverage.sh
   run_suite duplicate-class-check scripts/check-classpath.sh
   run_suite bytecode-java11 scripts/check-java11-bytecode.sh
   run_suite java11-consumer scripts/consumer-check-java11.sh

@@ -50,11 +50,7 @@ jobs:
           path: ~/antiwire-upstream
           key: upstream-${{ hashFiles('config/parity-pins.json') }}
       - name: fetch the pinned upstream clone
-        run: scripts/fetch-upstream.sh ~/antiwire-upstream
-        env:
-          ANTIWIRE_UPSTREAM: ~/antiwire-upstream
+        run: scripts/fetch-upstream.sh "$HOME/antiwire-upstream"
 
       - name: run the verification entry point
-        run: scripts/verify.sh
-        env:
-          ANTIWIRE_UPSTREAM: ~/antiwire-upstream
+        run: ANTIWIRE_UPSTREAM="$HOME/antiwire-upstream" scripts/verify.sh

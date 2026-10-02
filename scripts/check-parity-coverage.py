@@ -32,13 +32,22 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PINS_PATH = os.path.join(ROOT, "config", "parity-pins.json")
 MAP_PATH = os.path.join(ROOT, "config", "upstream-case-map.json")
 
-TEST_ANNOTATIONS = ("@Test", "@ParameterizedTest", "@org.junit.Test", "@org.junit.jupiter.api.Test")
+TEST_RE = re.compile(r"@(?:ParameterizedTest|org\.junit\.(?:jupiter\.)?Test|Test)(?=$|\s|\()")
+
+DECL_RE = re.compile(r"(?:@\w+(?:\([^)]*\))?\s+)*"
+                     r"(?:public\s+|internal\s+|private\s+)?(?:final\s+)?"
+                     r"(?:fun|void)\s+(`[^`]+`|\w+)\s*\(")
 
 
-def upstream_root(pins):
-    env = pins.get("clone_path_env")
-    path = os.environ.get(env) if env else None
-    return path or pins["clone_path_default"]
+def canonical(name):
+    """Canonical comparison form: lowercase alphanumerics only, backticks stripped.
+
+    Upstream Kotlin test names are frequently backticked sentences ("link message") while
+    the port uses their camelCase form (linkMessage); canonicalizing both sides reconciles
+    the mechanical renames without a hand-maintained table. Deliberate renames that change
+    words still need explicit entries in the map's renames.
+    """
+    return re.sub(r"[^a-z0-9]", "", name.lower())
 
 
 def git_rev_parse(repo, rev):
@@ -48,42 +57,39 @@ def git_rev_parse(repo, rev):
 
 
 def extract_test_names(path):
-    """Returns the set of test method names in a .kt or .java file."""
+    """Returns the set of test method names in a .kt or .java file.
+
+    Backtick-named Kotlin tests are normalized by stripping the backticks; a method counts
+    when a test annotation precedes its declaration (same line or the next non-annotation
+    line). The pending flag resets on the first line that is neither blank, comment, nor
+    annotation, so class-level annotations and multi-line argument lists cannot leak.
+    """
     try:
         with open(path, encoding="utf-8") as f:
             lines = f.readlines()
     except FileNotFoundError:
         return None
     names = set()
-    annotated = 0
+    pending = False
     for line in lines:
         stripped = line.strip()
-        if any(stripped.startswith(a) for a in TEST_ANNOTATIONS):
-            m = re.match(r"(?:@\w+(?:\([^)]*\))?\s*)+"
-                         r"(?:public\s+|internal\s+|private\s+)?(?:final\s+)?"
-                         r"(?:fun|void)\s+(\w+)\s*\(", stripped)
-            if m:
-                names.add(m.group(1))
-                annotated = 0
-                continue
-            annotated = 2
+        if not stripped or stripped.startswith("//"):
             continue
-        if annotated:
-            m = re.match(r"(?:public\s+|internal\s+|private\s+)?(?:final\s+)?"
-                         r"(?:fun|void)\s+(\w+)\s*\(", stripped)
+        if stripped.startswith("@"):
+            m = DECL_RE.match(stripped)
+            if m and TEST_RE.search(stripped):
+                # Annotation and declaration share the line ("@Test public void x()").
+                names.add(m.group(1).strip("`"))
+                pending = False
+                continue
+            if TEST_RE.search(stripped):
+                pending = True
+            continue
+        if pending:
+            m = DECL_RE.match(stripped)
             if m:
-                names.add(m.group(1))
-                annotated -= 1
-            elif stripped.startswith("@"):
-                continue
-            elif stripped.startswith("fun "):
-                annotated = 0
-            elif not stripped or stripped.startswith("//") or stripped.startswith("@"):
-                continue
-            elif stripped.startswith("}"):
-                annotated = 0
-            else:
-                annotated -= 1
+                names.add(m.group(1).strip("`"))
+        pending = False
     return names
 
 
@@ -100,7 +106,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", help="write the machine-readable report to this path")
     parser.add_argument("--require-complete", action="store_true",
-                        help="release validation: fail while any case is deferred")
+                        help="release validation: fail while any file is deferred")
     args = parser.parse_args()
 
     with open(PINS_PATH) as f:
@@ -108,7 +114,7 @@ def main():
     with open(MAP_PATH) as f:
         case_map = json.load(f)
 
-    clone = upstream_root(pins)
+    clone = os.environ.get("ANTIWIRE_UPSTREAM", pins["clone_path_default"])
     problems = []
     report = {"upstream": pins["upstream"], "clone": clone, "modules": {},
               "totals": {"adopted_files": 0, "partial_files": 0, "deferred_files": 0,
@@ -167,19 +173,19 @@ def main():
                 problems.append("mapped port file missing: %s" % entry["port"])
                 continue
 
-            renames = entry.get("renames", {})
-            missing = entry.get("missing", {})
-            expected = set()
-            for name in upstream_names:
-                expected.add(renames.get(name, name))
-            unported = sorted(expected - port_names - set(missing))
+            renames = {canonical(k): canonical(v) for k, v in entry.get("renames", {}).items()}
+            missing = {canonical(k) for k in entry.get("missing", {})}
+            upstream_canonical = {canonical(name) for name in upstream_names}
+            port_canonical = {canonical(name) for name in port_names}
+            expected = {renames.get(name, name) for name in upstream_canonical}
+            unported = sorted(expected - port_canonical - missing)
             if unported:
                 problems.append("%s/%s lost cases: %s" % (module, relative, ", ".join(unported)))
-            unrecorded_missing = sorted(set(missing) - expected)
+            unrecorded_missing = sorted(missing - expected)
             if unrecorded_missing:
                 problems.append("%s/%s records missing cases that do not exist upstream: %s"
                                 % (module, relative, ", ".join(unrecorded_missing)))
-            extra = sorted(port_names - expected)
+            extra = sorted(port_canonical - expected)
             record["upstream_cases"] = len(upstream_names)
             record["extra_port_cases"] = extra
             report["totals"]["upstream_cases"] += len(upstream_names)

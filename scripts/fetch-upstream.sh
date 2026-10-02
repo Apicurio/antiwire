@@ -9,16 +9,15 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PINS="$ROOT/config/parity-pins.json"
 
-read -r REPO TAG TAG_OBJECT COMMIT CLONE_DEFAULT <<PINVALUES
-$(python3 - "$PINS" <<'PY'
+PINS_LINE="$(python3 - "$PINS" <<'PY'
 import json, sys
 pins = json.load(open(sys.argv[1]))
 u = pins["upstream"]
 print(u["repository"], u["tag"], u["annotated_tag_object"], u["resolved_commit"],
       pins["clone_path_default"])
 PY
-)
-PINVALUES
+)"
+read -r REPO TAG TAG_OBJECT COMMIT CLONE_DEFAULT <<<"$PINS_LINE"
 
 CLONE_PATH="${1:-${ANTIWIRE_UPSTREAM:-$CLONE_DEFAULT}}"
 
@@ -36,17 +35,13 @@ verify_pin() {
   echo "upstream pin verified: $TAG -> $COMMIT (annotated object $TAG_OBJECT) at $CLONE_PATH"
 }
 
-if [ -d "$CLONE_PATH/.git" ]; then
-  # Make sure the pinned tag exists locally (a depth-1 clone of the default branch may
-  # not carry it), then verify.
-  if ! git -C "$CLONE_PATH" rev-parse -q --verify "$TAG^{tag}" >/dev/null; then
-    git -C "$CLONE_PATH" fetch origin "refs/tags/$TAG:refs/tags/$TAG" --force
-  fi
-  verify_pin
-  exit 0
+if [ ! -d "$CLONE_PATH/.git" ]; then
+  mkdir -p "$(dirname "$CLONE_PATH")"
+  git clone "$REPO" "$CLONE_PATH"
 fi
 
-mkdir -p "$(dirname "$CLONE_PATH")"
-git clone "$REPO" "$CLONE_PATH"
-git -C "$CLONE_PATH" fetch origin "refs/tags/$TAG:refs/tags/$TAG" --force
+# A depth-1 clone of the default branch may not carry the pinned tag.
+if ! git -C "$CLONE_PATH" rev-parse -q --verify "$TAG^{tag}" >/dev/null; then
+  git -C "$CLONE_PATH" fetch origin "refs/tags/$TAG:refs/tags/$TAG" --force
+fi
 verify_pin
