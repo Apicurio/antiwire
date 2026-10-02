@@ -2,15 +2,14 @@
 <!--
   antiwire build skeleton (TASK-2).
 
-  Provisional coordinates: the intended groupId is io.apicurio, but that namespace is NOT
-  authorized yet (docs/decisions.md DEC-8). Until authorization is recorded, the neutral
-  placeholder io.apicurio is used so that local builds work. These coordinates
-  MUST NOT be published anywhere; maven.deploy.skip is set below as a guard. TASK-21 owns
-  the final publication decision.
+  Coordinates: groupId io.apicurio per the DEC-8 resolution (maintainer directive
+  2026-10-02; docs/decisions.md), which replaced the earlier io.github.paoloantinori
+  placeholder. Publishing stays closed until TASK-21's release gates pass and the
+  maintainer approves the final candidate: maven.deploy.skip is set below as a guard.
 
-  These modules are empty shells that reserve package and module names only. They provide
-  no functionality and claim no Wire compatibility or parity. Module boundaries are the
-  fixed ones of OPEN-2: runtime standalone, schema depending on runtime, generator optional.
+  Module boundaries are the fixed ones of OPEN-2: runtime standalone, schema depending on
+  runtime, generator optional; the test-only modules (wire-upstream-shaded parity fixture,
+  wire-tests-java, wire-protoc-compat-java) are never published.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

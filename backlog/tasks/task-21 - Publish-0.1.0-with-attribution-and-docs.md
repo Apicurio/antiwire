@@ -37,3 +37,11 @@ Publish the first release only after the approved compatibility, complete applic
 <!-- DOD:BEGIN -->
 - [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+## Comments
+<!-- COMMENTS:BEGIN -->
+created: 2026-10-02 17:50
+---
+Mechanical release groundwork landed (no publish, no tag, no deploy): docs/license-inventory.md (per-file notice audit, all 159 production sources plus 9 resources, zero missing notices, three working assumptions corrected: IntArrayList family is JetBrains not R8, ProtoReader32AsProtoReader carries the antiwire header not a Nano notice, okio/Base64 carries the ASF header it vendored with; open discrepancy flagged: NOTICE attributes the ProtoReader family and MathMethods to Google under Apache 2.0 while the files carry BSD-style notices, and DEC-12 says NOTICE carries the BSD texts verbatim); README release-contract section; scripts/release-build.sh producing target/release/ (9 jars + MANIFEST.sha256) and the generated docs/release-candidate.md identifying candidate a45b0f0 with the two open gates (footprint signature with the guava pin observation, encodeForward) auto-filled from the live acceptance rows plus the DEC-13 freshness caveat; pom.xml header comment corrected for the resolved DEC-8 (comment-only, effective model identical). verify.sh on JDK 17.0.12: all 12 ACTIVE suites PASS. No AC ticked: publication approval, final-candidate freshness, and the Java 11 published-artifact smoke remain.
+---
+<!-- COMMENTS:END -->
