@@ -35,8 +35,9 @@ import okio.Okio;
  * <p>Scope notes for this port (docs/m1-ownership-map.md): the base-class defaults
  * {@code decode(ProtoReader32)} and {@code tryDecode(ProtoReader32)} route through the reader
  * wrapper, byte-identical to upstream's JVM default; the per-adapter direct overloads are
- * performance work owned by TASK-20. {@code decode(byte[])} stays on the long reader (proven
- * transcript-identical by ProtoReader32ParityTest; recorded in the ownership map). The
+ * performance work owned by TASK-20. The byte-array entries {@code decode(byte[])} and
+ * {@code decode(ByteString)} enter through {@link ByteArrayProtoReader32}, matching upstream's
+ * commonDecode (TASK-20; transcript parity proven by ProtoReader32ParityTest). The
  * companion members that need reflection (newMessageAdapter, newEnumAdapter, get) land with
  * TASK-7.
  */
@@ -185,8 +186,8 @@ public abstract class ProtoAdapter<E> {
    * through their tagged form inside a message.
    */
   public E decode(byte[] bytes) throws IOException {
-    // TASK-20: upstream's commonDecode enters via the array-backed 32-bit reader; the buffer
-    // wrap below copies the whole payload into segments (docs/performance.md, decode cells).
+    // TASK-20: upstream's commonDecode enters via the array-backed 32-bit reader; the former
+    // Buffer wrap copied the whole payload into segments (docs/performance.md, decode cells).
     return decode(new ByteArrayProtoReader32(bytes));
   }
 
