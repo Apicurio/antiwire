@@ -20,25 +20,28 @@ import com.squareup.wire.schema.ErrorCollector;
 import com.squareup.wire.schema.Linker;
 import com.squareup.wire.schema.Loader;
 import com.squareup.wire.schema.Location;
+import com.squareup.wire.schema.Profile;
 import com.squareup.wire.schema.ProtoFile;
 import com.squareup.wire.schema.ProtoType;
 import com.squareup.wire.schema.Root;
 import com.squareup.wire.schema.Schema;
+import com.squareup.wire.schema.Type;
 import com.squareup.wire.schema.internal.parser.ProtoFileElement;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import okio.FileSystem;
 
 /**
  * Load proto files and their transitive dependencies and parse them. Keep track of which files
  * were loaded from where so that we can use that information later when deciding what to
  * generate.
- *
- * <p>Upstream's loadProfile and locationsToCheck are deferred to TASK-16 with the rest of the
- * profile layer; this port's core schema module stays profile-free by design.
  */
 public final class CommonSchemaLoader implements Loader {
   private final FileSystem fileSystem;
@@ -257,6 +260,91 @@ public final class CommonSchemaLoader implements Loader {
    */
   public void reportLoadingErrors() {
     errors.throwIfNonEmpty();
+  }
+
+  public Profile loadProfile(String name, Schema schema) throws IOException {
+    List<Location> allLocations = new ArrayList<>();
+    for (ProtoFile protoFile : schema.protoFiles()) {
+      allLocations.add(protoFile.location());
+    }
+    Set<Location> locationsToCheck = locationsToCheck(name, allLocations);
+
+    List<ProfileFileElement> profileElements = new ArrayList<>();
+    for (Location location : locationsToCheck) {
+      List<Root> roots = baseToRoots.get(location.base);
+      if (roots == null) continue;
+      for (Root root : roots) {
+        Root.ProtoFilePath resolved = root.resolve(location.path);
+        if (resolved == null) continue;
+        profileElements.add(resolved.parseProfile());
+      }
+    }
+
+    Profile profile = new Profile(profileElements);
+    validate(schema, profileElements);
+    return profile;
+  }
+
+  /** Confirms that {@code profileFiles} link correctly against {@code schema}. */
+  private void validate(Schema schema, List<ProfileFileElement> profileFiles) {
+    for (ProfileFileElement profileFile : profileFiles) {
+      for (TypeConfigElement typeConfig : profileFile.typeConfigs) {
+        ProtoType imported = importedType(ProtoType.get(typeConfig.type));
+        if (imported == null) continue;
+
+        Type resolvedType = schema.getType(imported);
+        if (resolvedType == null) {
+          // This type is either absent from .proto files, or merely not loaded because our schema
+          // is incomplete. Unfortunately we can't tell the difference! Assume that this type is
+          // just absent from the schema-as-loaded and therefore irrelevant to the current project.
+          // Ignore it!
+          //
+          // (A fancier implementation would load the schema and profile in one step and they would
+          // be mutually complete. We aren't bothering with this correctness at this phase.)
+          continue;
+        }
+
+        String requiredImport = resolvedType.location().path;
+        if (!profileFile.imports.contains(requiredImport)) {
+          errors.add(typeConfig.location.path + " needs to import " + requiredImport
+              + " (" + typeConfig.location + ")");
+        }
+      }
+    }
+
+    errors.throwIfNonEmpty();
+  }
+
+  /** Returns the type to import for {@code type}. */
+  private ProtoType importedType(ProtoType type) {
+    // Map key type is always scalar.
+    if (type.isMap) type = type.valueType;
+    return type.isScalar ? null : type;
+  }
+
+  /**
+   * Returns a list of locations to check for profile files. This is the profile file name (like
+   * "java.wire") in the same directory, and in all parent directories up to the base.
+   */
+  public Set<Location> locationsToCheck(String name, List<Location> input) {
+    Deque<Location> queue = new ArrayDeque<>(input);
+
+    Set<Location> result = new LinkedHashSet<>();
+    while (true) {
+      Location protoLocation = queue.pollFirst();
+      if (protoLocation == null) break;
+      int lastSlash = protoLocation.path.lastIndexOf("/");
+      String parentPath = protoLocation.path.substring(0, lastSlash + 1);
+      Location profileLocation = new Location(
+          protoLocation.base, parentPath + name + ".wire", protoLocation.line,
+          protoLocation.column);
+
+      if (!result.add(profileLocation)) continue; // Already added.
+      if (parentPath.isEmpty()) continue; // No more parents to enqueue.
+      queue.add(new Location(protoLocation.base, parentPath.substring(0, parentPath.length() - 1),
+          protoLocation.line, protoLocation.column)); // Drop trailing '/'.
+    }
+    return result;
   }
 
   static String importPath(ProtoFile protoFile, Location location) {

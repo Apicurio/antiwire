@@ -47,6 +47,17 @@
     <maven.compiler.release>11</maven.compiler.release>
     <junit.version>5.10.2</junit.version>
     <kotlin.version>2.1.21</kotlin.version>
+    <!--
+      Divergence from upstream (maintainer decision, 2026-10-02): upstream Wire 7.1.0 builds
+      against com.palantir.javapoet:javapoet:0.19.0 (gradle/libs.versions.toml), but every
+      palantir javapoet release ships major-61 (Java 17) class files, which DEC-3 forbids for
+      production dependencies. Square JavaPoet 1.13.0 is the pure-Java upstream of that fork,
+      runs on Java 8+, and reproduces the pinned upstream golden byte-for-byte: the port's
+      WireCompiler output for wire-golden-files all_types_proto3.proto is identical to the
+      checked-in golden with this artifact. The only API difference in the ported call sites
+      is field-for-method access (JavaFile.packageName/typeSpec, ParameterizedTypeName.rawType).
+    -->
+    <javapoet.version>1.13.0</javapoet.version>
     <!-- Guard for DEC-8: provisional placeholder coordinates must never be deployed. -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
@@ -72,6 +83,15 @@
         <groupId>io.github.paoloantinori</groupId>
         <artifactId>wire-schema-java</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <!-- Pure-Java JavaPoet; the only third-party production dependency of the optional
+           generator module (explicitly permitted by the module boundary in OPEN-2). See the
+           javapoet.version property comment for why this is the Square artifact, not upstream
+           Wire's palantir fork. -->
+      <dependency>
+        <groupId>com.squareup</groupId>
+        <artifactId>javapoet</artifactId>
+        <version>${javapoet.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

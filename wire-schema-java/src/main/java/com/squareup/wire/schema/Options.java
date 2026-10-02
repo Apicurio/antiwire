@@ -41,7 +41,11 @@ public final class Options {
   // Null until this options is linked.
   private List<LinkedOptionEntry> entries;
 
-  Options(ProtoType optionType, List<OptionElement> optionElements) {
+  /**
+   * Upstream declares this constructor public; it is public here as well because the port's
+   * {@code com.squareup.wire.schema.internal} package (withStubs) constructs empty options.
+   */
+  public Options(ProtoType optionType, List<OptionElement> optionElements) {
     this.optionType = optionType;
     this.optionElements = optionElements;
   }

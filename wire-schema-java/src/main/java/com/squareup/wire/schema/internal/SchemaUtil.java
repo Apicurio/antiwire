@@ -15,6 +15,15 @@
  */
 package com.squareup.wire.schema.internal;
 
+import com.squareup.wire.schema.EnclosingType;
+import com.squareup.wire.schema.EnumType;
+import com.squareup.wire.schema.MessageType;
+import com.squareup.wire.schema.Options;
+import com.squareup.wire.schema.ProtoFile;
+import com.squareup.wire.schema.ProtoType;
+import com.squareup.wire.schema.Schema;
+import com.squareup.wire.schema.Service;
+import com.squareup.wire.schema.Type;
 import com.squareup.wire.schema.internal.parser.OptionElement;
 import java.util.List;
 
@@ -104,5 +113,86 @@ public final class SchemaUtil {
           + (value instanceof int[] ? java.util.Arrays.hashCode((int[]) value) : value.hashCode());
     }
     return result;
+  }
+
+  /**
+   * Replace types in this schema which are present in {@code typesToStub} with empty shells that
+   * have no outward references. This has to be done in this module so that we can access the
+   * internal constructor to avoid re-linking.
+   */
+  public static Schema withStubs(Schema schema, java.util.Set<ProtoType> typesToStub) {
+    if (typesToStub.isEmpty()) {
+      return schema;
+    }
+    List<ProtoFile> protoFiles = new java.util.ArrayList<>();
+    for (ProtoFile protoFile : schema.protoFiles()) {
+      List<Type> types = new java.util.ArrayList<>();
+      for (Type type : protoFile.types()) {
+        types.add(typesToStub.contains(type.type()) ? asStub(type) : type);
+      }
+      List<Service> services = new java.util.ArrayList<>();
+      for (Service service : protoFile.services()) {
+        services.add(typesToStub.contains(service.type()) ? asStub(service) : service);
+      }
+      protoFiles.add(protoFile.copy(
+          protoFile.location(), protoFile.imports(), protoFile.publicImports(),
+          protoFile.weakImports(), protoFile.packageName(), types, services,
+          protoFile.extendList(), protoFile.options(), protoFile.syntax()));
+    }
+    return new Schema(protoFiles);
+  }
+
+  /** Return a copy of this type with all possible type references removed. */
+  private static Type asStub(Type type) {
+    // Don't stub the built-in protobuf types which model concepts like options.
+    if (type.type().toString().startsWith("google.protobuf.")) {
+      return type;
+    }
+
+    if (type instanceof MessageType) {
+      MessageType messageType = (MessageType) type;
+      List<Type> nestedTypes = new java.util.ArrayList<>();
+      for (Type nestedType : messageType.nestedTypes()) {
+        nestedTypes.add(asStub(nestedType));
+      }
+      return messageType.copy(
+          messageType.type(), messageType.location(), messageType.documentation(),
+          messageType.name(), java.util.Collections.emptyList(), new java.util.ArrayList<>(),
+          messageType.oneOfs(), nestedTypes, messageType.nestedExtendList(),
+          messageType.extensionsList(), messageType.reserveds(),
+          new Options(Options.MESSAGE_OPTIONS, java.util.Collections.emptyList()),
+          messageType.syntax());
+    }
+
+    if (type instanceof EnumType) {
+      EnumType enumType = (EnumType) type;
+      return enumType.copy(
+          enumType.type(), enumType.location(), enumType.documentation(), enumType.name(),
+          java.util.Collections.emptyList(), enumType.reserveds(),
+          new Options(Options.ENUM_OPTIONS, java.util.Collections.emptyList()),
+          enumType.syntax());
+    }
+
+    if (type instanceof EnclosingType) {
+      EnclosingType enclosingType = (EnclosingType) type;
+      List<Type> nestedTypes = new java.util.ArrayList<>();
+      for (Type nestedType : enclosingType.nestedTypes()) {
+        nestedTypes.add(asStub(nestedType));
+      }
+      return enclosingType.copy(
+          enclosingType.location(), enclosingType.type(), enclosingType.name(),
+          enclosingType.documentation(), nestedTypes, enclosingType.nestedExtendList(),
+          enclosingType.syntax());
+    }
+
+    throw new AssertionError("Unknown type " + type.type());
+  }
+
+  /** Return a copy of this service with all possible type references removed. */
+  private static Service asStub(Service service) {
+    return service.copy(
+        service.type(), service.location(), service.documentation(), service.name(),
+        java.util.Collections.emptyList(),
+        new Options(Options.SERVICE_OPTIONS, java.util.Collections.emptyList()));
   }
 }

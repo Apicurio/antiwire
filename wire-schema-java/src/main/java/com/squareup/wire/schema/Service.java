@@ -40,6 +40,13 @@ public final class Service {
     this.options = options;
   }
 
+  /** Returns a copy of this service with the given property values, mirroring the Kotlin
+   * data-class {@code copy}. */
+  public Service copy(ProtoType type, Location location, String documentation, String name,
+      List<Rpc> rpcs, Options options) {
+    return new Service(type, location, documentation, name, rpcs, options);
+  }
+
   public ProtoType type() {
     return type;
   }

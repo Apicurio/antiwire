@@ -18,13 +18,25 @@
 
   <artifactId>wire-java-generator</artifactId>
 
-  <name>antiwire wire-java-generator (module shell)</name>
-  <description>Empty shell reserving the optional Java generator module. No functionality or parity is claimed.</description>
+  <name>antiwire wire-java-generator</name>
+  <description>Optional Java code generator and WireCompiler CLI, ported from upstream Wire 7.1.0.</description>
 
   <dependencies>
     <dependency>
       <groupId>io.github.paoloantinori</groupId>
       <artifactId>wire-schema-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.github.paoloantinori</groupId>
+      <artifactId>wire-runtime-java</artifactId>
+    </dependency>
+    <!-- Explicitly permitted pure-Java dependency of the optional generator module (OPEN-2).
+         Square JavaPoet 1.13.0, not upstream Wire's palantir fork: see the javapoet.version
+         property comment in the parent pom (DEC-3 Java 11 floor + proven byte-identical
+         golden output). -->
+    <dependency>
+      <groupId>com.squareup</groupId>
+      <artifactId>javapoet</artifactId>
     </dependency>
   </dependencies>
 </project>

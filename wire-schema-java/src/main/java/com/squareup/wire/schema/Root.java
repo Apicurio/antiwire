@@ -16,6 +16,8 @@
 package com.squareup.wire.schema;
 
 import com.squareup.wire.schema.internal.FileSystems;
+import com.squareup.wire.schema.internal.ProfileFileElement;
+import com.squareup.wire.schema.internal.ProfileParser;
 import com.squareup.wire.schema.internal.parser.ProtoFileElement;
 import com.squareup.wire.schema.internal.parser.ProtoParser;
 import java.io.IOException;
@@ -156,6 +158,15 @@ public abstract class Root {
         String data = source.readString(charset);
         ProtoFileElement element = ProtoParser.parse(location, data);
         return ProtoFile.get(element);
+      } catch (IOException e) {
+        throw new IOException("Failed to load " + path, e);
+      }
+    }
+
+    public ProfileFileElement parseProfile() throws IOException {
+      try (BufferedSource source = Okio.buffer(fileSystem.source(path))) {
+        String data = source.readUtf8();
+        return new ProfileParser(location, data).read();
       } catch (IOException e) {
         throw new IOException("Failed to load " + path, e);
       }

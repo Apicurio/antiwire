@@ -178,6 +178,17 @@ public final class Path implements Comparable<Path> {
     return segments.toArray(new String[0]);
   }
 
+  /**
+   * Returns the non-empty, non-{@code .} segments of this path, like {@code ["a", "b", "c"]} for
+   * {@code /a/b/c}; the root is not a segment. Like this class's equals and compareTo, the split
+   * is purely lexical over the path string, with {@code /} and the platform separator both
+   * counting as boundaries.
+   */
+  public List<String> segments() {
+    return java.util.Collections.unmodifiableList(
+        new ArrayList<>(java.util.Arrays.asList(segmentsOf(toString()))));
+  }
+
   /** Returns the parent of this path, or null when there is none. */
   public Path parent() {
     return wrap(nioPath.getParent());

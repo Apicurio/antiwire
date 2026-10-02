@@ -141,6 +141,18 @@ public final class ProtoFile {
     return wirePackage != null ? wirePackage.toString() : null;
   }
 
+  /**
+   * Returns a copy of this proto file with the given property values, mirroring the Kotlin
+   * data-class {@code copy}. Like upstream, the copy does not carry over the linked
+   * {@code javaPackage} and {@code wirePackage} option values.
+   */
+  public ProtoFile copy(Location location, List<String> imports, List<String> publicImports,
+      List<String> weakImports, String packageName, List<Type> types, List<Service> services,
+      List<Extend> extendList, Options options, Syntax syntax) {
+    return new ProtoFile(location, imports, publicImports, weakImports, packageName, types,
+        services, extendList, options, syntax);
+  }
+
   /** Returns a new proto file that omits types, services, extensions, and options not pruned. */
   ProtoFile retainAll(Schema schema, MarkSet markSet) {
     List<Type> retainedTypes = new ArrayList<>();

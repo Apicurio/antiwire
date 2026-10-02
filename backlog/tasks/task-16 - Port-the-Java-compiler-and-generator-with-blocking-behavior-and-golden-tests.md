@@ -1,7 +1,7 @@
 ---
 id: TASK-16
 title: Port the Java compiler and generator with blocking behavior and golden tests
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-29 09:23'
 updated_date: '2026-09-30 01:18'
@@ -42,3 +42,6 @@ From TASK-11 close-out: the profile layer was deliberately not ported with the s
 
 #2 - 2026-10-02 03:10 (UTC)
 TASK-13 closed with deferrals owned here. Beyond the profile files below: upstream SchemaHandlerTest, ManifestPartitionTest, TypeMoverTest (PartitionedSchema's DirectedAcyclicGraph is already ported to main), ProfileParserTest/ProfileLoaderTest, and the 3 @Disabled profile cases inside wire-schema-java SchemaLoaderTest (bodies preserved verbatim as comments there). The complete table is docs/task13-case-accounting.md "Deferred with an owner".
+
+#2 - 2026-10-02 05:35 (UTC)
+Scope inventory: upstream JavaGenerator is ALREADY JAVA (wire-java-generator/src/main/java/com/squareup/wire/java/JavaGenerator.java, 2,489 lines; deps: palantir javapoet, guava [banned in compile scope -> de-guava during adaptation], wire-schema internal JvmLanguages helpers). Kotlin surface to port: JavaSchemaHandler.kt (127), JvmLanguages.kt, WireCompiler.kt (577), wire-schema's WireRun.kt (416), SchemaHandler.kt (245), PartitionedSchema.kt (134), EventListener.kt (112), EventListeners.kt (60), Profile.kt (22), ProfileLoader.kt (21), AdapterConstant.kt (42), internal/{ProfileFileElement 80, ProfileParser 122, TypeConfigElement 42, TypeMover 233}; plus Target.kt already noted. Tests to adopt: wire-java-generator tests (JavaGeneratorTest, goldens in wire-golden-files), wire-compiler WireCompilerTest, and the TASK-13 deferrals (SchemaHandlerTest, ManifestPartitionTest, TypeMoverTest, ProfileParserTest, ProfileLoaderTest, 3 SchemaLoaderTest profile cases). Plan: (A) schema-side machinery batch, (B) generator+CLI batch, (C) test adoption incl. deferrals + compiler-tests suite ACTIVE, then gates.

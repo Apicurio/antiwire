@@ -56,6 +56,17 @@ public final class EnumType extends Type {
     this.syntax = syntax;
   }
 
+  /**
+   * Returns a copy of this enum type with the given property values, mirroring the Kotlin
+   * data-class {@code copy}. Like upstream, the copy does not carry over the linked
+   * {@code allowAlias} and {@code deprecated} option values.
+   */
+  public EnumType copy(ProtoType type, Location location, String documentation, String name,
+      List<EnumConstant> constants, List<Reserved> reserveds, Options options, Syntax syntax) {
+    return new EnumType(type, location, documentation, name, constants, reserveds, options,
+        syntax);
+  }
+
   @Override public ProtoType type() {
     return type;
   }

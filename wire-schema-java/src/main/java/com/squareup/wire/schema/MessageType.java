@@ -67,6 +67,19 @@ public final class MessageType extends Type {
     this.syntax = syntax;
   }
 
+  /**
+   * Returns a copy of this message type with the given property values, mirroring the Kotlin
+   * data-class {@code copy}. Like upstream, the copy does not carry over the linked
+   * {@code deprecated} option value.
+   */
+  public MessageType copy(ProtoType type, Location location, String documentation, String name,
+      List<Field> declaredFields, List<Field> extensionFields, List<OneOf> oneOfs,
+      List<Type> nestedTypes, List<Extend> nestedExtendList, List<Extensions> extensionsList,
+      List<Reserved> reserveds, Options options, Syntax syntax) {
+    return new MessageType(type, location, documentation, name, declaredFields, extensionFields,
+        oneOfs, nestedTypes, nestedExtendList, extensionsList, reserveds, options, syntax);
+  }
+
   @Override public ProtoType type() {
     return type;
   }

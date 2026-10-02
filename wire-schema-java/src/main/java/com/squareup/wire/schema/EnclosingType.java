@@ -43,6 +43,14 @@ public final class EnclosingType extends Type {
     this.syntax = syntax;
   }
 
+  /** Returns a copy of this enclosing type with the given property values, mirroring the Kotlin
+   * data-class {@code copy}. */
+  public EnclosingType copy(Location location, ProtoType type, String name, String documentation,
+      List<Type> nestedTypes, List<Extend> nestedExtendList, Syntax syntax) {
+    return new EnclosingType(location, type, name, documentation, nestedTypes, nestedExtendList,
+        syntax);
+  }
+
   @Override public Location location() {
     return location;
   }

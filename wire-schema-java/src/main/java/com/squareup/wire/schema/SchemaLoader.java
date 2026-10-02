@@ -25,10 +25,8 @@ import okio.FileSystem;
  * Load proto files and their transitive dependencies and parse them. Keep track of which files
  * were loaded from where so that we can use that information later when deciding what to
  * generate.
- *
- * <p>Upstream's ProfileLoader surface is deferred to TASK-16 with the profile layer.
  */
-public final class SchemaLoader implements Loader, AutoCloseable {
+public final class SchemaLoader implements Loader, ProfileLoader, AutoCloseable {
   private final CommonSchemaLoader delegate;
 
   public SchemaLoader(java.nio.file.FileSystem fileSystem) {
@@ -94,6 +92,10 @@ public final class SchemaLoader implements Loader, AutoCloseable {
 
   public void initRoots(List<Location> sourcePath) throws IOException {
     delegate.initRoots(sourcePath, Collections.emptyList());
+  }
+
+  @Override public Profile loadProfile(String name, Schema schema) throws IOException {
+    return delegate.loadProfile(name, schema);
   }
 
   @Override public ProtoFile load(String path) {

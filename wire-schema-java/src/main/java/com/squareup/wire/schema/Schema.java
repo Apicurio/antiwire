@@ -36,7 +36,12 @@ public final class Schema {
   private final Map<String, Type> typesIndex;
   private final Map<String, Service> servicesIndex;
 
-  Schema(Iterable<ProtoFile> protoFiles) {
+  /**
+   * Upstream declares this constructor {@code internal}; it is public here because the port's
+   * {@code com.squareup.wire.schema.internal} package (TypeMover, withStubs) constructs schemas,
+   * and upstream JVM bytecode exposes the internal constructor as public anyway.
+   */
+  public Schema(Iterable<ProtoFile> protoFiles) {
     List<ProtoFile> sorted = new ArrayList<>();
     for (ProtoFile protoFile : protoFiles) {
       sorted.add(protoFile);

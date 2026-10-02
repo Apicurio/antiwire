@@ -45,7 +45,9 @@ public abstract class FileSystem implements Closeable {
   /** The current process's host file system. Closing it is a no-op. */
   public static final FileSystem SYSTEM = new NioFileSystem(FileSystems.getDefault(), null);
 
-  private FileSystem() {
+  // Protected (upstream okio keeps an internal constructor that same-package ForwardingFileSystem
+  // can call): the WireCompiler dry-run file system subclasses through ForwardingFileSystem.
+  protected FileSystem() {
   }
 
   /** Releases resources held by this file system. The default does nothing. */

@@ -11,6 +11,19 @@ and plan are in `docs/`, the decision record in [docs/decisions.md](docs/decisio
 - Maven 3.6.3 or later. No wrapper is committed; the version floor is enforced instead.
 - A JDK 11 for the consumer smoke is optional locally (see below) and always provisioned in CI.
 
+## Known invocation constraint: `mvn test` with the shaded fixture in the reactor
+
+`mvn test -pl <module> -am` fails in `wire-runtime-java` with `TestEngine with ID
+'junit-vintage' failed to discover tests` (root cause: `NoClassDefFoundError` on a relocated
+`io.github.paoloantinori.antiwire.parity.*` class). The shaded fixture's relocation output is
+produced by the shade plugin in the `package` phase, so a `test`-scoped reactor run resolves
+the `wire-upstream-shaded` dependency to its empty `target/classes` instead of a jar, and the
+JUnit 4 parity tests cannot link. This predates the generator work (surefire dumps from
+2026-10-02 00:07 onward) and does not affect the entry point: `mvn verify` and
+`scripts/verify.sh` run the `package` phase and are green. Until the fixture owns a fix (for
+example a test-phase-aware jar or surefire exclusion), use `mvn verify`, not `mvn test`, for
+any reactor-scoped run.
+
 ## Verification entry point
 
 `scripts/verify.sh` is the single entry point and the only command CI's build job runs. It:
