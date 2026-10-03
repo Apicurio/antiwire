@@ -87,6 +87,7 @@ public final class SchemaEncoder {
     this.rpcOptionsProtoAdapter = schema.protoAdapter(Options.METHOD_OPTIONS.toString(), false);
   }
 
+  @SuppressWarnings("deprecation") // Engine layer: descriptor bytes stay on the okio form (docs/api-surface.md).
   public ByteString encode(ProtoFile protoFile) throws IOException {
     return fileEncoder.encodeByteString(protoFile);
   }

@@ -25,9 +25,9 @@ import com.squareup.wire.schema.ProtoFile;
 import com.squareup.wire.schema.Schema;
 import com.squareup.wire.schema.SchemaLoader;
 import com.squareup.wire.schema.internal.SchemaEncoder;
+import com.squareup.wire.testing.TestFiles;
 import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import org.junit.jupiter.api.Disabled;
@@ -49,18 +49,8 @@ import squareup.proto3.java.alltypes.AllTypesOuterClass;
  * this module's UPSTREAM-TEST-ADAPTATIONS.md.
  */
 public class SchemaEncoderInteropTest {
-  private static final Path PROTO_ROOT = upstreamClone()
+  private static final Path PROTO_ROOT = TestFiles.upstreamClone()
       .resolve("wire-protoc-compatibility-tests/src/main/proto");
-
-  private static Path upstreamClone() {
-    String clone = System.getenv("ANTIWIRE_UPSTREAM");
-    Path path = Path.of(clone == null || clone.isEmpty() ? "/tmp/wire" : clone);
-    if (!Files.isDirectory(path)) {
-      throw new IllegalStateException(
-          "pinned upstream clone not found at " + path + "; run scripts/fetch-upstream.sh");
-    }
-    return path;
-  }
 
   private final Schema schema = loadSchema();
 

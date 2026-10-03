@@ -34,26 +34,55 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
   public static final ProtoAdapter<AnyMessage> ADAPTER = new AnyMessageAdapter();
 
   public final String typeUrl;
-  public final ByteString value;
 
-  public AnyMessage(String typeUrl, ByteString value) {
-    super(ADAPTER, ByteString.EMPTY);
+  /**
+   * The serialized form of the wrapped value.
+   *
+   * @deprecated Engine/compat layer: the okio-typed field. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #valueBytes()}.
+   */
+  @Deprecated public final ByteString value;
+
+  /**
+   * @deprecated Engine/compat layer: the okio-typed constructor. okio remains internal to the
+   *     port (docs/api-surface.md); prefer {@link #AnyMessage(String, Bytes)}.
+   */
+  @Deprecated public AnyMessage(String typeUrl, ByteString value) {
+    super(ADAPTER, ByteString.EMPTY); // Deprecated bridge: Message's okio ctor is the engine form.
     this.typeUrl = typeUrl;
     this.value = value;
+  }
+
+  /**
+   * Builds an Any from the wire-owned bytes form. Unlike the deprecated okio constructor,
+   * which defers a null {@code value} failure to first use, a null {@code value} fails here
+   * at construction.
+   */
+  @SuppressWarnings("deprecation") // Message's okio ctor is the engine form (docs/api-surface.md).
+  public AnyMessage(String typeUrl, Bytes value) {
+    super(ADAPTER, ByteString.EMPTY);
+    this.typeUrl = typeUrl;
+    this.value = value.toByteString();
+  }
+
+  /** Returns the serialized form of the wrapped value as a {@link Bytes}. */
+  public Bytes valueBytes() {
+    return Bytes.fromByteString(value);
   }
 
   public <T> T unpack(ProtoAdapter<T> adapter) throws IOException {
     if (!typeUrl.equals(adapter.typeUrl)) {
       throw new IllegalStateException("type mismatch: " + typeUrl + " != " + adapter.typeUrl);
     }
-    return adapter.decode(value);
+    return adapter.decode(value.toByteArray());
   }
 
   public <T> T unpackOrNull(ProtoAdapter<T> adapter) throws IOException {
-    return typeUrl.equals(adapter.typeUrl) ? adapter.decode(value) : null;
+    return typeUrl.equals(adapter.typeUrl) ? adapter.decode(value.toByteArray()) : null;
   }
 
   /** Packs a generated {@link Message} using its built-in adapter. */
+  @SuppressWarnings("deprecation") // Engine layer: one-copy okio encode feeds the okio field.
   public static AnyMessage pack(Message<?, ?> message) throws IOException {
     ProtoAdapter<Object> adapter = (ProtoAdapter<Object>) message.adapter();
     if (adapter.typeUrl == null) {
@@ -67,6 +96,7 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
    * Packs {@code value} using an explicit {@code adapter}, for types that aren't Message
    * subtypes, such as well-known types like FieldMask.
    */
+  @SuppressWarnings("deprecation") // Engine layer: one-copy okio encode feeds the okio field.
   public static <T> AnyMessage pack(ProtoAdapter<T> adapter, T value) throws IOException {
     if (adapter.typeUrl == null) {
       throw new IllegalStateException(
@@ -101,7 +131,15 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
     return "Any{type_url=" + typeUrl + ", value=" + value + "}";
   }
 
-  public AnyMessage copy(String typeUrl, ByteString value) {
+  /**
+   * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #copy(String, Bytes)}.
+   */
+  @Deprecated public AnyMessage copy(String typeUrl, ByteString value) {
+    return new AnyMessage(typeUrl, value);
+  }
+
+  public AnyMessage copy(String typeUrl, Bytes value) {
     return new AnyMessage(typeUrl, value);
   }
 
@@ -109,6 +147,7 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
     return copy(typeUrl, value);
   }
 
+  @SuppressWarnings("deprecation") // Engine layer: the Any payload encodes through ProtoAdapter.BYTES.
   private static final class AnyMessageAdapter extends ProtoAdapter<AnyMessage> {
     AnyMessageAdapter() {
       super(FieldEncoding.LENGTH_DELIMITED, AnyMessage.class,

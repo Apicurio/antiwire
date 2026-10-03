@@ -32,7 +32,9 @@ public enum FieldEncoding {
 
   /**
    * Returns a Wire adapter that reads this field encoding without interpretation. For example,
-   * messages are returned as byte strings and enums are returned as integers.
+   * messages are returned as bytes values and enums are returned as integers. Length-delimited
+   * raw values decode as {@link Bytes} (docs/api-surface.md, phase 2); the unknown-field
+   * round-trips through this adapter are value-type-consistent on both sides.
    */
   public ProtoAdapter<?> rawProtoAdapter() {
     switch (this) {
@@ -43,7 +45,7 @@ public enum FieldEncoding {
       case FIXED64:
         return ProtoAdapter.FIXED64;
       case LENGTH_DELIMITED:
-        return ProtoAdapter.BYTES;
+        return ProtoAdapter.WIRE_BYTES;
       default:
         throw new AssertionError();
     }

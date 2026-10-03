@@ -53,8 +53,11 @@
       production dependencies. Square JavaPoet 1.13.0 is the pure-Java upstream of that fork,
       runs on Java 8+, and reproduces the pinned upstream golden byte-for-byte: the port's
       WireCompiler output for wire-golden-files all_types_proto3.proto is identical to the
-      checked-in golden with this artifact. The only API difference in the ported call sites
-      is field-for-method access (JavaFile.packageName/typeSpec, ParameterizedTypeName.rawType).
+      checked-in golden with this artifact (established 2026-10-02; since the no-okio phase 2
+      of 2026-10-03 the port's output diverges from that golden by exactly the documented
+      Bytes mapping, checked mechanically by AllTypesGoldenBytesMappingTest). The only API
+      difference in the ported call sites is field-for-method access (JavaFile.packageName/
+      typeSpec, ParameterizedTypeName.rawType).
     -->
     <javapoet.version>1.13.0</javapoet.version>
     <!-- Guard for DEC-8: provisional placeholder coordinates must never be deployed. -->

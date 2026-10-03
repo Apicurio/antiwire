@@ -24,6 +24,7 @@ import static com.squareup.wire.schema.internal.JvmLanguages.javaPackage;
 import static com.squareup.wire.schema.internal.JvmLanguages.legacyQualifiedFieldName;
 import static com.squareup.wire.schema.internal.JvmLanguages.optionValueToInt;
 import static com.squareup.wire.schema.internal.JvmLanguages.optionValueToLong;
+import static com.squareup.wire.schema.internal.JvmLanguages.scalarAdapterConstantName;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -43,6 +44,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
+import com.squareup.wire.Bytes;
 import com.squareup.wire.EnumAdapter;
 import com.squareup.wire.FieldEncoding;
 import com.squareup.wire.Message;
@@ -103,7 +105,12 @@ import okio.ByteString;
  * java.lang.String}, or {@code com.squareup.protos.person.Person}).
  */
 public final class JavaGenerator {
-  static final ClassName BYTE_STRING = ClassName.get(ByteString.class);
+  /**
+   * The port's bytes value type: generated code declares bytes-typed fields, parameters, and
+   * unknown fields with it instead of okio's {@code ByteString} (docs/api-surface.md, phase 2;
+   * the divergence from upstream-generated sources is exactly that mapping).
+   */
+  static final ClassName BYTES = ClassName.get(Bytes.class);
   static final ClassName STRING = ClassName.get(String.class);
   static final ClassName LIST = ClassName.get(List.class);
   static final ClassName MESSAGE = ClassName.get(Message.class);
@@ -129,7 +136,7 @@ public final class JavaGenerator {
   private static Map<ProtoType, TypeName> buildBuiltInTypesMap() {
     Map<ProtoType, TypeName> map = new LinkedHashMap<>();
     map.put(ProtoType.BOOL, TypeName.BOOLEAN);
-    map.put(ProtoType.BYTES, ClassName.get(ByteString.class));
+    map.put(ProtoType.BYTES, ClassName.get(Bytes.class));
     map.put(ProtoType.DOUBLE, TypeName.DOUBLE);
     map.put(ProtoType.FLOAT, TypeName.FLOAT);
     map.put(ProtoType.FIXED32, TypeName.INT);
@@ -168,7 +175,7 @@ public final class JavaGenerator {
     map.put(ProtoType.UINT32_VALUE, TypeName.INT);
     map.put(ProtoType.BOOL_VALUE, TypeName.BOOLEAN);
     map.put(ProtoType.STRING_VALUE, ClassName.get(String.class));
-    map.put(ProtoType.BYTES_VALUE, ClassName.get(ByteString.class));
+    map.put(ProtoType.BYTES_VALUE, ClassName.get(Bytes.class));
     return Collections.unmodifiableMap(map);
   }
 
@@ -179,7 +186,7 @@ public final class JavaGenerator {
     Map<ProtoType, CodeBlock> map = new LinkedHashMap<>();
     map.put(ProtoType.BOOL, CodeBlock.of("false"));
     map.put(ProtoType.STRING, CodeBlock.of("\"\""));
-    map.put(ProtoType.BYTES, CodeBlock.of("$T.$L", ByteString.class, "EMPTY"));
+    map.put(ProtoType.BYTES, CodeBlock.of("$T.$L", Bytes.class, "EMPTY"));
     map.put(ProtoType.DOUBLE, CodeBlock.of("0.0"));
     map.put(ProtoType.FLOAT, CodeBlock.of("0f"));
     map.put(ProtoType.FIXED64, CodeBlock.of("0L"));
@@ -505,7 +512,7 @@ public final class JavaGenerator {
   private CodeBlock singleAdapterFor(ProtoType type) {
     CodeBlock.Builder result = CodeBlock.builder();
     if (type.isScalar) {
-      result.add("$T.$L", ADAPTER, type.simpleName().toUpperCase(Locale.US));
+      result.add("$T.$L", ADAPTER, scalarAdapterConstantName(type));
     } else if (type.equals(ProtoType.DURATION)) {
       result.add("$T.$L", ADAPTER, "DURATION");
     } else if (type.equals(ProtoType.TIMESTAMP)) {
@@ -539,7 +546,7 @@ public final class JavaGenerator {
     } else if (type.equals(ProtoType.STRING_VALUE)) {
       result.add("$T.$L", ADAPTER, "STRING_VALUE");
     } else if (type.equals(ProtoType.BYTES_VALUE)) {
-      result.add("$T.$L", ADAPTER, "BYTES_VALUE");
+      result.add("$T.$L", ADAPTER, "WIRE_BYTES_VALUE");
     } else if (type.isMap) {
       throw new IllegalArgumentException("Cannot create single adapter for map type " + type);
     } else {
@@ -1262,7 +1269,7 @@ public final class JavaGenerator {
       }
     }
     if (useBuilder) {
-      result.addStatement("$L += value.unknownFields().size()", resultName);
+      result.addStatement("$L += value.unknownFieldsBytes().size()", resultName);
     }
     result.addStatement("return $L", resultName);
 
@@ -1306,7 +1313,7 @@ public final class JavaGenerator {
 
     if (useBuilder) {
       encodeCalls.add(
-          CodeBlock.builder().addStatement("writer.writeBytes(value.unknownFields())").build());
+          CodeBlock.builder().addStatement("writer.writeBytes(value.unknownFieldsBytes())").build());
     }
 
     if (reverse) {
@@ -1387,9 +1394,10 @@ public final class JavaGenerator {
     result.endControlFlow(); // switch
     result.endControlFlow(); // for
     if (useBuilder) {
-      result.addStatement("builder.addUnknownFields(reader.endMessageAndGetUnknownFields(token))");
+      result.addStatement(
+          "builder.addUnknownFields(reader.endMessageAndGetUnknownFieldsBytes(token))");
     } else {
-      result.addStatement("reader.endMessageAndGetUnknownFields(token)");
+      result.addStatement("reader.endMessageAndGetUnknownFieldsBytes(token)");
     }
 
     if (useBuilder) {
@@ -1768,13 +1776,13 @@ public final class JavaGenerator {
       result.addParameter(param.build());
       result.addCode("$L, ", fieldName);
     }
-    result.addCode("$T.EMPTY);\n", BYTE_STRING);
+    result.addCode("$T.EMPTY);\n", BYTES);
     return result.build();
   }
 
   // Example:
   //
-  // public SimpleMessage(int optional_int32, long optional_int64, ByteString unknownFields) {
+  // public SimpleMessage(int optional_int32, long optional_int64, Bytes unknownFields) {
   //   super(ADAPTER, unknownFields);
   //   this.optional_int32 = optional_int32;
   //   this.optional_int64 = optional_int64;
@@ -1783,7 +1791,7 @@ public final class JavaGenerator {
   // Alternate example, where the constructor takes in a builder, would be the case when there are
   // too many fields:
   //
-  // public SimpleMessage(Builder builder, ByteString unknownFields) {
+  // public SimpleMessage(Builder builder, Bytes unknownFields) {
   //   super(ADAPTER, unknownFields);
   //   this.optional_int32 = builder.optional_int32;
   //   this.optional_int64 = builder.optional_int64;
@@ -1873,7 +1881,7 @@ public final class JavaGenerator {
       result.addParameter(builderJavaType, builderName);
     }
 
-    result.addParameter(BYTE_STRING, unknownFieldsName);
+    result.addParameter(BYTES, unknownFieldsName);
 
     return result.build();
   }
@@ -1904,7 +1912,7 @@ public final class JavaGenerator {
   //   if (other == this) return true;
   //   if (!(other instanceof SimpleMessage)) return false;
   //   SimpleMessage o = (SimpleMessage) other;
-  //   return equals(unknownFields(), o.unknownFields())
+  //   return equals(unknownFieldsBytes(), o.unknownFieldsBytes())
   //       && equals(optional_int32, o.optional_int32);
   //
   private MethodSpec messageEquals(NameAllocator nameAllocator, MessageType type) {
@@ -1924,7 +1932,7 @@ public final class JavaGenerator {
     result.addStatement("if (!($N instanceof $T)) return false", otherName, javaType);
 
     result.addStatement("$T $N = ($T) $N", javaType, oName, javaType, otherName);
-    result.addCode("$[return unknownFields().equals($N.unknownFields())", oName);
+    result.addCode("$[return unknownFieldsBytes().equals($N.unknownFieldsBytes())", oName);
 
     List<Field> fields = type.fieldsAndOneOfFields();
     for (Field field : fields) {
@@ -1946,7 +1954,7 @@ public final class JavaGenerator {
   // public int hashCode() {
   //   int result = hashCode;
   //   if (result == 0) {
-  //     result = unknownFields().hashCode();
+  //     result = unknownFieldsBytes().hashCode();
   //     result = result * 37 + (f != null ? f.hashCode() : 0);
   //     hashCode = result;
   //   }
@@ -1968,13 +1976,13 @@ public final class JavaGenerator {
 
     List<Field> fields = type.fieldsAndOneOfFields();
     if (fields.isEmpty()) {
-      result.addStatement("return unknownFields().hashCode()");
+      result.addStatement("return unknownFieldsBytes().hashCode()");
       return result.build();
     }
 
     result.addStatement("int $N = super.hashCode", resultName);
     result.beginControlFlow("if ($N == 0)", resultName);
-    result.addStatement("$N = unknownFields().hashCode()", resultName);
+    result.addStatement("$N = unknownFieldsBytes().hashCode()", resultName);
     for (Field field : fields) {
       String fieldName = localNameAllocator.get(field);
       TypeName typeName = fieldType(field);
@@ -2147,7 +2155,7 @@ public final class JavaGenerator {
   //   Builder builder = new Builder();
   //   builder.optional_int32 = optional_int32;
   //   ...
-  //   builder.addUnknownFields(unknownFields());
+  //   builder.addUnknownFields(unknownFieldsBytes());
   //   return builder;
   // }
   private MethodSpec newBuilder(NameAllocator nameAllocator, MessageType message) {
@@ -2174,7 +2182,7 @@ public final class JavaGenerator {
       }
     }
 
-    result.addStatement("$L.addUnknownFields(unknownFields())", builderName);
+    result.addStatement("$L.addUnknownFields(unknownFieldsBytes())", builderName);
     result.addStatement("return $L", builderName);
     return result.build();
   }
@@ -2222,7 +2230,7 @@ public final class JavaGenerator {
   //   if (field_one == null) {
   //     throw missingRequiredFields(field_one, "field_one");
   //   }
-  //   return new SimpleMessage(field_one, super.buildUnknownFields());
+  //   return new SimpleMessage(field_one, super.buildUnknownFieldsBytes());
   // }
   //
   // The call to checkRequiredFields will be emitted only if the message has
@@ -2266,7 +2274,7 @@ public final class JavaGenerator {
       result.addCode("this, ");
     }
 
-    result.addCode("super.buildUnknownFields());\n");
+    result.addCode("super.buildUnknownFieldsBytes());\n");
     return result.build();
   }
 
@@ -2354,14 +2362,14 @@ public final class JavaGenerator {
     } else if (javaType.equals(STRING)) {
       return CodeBlock.of("$S", value != null ? value : "");
 
-    } else if (javaType.equals(BYTE_STRING)) {
+    } else if (javaType.equals(BYTES)) {
       if (value == null) {
-        return CodeBlock.of("$T.EMPTY", ByteString.class);
+        return CodeBlock.of("$T.EMPTY", Bytes.class);
       } else {
         // Guava Charsets replaced by java.nio.charset.StandardCharsets.
         return CodeBlock.of(
             "$T.decodeBase64($S)",
-            ByteString.class,
+            Bytes.class,
             ByteString.encodeString(String.valueOf(value), StandardCharsets.ISO_8859_1).base64());
       }
 

@@ -39,7 +39,9 @@ import org.junit.jupiter.api.Test;
  * {@code String.contains}, and try/fail/catch to {@code assertThrows}), upstream test-utils'
  * {@code SchemaBuilder.add(Path, String)} to the port builder's {@code add(String, String)}, and
  * palantir javapoet to Square javapoet 1.13.0 (same emitted output). Inputs and expected strings
- * are verbatim.
+ * are verbatim, except where the phase-2 bytes mapping applies (docs/api-surface.md): expected
+ * strings that cover bytes-typed values or unknown fields carry {@code Bytes} and its members
+ * where upstream's output would carry {@code okio.ByteString}.
  */
 public final class JavaGeneratorTest {
   @Test
@@ -236,7 +238,7 @@ public final class JavaGeneratorTest {
                 + "      if (long_ == null) {\n"
                 + "        throw Internal.missingRequiredFields(long_, \"long\");\n"
                 + "      }\n"
-                + "      return new Message(long_, super.buildUnknownFields());\n"
+                + "      return new Message(long_, super.buildUnknownFieldsBytes());\n"
                 + "    }\n"));
   }
 
@@ -260,7 +262,7 @@ public final class JavaGeneratorTest {
                     + "}\n")
             .build();
     assertTrue(new JavaWithProfilesGenerator(schema).generateJava("Message")
-        .contains("" + "public Message(Builder builder, ByteString unknownFields)"));
+        .contains("" + "public Message(Builder builder, Bytes unknownFields)"));
   }
 
   @Test
@@ -283,7 +285,7 @@ public final class JavaGeneratorTest {
                     + "}\n")
             .build();
     assertTrue(new JavaWithProfilesGenerator(schema).generateJava("Message")
-        .contains("" + "public Message(Builder builder, ByteString unknownFields)"));
+        .contains("" + "public Message(Builder builder, Bytes unknownFields)"));
   }
 
   @Test
@@ -458,7 +460,7 @@ public final class JavaGeneratorTest {
                 + "        }\n"
                 + "      }\n"
                 + "    }\n"
-                + "    reader.endMessageAndGetUnknownFields(token);\n"
+                + "    reader.endMessageAndGetUnknownFieldsBytes(token);\n"
                 + "    return fromProto(field, numbers, coin_flip, bars);\n"
                 + "  }\n"
                 + "\n"

@@ -121,7 +121,7 @@ public class KotlinConstructorBuilder<M extends Message<M, B>, B extends Message
     return value;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "deprecation" }) // Engine layer: generated ctors take okio unknown fields (docs/api-surface.md).
   @Override public M build() {
     List<ConstructorParam> params = new ArrayList<>();
     for (java.lang.reflect.Field field : messageType.getDeclaredFields()) {

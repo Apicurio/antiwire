@@ -125,6 +125,20 @@ public class ReverseProtoWriter {
     }
   }
 
+  /** Writes {@code value} without copying: the tail of the payload is written first. */
+  public void writeBytes(Bytes value) throws IOException {
+    byte[] data = value.internalBytes();
+    int valueLimit = data.length;
+    while (valueLimit != 0) {
+      require(1);
+      int copyByteCount = Math.min(arrayLimit, valueLimit);
+      arrayLimit -= copyByteCount;
+      int valuePos = valueLimit - copyByteCount;
+      System.arraycopy(data, valuePos, array, arrayLimit, copyByteCount);
+      valueLimit = valuePos;
+    }
+  }
+
   public void writeString(String value) throws IOException {
     // This is derived from Okio's Buffer.writeUtf8(), modified to write back-to-front. Like that
     // function, malformed UTF-16 surrogates are encoded as '?' in UTF-8.

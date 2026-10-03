@@ -194,6 +194,7 @@ public final class Reflection {
       return syntax;
     }
 
+    @SuppressWarnings("deprecation") // Engine layer: the binding API is the okio form (docs/api-surface.md).
     @Override public okio.ByteString unknownFields(M message) {
       return message.unknownFields();
     }
