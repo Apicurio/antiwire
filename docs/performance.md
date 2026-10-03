@@ -770,3 +770,7 @@ reference cells on the `2d175e2` candidate per the invalidation rule (section 0)
 ### Coordinate update 2026-10-02
 
 The maintainer resolved DEC-8: coordinates are now `io.apicurio` (was `io.github.paoloantinori`). A coordinate switch changes no class or resource byte (diff -rq of unpacked old/new jars differs only in the embedded META-INF/maven groupId directory), but whole-jar SHA-256 values therefore change. Current checksums under io.apicurio: wire-schema-java ac9a36f2..., wire-runtime-java 129a25cb... (old values 7bc11249.../43c810fb... superseded). The measured artifact set, sizes, and dependency graph are unchanged; resolution re-verified on the Apicurio integration branch (dependency:tree shows io.apicurio nodes, zero stale coordinates, Oracle A still 20/20 byte-identical).
+
+### Release-record confirmation (2026-10-03)
+
+The maintainer confirmed the performance reports as the release reference (session record, 2026-10-03). At confirmation time every cell is inside its oracle band and both former findings are resolved by fix, not acceptance: EmailSearchBench.encodeForward by the Utf8.size fast path (2.24-2.25x across sessions 3-4) and BytesBench.decode by TASK-28's zero-copy readBytesAsBytes (0.880, allocation back to one-copy parity). A session-5 renewal on the final release candidate (post TASK-28) records the bytes-decode fix measurements; any later relevant change re-fires the invalidation rule.

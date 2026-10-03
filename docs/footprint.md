@@ -545,7 +545,7 @@ final build action.
 | Apicurio marginal measurements (section 4) | Measured and reproducible |
 | Generator cost (section 5) | Measured and reproducible |
 | Kotlin and Okio absence in production scope (section 6) | Verified, three-way evidence |
-| **Acceptance of the measured footprint (AC#3, "the maintainer explicitly accepts the measured footprint before release")** | **PENDING maintainer signature** |
+| **Acceptance of the measured footprint (AC#3, "the maintainer explicitly accepts the measured footprint before release")** | **ACCEPTED by the maintainer (P. Antinori, 2026-10-03, session record): section 9.1 candidate c713e9a with the guava-free marginal; bound to the recorded checksums and revision per the invalidation rule** |
 
 The acceptance row is deliberately unsigned. The measured candidate to accept is the one
 identified in section 0 (revision, checksums, resolved identities), under the invalidation
@@ -802,7 +802,7 @@ source audit for all migrated modules.
 | Apicurio marginal measurements (9.5, guava-free branch 6ce5582c) | Measured and reproducible |
 | Generator cost (9.4) | Measured and reproducible |
 | Kotlin and Okio absence in production scope (section 6 evidence, plus the trees of 9.5) | Verified, three-way evidence |
-| **Acceptance of the measured footprint (AC#3, "the maintainer explicitly accepts the measured footprint before release")** | **PENDING maintainer signature** |
+| **Acceptance of the measured footprint (AC#3, "the maintainer explicitly accepts the measured footprint before release")** | **ACCEPTED by the maintainer (P. Antinori, 2026-10-03, session record): section 9.1 candidate c713e9a with the guava-free marginal; bound to the recorded checksums and revision per the invalidation rule** |
 
 The row is again deliberately unsigned. The candidate to accept is the one identified in
 9.1 (revision, nine checksums, resolved identities), with the marginal evidence of 9.5 on
