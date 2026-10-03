@@ -81,7 +81,9 @@ fired twice: the decode entry-point fix (`c0a2152`, the only runtime code delta 
 `0e87bde`) invalidated the initial matrix, and the 13:36 session renewed exactly the
 affected surface: all four decode cells plus, as controls, the three encode cells that
 sat closest to their noise bands (email forward writer, packed and bytes reverse
-writers). Encode and schema code paths are source-identical between the two candidates,
+writers). A third firing is the no-okio public API merge (`c713e9a`, docs/api-surface.md
+phases 1-2; `wire-runtime-java`, `wire-schema-java`, and `wire-java-generator` all
+changed), renewed in full by the session-4 matrix of section 5 (2026-10-03). Encode and schema code paths are source-identical between the two candidates,
 so the unmarked encode, schema, and protobuf-java numbers carry over from the initial
 session under that stated equivalence. The second firing is the session-3 encode-forward
 fix (`2d175e2`, the `okio.Utf8.size` change of section 6, plus the TASK-21 packaging
@@ -431,6 +433,164 @@ below the floor, i.e. the cell is statistically indistinguishable from its recor
 0.810 level while the oracle's own noise in it nearly tripled. Allocations are unchanged
 or better on every cell (email decode 4,224 vs the recorded 4,296).
 
+### Session 4 results (2026-10-03 14:19-14:44 CEST, candidate `c713e9a`, post no-okio)
+
+Why renewed: the no-okio public API merge `c713e9a` (phases 1 and 2 of docs/api-surface.md)
+changed `wire-runtime-java`, `wire-schema-java`, and `wire-java-generator`, so the
+invalidation rule (section 0) fired for a third time and DEC-13 freshness requires this
+renewal before TASK-21. The full 12-cell runtime matrix was re-measured end to end with the
+identical JMH configuration and interleave (start times 14:19, 14:25, 14:31, 14:37; last run
+finished 14:44), the same untouched upstream oracle, and the same two-phase discipline
+(bands from this session's own oracle repetitions by the unchanged `tools/analyze.py`
+BEFORE any session-4 port number was computed).
+
+Identity block (AC#5):
+
+| Item | Value |
+|---|---|
+| antiwire revision | `c713e9ad4f5ca30775dbd3884b5f1d6563552b51` (branch `main`, merge commit, clean tree) |
+| Build | `JAVA_HOME=~/.sdkman/candidates/java/17.0.12-tem mvn -pl wire-runtime-java,wire-schema-java,wire-java-generator -am install -DskipTests`, exit 0 (all three artifacts rebuilt: phases 1-2 touched all three) |
+| `io.apicurio:wire-runtime-java:0.1.0-SNAPSHOT` SHA-256 | `e04db4de1e42d123657ac669670adf11ba85e0b1e76340c246966852f85b1e0c` |
+| `io.apicurio:wire-schema-java:0.1.0-SNAPSHOT` SHA-256 | `9d3ed5f2bce0a75d550702ce99b6008ab354b0d4e3ac5bd9bde05a21e409fa65` |
+| `io.apicurio:wire-java-generator:0.1.0-SNAPSHOT` SHA-256 | `dbb2afd41dea44a420dc5919c8bed4286ac5eb853a31914f2f4f4eddec9310a5` |
+| Oracle | unchanged from sessions 1-3: upstream Wire 7.1.0 artifact set resolved from Maven Central, same jars |
+| Test gate at the candidate | the merge commit's own recorded battery: `./scripts/verify.sh` all 12 ACTIVE suites pass (runtime 894, schema 630, protoc-oracle 122, compiler 179); `./scripts/verify.sh` re-run once after the session-4 renewal commit, verdict quoted in that session's report |
+
+Generated-model identity under the phase-2 Bytes mapping: since the merge the port CLI
+emits `com.squareup.wire.Bytes` where upstream emits `okio.ByteString`, so the harness's
+former raw `diff -rq` source-identity gate no longer applies. The renewed
+`generate-models.sh` normalizes the UPSTREAM tree by the documented mechanical mapping
+(docs/api-surface.md; `tools/map_bytes.py`, a line-for-line mirror of
+`AllTypesGoldenBytesMappingTest.mapUpstreamSource`, regex pairs in the same order plus the
+import-block sort) and requires the port's RAW CLI output to be byte-identical to the
+mapped upstream tree: clean over all 7 generated files. The port tree is genuinely
+Bytes-typed (`import com.squareup.wire.Bytes`, `Bytes opt_bytes`, `#WIRE_BYTES` adapter
+strings in the generated `AllTypes` and `Blob`; zero `okio.` references). Per-file SHA-256
+of both raw trees: `results/gen-tree-fingerprints.txt`.
+
+Harness adaptation: each profile now compiles its OWN generated tree (`gen/${profile}` via
+the pom's `${profile.gen}` property) plus a same-FQCN profile-specific
+`perf.ModelBytes` (`src-port/java` vs `src-upstream/java`) that performs the bytes-field
+construction (`com.squareup.wire.Bytes.encodeUtf8/of` vs `okio.ByteString.encodeUtf8/of`)
+that phase 2 moved between types. It runs at `@Setup` time only, never on a measured path.
+
+IdentityCheck (wire bytes, unaffected by the value-type change by construction): run under
+both classpaths, diff-clean across profiles, and EVERY fingerprint is IDENTICAL to its
+session-3 value, including both bytes-bearing workloads: email `cc02806d...` 672 B,
+all_types `ba3c8a31...` 483 B, packed `df973ccf...` 18,437 B, blob `4d49caab...` 17,472 B;
+forward and reverse encodings and the decode-reencode round trip mutually identical on
+both sides. Old and new fingerprints are therefore the same values, recorded once with the
+reason: the phase-2 mapping changes the Java value type, not the wire format, and
+`perf.IdentityCheck` compares wire bytes, so a fingerprint can only move if the wire
+format had changed, which is exactly what the check exists to refute.
+
+Session-4 matrix (medians over all 40 iterations; range = min-max over both repetitions;
+allocation is the `gc.alloc.rate.norm` median of repetition 1; own bands from this
+session's phase 1):
+
+| Cell | upstream 7.1.0 ops/s median [min-max] | antiwire ops/s median [min-max] | ratio | alloc/op upstream / port (B) | own band |
+|---|---|---|---|---|---|
+| email encodeForward | 594,465 [54,802-607,997] | 1,325,822 [963,953-1,377,341] | **2.230** | 16 / 16 | ±10% |
+| email encodeReverse | 2,917,430 [2,487,478-3,254,258] | 2,972,656 [1,911,963-3,087,631] | 1.019 | 200 / 176 | ±25% |
+| email decode | 2,356,293 [1,927,074-2,500,425] | 2,232,970 [2,086,501-2,329,492] | 0.948 | 4,132 / 4,296 | ±20% |
+| all_types encodeForward | 935,344 [860,820-955,832] | 1,061,015 [871,715-1,079,651] | 1.134 | 16 / 16 | ±5% |
+| all_types encodeReverse | 1,298,015 [1,166,217-1,384,602] | 1,507,671 [1,294,793-1,568,133] | 1.162 | 200 / 176 | ±10% |
+| all_types decode | 526,390 [485,095-537,882] | 538,051 [496,581-550,371] | 1.022 | 8,184 / 9,040 | ±5% |
+| packed encodeForward | 42,515 [40,312-43,414] | 35,572 [28,281-42,444] | 0.837 | 16 / 16 | ±5% |
+| packed encodeReverse | 67,291 [62,952-69,073] | 63,785 [48,479-66,499] | 0.948 | 200 / 176 | ±5% |
+| packed decode | 25,586 [18,023-26,249] | 30,493 [5,016-32,939] | 1.192 | 116,192 / 116,456 | ±5% |
+| bytes encodeForward | 2,088,838 [1,403,339-2,225,134] | 2,005,036 [1,893,304-2,254,483] | 0.960 | 16 / 16 | ±5% |
+| bytes encodeReverse | 1,283,567 [958,824-1,420,815] | 1,316,919 [968,197-1,550,463] | 1.026 | 200 / 176 | ±5% |
+| bytes decode | 1,644,905 [87,895-1,734,533] | 861,281 [745,162-881,415] | 0.524 | 19,020 / 36,752 | ±25% |
+
+Mandate judgment: `EmailSearchBench.encodeForward` = 2.230 overall and 2.249 / 2.211 per
+repetition, each far above the required 0.95; the encode-forward mandate holds on the
+no-okio candidate.
+
+Session 4 vs session 3, per cell (port median move = session-4 port median divided by the
+session-3 record's; upstream median move likewise, as the environment-drift control;
+allocations from the table above):
+
+| Cell | s4 ratio | s3 ratio | port median move | upstream median move |
+|---|---|---|---|---|
+| email encodeForward | 2.230 | 2.245 | 0.974 | 0.980 |
+| email encodeReverse | 1.019 | 0.990 | 1.006 | 0.978 |
+| email decode | 0.948 | 0.874 | 1.026 | 0.946 |
+| all_types encodeForward | 1.134 | 1.083 | 1.039 | 0.992 |
+| all_types encodeReverse | 1.162 | 1.123 | 0.994 | 0.961 |
+| all_types decode | 1.022 | 1.015 | 0.999 | 0.992 |
+| packed encodeForward | 0.837 | 0.992 | 0.840 | 0.996 |
+| packed encodeReverse | 0.948 | 1.043 | 0.927 | 1.021 |
+| packed decode | 1.192 | 1.253 | 0.920 | 0.967 |
+| bytes encodeForward | 0.960 | 1.037 | 0.939 | 1.015 |
+| bytes encodeReverse | 1.026 | 0.988 | 0.977 | 0.940 |
+| bytes decode | 0.524 | 0.797 | 0.681 | 1.038 |
+
+Findings of this session, with the diagnosis each one was written after:
+
+1. **bytes decode 0.524 is a real regression, mechanism closed.** Allocation per op rose
+   19,020 -> 36,752 B (+93.2%), an extra 17,732 B over the session-3 port level, which is
+   the payload of the workload's 17 bytes values (17 x 1,024 B) once each: since phase 2
+   the generated models decode bytes fields through `ProtoAdapter.WIRE_BYTES`, whose
+   `WireBytesAdapter.decode` (ProtoAdapter.java at `c713e9a`) does
+   `Bytes.fromByteString(reader.readBytes())`, paying the reader's own okio read copy AND
+   the cross-package `fromByteString` clone, two copies per value where the phase-1
+   generated code paid one through the deprecated `BYTES` adapter. The arithmetic closes
+   on the CPU side too: the port lost roughly 370 ns/op against session 3, the memcpy cost
+   of 17 KB. The bench enters through `decode(byte[])`, so the `decode(Bytes)` funnel is
+   not on the measured path; the cost is entirely the per-field bridge. This is exactly
+   the cost docs/api-surface.md pre-declared as "remaining bridge costs, owned by the next
+   perf session". Disposition: TASK-28 filed in this same turn (adoptable `byte[]` reader
+   feeding `Bytes.takeOwnership`, one copy per value); until its fix lands and is
+   re-measured under this document's invalidation rule, the finding is PENDING and
+   requires the maintainer's explicit acceptance before TASK-21 (AC#3 discipline).
+2. **all_types decode allocation +10.5%** (8,904 -> 9,040 B/op) is the same bridge on this
+   workload's four tiny bytes values; throughput stayed in band (1.022). No separate
+   disposition; it moves with finding 1's fix.
+3. **packed encodeForward 0.837 and packed encodeReverse 0.948 are flagged by the
+   pre-declared rule but NOT confirmed as port regressions.** Evidence, in order: the two
+   cells' allocations are byte-for-byte the session-3 values (16/16, 200/176); the two
+   generated model trees differ by exactly the documented mapping on a path that touches
+   no bytes field and no `Bytes` code, and the runtime seam the mapping adds to encode is
+   one memo null-check (`unknownFieldsBytes()` on a `Bytes`-constructed message); the
+   port's second repetition dropped NON-uniformly, concentrating in the three cells that
+   ran consecutively in its wall-clock slot (packed encodeForward port r2/r1 0.857, packed
+   encodeReverse 0.884, bytes encodeForward 0.906) while email, all_types, and packed
+   decode held their rep-1 levels in the same run; whole-fork and mid-fork collapses are a
+   real feature of this session's environment on BOTH profiles: one upstream email
+   encodeForward fork collapses mid-run to 358k and 54,802 ops/s and then RECOVERS to
+   537k-579k within the same fork, and the port's packed encodeForward rep 1 carries one
+   healthy fork (40k-42k throughout) beside one that falls off mid-fork from 40.3k to
+   28k-34k and never recovers, i.e. transient machine interference striking individual
+   forks under either classpath, not a property of the port's code; port rep 1
+   packed encodeForward read 0.936
+   with one collapsed fork; and an isolated rerun after the matrix (14:54-15:00, quiet
+   machine, same jars, same flags) read encodeForward 0.944 and encodeReverse 1.041, at
+   the level of the doc's session 3 (0.992 / 1.043) and of a second full-matrix run of the
+   SAME session-3 candidate `2d175e2` preserved in the harness
+   (`results/repeat-20261002-2200`, run 2026-10-02 ~22:03-22:27: 0.945 / 1.027).
+   Disposition: read as an environmental transient concentrated in the port's second
+   repetition slot; the recorded matrix values above stand as measured, and the isolated
+   rerun is diagnosis, not a substitute record.
+
+Allocation table, session 4 (gc.alloc.rate.norm median, rep 1): email 4,132 / 4,296,
+all_types 8,184 / 9,040, packed 116,192 / 116,456, bytes decode 19,020 / 36,752; every
+encode cell 16 / 16 forward and 200 / 176 reverse, identical to session 3 on every cell
+including the bytes workload, which confirms the phase-2 encode bridges are zero-copy on
+both writers (`ProtoWriter.writeBytes(Bytes)` and `ReverseProtoWriter.writeBytes(Bytes)`
+write without copying, `Bytes.size()` is O(1); read at `c713e9a`, not inferred).
+
+Renewal statement (DEC-13 freshness): this record identifies the final candidate by
+revision (`c713e9a`), artifact checksums (`e04db4de`/`9d3ed5f2`/`dbb2afd4`), unchanged
+oracle pins, generated-model identity under the phase-2 mapping, and unchanged identity
+fingerprints; the 12 runtime cells above supersede the session-3 runtime matrix for this
+candidate and this record is what TASK-21's acceptance points at. Still open before that
+acceptance, unchanged in kind from the session-3 limitations: (1) the three schema cells
+and the eight protobuf-java reference cells of section 5's workload 2 and 7 still carry
+their session-1 numbers measured on superseded candidates and require the same renewal;
+(2) finding 1 above needs the TASK-28 fix and re-measurement, or an explicit maintainer
+acceptance record. This document grants no acceptance.
+
 ### Workload 2: Apicurio schema operations
 
 | operation | upstream 7.1.0 ops/s median [min-max] | antiwire ops/s median [min-max] | ratio port/upstream | alloc/op upstream (B) | alloc/op port (B) |
@@ -585,6 +745,21 @@ rebuilt harness BEFORE any session-3 port result existed; `identity-port.txt` /
 `tools/jfr_top.py`. The session-3 `tools/analyze.py` encodes the same two-phase rule and
 the same pre-declared mandate: `EmailSearchBench.encodeForward >= 0.95` per repetition,
 every other cell inside its own oracle-derived band.
+
+Session 4 (2026-10-03): raw material is `/tmp/aw-perf/results/` again
+(`rt-{upstream,port}-{1,2}.{json}` + `logs/rt-*.txt` from the unchanged `run-all.sh` at
+14:19-14:44; `analysis.txt` / `analysis.json` from the unchanged two-phase script;
+`identity-port.txt` / `identity-upstream.txt`, diff-clean and identical to the session-3
+values; `candidate-revision.txt`, `candidate-jar-checksums.txt`,
+`gen-tree-fingerprints.txt`), plus the session-4 harness adaptations (`tools/map_bytes.py`
+mapping normalizer, `tools/compare_sessions.py`, the per-profile `gen/` trees and
+`src-port/java` / `src-upstream/java` `perf.ModelBytes` pair, all visible in the harness's
+own files) and the diagnosis artifacts `results/iso-packed-{upstream,port}.json` (the
+isolated 14:54-15:00 packed rerun of finding 3). The files this session displaced were
+preserved under `results/repeat-20261002-2200` and `logs/repeat-20261002-2200`: a second
+full-matrix run of the SAME candidate `2d175e2` on 2026-10-02 ~22:03-22:27, whose readings
+(packed encodeForward 0.945, encodeReverse 1.027, bytes decode 0.958) corroborate the
+packed-cell and bytes-decode analyses above.
 
 This document is a measurement record; it grants no acceptance. All four findings of the
 initial matrix are resolved by fixes and closed by re-measurement under the pre-declared
