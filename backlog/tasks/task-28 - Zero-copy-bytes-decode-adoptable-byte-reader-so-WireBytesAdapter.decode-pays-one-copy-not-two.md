@@ -3,7 +3,7 @@ id: TASK-28
 title: >-
   Zero-copy bytes decode: adoptable byte[] reader so WireBytesAdapter.decode
   pays one copy, not two
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-03 13:00'
 labels:
@@ -25,5 +25,9 @@ Session-4 performance renewal (candidate c713e9a, docs/performance.md) confirmed
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+## Final Summary
+
+Commit bc3ad43: the reader family gains readBytesAsBytes (ProtoReader: one readByteArray copy adopted by Bytes.takeOwnership; ByteArrayProtoReader32: whole-array adoption when pos==0 and the value consumes the array, else one copyOfRange slice; ProtoReader32 interface and the AsProtoReader wrapper delegate), and WireBytesAdapter.decode uses it. Two broken intermediates were caught by the battery (adoption without pos advancement causing duplicate reads; adoption without the pos==0 gate prefixing values with leading message bytes) before the final gated form. Measured: bytes decode allocation 19,072 B/op (session-3 level 19,064; the extra 17KB copy eliminated) and 1,501,171 ops/s vs upstream 1,705,193 = 0.880 ratio, inside the cell's oracle band (session 4: 0.524). All 894 runtime tests plus wire-tests-java 80, protoc-oracle 122, compiler 179 green; full battery 12/12. docs/performance.md session-5 renewal recording this fix is the remaining release-freshness step (candidate bc3ad43).
