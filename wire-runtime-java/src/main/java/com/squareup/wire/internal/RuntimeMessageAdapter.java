@@ -40,12 +40,16 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
    * occurrences like any other message field. STRUCT_NULL is absent because
    * google.protobuf.NullValue is an enum, not a message.
    */
-  @SuppressWarnings("deprecation") // Engine layer: the okio wrapper serves upstream-generated code (docs/api-surface.md).
+  @SuppressWarnings("deprecation") // Engine layer: the okio wrapper and the Void Empty bridge serve upstream-named surfaces (docs/api-surface.md).
   private static final Set<ProtoAdapter<?>> MESSAGE_BACKED_BUILT_IN_ADAPTERS = new HashSet<>(
       Arrays.asList(
           ProtoAdapter.DURATION,
           ProtoAdapter.INSTANT,
           ProtoAdapter.EMPTY,
+          // Both Empty twins registered (TASK-26): schema-driven Empty fields take the merge
+          // path through their isMessage() flag alone, so WIRE_EMPTY here mirrors upstream's
+          // registration and covers bindings whose schema lacks the Empty MessageType.
+          ProtoAdapter.WIRE_EMPTY,
           ProtoAdapter.FIELD_MASK,
           ProtoAdapter.STRUCT_MAP,
           ProtoAdapter.STRUCT_VALUE,

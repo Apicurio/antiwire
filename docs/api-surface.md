@@ -54,6 +54,7 @@ The consumer classes under the rule are `com.squareup.wire.ProtoAdapter`, `Messa
 | `Builder.buildUnknownFields()` | `Builder.buildUnknownFieldsBytes()` |
 | `AnyMessage(String, ByteString)` ctor, `value` field, `copy(String, ByteString)` | `AnyMessage(String, Bytes)` ctor, `valueBytes()`, `copy(String, Bytes)` |
 | `ProtoAdapter.BYTES`, `ProtoAdapter.BYTES_VALUE` constants | `ProtoAdapter.WIRE_BYTES`, `ProtoAdapter.WIRE_BYTES_VALUE` (phase 2) |
+| `ProtoAdapter.EMPTY` constant | `ProtoAdapter.WIRE_EMPTY` (TASK-26) |
 
 ## The Bytes design
 
@@ -260,3 +261,50 @@ session the port-side models (all_types and bytes_heavy both carry bytes fields)
 with `Bytes` fields, and the harness's `diff -rq gen/port gen/upstream` source-identity gate
 must apply the same mapping above before comparing; `perf.IdentityCheck` compares wire bytes
 and is unaffected by the value-type change.
+
+## The Empty unit value (TASK-26, 2026-10-03)
+
+Upstream's well-known `google.protobuf.Empty` adapter is `ProtoAdapter<Unit>`
+(`wire-runtime/src/commonMain/kotlin/com/squareup/wire/ProtoAdapter.kt`, `commonEmpty`):
+decode returns Kotlin's `Unit`, so in the dynamic (`Schema.protoAdapter`) Map model a present
+Empty field round-trips as the key mapped to `Unit`. Java has no `Unit`, and the port's
+`ProtoAdapter<Void> EMPTY` cannot represent presence: its decode returns `null`, which is the
+Map model's absent value, and no non-null `Void` value exists to encode (a non-null attempt
+fails with a `ClassCastException`).
+
+The dynamic path now uses a singleton marker instead; the constants mirror the `BYTES` /
+`WIRE_BYTES` split:
+
+- `ProtoAdapter.UnitValue`, a public single-constant enum (`INSTANCE`), is the dynamic
+  model's unit value for `google.protobuf.Empty`. Its only job is presence, since Empty
+  carries no information.
+- `ProtoAdapter.WIRE_EMPTY` (`ProtoAdapter<UnitValue>`) is the adapter the dynamic factory
+  maps `ProtoType.EMPTY` to (`SchemaProtoAdapterFactory`). A present Empty field decodes to
+  `UnitValue.INSTANCE` and encodes from it; `null` means the field is absent, matching
+  upstream's `Unit`-present / null-absent semantics.
+- `ProtoAdapter.EMPTY` stays `ProtoAdapter<Void>` under the upstream name, now carrying the
+  standard `@Deprecated` bridge marking with `WIRE_EMPTY` named as the replacement (the
+  ported `EmptyRoundTripTest` keeps proving its bytes against protoc, as the oracle). The
+  deprecation follows this document's rule: documentation and a compiler nudge only, nothing
+  removed and no behavior changed. TASK-16 owns the generated-code fate of the name.
+
+Byte semantics are upstream-identical: `commonEmpty` reports `encodedSize` 0 and writes
+nothing for any value, reading every tag inside the message as an unknown field; the field
+framing, tag plus length zero (`1a 00` for tag 3), is written by the generic field machinery,
+exactly as in the port. `DynamicSerializationTest.presentEmptyFieldRoundTripsAsTheUnitValue`
+pins those hand-checked bytes.
+
+Why this shape: a new `com.squareup.wire.Unit`-like type would collide with the generated-code
+`kotlin.Unit` question without answering it, and retaining a null Map value for a present
+field would break the model's null-means-absent contract everywhere else
+(`RuntimeMessageAdapter` skips null values on encode by that contract). A dedicated
+singleton scoped to the Empty adapter changes no other value's meaning. The marker is a
+plain runtime type, not okio-typed, so `ConsumerApiSurfaceTest` walks it as part of
+`ProtoAdapter`'s nested classes and stays green.
+
+Generated code is deliberately untouched. The pinned upstream generator still maps
+`google.protobuf.Empty` to `kotlin.Unit` fields referencing `ProtoAdapter#EMPTY`
+(`JavaGenerator.java`, unchanged), so generated output for Empty protos still does not
+compile against the port runtime: that is the compatibility-matrix section E live gap, owned
+by TASK-16 under DEC-6, and the `wire-protoc-compat` `AllEmpty` fixture stays excluded with
+it. TASK-26 resolves the dynamic model only; the distinction is recorded in section E.

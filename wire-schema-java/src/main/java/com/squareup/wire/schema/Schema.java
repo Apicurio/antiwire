@@ -145,6 +145,10 @@ public final class Schema {
    * {@code google.protobuf.Timestamp}.) It can both encode and decode these objects. Map keys
    * are field names.
    *
+   * <p>{@code google.protobuf.Empty} fields decode to {@link ProtoAdapter.UnitValue#INSTANCE}
+   * and encode from it, standing in for upstream's {@code kotlin.Unit}; a {@code null} value
+   * means the field is absent (docs/api-surface.md).
+   *
    * @param includeUnknown true to include values for unknown tags in the returned model. Map
    *     keys for such values is the unknown value's tag name as a string. Unknown values are
    *     decoded to {@link Long}, {@link Long}, {@link Integer}, or {@link com.squareup.wire.Bytes}

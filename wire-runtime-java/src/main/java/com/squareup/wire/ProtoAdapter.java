@@ -440,7 +440,23 @@ public abstract class ProtoAdapter<E> {
   public static final ProtoAdapter<String> STRING = new StringAdapter();
   public static final ProtoAdapter<java.time.Duration> DURATION = new DurationAdapter();
   public static final ProtoAdapter<java.time.Instant> INSTANT = new InstantAdapter();
-  public static final ProtoAdapter<Void> EMPTY = new EmptyAdapter();
+  /**
+   * The {@code google.protobuf.Empty} adapter. Upstream's constant is {@code
+   * ProtoAdapter<Unit>}; this Java rendering is {@code ProtoAdapter<Void>}, so its decode
+   * returns {@code null} and no value can be encoded, and a present Empty field cannot be
+   * represented.
+   *
+   * @deprecated Bridge surface, kept under the upstream name; prefer {@link #WIRE_EMPTY},
+   *     whose {@link UnitValue} type carries presence (docs/api-surface.md).
+   */
+  @Deprecated public static final ProtoAdapter<Void> EMPTY = new EmptyAdapter();
+  /**
+   * The {@code google.protobuf.Empty} adapter over {@link UnitValue}, standing in for
+   * upstream's {@code ProtoAdapter<Unit>} (docs/api-surface.md): this is the form the dynamic
+   * model uses. The wire format is identical to the deprecated {@link #EMPTY}; only the Java
+   * value type differs, and {@link UnitValue} owns the presence semantics.
+   */
+  public static final ProtoAdapter<UnitValue> WIRE_EMPTY = new WireEmptyAdapter();
   public static final ProtoAdapter<FieldMask> FIELD_MASK = new FieldMaskAdapter();
   public static final ProtoAdapter<Map<String, ?>> STRUCT_MAP = new StructMapAdapter();
   public static final ProtoAdapter<List<?>> STRUCT_LIST = new StructListAdapter();
@@ -488,6 +504,16 @@ public abstract class ProtoAdapter<E> {
    */
   public static final ProtoAdapter<Bytes> WIRE_BYTES_VALUE =
       new WrapperAdapter<Bytes>(WIRE_BYTES, "type.googleapis.com/google.protobuf.BytesValue");
+
+  /**
+   * The value of a {@code google.protobuf.Empty} field in the dynamic model: a singleton
+   * standing in for upstream's {@code kotlin.Unit} (docs/api-surface.md). Empty carries no
+   * information, so the marker's only job is presence: a field decoded to {@link #INSTANCE}
+   * was on the wire, and {@code null} means the field was absent.
+   */
+  public enum UnitValue {
+    INSTANCE
+  }
 
   static final class PackedProtoAdapter<E> extends ProtoAdapter<List<E>> {
     private final ProtoAdapter<E> originalAdapter;
@@ -1486,6 +1512,42 @@ public abstract class ProtoAdapter<E> {
     }
 
     @Override public Void redact(Void value) {
+      return value;
+    }
+  }
+
+  /**
+   * Byte behavior is upstream's commonEmpty (ProtoAdapter.kt) exactly: the adapter writes
+   * nothing itself, and the enclosing field machinery writes the tag and zero length, as for
+   * any other message-typed field.
+   */
+  private static final class WireEmptyAdapter extends ProtoAdapter<UnitValue> {
+    WireEmptyAdapter() {
+      super(FieldEncoding.LENGTH_DELIMITED, UnitValue.class,
+          "type.googleapis.com/google.protobuf.Empty", Syntax.PROTO_3, null, null);
+    }
+
+    @Override public int encodedSize(UnitValue value) {
+      return 0;
+    }
+
+    @Override public void encode(ProtoWriter writer, UnitValue value) {
+    }
+
+    @Override public void encode(ReverseProtoWriter writer, UnitValue value) {
+    }
+
+    @Override public UnitValue decode(ProtoReader reader) throws IOException {
+      long token = reader.beginMessage();
+      int tag;
+      while ((tag = reader.nextTag()) != -1) {
+        reader.readUnknownField(tag);
+      }
+      reader.endMessageAndGetUnknownFields(token);
+      return UnitValue.INSTANCE;
+    }
+
+    @Override public UnitValue redact(UnitValue value) {
       return value;
     }
   }

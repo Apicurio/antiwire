@@ -37,7 +37,7 @@ Upstream counts are `@Test` methods; port counts include merged non-upstream cas
 | jvmTest SchemaLoaderTest.kt | 16 | SchemaLoaderTest (16, 3 @Disabled) | 3 profile cases deferred with TASK-16 (below). loadSourcePathFiles/reportLoadingErrors widened to public (pre-annotated). |
 | jvmTest RootTest.kt | 6 | RootTest (6) | Symlink targets absolute (port resolves them itself); skip when the host refuses symlinks, mirroring upstream's Windows guard. |
 | jvmTest SchemaProtoAdapterTest.kt | 11 | SchemaProtoAdapterTest (11) | |
-| jvmTest DynamicSerializationTest.kt | 6 | DynamicSerializationTest (6, 1 @Disabled mirroring upstream @Ignore) | JDK time types; EOF/Protocol exception relocations. One model-level divergence: Empty/Unit (TASK-26). |
+| jvmTest DynamicSerializationTest.kt | 6 | DynamicSerializationTest (9, 1 @Disabled mirroring upstream @Ignore) | JDK time types; EOF/Protocol exception relocations. The Empty/Unit divergence this row carried was resolved by TASK-26 (2026-10-03): the `empty_field` expectation runs again against `UnitValue` (docs/api-surface.md), plus three port-added Empty cases. |
 | jvmTest internal/SchemaEncoderTest.kt | 5 | internal/SchemaEncoderFullTest (5) | protobuf-java test-scoped (upstream's own jvmTest pin 4.36.1); FileDescriptorProto oracle comparison. |
 | jvmTest DirectedAcyclicGraphTest.kt | 6 | DirectedAcyclicGraphTest (6) | DirectedAcyclicGraph ported to main (its production user PartitionedSchema is TASK-16 scope). |
 

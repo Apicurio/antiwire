@@ -69,14 +69,12 @@ public class DynamicSerializationTest {
         .build();
 
     ProtoAdapter<Object> adapter = schema.protoAdapter("Message", true);
-    // TASK-13 adaptation: upstream expects "empty_field" to Kotlin's Unit here. The port's
-    // google.protobuf.Empty adapter is ProtoAdapter<Void> and RuntimeMessageAdapter skips null
-    // field values on encode, so a present-but-empty Empty field cannot round-trip through the
-    // port's Map model; the entry is omitted and the divergence is owned by TASK-26 rather than
-    // papered over by editing other expectations.
+    // Upstream expects "empty_field" to Kotlin's Unit; the port's dynamic model maps it to the
+    // UnitValue singleton (TASK-26, docs/api-surface.md).
     Map<String, Object> expected = map(
         "duration_field", Duration.ofSeconds(60L * 60 * 48, 0L), // 2 days.
         "timestamp_field", Instant.ofEpochSecond(123131234L, 23432423L),
+        "empty_field", ProtoAdapter.UnitValue.INSTANCE,
         "struct_field", map("one", 1.0, "two", 2.0),
         "value_field", "Can be Anything",
         "list_value_field", Arrays.asList(Arrays.asList(1.0, 2.0, 3.0), 5.0, false, "boom"),
@@ -171,6 +169,69 @@ public class DynamicSerializationTest {
     ByteString encoded = ByteString.decodeHex("0a0208050a021003");
 
     assertEquals(map("duration_field", Duration.ofSeconds(5L, 3L)), adapter.decode(encoded));
+  }
+
+  /**
+   * TASK-26: a present Empty field decodes to the unit value and encodes back to the same
+   * bytes. The bytes are the field framing only, tag 3 as (3 << 3) | 2 = 0x1a followed by
+   * length 0x00: upstream's Unit adapter writes nothing itself (ProtoAdapter.kt
+   * commonEmpty), exactly like the port's adapter.
+   */
+  @Test public void presentEmptyFieldRoundTripsAsTheUnitValue() throws Exception {
+    Schema schema = new SchemaBuilder()
+        .add("message.proto", ""
+            + "syntax = \"proto3\";\n"
+            + "import \"google/protobuf/empty.proto\";\n"
+            + "\n"
+            + "message Message {\n"
+            + "  google.protobuf.Empty empty_field = 3;\n"
+            + "}\n")
+        .build();
+
+    ProtoAdapter<Object> adapter = schema.protoAdapter("Message", true);
+    ByteString encoded = ByteString.decodeHex("1a00");
+    Map<String, Object> expected = map("empty_field", ProtoAdapter.UnitValue.INSTANCE);
+
+    assertEquals(expected, adapter.decode(encoded));
+    assertEquals(encoded, ByteString.of(adapter.encode(expected)));
+  }
+
+  /** TASK-26: a null Empty value is absent; presence is carried by the unit value alone. */
+  @Test public void nullEmptyFieldIsAbsent() throws Exception {
+    // `optional` spells out explicit presence; a plain proto3 Empty field is NULL_IF_ABSENT
+    // too (message types always carry presence), so both spellings behave the same here.
+    Schema schema = new SchemaBuilder()
+        .add("message.proto", ""
+            + "syntax = \"proto3\";\n"
+            + "import \"google/protobuf/empty.proto\";\n"
+            + "\n"
+            + "message Message {\n"
+            + "  optional google.protobuf.Empty empty_field = 3;\n"
+            + "}\n")
+        .build();
+
+    ProtoAdapter<Object> adapter = schema.protoAdapter("Message", true);
+
+    assertEquals(ByteString.EMPTY, ByteString.of(adapter.encode(map("empty_field", (Object) null))));
+    assertEquals(map(), adapter.decode(ByteString.EMPTY));
+  }
+
+  /** TASK-26: duplicated singular Empty occurrences merge, like every message-backed field. */
+  @Test public void singularEmptyOccurrencesMergeToTheUnitValue() throws Exception {
+    Schema schema = new SchemaBuilder()
+        .add("message.proto", ""
+            + "syntax = \"proto3\";\n"
+            + "import \"google/protobuf/empty.proto\";\n"
+            + "\n"
+            + "message Message {\n"
+            + "  google.protobuf.Empty empty_field = 3;\n"
+            + "}\n")
+        .build();
+
+    ProtoAdapter<Object> adapter = schema.protoAdapter("Message", true);
+
+    assertEquals(map("empty_field", ProtoAdapter.UnitValue.INSTANCE),
+        adapter.decode(ByteString.decodeHex("1a001a00")));
   }
 
   @Disabled // Not supported.

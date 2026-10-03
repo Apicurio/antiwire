@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
  * {@code null} (the port's EmptyAdapter is a ProtoAdapter<Void>); the protoc-side bytes are
  * untouched. See this module's UPSTREAM-TEST-ADAPTATIONS.md.
  */
+@SuppressWarnings("deprecation") // The Void-typed EMPTY is the protoc-oracle subject here.
 public class EmptyRoundTripTest {
   @Test public void empty() throws IOException {
     Empty googleMessage = Empty.newBuilder().build();
@@ -44,14 +45,16 @@ public class EmptyRoundTripTest {
   }
 
   /**
-   * TASK-26: Empty/Void divergence. The wire-side AllEmpty model is not generated (upstream's
-   * wire Java generator models google.protobuf.Empty as kotlin.Unit; this module refuses
-   * kotlin-stdlib in compile scope), and the matching protoc-side AllEmpty reference class was
-   * excluded with it (one proto, both sides). The upstream body is preserved below verbatim
-   * for the day TASK-26 lands the fixture.
+   * Generated-code Empty divergence (compatibility-matrix section E, owner TASK-16 under
+   * DEC-6): the pinned upstream generator models google.protobuf.Empty as kotlin.Unit, which
+   * this module refuses in compile scope, so the wire-side AllEmpty model is not generated and
+   * the matching protoc-side reference class was excluded with it (one proto, both sides). The
+   * dynamic-model Empty question is separate and resolved (TASK-26, UnitValue); it does not
+   * land this fixture. The upstream body is preserved below verbatim for the generated-code
+   * resolution.
    */
   @Test
-  @Disabled("TASK-26: Empty/Void divergence (wire-side AllEmpty model not generated)")
+  @Disabled("Generated-code Empty divergence (wire-side AllEmpty model not generated; TASK-16/DEC-6)")
   public void allEmpty() {
     /*
     val googleMessage = AllEmptyOuterClass.AllEmpty.newBuilder()

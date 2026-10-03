@@ -66,7 +66,9 @@ final class SchemaProtoAdapterFactory {
     adapters.put(ProtoType.ANY, AnyMessage.ADAPTER);
     adapters.put(ProtoType.DURATION, ProtoAdapter.DURATION);
     adapters.put(ProtoType.TIMESTAMP, ProtoAdapter.INSTANT);
-    adapters.put(ProtoType.EMPTY, ProtoAdapter.EMPTY);
+    // TASK-26: Empty crosses this surface as the unit value, matching upstream's
+    // ProtoAdapter<Unit>; the Void-typed EMPTY cannot represent a present field.
+    adapters.put(ProtoType.EMPTY, ProtoAdapter.WIRE_EMPTY);
     adapters.put(ProtoType.FIELD_MASK, ProtoAdapter.FIELD_MASK);
     adapters.put(ProtoType.STRUCT_MAP, ProtoAdapter.STRUCT_MAP);
     adapters.put(ProtoType.STRUCT_VALUE, ProtoAdapter.STRUCT_VALUE);
