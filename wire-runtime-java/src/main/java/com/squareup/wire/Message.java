@@ -58,7 +58,12 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
   /** If non-zero, the hash code of this message. Accessed by generated code. */
   protected transient int hashCode = 0;
 
-  protected Message(ProtoAdapter<M> adapter, ByteString unknownFields) {
+  /**
+   * @deprecated Engine/compat layer: the okio-typed constructor. okio remains internal to the
+   *     port (docs/api-surface.md); generated code and the reflection machinery keep calling
+   *     it, and its behavior is unchanged.
+   */
+  @Deprecated protected Message(ProtoAdapter<M> adapter, ByteString unknownFields) {
     this.adapter = adapter;
     this.unknownFieldsMemoized = unknownFields;
   }
@@ -66,12 +71,24 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
   /**
    * Returns a byte string containing the proto encoding of this message's unknown fields.
    * Returns an empty byte string if this message has no unknown fields.
+   *
+   * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #unknownFieldsBytes()}.
    */
-  public ByteString unknownFields() {
+  @Deprecated public ByteString unknownFields() {
     // Some naughty libraries construct Messages by reflection which causes this non-null field
     // to have a null value. We defend against this with an otherwise-redundant null check.
     ByteString fields = unknownFieldsMemoized;
     return fields != null ? fields : ByteString.EMPTY;
+  }
+
+  /**
+   * Returns a {@link Bytes} containing the proto encoding of this message's unknown fields.
+   * Returns an empty {@code Bytes} if this message has no unknown fields. Copies out of the
+   * internal okio memo once per call.
+   */
+  public Bytes unknownFieldsBytes() {
+    return Bytes.fromByteString(unknownFields());
   }
 
   /** Returns a new builder initialized with the data in this message. */
@@ -97,8 +114,13 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
     }
   }
 
-  /** Encode this message and write it to {@code sink}. */
-  public void encode(BufferedSink sink) throws IOException {
+  /**
+   * Encode this message and write it to {@code sink}.
+   *
+   * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #encode(OutputStream)}.
+   */
+  @Deprecated public void encode(BufferedSink sink) throws IOException {
     adapter.encode(sink, (M) this);
   }
 
@@ -107,9 +129,19 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
     return adapter.encode((M) this);
   }
 
-  /** Encode this message as a {@link ByteString}. */
-  public ByteString encodeByteString() throws IOException {
+  /**
+   * Encode this message as a {@link ByteString}.
+   *
+   * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #encodeToBytes()} or {@link #encode()}.
+   */
+  @Deprecated public ByteString encodeByteString() throws IOException {
     return adapter.encodeByteString((M) this);
+  }
+
+  /** Encode this message as a {@link Bytes}. */
+  public Bytes encodeToBytes() throws IOException {
+    return adapter.encodeToBytes((M) this);
   }
 
   /** Encode this message and write it to {@code stream}. */
@@ -128,7 +160,11 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
     protected Builder() {
     }
 
-    public B addUnknownFields(ByteString unknownFields) {
+    /**
+     * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+     *     (docs/api-surface.md); prefer {@link #addUnknownFields(Bytes)}.
+     */
+    @Deprecated public B addUnknownFields(ByteString unknownFields) {
       if (unknownFields.size() > 0) {
         prepareForNewUnknownFields();
         try {
@@ -139,6 +175,11 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
         }
       }
       return (B) this;
+    }
+
+    /** Adds {@code unknownFields} to the unknown fields this builder will build. */
+    public B addUnknownFields(Bytes unknownFields) {
+      return addUnknownFields(unknownFields.toByteString());
     }
 
     public B addUnknownField(int tag, FieldEncoding fieldEncoding, Object value) {
@@ -166,8 +207,11 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
     /**
      * Returns a byte string with this message's unknown fields. Returns an empty byte string
      * if this message has no unknown fields.
+     *
+     * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+     *     (docs/api-surface.md); prefer {@link #buildUnknownFieldsBytes()}.
      */
-    public ByteString buildUnknownFields() {
+    @Deprecated public ByteString buildUnknownFields() {
       if (unknownFieldsBuffer != null) {
         // Reads and caches the unknown fields from the buffer.
         unknownFieldsByteString = unknownFieldsBuffer.readByteString();
@@ -175,6 +219,14 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
         unknownFieldsWriter = null;
       }
       return unknownFieldsByteString;
+    }
+
+    /**
+     * Returns a {@link Bytes} with this message's unknown fields. Returns an empty
+     * {@code Bytes} if this message has no unknown fields.
+     */
+    public Bytes buildUnknownFieldsBytes() {
+      return Bytes.fromByteString(buildUnknownFields());
     }
 
     /** Returns an immutable {@link Message} based on the fields that set in this builder. */

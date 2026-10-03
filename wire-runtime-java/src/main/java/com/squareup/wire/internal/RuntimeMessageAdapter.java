@@ -40,6 +40,7 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
    * occurrences like any other message field. STRUCT_NULL is absent because
    * google.protobuf.NullValue is an enum, not a message.
    */
+  @SuppressWarnings("deprecation") // Engine layer: the bytes wrapper adapter stays okio-typed (docs/api-surface.md).
   private static final Set<ProtoAdapter<?>> MESSAGE_BACKED_BUILT_IN_ADAPTERS = new HashSet<>(
       Arrays.asList(
           ProtoAdapter.DURATION,

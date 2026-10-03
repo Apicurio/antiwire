@@ -39,7 +39,8 @@ import okio.Okio;
  * {@code decode(ByteString)} enter through {@link ByteArrayProtoReader32}, matching upstream's
  * commonDecode (TASK-20; transcript parity proven by ProtoReader32ParityTest). The
  * companion members that need reflection (newMessageAdapter, newEnumAdapter, get) land with
- * TASK-7.
+ * TASK-7. The okio-typed members are the deprecated engine/compat layer; the JDK-typed
+ * canonical surface ({@link Bytes}) is documented in docs/api-surface.md.
  */
 public abstract class ProtoAdapter<E> {
   final FieldEncoding fieldEncoding;
@@ -133,8 +134,13 @@ public abstract class ProtoAdapter<E> {
     writer.writeTag(tag, fieldEncoding);
   }
 
-  /** Encode {@code value} and write it to {@code sink}. */
-  public void encode(BufferedSink sink, E value) throws IOException {
+  /**
+   * Encode {@code value} and write it to {@code sink}.
+   *
+   * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #encode(OutputStream, Object)}.
+   */
+  @Deprecated public void encode(BufferedSink sink, E value) throws IOException {
     ReverseProtoWriter writer = new ReverseProtoWriter();
     encode(writer, value);
     writer.writeTo(sink);
@@ -147,11 +153,21 @@ public abstract class ProtoAdapter<E> {
     return buffer.readByteArray();
   }
 
-  /** Encode {@code value} as a {@link ByteString}. */
-  public ByteString encodeByteString(E value) throws IOException {
+  /**
+   * Encode {@code value} as a {@link ByteString}.
+   *
+   * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #encodeToBytes(Object)} or {@link #encode(Object)}.
+   */
+  @Deprecated public ByteString encodeByteString(E value) throws IOException {
     Buffer buffer = new Buffer();
     encode(buffer, value);
     return buffer.readByteString();
+  }
+
+  /** Encode {@code value} as a {@link Bytes}. */
+  public Bytes encodeToBytes(E value) throws IOException {
+    return Bytes.takeOwnership(encode(value));
   }
 
   /** Encode {@code value} and write it to {@code stream}. */
@@ -191,13 +207,33 @@ public abstract class ProtoAdapter<E> {
     return decode(new ByteArrayProtoReader32(bytes));
   }
 
-  /** Read an encoded message from {@code bytes}. See {@link #decode(byte[])}. */
-  public E decode(ByteString bytes) throws IOException {
+  /**
+   * Read an encoded message from {@code bytes}. See {@link #decode(byte[])}.
+   *
+   * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #decode(Bytes)} or {@link #decode(byte[])}.
+   */
+  @Deprecated public E decode(ByteString bytes) throws IOException {
     return decode(new ByteArrayProtoReader32(bytes.toByteArray()));
   }
 
-  /** Read an encoded message from {@code source}. */
-  public E decode(BufferedSource source) throws IOException {
+  /**
+   * Read an encoded message from {@code bytes}. See {@link #decode(byte[])}.
+   *
+   * <p>Hands the payload to the array-backed reader without copying; the reader only reads the
+   * array, which {@code Bytes} never mutates.
+   */
+  public E decode(Bytes bytes) throws IOException {
+    return decode(bytes.internalBytes());
+  }
+
+  /**
+   * Read an encoded message from {@code source}.
+   *
+   * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #decode(InputStream)}.
+   */
+  @Deprecated public E decode(BufferedSource source) throws IOException {
     return decode(new ProtoReader(source));
   }
 
@@ -387,7 +423,14 @@ public abstract class ProtoAdapter<E> {
   public static final ProtoAdapter<float[]> FLOAT_ARRAY = new FloatArrayProtoAdapter(FLOAT);
   public static final ProtoAdapter<Double> DOUBLE = new DoubleProtoAdapter();
   public static final ProtoAdapter<double[]> DOUBLE_ARRAY = new DoubleArrayProtoAdapter(DOUBLE);
-  public static final ProtoAdapter<ByteString> BYTES = new BytesAdapter();
+  /**
+   * The bytes adapter.
+   *
+   * @deprecated Engine/compat layer: the adapter's value type is okio's, which stays internal
+   *     to the port (docs/api-surface.md). Generated code keeps using it; a wire-owned
+   *     {@code ProtoAdapter<Bytes>} belongs to the generated-code follow-up decision.
+   */
+  @Deprecated public static final ProtoAdapter<ByteString> BYTES = new BytesAdapter();
   public static final ProtoAdapter<String> STRING = new StringAdapter();
   public static final ProtoAdapter<java.time.Duration> DURATION = new DurationAdapter();
   public static final ProtoAdapter<java.time.Instant> INSTANT = new InstantAdapter();
@@ -422,8 +465,15 @@ public abstract class ProtoAdapter<E> {
   @SuppressWarnings("unchecked")
   public static final ProtoAdapter<String> STRING_VALUE =
       new WrapperAdapter<String>(STRING, "type.googleapis.com/google.protobuf.StringValue");
+  /**
+   * The bytes wrapper adapter.
+   *
+   * @deprecated Engine/compat layer: the adapter's value type is okio's, which stays internal
+   *     to the port (docs/api-surface.md). Generated code keeps using it; a wire-owned
+   *     {@code ProtoAdapter<Bytes>} belongs to the generated-code follow-up decision.
+   */
   @SuppressWarnings("unchecked")
-  public static final ProtoAdapter<ByteString> BYTES_VALUE =
+  @Deprecated public static final ProtoAdapter<ByteString> BYTES_VALUE =
       new WrapperAdapter<ByteString>(BYTES, "type.googleapis.com/google.protobuf.BytesValue");
 
   static final class PackedProtoAdapter<E> extends ProtoAdapter<List<E>> {

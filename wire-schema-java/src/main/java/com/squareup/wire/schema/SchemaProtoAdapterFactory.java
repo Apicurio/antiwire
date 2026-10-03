@@ -43,42 +43,45 @@ final class SchemaProtoAdapterFactory {
   private final boolean includeUnknown;
 
   private static final Map<ProtoType, ProtoAdapter<?>> SCALAR_AND_WELL_KNOWN_ADAPTERS =
-      new HashMap<>();
+      createScalarAndWellKnownAdapters();
 
-  static {
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.BOOL, ProtoAdapter.BOOL);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.BYTES, ProtoAdapter.BYTES);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.DOUBLE, ProtoAdapter.DOUBLE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FLOAT, ProtoAdapter.FLOAT);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FIXED32, ProtoAdapter.FIXED32);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FIXED64, ProtoAdapter.FIXED64);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.INT32, ProtoAdapter.INT32);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.INT64, ProtoAdapter.INT64);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.SFIXED32, ProtoAdapter.SFIXED32);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.SFIXED64, ProtoAdapter.SFIXED64);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.SINT32, ProtoAdapter.SINT32);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.SINT64, ProtoAdapter.SINT64);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRING, ProtoAdapter.STRING);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.UINT32, ProtoAdapter.UINT32);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.UINT64, ProtoAdapter.UINT64);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.ANY, AnyMessage.ADAPTER);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.DURATION, ProtoAdapter.DURATION);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.TIMESTAMP, ProtoAdapter.INSTANT);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.EMPTY, ProtoAdapter.EMPTY);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FIELD_MASK, ProtoAdapter.FIELD_MASK);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRUCT_MAP, ProtoAdapter.STRUCT_MAP);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRUCT_VALUE, ProtoAdapter.STRUCT_VALUE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRUCT_NULL, ProtoAdapter.STRUCT_NULL);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRUCT_LIST, ProtoAdapter.STRUCT_LIST);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.DOUBLE_VALUE, ProtoAdapter.DOUBLE_VALUE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.FLOAT_VALUE, ProtoAdapter.FLOAT_VALUE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.INT64_VALUE, ProtoAdapter.INT64_VALUE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.UINT64_VALUE, ProtoAdapter.UINT64_VALUE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.INT32_VALUE, ProtoAdapter.INT32_VALUE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.UINT32_VALUE, ProtoAdapter.UINT32_VALUE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.BOOL_VALUE, ProtoAdapter.BOOL_VALUE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.STRING_VALUE, ProtoAdapter.STRING_VALUE);
-    SCALAR_AND_WELL_KNOWN_ADAPTERS.put(ProtoType.BYTES_VALUE, ProtoAdapter.BYTES_VALUE);
+  @SuppressWarnings("deprecation") // Engine layer: bytes adapters stay okio-typed (docs/api-surface.md).
+  private static Map<ProtoType, ProtoAdapter<?>> createScalarAndWellKnownAdapters() {
+    Map<ProtoType, ProtoAdapter<?>> adapters = new HashMap<>();
+    adapters.put(ProtoType.BOOL, ProtoAdapter.BOOL);
+    adapters.put(ProtoType.BYTES, ProtoAdapter.BYTES);
+    adapters.put(ProtoType.DOUBLE, ProtoAdapter.DOUBLE);
+    adapters.put(ProtoType.FLOAT, ProtoAdapter.FLOAT);
+    adapters.put(ProtoType.FIXED32, ProtoAdapter.FIXED32);
+    adapters.put(ProtoType.FIXED64, ProtoAdapter.FIXED64);
+    adapters.put(ProtoType.INT32, ProtoAdapter.INT32);
+    adapters.put(ProtoType.INT64, ProtoAdapter.INT64);
+    adapters.put(ProtoType.SFIXED32, ProtoAdapter.SFIXED32);
+    adapters.put(ProtoType.SFIXED64, ProtoAdapter.SFIXED64);
+    adapters.put(ProtoType.SINT32, ProtoAdapter.SINT32);
+    adapters.put(ProtoType.SINT64, ProtoAdapter.SINT64);
+    adapters.put(ProtoType.STRING, ProtoAdapter.STRING);
+    adapters.put(ProtoType.UINT32, ProtoAdapter.UINT32);
+    adapters.put(ProtoType.UINT64, ProtoAdapter.UINT64);
+    adapters.put(ProtoType.ANY, AnyMessage.ADAPTER);
+    adapters.put(ProtoType.DURATION, ProtoAdapter.DURATION);
+    adapters.put(ProtoType.TIMESTAMP, ProtoAdapter.INSTANT);
+    adapters.put(ProtoType.EMPTY, ProtoAdapter.EMPTY);
+    adapters.put(ProtoType.FIELD_MASK, ProtoAdapter.FIELD_MASK);
+    adapters.put(ProtoType.STRUCT_MAP, ProtoAdapter.STRUCT_MAP);
+    adapters.put(ProtoType.STRUCT_VALUE, ProtoAdapter.STRUCT_VALUE);
+    adapters.put(ProtoType.STRUCT_NULL, ProtoAdapter.STRUCT_NULL);
+    adapters.put(ProtoType.STRUCT_LIST, ProtoAdapter.STRUCT_LIST);
+    adapters.put(ProtoType.DOUBLE_VALUE, ProtoAdapter.DOUBLE_VALUE);
+    adapters.put(ProtoType.FLOAT_VALUE, ProtoAdapter.FLOAT_VALUE);
+    adapters.put(ProtoType.INT64_VALUE, ProtoAdapter.INT64_VALUE);
+    adapters.put(ProtoType.UINT64_VALUE, ProtoAdapter.UINT64_VALUE);
+    adapters.put(ProtoType.INT32_VALUE, ProtoAdapter.INT32_VALUE);
+    adapters.put(ProtoType.UINT32_VALUE, ProtoAdapter.UINT32_VALUE);
+    adapters.put(ProtoType.BOOL_VALUE, ProtoAdapter.BOOL_VALUE);
+    adapters.put(ProtoType.STRING_VALUE, ProtoAdapter.STRING_VALUE);
+    adapters.put(ProtoType.BYTES_VALUE, ProtoAdapter.BYTES_VALUE);
+    return adapters;
   }
 
   private final Map<ProtoType, ProtoAdapter<?>> adapterMap;

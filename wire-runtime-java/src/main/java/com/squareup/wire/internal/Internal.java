@@ -320,6 +320,7 @@ public final class Internal {
    * proto specification, when an embedded message field appears multiple times, the values are
    * merged: repeated fields are concatenated, singular fields take the later value.
    */
+  @SuppressWarnings("deprecation") // Engine layer: merge re-encodes through the okio buffer forms (docs/api-surface.md).
   public static <E> E decodeMessageOrMerge(ProtoAdapter<E> adapter, ProtoReader reader, E existing)
       throws java.io.IOException {
     if (existing == null) return adapter.decode(reader);

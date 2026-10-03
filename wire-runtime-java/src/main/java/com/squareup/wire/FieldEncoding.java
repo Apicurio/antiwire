@@ -34,6 +34,7 @@ public enum FieldEncoding {
    * Returns a Wire adapter that reads this field encoding without interpretation. For example,
    * messages are returned as byte strings and enums are returned as integers.
    */
+  @SuppressWarnings("deprecation") // Engine layer: the bytes adapter stays okio-typed (docs/api-surface.md).
   public ProtoAdapter<?> rawProtoAdapter() {
     switch (this) {
       case VARINT:
