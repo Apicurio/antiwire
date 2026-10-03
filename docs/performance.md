@@ -591,6 +591,121 @@ their session-1 numbers measured on superseded candidates and require the same r
 (2) finding 1 above needs the TASK-28 fix and re-measurement, or an explicit maintainer
 acceptance record. This document grants no acceptance.
 
+### Session 5 results (2026-10-03 17:50-18:14 CEST, candidate `82c3624`, post TASK-28)
+
+Why renewed: TASK-28 (`bc3ad43`, the zero-copy `readBytesAsBytes` bytes decode) changed
+`wire-runtime-java` after session 4, firing the invalidation rule (section 0) a fourth
+time; this renewal records the fix on the final release candidate and is the measurement
+the maintainer's 2026-10-03 release-record confirmation (end of this document)
+anticipated. The full 12-cell runtime matrix was re-measured end to end with the identical
+JMH configuration and interleave (start times 17:50, 17:56, 18:02, 18:08; last run
+finished 18:14), the same untouched upstream oracle, and the same two-phase discipline
+(bands from this session's own oracle repetitions by the unchanged `tools/analyze.py`
+BEFORE any session-5 port number was computed).
+
+Identity block (AC#5):
+
+| Item | Value |
+|---|---|
+| antiwire revision | `82c362477077364174aec4ce89f2e947ba25029b` (branch `main`, clean tree; the only code delta vs session 4's `c713e9a` is TASK-28 `bc3ad43`, `wire-runtime-java` only; `e0da8b6`..`82c3624` in between are docs and backlog only) |
+| Build | `JAVA_HOME=~/.sdkman/candidates/java/17.0.12-tem mvn -pl wire-runtime-java,wire-schema-java,wire-java-generator -am install -DskipTests`, exit 0 (schema and generator sources unchanged vs session 4; the runtime is the only changed artifact) |
+| `io.apicurio:wire-runtime-java:0.1.0-SNAPSHOT` SHA-256 | `0f8bb01960ce656c97f57547a541d0d4f9342105bf2ed9aaa754c15865980c58` |
+| `io.apicurio:wire-schema-java:0.1.0-SNAPSHOT` SHA-256 | `97f7cb22bef4d9e4dd5d322668a40ae05b32fbb0d42491a891eaedf686bd4dd5` (source unchanged; rebuilt through the same reactor, so the checksum moves with the jar timestamps) |
+| `io.apicurio:wire-java-generator:0.1.0-SNAPSHOT` SHA-256 | `dbb2afd41dea44a420dc5919c8bed4286ac5eb853a31914f2f4f4eddec9310a5` (byte-identical to session 4's recorded jar) |
+| Oracle | unchanged from sessions 1-4: upstream Wire 7.1.0 artifact set from Maven Central; the upstream bench jar is session 4's own 14:18 build, untouched |
+| Bench jar verification | `aw-perf-port.jar` rebuilt against the installed runtime: every one of the 143 runtime jar entries is byte-identical inside the shaded bench jar (the only differing entry is `META-INF/MANIFEST.MF`, rewritten by shade), and the shaded `ProtoReader` carries TASK-28's `readBytesAsBytes` |
+| Generated-model identity | `generate-models.sh` re-run: trees identical under the phase-2 Bytes mapping; every per-file fingerprint identical to session 4 (`results/gen-tree-fingerprints.txt`) |
+| IdentityCheck | profile-diff clean; every fingerprint identical to sessions 3 and 4: email `cc02806d...` 672 B, all_types `ba3c8a31...` 483 B, packed `df973ccf...` 18,437 B, blob `4d49caab...` 17,472 B |
+| Test gate at the candidate | `./scripts/verify.sh` on openjdk 17.0.12 after the measurement: `VERDICT: all 12 ACTIVE suites passed.` (runtime 894, schema 630, protoc-oracle 122, compiler 179 cases; 4/6/50/33 skipped) |
+
+Session-5 matrix (medians over all 40 iterations; range = min-max over both repetitions;
+allocation is the `gc.alloc.rate.norm` median of repetition 1; own bands from this
+session's phase 1):
+
+| Cell | upstream 7.1.0 ops/s median [min-max] | antiwire ops/s median [min-max] | ratio | alloc/op upstream / port (B) | own band |
+|---|---|---|---|---|---|
+| email encodeForward | 596,995 [533,293-606,045] | 1,334,388 [1,258,462-1,389,882] | **2.235** | 16 / 16 | ±5% |
+| email encodeReverse | 2,819,752 [2,462,663-3,189,809] | 2,974,168 [2,605,535-3,040,728] | 1.055 | 200 / 176 | ±25% |
+| email decode | 2,293,974 [2,062,368-2,489,325] | 2,218,526 [1,953,511-2,257,092] | 0.967 | 4,104 / 4,248 | ±15% |
+| all_types encodeForward | 885,620 [783,940-935,100] | 993,528 [917,235-1,070,516] | 1.122 | 16 / 16 | ±10% |
+| all_types encodeReverse | 1,307,380 [1,228,844-1,356,783] | 1,505,270 [1,368,619-1,546,519] | 1.151 | 200 / 176 | ±5% |
+| all_types decode | 521,063 [460,346-544,374] | 523,629 [458,367-545,638] | 1.005 | 8,184 / 8,944 | ±10% |
+| packed encodeForward | 41,740 [37,483-43,100] | 40,297 [37,828-42,200] | 0.965 | 16 / 16 | ±10% |
+| packed encodeReverse | 66,692 [62,528-68,627] | 67,311 [62,738-69,015] | 1.009 | 200 / 176 | ±10% |
+| packed decode | 26,518 [21,991-27,550] | 31,837 [29,565-34,300] | 1.201 | 116,192 / 116,456 | ±10% |
+| bytes encodeForward | 1,925,900 [1,699,755-2,027,507] | 2,199,825 [2,088,495-2,241,564] | 1.142 | 8 / 16 (see note 3) | ±15% |
+| bytes encodeReverse | 1,368,957 [1,040,152-1,515,840] | 1,320,817 [1,245,890-1,530,053] | 0.965 | 200 / 176 | ±15% |
+| bytes decode | 1,447,476 [1,156,207-1,775,867] | 1,672,821 [1,152,171-1,709,196] | **1.156** | 19,040 / 19,072 | ±30% |
+
+Mandate judgment: `EmailSearchBench.encodeForward` = 2.235 overall and 2.193 / 2.257 per
+repetition, each far above the required 0.95; the encode-forward mandate holds on the
+release candidate.
+
+The TASK-28 fix, before and after (the cell this session exists for): bytes decode was
+session 4's finding 1 at **0.524** with 36,752 B/op, two copies per bytes value through
+`Bytes.fromByteString(reader.readBytes())`; on the fix candidate it reads **1.156** pooled
+(per-repetition 1.026 and 1.064, every repetition at or above parity) with 19,072 B/op
+against upstream's 19,040 (+0.2%), the session-3 one-copy level (19,064). TASK-28's
+acceptance criterion is met: back inside its oracle band (this session's own band ±30%,
+floor 0.700; worst per-repetition reading 1.026) with allocation at the one-copy level.
+The pooled ratio exceeds both per-repetition ratios because the upstream side itself split
+this session (run-to-run 17.2%: rep 1 median 1.64M, rep 2 median 1.38M with a 1.29M fork),
+which is also what sets the cell's ±30% own band; the port's fork medians are 1.683M,
+1.686M, 1.688M and one transient 1.295M (the per-fork strike pattern session 4 documented
+on both profiles), against upstream's fork medians 1.29M, 1.44M, 1.57M, 1.71M. Honest
+reading: parity to modestly faster; the two-copy regression is closed by fix, not
+acceptance.
+
+Session 5 vs session 4, per cell (port median move = session-5 port median divided by the
+session-4 record's; upstream median move likewise, as the environment-drift control):
+
+| Cell | s5 ratio | s4 ratio | port median move | upstream median move |
+|---|---|---|---|---|
+| email encodeForward | 2.235 | 2.230 | 1.006 | 1.004 |
+| email encodeReverse | 1.055 | 1.019 | 1.001 | 0.967 |
+| email decode | 0.967 | 0.948 | 0.994 | 0.974 |
+| all_types encodeForward | 1.122 | 1.134 | 0.936 | 0.947 |
+| all_types encodeReverse | 1.151 | 1.162 | 0.998 | 1.007 |
+| all_types decode | 1.005 | 1.022 | 0.973 | 0.990 |
+| packed encodeForward | 0.965 | 0.837 | 1.133 | 0.982 |
+| packed encodeReverse | 1.009 | 0.948 | 1.055 | 0.991 |
+| packed decode | 1.201 | 1.192 | 1.044 | 1.036 |
+| bytes encodeForward | 1.142 | 0.960 | 1.097 | 0.922 |
+| bytes encodeReverse | 0.965 | 1.026 | 1.003 | 1.067 |
+| bytes decode | 1.156 | 0.524 | 1.942 | 0.880 |
+
+Findings of this session: none. Every cell is inside its own oracle-derived band, the
+mandate holds, and no new finding is filed. Three corroboration notes for the record:
+(1) session-4 finding 3's packed encode cells read 0.965 and 1.009 (0.837 and 0.948 in
+session 4), back at the session-3 level, consistent with that finding's
+environmental-transient diagnosis; (2) session-4 finding 2's all_types decode allocation
+moved with the fix exactly as predicted, 9,040 -> 8,944 B/op (session-3 level 8,904;
+upstream 8,184), throughput 1.005 in band; (3) the upstream bytes encodeForward rep-1
+allocation median read 8 B/op because its per-iteration samples split between 0 and 16
+(gc profiler accounting at near-zero allocation); rep 2 and the port read a clean 16/16,
+so the table's 8 / 16 is an upstream-side reading artifact, not a port change.
+
+Allocation table, session 5 (`gc.alloc.rate.norm` median, rep 1): email 4,104 / 4,248,
+all_types 8,184 / 8,944, packed 116,192 / 116,456, bytes decode 19,040 / 19,072; every
+encode cell 16 / 16 forward and 200 / 176 reverse except the upstream bytes encodeForward
+reading noted above; every port cell identical to its session-3 and session-4 value
+except the two the fix moved (bytes decode 36,752 -> 19,072, all_types decode
+9,040 -> 8,944).
+
+Renewal statement (TASK-21 evidence): this record renews the full 12-cell runtime matrix
+on the final release candidate (`82c3624`, code identical to the TASK-28 fix `bc3ad43`)
+by revision, artifact checksums, unchanged oracle pins, generated-model identity, and
+unchanged identity fingerprints, and it closes the last open performance item of the
+session-4 statement (the TASK-28 fix and its re-measurement). Together with the
+maintainer's 2026-10-03 release-record confirmation (end of this document), which
+anticipated exactly this renewal, it constitutes TASK-21's performance evidence. The
+schema and protobuf-java reference cells still carry their session-1 numbers measured on
+superseded candidates (session-4 limitation, unchanged in kind); the maintainer's
+same-day confirmation record is the acceptance authority over that scope, and this
+document grants no acceptance. Any later change to `wire-runtime-java`,
+`wire-schema-java`, `wire-java-generator`, the oracle versions, or the harness workloads
+re-fires the invalidation rule.
+
 ### Workload 2: Apicurio schema operations
 
 | operation | upstream 7.1.0 ops/s median [min-max] | antiwire ops/s median [min-max] | ratio port/upstream | alloc/op upstream (B) | alloc/op port (B) |
@@ -760,6 +875,17 @@ preserved under `results/repeat-20261002-2200` and `logs/repeat-20261002-2200`: 
 full-matrix run of the SAME candidate `2d175e2` on 2026-10-02 ~22:03-22:27, whose readings
 (packed encodeForward 0.945, encodeReverse 1.027, bytes decode 0.958) corroborate the
 packed-cell and bytes-decode analyses above.
+
+Session 5 (2026-10-03): raw material is `/tmp/aw-perf/results/` again
+(`rt-{upstream,port}-{1,2}.{json}` + `logs/rt-*.txt` from the unchanged `run-all.sh` at
+17:50-18:14; `analysis.txt` / `analysis.json` from the unchanged two-phase script;
+`identity-port.txt` / `identity-upstream.txt`, diff-clean and identical to the session-3
+and session-4 values; `candidate-jar-checksums.txt`, `gen-tree-fingerprints.txt`), plus
+`tools/compare_sessions_s5.py` (pairs this session against the session-4 record) and
+`tools/doc_table.py` (table extraction from the raw JSONs). The session-4 files this run
+displaced are preserved under `results/session4-20261003/` and
+`logs/session4-20261003/`, including `t28-bytes.json` (the TASK-28 isolated
+pre-measurement on the fix jars).
 
 This document is a measurement record; it grants no acceptance. All four findings of the
 initial matrix are resolved by fixes and closed by re-measurement under the pre-declared
