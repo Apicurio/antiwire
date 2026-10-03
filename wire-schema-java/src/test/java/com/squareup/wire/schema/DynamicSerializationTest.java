@@ -17,6 +17,7 @@ package com.squareup.wire.schema;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.squareup.wire.Bytes;
 import com.squareup.wire.FieldMask;
 import com.squareup.wire.ProtoAdapter;
 import com.squareup.wire.SchemaBuilder;
@@ -87,7 +88,7 @@ public class DynamicSerializationTest {
         "uInt32_value_field", 33,
         "bool_value_field", true,
         "string_value_field", "πάμε",
-        "bytes_value_field", ByteString.encodeUtf8("πάμε"),
+        "bytes_value_field", Bytes.encodeUtf8("πάμε"), // Phase 2: Bytes value type (docs/api-surface.md).
         "field_mask_field", new FieldMask(Arrays.asList("user.display_name", "photo")));
     assertEquals(expected, adapter.decode(adapter.encode(expected)));
   }

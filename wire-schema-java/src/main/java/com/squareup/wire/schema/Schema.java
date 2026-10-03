@@ -140,15 +140,15 @@ public final class Schema {
   /**
    * Returns a wire adapter for the message or enum type named {@code typeName}. The returned
    * type adapter doesn't have model classes to encode and decode from, so instead it uses scalar
-   * types ({@link String}, {@link okio.ByteString}, {@link Integer}, etc.), maps, lists, and
-   * corresponding classes to proto3 types (e.g. {@link java.time.Instant} for
+   * types ({@link String}, {@link com.squareup.wire.Bytes}, {@link Integer}, etc.), maps, lists,
+   * and corresponding classes to proto3 types (e.g. {@link java.time.Instant} for
    * {@code google.protobuf.Timestamp}.) It can both encode and decode these objects. Map keys
    * are field names.
    *
    * @param includeUnknown true to include values for unknown tags in the returned model. Map
    *     keys for such values is the unknown value's tag name as a string. Unknown values are
-   *     decoded to {@link Long}, {@link Long}, {@link Integer}, or {@link okio.ByteString} for
-   *     {@link com.squareup.wire.FieldEncoding#VARINT}, {@link
+   *     decoded to {@link Long}, {@link Long}, {@link Integer}, or {@link com.squareup.wire.Bytes}
+   *     for {@link com.squareup.wire.FieldEncoding#VARINT}, {@link
    *     com.squareup.wire.FieldEncoding#FIXED64}, {@link com.squareup.wire.FieldEncoding#FIXED32},
    *     or {@link com.squareup.wire.FieldEncoding#LENGTH_DELIMITED}, respectively.
    */

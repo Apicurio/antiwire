@@ -134,6 +134,16 @@ public class ProtoReader {
   }
 
   /**
+   * Ends a length-delimited nested message and returns its unknown fields as {@link Bytes}:
+   * the form generated code feeds to {@code Message.Builder.addUnknownFields(Bytes)}. Same
+   * contract as {@link #endMessageAndGetUnknownFields(long)}; the empty case maps to the
+   * {@code Bytes.EMPTY} singleton (docs/api-surface.md, phase 2).
+   */
+  public Bytes endMessageAndGetUnknownFieldsBytes(long token) throws IOException {
+    return Bytes.fromByteString(endMessageAndGetUnknownFields(token));
+  }
+
+  /**
    * End a length-delimited nested message. Calls to this method must be symmetric with calls to
    * [beginMessage].
    *
@@ -493,7 +503,9 @@ public class ProtoReader {
 
   /**
    * Store an already read field temporarily. Once the entire message is read, call
-   * {@link #endMessageAndGetUnknownFields} to retrieve unknown fields.
+   * {@link #endMessageAndGetUnknownFields} to retrieve unknown fields. The value must be what
+   * {@link FieldEncoding#rawProtoAdapter} decodes for {@code fieldEncoding}; for
+   * LENGTH_DELIMITED that is {@link Bytes} (docs/api-surface.md, phase 2).
    */
   public void addUnknownField(int tag, FieldEncoding fieldEncoding, Object value)
       throws IOException {

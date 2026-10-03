@@ -44,6 +44,17 @@ public final class JvmLanguages {
     return builtInAdapterString(type, false);
   }
 
+  /**
+   * The {@code ProtoAdapter} constant name a scalar field references. The port's generated code
+   * references the Bytes-valued adapter for bytes fields; every other scalar keeps upstream's
+   * constant name (docs/api-surface.md, phase 2). Both the emitted adapter expressions and the
+   * reflection adapter strings derive from this one mapping.
+   */
+  public static String scalarAdapterConstantName(ProtoType type) {
+    if (type.equals(ProtoType.BYTES)) return "WIRE_BYTES";
+    return type.toString().toUpperCase(Locale.US);
+  }
+
   public static String builtInAdapterString(ProtoType type, boolean useArray) {
     String protoAdapterName = ProtoAdapter.class.getName();
     if (type.isScalar) {
@@ -65,7 +76,7 @@ public final class JvmLanguages {
         throw new IllegalArgumentException("No Array adapter for " + type);
       }
 
-      return protoAdapterName + "#" + type.toString().toUpperCase(Locale.US);
+      return protoAdapterName + "#" + scalarAdapterConstantName(type);
     }
     if (type.equals(ProtoType.DURATION)) return protoAdapterName + "#DURATION";
     if (type.equals(ProtoType.TIMESTAMP)) return protoAdapterName + "#INSTANT";
@@ -83,7 +94,7 @@ public final class JvmLanguages {
     if (type.equals(ProtoType.UINT32_VALUE)) return protoAdapterName + "#UINT32_VALUE";
     if (type.equals(ProtoType.BOOL_VALUE)) return protoAdapterName + "#BOOL_VALUE";
     if (type.equals(ProtoType.STRING_VALUE)) return protoAdapterName + "#STRING_VALUE";
-    if (type.equals(ProtoType.BYTES_VALUE)) return protoAdapterName + "#BYTES_VALUE";
+    if (type.equals(ProtoType.BYTES_VALUE)) return protoAdapterName + "#WIRE_BYTES_VALUE";
     return null;
   }
 

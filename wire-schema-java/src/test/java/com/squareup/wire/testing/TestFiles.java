@@ -118,6 +118,22 @@ public final class TestFiles {
     return new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
   }
 
+  /**
+   * The pinned upstream square/wire clone that tests read pinned goldens and protos from: the
+   * {@code ANTIWIRE_UPSTREAM} environment variable (set by CI), defaulting to /tmp/wire, both
+   * fetched by scripts/fetch-upstream.sh. Throws when the clone is absent rather than skipping,
+   * so a clone-dependent suite cannot silently not run.
+   */
+  public static Path upstreamClone() {
+    String clone = System.getenv("ANTIWIRE_UPSTREAM");
+    Path path = Path.of(clone == null || clone.isEmpty() ? "/tmp/wire" : clone);
+    if (!Files.isDirectory(path)) {
+      throw new IllegalStateException(
+          "pinned upstream clone not found at " + path + "; run scripts/fetch-upstream.sh");
+    }
+    return path;
+  }
+
   /** Upstream wire-test-utils' {@code containsExactlyInAnyOrderAsRelativePaths}. */
   public static void assertContainsExactlyInAnyOrderAsRelativePaths(
       java.util.Set<String> actual, String... values) {

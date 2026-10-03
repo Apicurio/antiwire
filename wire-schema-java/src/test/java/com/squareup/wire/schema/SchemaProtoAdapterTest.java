@@ -18,6 +18,7 @@ package com.squareup.wire.schema;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.squareup.wire.Bytes;
 import com.squareup.wire.ProtoAdapter;
 import com.squareup.wire.SchemaBuilder;
 import com.squareup.wire.internal.ProtocolException;
@@ -232,11 +233,13 @@ public class SchemaProtoAdapterTest {
             + "}\n")
         .build();
 
+    // Phase 2: unknown length-delimited values decode as the wire-owned Bytes
+    // (docs/api-surface.md), where upstream's dynamic model would carry okio's ByteString.
     Map<String, Object> dansCoffeeWithUnknowns = map(
         "customer_name", "Dan",
-        "2", Arrays.asList(ByteString.decodeHex("11000000000000e03f")),
+        "2", Arrays.asList(Bytes.decodeHex("11000000000000e03f")),
         "size_ounces", 16,
-        "15", Arrays.asList(ByteString.decodeHex("1001")));
+        "15", Arrays.asList(Bytes.decodeHex("1001")));
 
     ProtoAdapter<Object> adapter = schema.protoAdapter("CafeDrink", true);
     assertEquals(dansCoffeeWithUnknowns, adapter.decode(new Buffer().write(dansCoffeeEncoded)));

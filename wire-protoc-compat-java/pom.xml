@@ -55,5 +55,14 @@
       <artifactId>wire-schema-java</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Shared test fixtures (com.squareup.wire.testing.TestFiles, including the pinned
+         upstream-clone lookup the interop test uses). Test scope only. -->
+    <dependency>
+      <groupId>io.apicurio</groupId>
+      <artifactId>wire-schema-java</artifactId>
+      <version>${project.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

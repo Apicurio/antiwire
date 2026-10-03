@@ -45,11 +45,11 @@ final class SchemaProtoAdapterFactory {
   private static final Map<ProtoType, ProtoAdapter<?>> SCALAR_AND_WELL_KNOWN_ADAPTERS =
       createScalarAndWellKnownAdapters();
 
-  @SuppressWarnings("deprecation") // Engine layer: bytes adapters stay okio-typed (docs/api-surface.md).
+  /** Bytes values cross this schema-driven surface as {@link com.squareup.wire.Bytes} (docs/api-surface.md, phase 2). */
   private static Map<ProtoType, ProtoAdapter<?>> createScalarAndWellKnownAdapters() {
     Map<ProtoType, ProtoAdapter<?>> adapters = new HashMap<>();
     adapters.put(ProtoType.BOOL, ProtoAdapter.BOOL);
-    adapters.put(ProtoType.BYTES, ProtoAdapter.BYTES);
+    adapters.put(ProtoType.BYTES, ProtoAdapter.WIRE_BYTES);
     adapters.put(ProtoType.DOUBLE, ProtoAdapter.DOUBLE);
     adapters.put(ProtoType.FLOAT, ProtoAdapter.FLOAT);
     adapters.put(ProtoType.FIXED32, ProtoAdapter.FIXED32);
@@ -80,7 +80,7 @@ final class SchemaProtoAdapterFactory {
     adapters.put(ProtoType.UINT32_VALUE, ProtoAdapter.UINT32_VALUE);
     adapters.put(ProtoType.BOOL_VALUE, ProtoAdapter.BOOL_VALUE);
     adapters.put(ProtoType.STRING_VALUE, ProtoAdapter.STRING_VALUE);
-    adapters.put(ProtoType.BYTES_VALUE, ProtoAdapter.BYTES_VALUE);
+    adapters.put(ProtoType.BYTES_VALUE, ProtoAdapter.WIRE_BYTES_VALUE);
     return adapters;
   }
 

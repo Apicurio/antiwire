@@ -137,13 +137,19 @@ public final class Bytes {
     return data;
   }
 
-  /** Engine bridge: converts from the engine's okio form, copying once. */
+  /**
+   * Engine bridge: converts from the engine's okio form, copying once. The empty value maps to
+   * the {@link #EMPTY} singleton, so the common no-unknown-fields paths stay allocation-free.
+   */
   static Bytes fromByteString(ByteString bytes) {
-    return new Bytes(bytes.toByteArray());
+    return bytes.size() == 0 ? EMPTY : new Bytes(bytes.toByteArray());
   }
 
-  /** Engine bridge: converts to the engine's okio form, copying once. */
+  /**
+   * Engine bridge: converts to the engine's okio form, copying once. The empty value maps to
+   * okio's {@code ByteString.EMPTY} singleton.
+   */
   ByteString toByteString() {
-    return ByteString.of(data);
+    return data.length == 0 ? ByteString.EMPTY : ByteString.of(data);
   }
 }

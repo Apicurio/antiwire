@@ -40,7 +40,7 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
    * occurrences like any other message field. STRUCT_NULL is absent because
    * google.protobuf.NullValue is an enum, not a message.
    */
-  @SuppressWarnings("deprecation") // Engine layer: the bytes wrapper adapter stays okio-typed (docs/api-surface.md).
+  @SuppressWarnings("deprecation") // Engine layer: the okio wrapper serves upstream-generated code (docs/api-surface.md).
   private static final Set<ProtoAdapter<?>> MESSAGE_BACKED_BUILT_IN_ADAPTERS = new HashSet<>(
       Arrays.asList(
           ProtoAdapter.DURATION,
@@ -58,7 +58,9 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
           ProtoAdapter.UINT32_VALUE,
           ProtoAdapter.BOOL_VALUE,
           ProtoAdapter.STRING_VALUE,
-          ProtoAdapter.BYTES_VALUE));
+          ProtoAdapter.BYTES_VALUE,
+          // Phase 2: generated code references the Bytes-valued wrapper (docs/api-surface.md).
+          ProtoAdapter.WIRE_BYTES_VALUE));
 
   private final MessageBinding<M, B> binding;
   private final boolean preservingProtoFieldNames;

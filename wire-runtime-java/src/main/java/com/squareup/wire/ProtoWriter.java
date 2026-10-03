@@ -67,6 +67,11 @@ public class ProtoWriter {
     sink.write(value);
   }
 
+  /** Writes {@code value} without copying: the payload array is read, never written. */
+  public void writeBytes(Bytes value) throws IOException {
+    sink.write(value.internalBytes());
+  }
+
   public void writeString(String value) throws IOException {
     sink.writeUtf8(value);
   }
