@@ -1296,7 +1296,9 @@ public abstract class ProtoAdapter<E> {
     }
 
     @Override public Bytes decode(ProtoReader reader) throws IOException {
-      return Bytes.fromByteString(reader.readBytes());
+      // TASK-28: single copy. The reader adopts its array into Bytes; the prior path paid
+      // the ByteString read copy plus a fromByteString clone.
+      return reader.readBytesAsBytes();
     }
 
     @Override public Bytes redact(Bytes value) {

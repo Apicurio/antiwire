@@ -63,6 +63,10 @@ public final class ProtoReader32AsProtoReader extends ProtoReader {
     return delegate.readBytes();
   }
 
+  @Override public Bytes readBytesAsBytes() throws IOException {
+    return delegate.readBytesAsBytes();
+  }
+
   @Override public boolean beforePossiblyPackedScalar() throws IOException {
     return delegate.beforePossiblyPackedScalar();
   }

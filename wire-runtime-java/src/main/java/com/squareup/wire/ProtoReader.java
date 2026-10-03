@@ -330,6 +330,17 @@ public class ProtoReader {
   }
 
   /**
+   * Reads a {@code bytes} field value as the wire-owned {@link Bytes} type with a single copy:
+   * the array read is adopted directly by Bytes, skipping the second clone the
+   * ByteString-then-convert path would pay (TASK-28).
+   */
+  public Bytes readBytesAsBytes() throws IOException {
+    long byteCount = beforeLengthDelimitedScalar();
+    source.require(byteCount); // Throws EOFException if insufficient bytes are available.
+    return Bytes.takeOwnership(source.readByteArray(byteCount));
+  }
+
+  /**
    * Prepares to read a value and returns true if the read should proceed. If there's nothing to
    * read (because a packed value has length 0), this will clear the reader state.
    */

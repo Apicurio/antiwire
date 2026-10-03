@@ -90,6 +90,9 @@ public interface ProtoReader32 {
    */
   ByteString readBytes() throws IOException;
 
+  /** Reads a {@code bytes} field value as the wire-owned {@link Bytes} type (TASK-28). */
+  Bytes readBytesAsBytes() throws IOException;
+
   /**
    * Prepares to read a value and returns true if the read should proceed. If there's nothing to
    * read (because a packed value has length 0), this will clear the reader state.

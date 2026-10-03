@@ -3,7 +3,7 @@ id: TASK-28
 title: >-
   Zero-copy bytes decode: adoptable byte[] reader so WireBytesAdapter.decode
   pays one copy, not two
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-03 13:00'
 labels:

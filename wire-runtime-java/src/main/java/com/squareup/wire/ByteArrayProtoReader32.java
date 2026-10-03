@@ -299,6 +299,22 @@ public final class ByteArrayProtoReader32 implements ProtoReader32 {
     return readByteString(byteCount);
   }
 
+  @Override public Bytes readBytesAsBytes() throws IOException {
+    int byteCount = beforeLengthDelimitedScalar();
+    int newPos = checkedLimit(byteCount);
+    if (pos == 0 && newPos == source.length) {
+      // The value IS the array: adopt it instead of copying (TASK-28). The array is assigned
+      // once at construction and never mutated, so aliasing it in Bytes is safe; pos still
+      // advances, so a later read correctly hits EOF.
+      Bytes result = Bytes.takeOwnership(source);
+      pos = newPos;
+      return result;
+    }
+    Bytes result = Bytes.takeOwnership(java.util.Arrays.copyOfRange(source, pos, newPos));
+    pos = newPos;
+    return result;
+  }
+
   @Override public boolean beforePossiblyPackedScalar() throws IOException {
     switch (state) {
       case STATE_LENGTH_DELIMITED:
