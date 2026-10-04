@@ -46,3 +46,6 @@ section E.
 - [ ] #1 Generated output for a schema declaring `message Bytes` next to bytes-field users compiles against the port runtime, or the limitation is re-documented with the chosen rejection rationale
 - [ ] #2 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
+
+GitHub tracking issue: https://github.com/Apicurio/antiwire/issues/2
+
