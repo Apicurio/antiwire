@@ -1,7 +1,7 @@
 ---
 id: TASK-22
 title: Define a deferred Kafka use case and validate an adoption proposal
-status: In Progress
+status: To Do
 assignee: []
 created_date: '2026-09-29 09:23'
 updated_date: '2026-09-30 01:18'
@@ -38,3 +38,6 @@ Kafka is a later adoption target and does not block the Apicurio-first 0.1.0 rel
 
 #1 - 2026-10-02 13:19 (UTC)
 Decision package prepared and committed: docs/kafka-use-case-proposal.md. Kafka researched read-only at shallow-clone commit 4c7bc0e4cebaa1fb9e26bde350594926586780a2 (trunk, 4.5.0-SNAPSHOT). Candidates: C1 registry-free protobuf client stack on vanilla kafka-clients, new optional wire-kafka-example module (RECOMMENDED); C2 Apicurio serdes + ProtobufConverter run against the pinned broker (later follow-up, overlaps TASK-18); C3 serving Kafka's own protocol/metadata schemas (rejected at this pin: zero .proto files, JSON-defined protocol compiled by :generator, no Rust sources on trunk, protobuf-java 3.25.5 present only as the shaded OpenTelemetry dependency). Kafka Java facts recorded: :clients compiles at --release 11 (build.gradle:53-55), matching the port's floor; broker modules at 17. No AC ticked: AC#1 awaits the maintainer approving one scenario and the draft end-to-end acceptance criteria (doc section 5) before any POC implementation starts.
+
+#2 - 2026-10-04 (session): maintainer deferred the Kafka thread for now ("lasciamo perdere il filone kafka per il momento"). No POC; the task returns to To Do. The decision package stays valid (docs/kafka-use-case-proposal.md, pin 4c7bc0e4) whenever the thread resumes - re-verify the Kafka pin at that point.
+
