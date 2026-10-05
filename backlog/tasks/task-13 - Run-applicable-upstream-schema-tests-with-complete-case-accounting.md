@@ -1,7 +1,7 @@
 ---
 id: TASK-13
 title: Run applicable upstream schema tests with complete case accounting
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-29 09:23'
 updated_date: '2026-09-30 01:18'

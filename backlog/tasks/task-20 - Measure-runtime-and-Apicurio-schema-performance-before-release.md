@@ -1,7 +1,7 @@
 ---
 id: TASK-20
 title: Measure runtime and Apicurio schema performance before release
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-29 09:23'
 updated_date: '2026-09-30 01:18'
@@ -42,3 +42,7 @@ Finding 3 RESOLVED BY FIX, closed by re-measurement (not by acceptance, not by r
 
 #1 - 2026-10-02 15:00 (UTC)
 Delivered: docs/performance.md (candidates 0e87bde initial, c0a2152 decode fix; re-measurement 4702ec1). Results: schema ops (the Apicurio path) FASTER (parse 1.118x, link+load 1.084x, descriptor conversion 1.160x with 22% less alloc); encode parity-or-better on 7/8 cells; decode initially weak (0.502-0.938) - root cause identified and FIXED in c0a2152 (decode(byte[])/decode(ByteString) now enter via ByteArrayProtoReader32 like upstream's commonDecode, removing the full-payload Buffer copy; byte-identical outputs verified, 869+80+122 tests green). Post-fix decode: 0.810/0.904/1.221/0.980. Regressions resolved: 3 of 4 (BytesBench.decode thin at 0.810 vs 0.800 floor, noted in doc). REMAINING PENDING (blocks TASK-21): EmailSearchBench.encodeForward 0.867 then 0.790 across two sessions, outside its own +-5% band both times; encode path is structurally identical to upstream (commonEncode = Buffer+encode+readByteArray, verified) so no decode-style structural fix exists; port-side variance wide (417-505k ops/s vs upstream stable ~607k). This is a maintainer-acceptance gate per AC#3 - not accepted here. AC#3 left unchecked pending that single acceptance; re-rolling the measurement until it passes would violate the pre-declared-band discipline.
+
+## Final Summary
+
+Closed with every criterion satisfied by fix, not acceptance. AC#1/AC#2: docs/performance.md sessions 1-5, harness rebuilt post-reboot with two-phase oracle-band discipline, all measurements reproducible. AC#3: maintainer confirmed the reports as the release reference (2026-10-03, recorded in 82c3624) with zero regressions outstanding at confirmation - encodeForward resolved by the Utf8.size fast path (2.2x), bytes decode by TASK-28's zero-copy readBytesAsBytes (session 5: per-rep >= 1.026, allocation at one-copy parity). AC#4: isolated profiles, one implementation per classpath, IdentityCheck byte-parity on every session. AC#5: every session records revision, jar checksums, and fingerprints; invalidation rule fired and was honored each time.
