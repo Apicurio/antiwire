@@ -60,6 +60,7 @@ jobs:
         run: |
           scripts/test-bootstrap.sh
           scripts/test-parity-gate.sh
+          scripts/test-release-gates.sh
 
       - name: run the verification entry point
         run: ANTIWIRE_UPSTREAM="$HOME/antiwire-upstream" scripts/verify.sh
