@@ -48,6 +48,11 @@ TASK-21. Concretely, any commit that changes the content of `wire-runtime-java`,
 `wire-schema-java`, or `wire-java-generator` (source, pom, or plugin configuration)
 invalidates the corresponding rows in sections 2, 3, and 5 and the checksum block above.
 
+Renewal pointers, appended 2026-10-06: section 9 (candidate c713e9a, 2026-10-03) and
+section 10 (candidate 0f860ff, 2026-10-06) each re-measured the antiwire column after the
+rule fired again. The newest candidate, its measurements, and its acceptance status are
+in section 10; the paragraphs above are the original 2026-10-02 record.
+
 ## 1. Method
 
 ### 1.1 Clean minimal consumer probes
@@ -560,6 +565,9 @@ Partly superseded on 2026-10-03 by the renewal in section 9: the candidate the a
 should bind to is now the c713e9a build of section 9.1, and the guava observation of
 section 4.4 no longer applies (section 9.5).
 
+Further superseded on 2026-10-06 by the renewal in section 10: the candidate is now the
+0f860ff build of section 10.1, whose acceptance is PENDING maintainer signature.
+
 ## 9. Candidate c713e9a (post no-okio API merge), measured 2026-10-03
 
 The invalidation rule of section 0 fired twice since the 2026-10-02 report, so this section
@@ -810,6 +818,11 @@ the guava-free branch; the open point previously attached to acceptance (the gua
 section 4.4) is gone with the rebuild, so what remains for the maintainer to weigh is the
 footprint itself. The invalidation rule of section 0 continues to bind.
 
+Superseded on 2026-10-06 by the renewal in section 10: candidate 0f860ff renews the
+antiwire column, and its acceptance is PENDING maintainer signature. This c713e9a
+acceptance stays as history, and the 9.5 marginal was not renewed for 0f860ff (the
+integration branch is Mac-hosted and was absent from the measuring host; section 10.5).
+
 ### 9.7 Verification run
 
 `./scripts/verify.sh` was run once on c713e9a after these measurements (build JVM Temurin
@@ -843,3 +856,208 @@ the acceptance binds to the recorded checksums of the 9.1 build plus the revisio
 javadoc jars are the one family a later rebuild will not reproduce bitwise. Nothing in the
 port changed during the renewal: the working-tree diff at commit time contains this
 document and the TASK-19 task file only, and the verify run was the final build action.
+
+## 10. Candidate 0f860ff (post TASK-28, TASK-26, TASK-16.1, TASK-16.2), measured 2026-10-06
+
+The invalidation rule of section 0 fired again since the c713e9a renewal: four commits
+changed the content of the shipped jars, touching all three modules. `bc3ad43` (TASK-28)
+changed the runtime reader family and `ProtoAdapter` for zero-copy bytes decode;
+`275dcc2` (TASK-26) changed the runtime `ProtoAdapter` and `RuntimeMessageAdapter` plus
+the schema `Schema` and `SchemaProtoAdapterFactory` for dynamic Empty parity; `84a6a9f`
+(TASK-16.1) changed the schema `JvmLanguages` and the generator `JavaGenerator` for
+Empty models; `ec15e18` (TASK-16.2) added the generator `ProtoTarget` with its `.proto`
+emission. No pom changed since c713e9a (`git diff` on the root pom and the three module
+poms is empty), so the invalidating change is source content only. This section renews the
+antiwire column the way section 9 did; everything above stays as history (DEC-13). Two
+things differ from the section 9 renewal. First, the measurement moved hosts: every
+earlier section measured on macOS, this one runs on Fedora Linux, with the same Maven and
+JDK baseline and the GNU equivalents of the size and checksum tools (10.1). Second, one
+renewal could not be performed here: the Apicurio marginal of 9.5 needs the local-only
+integration branch at `6ce5582c`, which is Mac-hosted and absent from this host, so that
+result is not claimed for this candidate (10.5). Upstream 6.4.0 and 7.1.0 resolve to the
+same Maven Central artifacts as before, so their columns are cited unchanged from sections
+2 and 3 and were not re-measured.
+
+### 10.1 Measured candidate identity
+
+| Item | Value |
+|---|---|
+| antiwire build revision | `0f860ff0751c95a2f9ddb290c733e2ca21308ee2` (branch `m6-footprint`, a worktree of `main` at `0f860ff`); this is the revision the record below binds to, and production sources must not change after it for the record to stay valid |
+| Build command | `mvn -B -ntp -pl wire-runtime-java,wire-schema-java,wire-java-generator -am clean install -DskipTests` (BUILD SUCCESS, 01:52 min, finished 2026-10-06T17:01:56+02:00, exit 0; private local repository `-Dmaven.repo.local=/tmp/aw-m2-foot`, isolated from `~/.m2`; the reactor also builds the never-published `wire-upstream-shaded` test fixture, as in 9.1) |
+| Build tool | Apache Maven 3.9.12 (848fbb4bf2d427b72bdb2471c22fced7ebd9a7a1) |
+| Build JDK | OpenJDK 17.0.12, Temurin-17.0.12+7 (`~/.sdkman/candidates/java/17.0.12-tem`) |
+| OS | Fedora Linux 44 (Workstation), kernel `7.2.8-200.fc44.x86_64`, x86_64 (earlier sections: macOS 26.7.1, aarch64) |
+| Size and checksum tools | GNU coreutils 9.10: `stat -c %s` and `sha256sum` (SHA-256); the macOS runs used `stat -f %z` and `shasum -a 256`, same quantities |
+| Coordinates | `io.apicurio`, version 0.1.0-SNAPSHOT (DEC-8) |
+| Apicurio base | `448f845c9791b960cec3f0bb9a491ac5cd90e785` (unchanged from sections 4 and 9.5; not re-measured here) |
+| Apicurio integration | not available on this host: branch `antiwire-integration` and commits `6ce5582c` / `a11d7cfa` are absent from every local Apicurio clone (10.5) |
+
+All nine release artifacts (main, `-sources`, `-javadoc` of each shipped module), built
+fresh by the command above from the revision above:
+
+| Artifact (0.1.0-SNAPSHOT, `io.apicurio`) | Bytes | MiB | SHA-256 |
+|---|---|---|---|
+| `wire-runtime-java` | 251,345 | 0.240 | `d5ef9cad6d2880c360865994814d32b90b4ed431f25b04e5df81262c85f393d4` |
+| `wire-runtime-java` (`-sources`) | 164,648 | 0.157 | `27afb17149c78bf13f671fc0f887a10101e05fa15faf225103b0bc0f7481012e` |
+| `wire-runtime-java` (`-javadoc`) | 561,023 | 0.535 | `fead87ca9d7a4d372e2ac695e99634f3af730e14da097c9a1db88ddb96b79bf9` |
+| `wire-schema-java` | 325,324 | 0.310 | `d7f2857972666184433a54fc981aab9b8d8b26f90944d72b86cc69041e7c6319` |
+| `wire-schema-java` (`-sources`) | 208,135 | 0.198 | `722945157345d58eb9e0cc75af5e5e0901e67a9cc73070b3839a7dd23d41bf5c` |
+| `wire-schema-java` (`-javadoc`) | 622,677 | 0.594 | `7e7caa1aabfbc35ce1070231924df7a7ed4f64316082364b597dcecd15dfefeb` |
+| `wire-java-generator` | 59,770 | 0.057 | `00d88bd9b22d4dcaa55ce77f5adb7bab4cc178b8b8eb956eabcc6c58faf23cd6` |
+| `wire-java-generator` (`-sources`) | 38,000 | 0.036 | `1a9122b45959e8c1210579a46e18dd7844d87db669720f50b678aad8a05fef53` |
+| `wire-java-generator` (`-javadoc`) | 127,942 | 0.122 | `7f76133c073ec8947f19b3e630a952b9371893499151417347a1948806a1c7e4` |
+
+Growth against the c713e9a jars of 9.1: `wire-runtime-java` 248,894 to 251,345 (+2,451,
+TASK-28 with the runtime side of TASK-26), `wire-schema-java` 325,326 to 325,324 (minus
+2, TASK-26 and TASK-16.1 changed the sources and the compiled jar nets two bytes smaller),
+`wire-java-generator` 56,425 to 59,770 (+3,345, TASK-16.1 Empty models and TASK-16.2
+`ProtoTarget`). The jar-reproducibility caveat of section 0 applies unchanged, in the
+precise form 9.7 gave it: main and `-sources` jars rebuild bitwise from an unchanged
+tree, `-javadoc` jars do not, so acceptance binds to these checksums plus the revision.
+The jars the probes below copied are byte-identical to the installed jars of the private
+repository (verified by `sha256sum` on both copies). Resolved dependency identities are
+unchanged and were re-verified by the probe trees below: `wire-runtime-java` resolves to
+itself and nothing else; `wire-schema-java` to itself plus `wire-runtime-java`;
+`wire-java-generator` to itself plus both and `com.squareup:javapoet:1.13.0`.
+
+Dated note, 2026-10-06. After this measurement, the license refresh (branch `m6-license`,
+commit `7297b66`) changed one comment line in `ProtoReader32AsProtoReader.java`, the
+copyright header of a translated `wire-runtime-java` file, from the antiwire form to the
+upstream Square 2024 form. The change touches no code: it alters the content of the
+`wire-runtime-java` `-sources` jar, while the compiled classes are comment-insensitive.
+The whole-jar checksums above still will not survive that merge, because they bind to
+this specific build and any later build differs per the ZIP-timestamp caveat of section
+0. The checksums of this section therefore bind to `0f860ff` and will differ for any
+candidate that contains `7297b66`. The footprint must be measured again on the final
+candidate, which TASK-21 already requires.
+
+### 10.2 Clean minimal consumer: runtime surface (renewed antiwire column)
+
+Probe `rt-aw` at `/tmp/aw-fp3-consumers/rt-aw`, same pom template and commands as section
+1.1, run on 2026-10-06 with Maven 3.9.12 on Temurin 17.0.12 (the CLI plugin version
+resolved was `maven-dependency-plugin:3.7.0`, as in section 1.1) against the freshly
+installed jars of 10.1, resolving from the same private repository; per-jar sizes were
+taken with the GNU form `stat -c '%s %n'`. All commands exited 0:
+
+```
+fp.probe:rt-aw:pom:1.0
+\- io.apicurio:wire-runtime-java:jar:0.1.0-SNAPSHOT:runtime
+```
+
+| Baseline | Jars | Bytes | MiB | Change vs antiwire |
+|---|---|---|---|---|
+| upstream wire-runtime-jvm 6.4.0 (cited from section 2.3) | 4 | 2,409,569 | 2.298 | antiwire removes 2,158,224 bytes (89.6%) |
+| upstream wire-runtime-jvm 7.1.0 (cited from section 2.3) | 4 | 2,440,849 | 2.328 | antiwire removes 2,189,504 bytes (89.7%) |
+| antiwire wire-runtime-java (this section) | 1 | 251,345 | 0.240 | baseline for the two rows above |
+
+The removal share sits a tenth of a point below 9.2 (89.7% and 89.8%) only because the
+antiwire jar grew again; what disappears is still exactly the Kotlin stack of section 2.
+
+### 10.3 Clean minimal consumer: schema surface (renewed antiwire column)
+
+Probe `sch-aw` at `/tmp/aw-fp3-consumers/sch-aw`, same method:
+
+```
+fp.probe:sch-aw:pom:1.0
+\- io.apicurio:wire-schema-java:jar:0.1.0-SNAPSHOT:runtime
+   \- io.apicurio:wire-runtime-java:jar:0.1.0-SNAPSHOT:runtime
+```
+
+| Baseline | Jars | Bytes | MiB | Change vs antiwire |
+|---|---|---|---|---|
+| upstream wire-schema-jvm 6.4.0 (cited from section 3.3) | 15 | 9,779,888 | 9.327 | antiwire removes 9,203,219 bytes (94.1%) |
+| upstream wire-schema-jvm 7.1.0 (cited from section 3.3) | 14 | 10,166,815 | 9.696 | antiwire removes 9,590,146 bytes (94.3%) |
+| antiwire wire-schema-java (this section) | 2 | 576,669 | 0.550 | baseline for the two rows above |
+
+### 10.4 Optional generator cost (renewed)
+
+Probe `gen-aw` at `/tmp/aw-fp3-consumers/gen-aw`, same method:
+
+```
+fp.probe:gen-aw:pom:1.0
+\- io.apicurio:wire-java-generator:jar:0.1.0-SNAPSHOT:runtime
+   +- io.apicurio:wire-schema-java:jar:0.1.0-SNAPSHOT:runtime
+   +- io.apicurio:wire-runtime-java:jar:0.1.0-SNAPSHOT:runtime
+   \- com.squareup:javapoet:jar:1.13.0:runtime
+```
+
+| Resolved artifact | Bytes |
+|---|---|
+| `io.apicurio:wire-java-generator` (0.1.0-SNAPSHOT) | 59,770 |
+| `io.apicurio:wire-schema-java` (0.1.0-SNAPSHOT) | 325,324 |
+| `io.apicurio:wire-runtime-java` (0.1.0-SNAPSHOT) | 251,345 |
+| `com.squareup:javapoet` (1.13.0) | 106,068 |
+| Total | 742,507 bytes (0.708 MiB), 4 jars |
+
+`javapoet` 1.13.0 is the same artifact as in sections 5 and 9.4 (106,068 bytes, same
+version resolved from Maven Central), so the DEC-3 bytecode statement of section 5
+carries over unchanged. Against the cited upstream generator baseline of section 5
+(15 jars, 10,208,654 bytes, 9.736 MiB) the antiwire generator removes 9,466,147 bytes
+(92.7%), and its only third-party byte cost beyond the port itself is still javapoet at
+106,068 bytes (0.101 MiB).
+
+Kotlin and Okio check for this candidate, verified mechanically from the three trees
+above: grepping each tree for `kotlin`, `okio`, and `guava` returns zero matches (the
+probes resolved 1, 2, and 4 jars respectively, all `io.apicurio` plus the one javapoet).
+The enforcer evidence of section 6 is unchanged in force: no pom has changed since
+c713e9a, so the `bannedDependencies` rule and its scopes stand as recorded.
+
+### 10.5 Apicurio marginal: not renewed on this host
+
+The 9.5 marginal was measured on the Mac host against the local-only branch
+`antiwire-integration` at `6ce5582c40e0918b27acde0a1ec51ddb0731b548` (never pushed). This
+renewal runs on the Fedora host, where that branch is not available; the checks run here
+were: `/home/pantinor/data/repo.old/work/apicurio-registry` and
+`/home/pantinor/data/repo/work/apicurio-registry` are valid clones but contain no ref
+matching `antiwire` (checked over `branch -a`, `for-each-ref`, and `packed-refs`) and no
+object `6ce5582c...` or `a11d7cfa...` (`git cat-file -t` fails on both), and
+`/tmp/apicurio` does not exist. The marginal was therefore not re-measured, and the 9.5
+result (net minus 10,419,255 bytes, identical for both migrated modules) is bound to
+`6ce5582c` plus the c713e9a jars and is NOT claimed for candidate `0f860ff`.
+
+What this host can compute is the antiwire side of the marginal, which is exactly the two
+added jars, from the 10.1 measurements: `wire-schema-java` 325,324 plus
+`wire-runtime-java` 251,345, total 576,669 bytes (0.550 MiB), up 2,449 bytes from the
+574,220 bytes (0.548 MiB) of 9.5. This is the antiwire side only, clearly labeled as
+such; the removed set and the net figure are not re-derived here because they must come
+from the integration tree.
+
+To renew the marginal, on a host that has it: the `antiwire-integration` branch
+(`6ce5582c`, or a successor rebuilt to resolve the 0f860ff jars) present in an Apicurio
+clone, the nine 10.1 artifacts installed in the local repository that Apicurio's build
+resolves, then the two `dependency:tree` passes of 9.5 re-run at base `448f845c` and at
+the integration head, with the removed set re-derived from the integration tree rather
+than carried over. TASK-21's same-candidate Apicurio revalidation (its implementation
+notes) is the owner of that run.
+
+### 10.6 Acceptance (renewed, pending)
+
+| Item | Status |
+|---|---|
+| Clean-consumer measurements (10.2, 10.3) | Measured and reproducible |
+| Generator cost (10.4) | Measured and reproducible |
+| Apicurio marginal measurements (section 9.5) | NOT renewed; the 9.5 result is bound to 6ce5582c and the c713e9a jars and is not claimed for this candidate (10.5) |
+| Kotlin and Okio absence in production scope (the 10.2 to 10.4 trees; enforcer rule unchanged since c713e9a) | Verified for this candidate's probe trees; enforcer evidence as in section 6 |
+| **Acceptance of the measured footprint (AC#3, "the maintainer explicitly accepts the measured footprint before release")** | **PENDING maintainer signature: candidate 0f860ff of 10.1 (revision, nine checksums, resolved identities), antiwire column renewed in 10.2 to 10.4, Apicurio marginal outstanding per 10.5** |
+
+The row is unsigned by construction: acceptance is the maintainer's act. The candidate to
+accept is the one identified in 10.1, with the renewal status exactly as the rows above
+state it, including that the marginal evidence of 9.5 does not carry to this candidate
+until 10.5 is run. The c713e9a acceptance of 9.6 stays as history. The invalidation rule
+of section 0 continues to bind.
+
+### 10.7 Verification run
+
+No full `scripts/verify.sh` battery was run during this renewal: the change is
+measurement and documentation only, and this host was kept to sequential Maven. What was
+run and checked here: the 10.1 build exited 0 (BUILD SUCCESS); the six probe commands
+(`dependency:tree` and `dependency:copy-dependencies` for each of the three probes)
+exited 0; every sum, MiB value, growth figure, and removal ratio written in this section
+was recomputed by a script (`/tmp/aw-foot-recompute.py`) whose output matches the tables
+above. The last recorded full battery on this production content is the TASK-16.2 close:
+`scripts/verify.sh` with all 12 ACTIVE suites PASS, run on `ec15e18`; the commits after
+`ec15e18` up to `0f860ff` touch `README.md` and two backlog task files only (verified by
+`git diff --name-only ec15e18..HEAD`), so the production tree measured here is identical
+to the tree that battery ran on. The DEC-3 Java 11 consumer smoke was not run here; it
+remains TASK-21 AC#6 work on the final candidate. Nothing in the port changed during
+this renewal: the working-tree diff at commit time contains this document only.
