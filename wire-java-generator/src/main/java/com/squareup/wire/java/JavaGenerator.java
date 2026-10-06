@@ -153,7 +153,10 @@ public final class JavaGenerator {
     map.put(ProtoType.ANY, ClassName.get("com.squareup.wire", "AnyMessage"));
     map.put(ProtoType.DURATION, ClassName.get("java.time", "Duration"));
     map.put(ProtoType.TIMESTAMP, ClassName.get("java.time", "Instant"));
-    map.put(ProtoType.EMPTY, ClassName.get("kotlin", "Unit"));
+    // The port's Empty mapping (TASK-16.1): upstream maps google.protobuf.Empty to kotlin.Unit,
+    // which cannot compile against this runtime; the bounded divergence is the port's unit
+    // value type (docs/api-surface.md), the generated-code twin of the phase-2 Bytes mapping.
+    map.put(ProtoType.EMPTY, ClassName.get(ProtoAdapter.UnitValue.class));
     map.put(ProtoType.FIELD_MASK, ClassName.get("com.squareup.wire", "FieldMask"));
     map.put(
         ProtoType.STRUCT_MAP,
@@ -518,7 +521,7 @@ public final class JavaGenerator {
     } else if (type.equals(ProtoType.TIMESTAMP)) {
       result.add("$T.$L", ADAPTER, "INSTANT");
     } else if (type.equals(ProtoType.EMPTY)) {
-      result.add("$T.$L", ADAPTER, "EMPTY");
+      result.add("$T.$L", ADAPTER, "WIRE_EMPTY");
     } else if (type.equals(ProtoType.FIELD_MASK)) {
       result.add("$T.$L", ADAPTER, "FIELD_MASK");
     } else if (type.equals(ProtoType.STRUCT_MAP)) {

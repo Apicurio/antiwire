@@ -68,8 +68,11 @@ with recorded reasons, 0 missing.
   upstream `containsExactly(JavaTarget(...))` assertions became per-property assertions of the
   same field values.
 - `google.protobuf.Empty` representation (OPEN-4): no adopted case in this corpus compiles
-  generated output against the runtime, so no OPEN-4 disables were needed here; the gap remains
-  recorded in compatibility-matrix section E.
+  generated output against the runtime, so no OPEN-4 disables were needed here. The gap this
+  row used to point at is resolved (TASK-16.1, 2026-10-06): the generator maps Empty to
+  `ProtoAdapter.UnitValue` with `ProtoAdapter.WIRE_EMPTY` as a bounded golden-checked mapping,
+  covered by `GeneratedEmptyCompileTest` here and by the revived protoc-oracle case in
+  `wire-protoc-compat-java`'s `EmptyRoundTripTest` (compatibility-matrix section E).
 - Full-reactor `mvn test` fails at the pinned baseline independently of this batch: with this
   change present, surefire's fork in wire-runtime-java dies on `TestEngine with ID
   'junit-vintage' failed to discover tests` (junit-vintage arrives transitively with

@@ -55,6 +55,17 @@
       <artifactId>wire-schema-java</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- EmptyRoundTripTest generates its wire-side AllEmpty model with the port's own
+         generator at test time (TASK-16.1), compiles it against the port runtime at
+         Java 11 source level with no Kotlin on the classpath, and byte-compares against
+         the protoc oracle fixture. Test scope only: the oracle module never ships, and no
+         production consumer pulls the generator (OPEN-2 fixed boundary). -->
+    <dependency>
+      <groupId>io.apicurio</groupId>
+      <artifactId>wire-java-generator</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
     <!-- Shared test fixtures (com.squareup.wire.testing.TestFiles, including the pinned
          upstream-clone lookup the interop test uses). Test scope only. -->
     <dependency>

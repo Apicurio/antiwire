@@ -22,6 +22,15 @@ INSTALL_DIR="${1:-${PROTOC_HOME:-$HOME/.cache/antiwire-protoc}/$PROTOC_VERSION-$
 mkdir -p "$INSTALL_DIR"
 EXE="$INSTALL_DIR/protoc"
 
+# macOS ships shasum, Fedora ships sha256sum; both print "<hex>  <file>".
+# shasum -a 256: sha256sum has no algorithm flag to translate.
+if ! command -v shasum >/dev/null 2>&1 && command -v sha256sum >/dev/null 2>&1; then
+  shasum() {
+    [ "$1" = "-a" ] && shift 2
+    sha256sum "$@"
+  }
+fi
+
 # The checksum guards the download AND the cache: a corrupt-but-executable cached binary
 # is re-verified every run rather than trusted.
 if [ ! -x "$EXE" ] || [ "$(shasum -a 256 "$EXE" | cut -d' ' -f1)" != "$SHA256" ]; then

@@ -188,7 +188,8 @@ The port's generated output diverges from upstream-generated output by exactly t
 the pinned wire-golden-files `all_types_proto3` corpus with the port CLI, rewrites the
 UPSTREAM golden by the mapping, and requires the port's raw output to be byte-identical to
 it, so any other divergence, including a regression back to an okio-typed member the mapping
-covers, fails the suite):
+covers, fails the suite). The Empty rows joined the mapping at TASK-16.1 (see the Empty
+section below); the table is the complete bounded divergence:
 
 | Upstream form | Port form |
 |---|---|
@@ -198,6 +199,9 @@ covers, fails the suite):
 | `reader.endMessageAndGetUnknownFields(` | `reader.endMessageAndGetUnknownFieldsBytes(` |
 | `ProtoAdapter.BYTES` / `#BYTES` | `ProtoAdapter.WIRE_BYTES` / `#WIRE_BYTES` |
 | `ProtoAdapter.BYTES_VALUE` / `#BYTES_VALUE` | `ProtoAdapter.WIRE_BYTES_VALUE` / `#WIRE_BYTES_VALUE` |
+| `import kotlin.Unit;` (line removed) | no import: the type is `ProtoAdapter.UnitValue`, nested in the already imported `ProtoAdapter` |
+| `Unit` (type token) | `ProtoAdapter.UnitValue` |
+| `ProtoAdapter.EMPTY` / `#EMPTY` | `ProtoAdapter.WIRE_EMPTY` / `#WIRE_EMPTY` |
 
 The import line moves to its new sorted position (the test sorts the golden's import
 block; JavaPoet already emits the port's sorted), and `adapter` strings inside `@WireField`
@@ -241,17 +245,35 @@ bridge costs, owned by the next perf session: `WireBytesAdapter.decode` and
 value: the reader's own read plus the `fromByteString` conversion), where a reader that hands
 out an adoptable `byte[]` would pay one.
 
-### Known limitation: the `Bytes` import can be shadowed
+### User types named like generated references: verified behavior, not a limitation (TASK-27)
 
-A single-type-import shadows same-package types declared in other compilation units (JLS
-6.4.1), so a proto declaring `message Bytes` in a package whose other messages also use bytes
-fields generates output that cannot compile: sibling files bind bare `Bytes` to the runtime
-type, and the message's own file collides with the import. Upstream shares this hazard class
-for every name it imports (`okio.ByteString`, `java.time.Duration`, `kotlin.Unit`; a
-same-package `message Duration` breaks upstream output identically); phase 2 only raises the
-likelihood because `Bytes` is a plausible message name. The clean fix, per-file
-always-qualified emission, needs javapoet `alwaysQualify`, which exists only in the palantir
-fork that DEC-3 forbids; the gap is tracked as TASK-27.
+An earlier version of this section claimed (2026-10-03) that a proto declaring `message Bytes`
+in a package whose other messages also use bytes fields cannot compile, through JLS 6.4.1
+single-type-import shadowing. The 2026-10-06 delivery audit refuted that claim for every shape
+it tested, and TASK-27 pinned the behavior as regression coverage in
+`wire-java-generator`'s `GeneratedBytesCollisionCompileTest`: same-package and cross-package
+`message Bytes`, a `Bytes` message with its own bytes field, repeated bytes, map values,
+repeated message values, an enum named `Bytes`, a nested `Bytes`, proto2, oneof, an extension
+field, and messages colliding with always-emitted imports (`FieldEncoding`, `ProtoWriter`,
+`Internal`) all generate, compile with `javac --release 11` against the port runtime with no
+Kotlin on the classpath, and bind every field to its intended type in round-trips: runtime
+bytes to `com.squareup.wire.Bytes`, user fields to the user message or enum, with the emitted
+source asserting the mechanism (no contested import, qualified runtime references).
+
+The mechanism is JavaPoet's collision handling, not the language: when a referenced type's
+simple name is contested by a user type in scope, the generator skips the import and emits the
+runtime name fully qualified, so the bare name stays the user type. The earlier JLS reading
+was wrong in the other direction too: had the contested import been emitted into a sibling
+file, JLS 6.4.1 would shadow the same-package user type unconditionally (a single-file probe
+confirms the imported name wins whenever the import is present); what prevents that is the
+generator never emitting the contested import, and the regression suite pins that emission
+behavior, not a language guarantee. The same section's claim that upstream's generator breaks
+identically on a same-package `message Duration` was never verified and is withdrawn; nothing
+here asserts upstream parity for collision shapes either way. What stays unclaimed: every
+possible collision shape is not proven safe, only the pinned ones above are verified. If a
+future schema produces a real failing shape, the record is a minimal reproducer and the named
+remedy is per-file always-qualified emission (javapoet `alwaysQualify`, which exists only in
+the palantir fork that DEC-3 forbids), not an unrequested rewrite.
 
 ### Performance note (out of scope here, recorded for the next session)
 
@@ -302,9 +324,26 @@ singleton scoped to the Empty adapter changes no other value's meaning. The mark
 plain runtime type, not okio-typed, so `ConsumerApiSurfaceTest` walks it as part of
 `ProtoAdapter`'s nested classes and stays green.
 
-Generated code is deliberately untouched. The pinned upstream generator still maps
-`google.protobuf.Empty` to `kotlin.Unit` fields referencing `ProtoAdapter#EMPTY`
-(`JavaGenerator.java`, unchanged), so generated output for Empty protos still does not
-compile against the port runtime: that is the compatibility-matrix section E live gap, owned
-by TASK-16 under DEC-6, and the `wire-protoc-compat` `AllEmpty` fixture stays excluded with
-it. TASK-26 resolves the dynamic model only; the distinction is recorded in section E.
+Generated code joined the mapping at TASK-16.1 (2026-10-06). The delivery audit at 295ef5f
+reproduced the defect: the port's `JavaGenerator` still mapped `ProtoType.EMPTY` to
+`kotlin.Unit` referencing `ProtoAdapter.EMPTY`, so generated Empty models compiled neither
+without kotlin-stdlib (`package kotlin does not exist`) nor with it (`Unit cannot be
+converted to Void`; the port's `EMPTY` is Void-typed). The fix is the bounded mechanical
+mapping above, following the phase-2 Bytes precedent: `JavaGenerator` maps `ProtoType.EMPTY`
+to `ProtoAdapter.UnitValue` and emits `ProtoAdapter.WIRE_EMPTY`, and the `@WireField`
+adapter string (`JvmLanguages.builtInAdapterString`) follows as `#WIRE_EMPTY`, which the
+reflection machinery resolves by name. The deprecated Void-typed `ProtoAdapter.EMPTY` is
+untouched, exactly like the deprecated okio-typed constants.
+
+Mechanical checks: `wire-java-generator`'s `GeneratedEmptyCompileTest` generates the audit's
+proto shape with the CLI, compiles it with `javac --release 11` against the port runtime with
+every Kotlin jar stripped from the classpath, and round-trips it through both the generated
+adapter and the reflection machinery, including present-versus-absent fields and duplicate
+singular occurrences; `AllTypesGoldenBytesMappingTest` pins the mapping against the pinned
+upstream golden (the corpus declares Empty fields). In `wire-protoc-compat-java`,
+`EmptyRoundTripTest.allEmpty` runs again: it generates `AllEmpty` from the pinned clone's
+`all_empty.proto` with the port generator at test time, compiles and loads it the same way,
+and byte-compares against the protoc oracle (`AllEmptyOuterClass`, now generated by
+`scripts/generate-protoc-compat-fixtures.sh`). What stays excluded is only the pinned
+UPSTREAM compiler's own Empty output (kotlin.Unit), which the wire-model side of the fixture
+script still skips, and the Kotlin generator product itself (DEC-6).
