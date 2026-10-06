@@ -1,10 +1,10 @@
 ---
 id: TASK-14.1
 title: Bootstrap pinned upstream sources before running clone-dependent tests
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-06 08:37'
-updated_date: '2026-10-06 09:24'
+updated_date: '2026-10-06 10:55'
 labels:
   - adversarial-audit
   - build
@@ -36,10 +36,10 @@ Restore the documented single-command verification contract. Respect ANTIWIRE_UP
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 With no upstream clone at the default or configured location, the documented verification command obtains and validates the pinned sources before clone-dependent tests run.
-- [ ] #2 An existing correct clone is reused without destructive replacement, and a wrong or modified clone is rejected with an actionable error.
-- [ ] #3 Unavailable upstream sources produce an explicit prerequisite failure before the long build rather than a static-initializer test failure or a silent skip.
-- [ ] #4 An isolated bootstrap regression check covers absent, valid and invalid clone states, and BUILD.md plus CI instructions agree on the required setup.
+- [x] #1 With no upstream clone at the default or configured location, the documented verification command obtains and validates the pinned sources before clone-dependent tests run.
+- [x] #2 An existing correct clone is reused without destructive replacement, and a wrong or modified clone is rejected with an actionable error.
+- [x] #3 Unavailable upstream sources produce an explicit prerequisite failure before the long build rather than a static-initializer test failure or a silent skip.
+- [x] #4 An isolated bootstrap regression check covers absent, valid and invalid clone states, and BUILD.md plus CI instructions agree on the required setup.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -54,7 +54,13 @@ Restore the documented single-command verification contract. Respect ANTIWIRE_UP
 Document the distinct stale-build-output condition encountered during the audit: deleted source tests can survive in target/test-classes after switching revisions. A supported clean-build recovery instruction is appropriate. Do not add exclusions for those test names or weaken tests to hide stale outputs.
 <!-- SECTION:NOTES:END -->
 
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+scripts/verify.sh now runs scripts/fetch-upstream.sh before the mvn build suite, honouring ANTIWIRE_UPSTREAM, so the pinned clone exists and is validated before any clone-dependent test. fetch-upstream.sh also rejects a dirty worktree with an actionable message; a wrong pin or unreachable source fails fast with an explicit FATAL before any build starts. BUILD.md documents the prerequisite, the CI-shared contract and the clean-build recovery for stale target/test-classes. scripts/test-bootstrap.sh is the committed offline regression check (stubbed mvn recording clone state at invocation time) covering absent, valid, modified, wrong-pin and unreachable states; I ran it myself and it passes 5 of 5. Real-network bootstrap was proven by the worker against square/wire. Final scripts/verify.sh on the m6-scripts worktree: all 12 ACTIVE suites passed. Merged into audit-m6-followups (45f5073). Gates: /simplify and a high-effort /code-review ran on the branch, all findings fixed, tests re-run after fixes.
+<!-- SECTION:FINAL_SUMMARY:END -->
+
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->

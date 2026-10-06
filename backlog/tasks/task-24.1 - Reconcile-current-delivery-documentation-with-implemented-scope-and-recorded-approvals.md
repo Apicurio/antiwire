@@ -3,10 +3,10 @@ id: TASK-24.1
 title: >-
   Reconcile current delivery documentation with implemented scope and recorded
   approvals
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-06 08:20'
-updated_date: '2026-10-06 09:26'
+updated_date: '2026-10-06 10:22'
 labels:
   - adversarial-audit
   - documentation
@@ -38,11 +38,11 @@ Update the reader-facing current status and reconcile task bookkeeping with prim
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 README and current status documents consistently describe the implemented runtime, schema loading, consumer API and optional Java generator rather than the M0 snapshot.
-- [ ] #2 The current release summary distinguishes resolved performance findings and recorded historical acceptance from final-candidate freshness and explicit publication approval still required by TASK-21.
-- [ ] #3 TASK-19 status, checklist and evidence references agree after each unchecked item is checked against the actual measurement and review records; unsupported items remain explicitly open.
-- [ ] #4 Historical reports retain their original revisions and dates, and current summaries link to those records without presenting old measurements as proof for a newer candidate.
-- [ ] #5 The generated-output summary distinguishes raw byte identity from identity after approved API mappings, and its corpus size is derived from the actual comparison inputs.
+- [x] #1 README and current status documents consistently describe the implemented runtime, schema loading, consumer API and optional Java generator rather than the M0 snapshot.
+- [x] #2 The current release summary distinguishes resolved performance findings and recorded historical acceptance from final-candidate freshness and explicit publication approval still required by TASK-21.
+- [x] #3 TASK-19 status, checklist and evidence references agree after each unchecked item is checked against the actual measurement and review records; unsupported items remain explicitly open.
+- [x] #4 Historical reports retain their original revisions and dates, and current summaries link to those records without presenting old measurements as proof for a newer candidate.
+- [x] #5 The generated-output summary distinguishes raw byte identity from identity after approved API mappings, and its corpus size is derived from the actual comparison inputs.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -61,7 +61,13 @@ Additional 2026-10-06 evidence-lane recommendations belong to this documentation
 The team-update statement at line 38 that an automated check detects every edited expected value is unsupported by the current parity checker, which compares names rather than test bodies. Replace that overclaim with the actual boundary between automated checks and individual adaptation review. Do not promise automatic semantic equivalence of arbitrary tests.
 <!-- SECTION:NOTES:END -->
 
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Reconciled the current-state documentation with the implemented scope on branch audit-m6-followups (commits f4e82d1, 14ff12c and the review-fix commit; not on main, not pushed). README.md now describes the implemented port, separates the historical acceptances (footprint c713e9a, performance 82c3624) from final-candidate freshness and publication approval owned by TASK-21, no longer calls the port unwritten, and lists the open gaps without per-task status mirrors. docs/team-update-2026-10-05.md now states golden identity after the documented Bytes mapping, drops the unsourced 13-file figure, corrects the decode workload count, separates recorded from executed protoc cases (122 recorded, 50 skipped, 72 executed), labels 967 as a name-based reconciliation that does not show execution, labels the schema-operation cells as the initial 2026-10-02 matrix, and replaces the unsupported claim about edited expected values with the real boundary. Pre-DEC-8 relocation names were corrected in docs/security-regression-inventory.md and docs/upstream-sync.md. TASK-19 acceptance criteria 1, 2 and 4 were checked against docs/footprint.md and ticked, and its historical comments were restored verbatim. Gates: /simplify ran with four angles and its findings were applied; a high-effort /code-review ran on the final diff and its seven findings were fixed or dispositioned (the missing __pycache__ ignore rule and the literal backslash-n sequences in task plans are left to the tracker and scripts work). Tests are not applicable: Markdown only.
+<!-- SECTION:FINAL_SUMMARY:END -->
+
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->

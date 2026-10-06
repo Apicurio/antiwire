@@ -3,10 +3,10 @@ id: TASK-14.2
 title: >-
   Reject unrecorded skipped cases and false fixture classifications in parity
   gates
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-06 08:38'
-updated_date: '2026-10-06 09:24'
+updated_date: '2026-10-06 10:55'
 labels:
   - adversarial-audit
   - parity
@@ -36,11 +36,11 @@ These are directly reproduced checker and result-parser failures. A full reactor
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 An unrecorded method-level or class-level skip of a required upstream case fails verification with the case identity and reason.
-- [ ] #2 Executable upstream test files cannot silently leave the coverage inventory through an unchecked fixture classification; genuine fixtures remain supported.
-- [ ] #3 Execution reports reconcile mapped cases and their dispositions, accounting for upstream ignores, approved exclusions, parameterized invocations and port-only tests without relying on naive aggregate count equality.
-- [ ] #4 Release completeness rejects required cases that are skipped or absent from execution and distinguishes those cases from approved excluded features.
-- [ ] #5 End-to-end regression probes show deletion, unrecorded method skip, class skip and false-fixture mutations fail for the intended reason while the valid baseline passes; coverage documentation accurately states the enforced guarantees.
+- [x] #1 An unrecorded method-level or class-level skip of a required upstream case fails verification with the case identity and reason.
+- [x] #2 Executable upstream test files cannot silently leave the coverage inventory through an unchecked fixture classification; genuine fixtures remain supported.
+- [x] #3 Execution reports reconcile mapped cases and their dispositions, accounting for upstream ignores, approved exclusions, parameterized invocations and port-only tests without relying on naive aggregate count equality.
+- [x] #4 Release completeness rejects required cases that are skipped or absent from execution and distinguishes those cases from approved excluded features.
+- [x] #5 End-to-end regression probes show deletion, unrecorded method skip, class skip and false-fixture mutations fail for the intended reason while the valid baseline passes; coverage documentation accurately states the enforced guarantees.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -53,9 +53,17 @@ These are directly reproduced checker and result-parser failures. A full reactor
 
 <!-- SECTION:NOTES:BEGIN -->
 The evidence audit found that config/verify-suites.json describes all protoc skips as DEC-6/TASK-26 exclusions, although InteropTest includes a mirrored upstream ignore. Reconcile the registry's declared skip reasons with the actual case dispositions as part of this task. Do not remove valid upstream ignores to reach an arbitrary count.
+
+Two real defects were found by the new execution gate and fixed in the same change. TestAllTypes.java was classified fixture:true while carrying 23 executable test cases on both sides, so those cases were outside the inventory; it is reclassified and the reconciled upstream cases moved from 967 to 990. DurationTest.java and InstantTest.java sat in wire-runtime-java/src/test/kotlin, where Java sources are never compiled, so neither class had ever run while counted as ported by name. Both moved to src/test/java. On first execution InstantTest's port-only boundary lock failed because its premise was false: java.time.Instant.ofEpochSecond normalizes a negative nanosecond adjustment to exactly the upstream expected values (probed on the JVM). The two upstream cases negativeNearZero and negativeValues are now ported verbatim, the false lock and the false recorded-missing rationale were removed, and the task9 ledger row corrected; recorded-missing cases dropped from 4 to 2. Current totals: 990 upstream cases (988 ported, 2 recorded missing); 92 skips, of which 10 mirror an upstream ignore, 79 are DEC-6 exclusions and 3 have open owners (2 TASK-16.2, 1 TASK-16.1). --require-complete rejects open-owner skips until those tasks close.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+The parity checker now models skips and execution. Every @Disabled or @Ignore in a mapped port file is accepted only when the pinned upstream ignores the same case, or the case map records a skipped disposition with a reason and either a DEC exclusion or an owning task; class-level disables need an explicit class record; fixture:true is rejected when either side carries test methods. parity-coverage.sh passes --execution, which reconciles per-class surefire XML by case identity (invocation suffixes stripped): every mapped case must run, runtime skips need lawful dispositions, and ghost cases from stale compiled classes are reported. --require-complete rejects open-owner skips and accepts DEC exclusions. The 82 previously unrecorded skips are now explicit records (79 DEC-6, 2 owned by TASK-16.2, 1 by TASK-16.1), with no blanket approval; config/verify-suites.json now states the real accounting. scripts/test-parity-gate.sh is the committed probe suite (baseline plus ten mutation probes, including the real verify.sh parser functions replayed with an extra skip). Verified by me: the suite passes, and replaying the audit's own mutations on a scratch clone now fails for the intended reason (an unrecorded method-level @Disabled on PrunerTest.retainType names the case; fixture:true on PrunerTest is rejected with its 99 methods), while the baseline passes. Merged into audit-m6-followups (45f5073). Gates: /simplify and a high-effort /code-review ran on the branch, eight findings fixed, tests re-run.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->

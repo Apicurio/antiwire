@@ -1,10 +1,10 @@
 ---
 id: TASK-16.1
 title: Generate compilable pure-Java models for google.protobuf.Empty
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-06 08:29'
-updated_date: '2026-10-06 09:24'
+updated_date: '2026-10-06 11:57'
 labels:
   - adversarial-audit
   - codegen
@@ -35,10 +35,10 @@ Java code generation is supported by README.md:41. DEC-6 excludes Kotlin generat
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 WireCompiler generates a Java model for a proto containing google.protobuf.Empty that compiles with javac --release 11 against the port runtime without Kotlin or upstream Wire dependencies.
-- [ ] #2 Generated Empty fields preserve present versus absent values and round-trip with the pinned upstream wire representation, including duplicate singular occurrences.
-- [ ] #3 The applicable generated-model EmptyRoundTripTest executes successfully without the unsupported DEC-6 exclusion.
-- [ ] #4 The Empty mapping and bounded golden adaptation are documented and automatically checked, and README plus compatibility records no longer describe the resolved generated-code gap as open.
+- [x] #1 WireCompiler generates a Java model for a proto containing google.protobuf.Empty that compiles with javac --release 11 against the port runtime without Kotlin or upstream Wire dependencies.
+- [x] #2 Generated Empty fields preserve present versus absent values and round-trip with the pinned upstream wire representation, including duplicate singular occurrences.
+- [x] #3 The applicable generated-model EmptyRoundTripTest executes successfully without the unsupported DEC-6 exclusion.
+- [x] #4 The Empty mapping and bounded golden adaptation are documented and automatically checked, and README plus compatibility records no longer describe the resolved generated-code gap as open.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -51,9 +51,17 @@ Java code generation is supported by README.md:41. DEC-6 excludes Kotlin generat
 
 <!-- SECTION:NOTES:BEGIN -->
 The corrected audit replay is recorded at /tmp/antiwire-empty-repro/replay-transcript.txt. It generated audit.empty.Rpc successfully using the current runtime/schema classes and a generator compiled from the same HEAD sources. javac on the correctly named Rpc.java failed without Kotlin and also failed with kotlin-stdlib present due to Unit/Void type mismatches. Preserve the proto input and equivalent regression commands in the eventual test suite rather than relying on temporary audit paths.
+
+scripts/install-protoc.sh had a pre-existing portability bug (shasum exists only on macOS) that blocked regenerating the protoc fixtures on Linux; it now falls back to sha256sum. The relocated upstream oracle is not a dependency of wire-protoc-compat-java, and adding it would put kotlin-stdlib on the compile classpath; the revived case byte-compares against the pinned protoc oracle that the upstream case itself uses, and the relocated-upstream byte parity for WIRE_EMPTY stays pinned by WireEmptyAdapterTest in wire-runtime-java.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Generated Java for google.protobuf.Empty now compiles with javac --release 11 against the port runtime with no Kotlin on the classpath. JavaGenerator maps ProtoType.EMPTY to ProtoAdapter.UnitValue and references the Unit-typed ProtoAdapter.WIRE_EMPTY, and JvmLanguages emits the matching reflection adapter string, as a bounded documented mapping that follows the phase-2 Bytes precedent; the deprecated Void-typed ProtoAdapter.EMPTY is untouched. The regression test GeneratedEmptyCompileTest failed first with the audit's exact error ("package kotlin does not exist", and with Kotlin present "Unit cannot be converted to Void"), then passed after the fix; it round-trips present versus absent values and duplicate singular occurrences. EmptyRoundTripTest.allEmpty is revived with no @Disabled and no DEC-6 label, runs green with byte parity against the pinned protoc oracle (a new AllEmptyOuterClass fixture), and keeps only the genuine DEC-6 Kotlin-model half excluded. AllTypesGoldenBytesMappingTest gained three mapping rows so the golden comparison checks exactly the documented divergence. api-surface.md, compatibility-matrix.md, README and the task16 ledger no longer describe the gap as open. I merged the branch and found a conflict the worker could not see: the parity gate still held a skipped record owned by this task for the now-running allEmpty case and failed as stale; I removed that record and refreshed the registry counts. Final scripts/verify.sh on the integrated tree, run by me: exit 0, all 12 ACTIVE suites passed (protoc 123 cases with 49 skipped, compiler 188 with 33 skipped, parity 990 reconciled). Gates: /simplify ran and its findings were applied; a high-effort /code-review ran with six findings, all fixed.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->

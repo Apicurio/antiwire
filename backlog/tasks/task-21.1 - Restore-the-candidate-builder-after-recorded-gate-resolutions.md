@@ -1,10 +1,10 @@
 ---
 id: TASK-21.1
 title: Restore the candidate builder after recorded gate resolutions
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-06 08:32'
-updated_date: '2026-10-06 09:25'
+updated_date: '2026-10-06 10:55'
 labels:
   - adversarial-audit
   - release-tooling
@@ -32,10 +32,10 @@ The script deliberately requires a manual anchor update when a gate changes stat
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The candidate builder recognizes the actual recorded gate states and can reach packaging for a valid candidate without requiring obsolete PENDING text.
-- [ ] #2 Missing, ambiguous, changed or reopened gate records produce an explicit failure or unresolved status rather than an inferred approval.
-- [ ] #3 Checks exercise pending, resolved and missing-evidence states, including the exact historical transition that currently prevents packaging.
-- [ ] #4 The script-generated candidate report records accurate gate status and artifact identity, preserves TASK-21 final-candidate freshness requirements, and performs no deploy, tag or publication.
+- [x] #1 The candidate builder recognizes the actual recorded gate states and can reach packaging for a valid candidate without requiring obsolete PENDING text.
+- [x] #2 Missing, ambiguous, changed or reopened gate records produce an explicit failure or unresolved status rather than an inferred approval.
+- [x] #3 Checks exercise pending, resolved and missing-evidence states, including the exact historical transition that currently prevents packaging.
+- [x] #4 The script-generated candidate report records accurate gate status and artifact identity, preserves TASK-21 final-candidate freshness requirements, and performs no deploy, tag or publication.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -44,7 +44,19 @@ The script deliberately requires a manual anchor update when a gate changes stat
 1. Read scripts/release-build.sh lines 60-100 and the current accepted-state rows in docs/footprint.md and docs/performance.md.\n2. Re-anchor the maintainer-gate detection to recognise the recorded states (ACCEPTED / RESOLVED rows) as well as PENDING, keeping fail-closed: missing, ambiguous, reworded or reopened gate records produce an explicit failure or unresolved status, never an inferred approval. The generated docs/release-candidate.md must record accurate gate status plus candidate revision and artifact identity, and must keep the DEC-13 freshness caveat.\n3. Add checks exercising pending, resolved and missing-evidence states, including the exact historical transition that currently aborts at line 84, using scratch docs copies and without running packaging or publication.\n4. Do not run the real release-build.sh (it rewrites docs/release-candidate.md) except in a scratch copy of the repository.\nVerification: the new state-matrix check passes; release-build.sh guard section exits 0 on current docs in a scratch copy.
 <!-- SECTION:PLAN:END -->
 
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+The real docs/release-candidate.md was deliberately not regenerated: that belongs to TASK-21's final-candidate procedure, because the committed file names candidate a45b0f0 and DEC-13 requires fresh evidence for the final candidate. The builder was proven end to end only in a scratch clone (exit 0, nine artifacts plus MANIFEST.sha256, both gates CLOSED, no publish). A pre-existing portability bug surfaced and was fixed: shasum is absent on Linux, so the manifest step now uses sha256sum and fails closed if neither exists.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+scripts/release-build.sh now recognizes the recorded gate states. maintainer_gate anchors both pending and accepted wording: a pending row reports OPEN, one accepted wording (identical restated rows count once) reports CLOSED with the extracted signature, and a missing or reworded row, a pending plus accepted pair (reopened), ambiguous rows, an unreadable document or an unreadable signature all abort fail-closed. The historical line-84 abort is gone: --check-gates on the real docs exits 0 with both gates CLOSED. The generated candidate document records the OPEN or CLOSED statuses with revision, pin and checksums, keeps the DEC-13 freshness caveat and performs no deploy, tag or publish. scripts/test-release-gates.sh is the committed state matrix (current, pending, missing, reopened, unreadable signature, ambiguous, no document); I ran it and it passes. README's candidate procedure bullet matches the new behaviour. Merged into audit-m6-followups (45f5073). Gates: /simplify and a high-effort /code-review ran on the branch, findings fixed, tests re-run.
+<!-- SECTION:FINAL_SUMMARY:END -->
+
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
