@@ -862,8 +862,12 @@ changed the runtime reader family and `ProtoAdapter` for zero-copy bytes decode;
 the schema `Schema` and `SchemaProtoAdapterFactory` for dynamic Empty parity; `84a6a9f`
 (TASK-16.1) changed the schema `JvmLanguages` and the generator `JavaGenerator` for
 Empty models; `ec15e18` (TASK-16.2) added the generator `ProtoTarget` with its `.proto`
-emission. No pom changed since c713e9a (`git diff` on the root pom and the three module
-poms is empty), so the invalidating change is source content only. This section renews the
+emission. No pom of the parent or of the three shipped modules changed since c713e9a
+(`git diff` on the root pom and the three shipped module poms is empty), so the
+invalidating change is source content only. One non-shipped pom did change: `84a6a9f`
+adds a test-scoped `wire-java-generator` dependency to `wire-protoc-compat-java`, the
+never-shipped oracle module, which is outside the shipped artifact set and invalidates
+no row of this report. This section renews the
 antiwire column the way section 9 did; everything above stays as history (DEC-13). Two
 things differ from the section 9 renewal. First, the measurement moved hosts: every
 earlier section measured on macOS, this one runs on Fedora Linux, with the same Maven and
