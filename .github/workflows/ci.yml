@@ -1,8 +1,8 @@
 name: ci
 
-# Build and verification for the antiwire module shells. Nothing in this workflow claims
-# parity, compatibility certification, or test coverage: the suite registry printed by
-# scripts/verify.sh is the honest state (PENDING suites are listed as not run).
+# Build and verification for the antiwire port. The claims this workflow supports are exactly
+# the ACTIVE suites in config/verify-suites.json that scripts/verify.sh runs and reconciles;
+# parity evidence beyond them lives in the docs/ ledgers.
 #
 # One job, two toolchains, one execution: Maven runs on Temurin 17 while a Temurin 11
 # toolchain is exported as JAVA_HOME_11_X64, and scripts/verify.sh runs every suite,

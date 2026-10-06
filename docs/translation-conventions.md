@@ -344,9 +344,9 @@ code must do; style is not a parity surface). Test and build tooling is not forc
 
 | Scope | Kotlin status | Authority and enforcement |
 |---|---|---|
-| Test compilation (`src/test/kotlin`, test-scoped kotlin-stdlib) | Allowed | BUILD.md "Kotlin policy"; enforcer bans target only compile, runtime, and provided scopes (parent `pom.xml`, `bannedDependencies`, lines 140-154) |
+| Test compilation (`src/test/kotlin`, test-scoped kotlin-stdlib) | Allowed | BUILD.md "Kotlin policy"; enforcer bans target only compile, runtime, and provided scopes (parent `pom.xml`, `bannedDependencies`, lines 196-210) |
 | Pinned upstream generators running as isolated build-time fixture tools | Allowed | DEC-4; fixture generation uses pinned upstream tooling and avoids any dependency on the port's own generator (DEC-5) |
-| Production compile, runtime, and provided scope | Forbidden for Kotlin artifacts and Kotlin-backed libraries, transitively (the banned list lives in the parent `pom.xml` enforcer and BUILD.md) | Maven enforcer `bannedDependencies` with `searchTransitive=true` (parent `pom.xml` lines 140-154, message names DEC-4); duplicate-class check `scripts/check-classpath.sh` over `config/retained-prefixes.txt` (fail-closed when missing or empty); Java 11 bytecode check `scripts/check-java11-bytecode.sh` (class file major version 55 or lower, multi-release aware); real-JVM check `scripts/consumer-check-java11.sh` on an actual JDK 11 |
+| Production compile, runtime, and provided scope | Forbidden for Kotlin artifacts and Kotlin-backed libraries, transitively (the banned list lives in the parent `pom.xml` enforcer and BUILD.md) | Maven enforcer `bannedDependencies` with `searchTransitive=true` (parent `pom.xml` lines 196-210, message names DEC-4); duplicate-class check `scripts/check-classpath.sh` over `config/retained-prefixes.txt` (fail-closed when missing or empty); Java 11 bytecode check `scripts/check-java11-bytecode.sh` (class file major version 55 or lower, multi-release aware); real-JVM check `scripts/consumer-check-java11.sh` on an actual JDK 11 |
 
 All four checks run under the single entry point `scripts/verify.sh`, which is the only command
 CI's build job runs (BUILD.md). A vendored okio subset chosen under OPEN-1 lands as port source

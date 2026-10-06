@@ -17,8 +17,8 @@
 
   <artifactId>wire-schema-java</artifactId>
 
-  <name>antiwire wire-schema-java (module shell)</name>
-  <description>Empty shell reserving the schema module. No functionality or parity is claimed.</description>
+  <name>antiwire wire-schema-java (schema module)</name>
+  <description>Pure-Java port of the Wire schema model, parser and linker.</description>
 
   <dependencies>
     <dependency>

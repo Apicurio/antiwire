@@ -1,8 +1,9 @@
-# Building antiwire (module shells)
+# Building antiwire
 
-The repository currently contains the TASK-2 build skeleton only: empty module shells that
-reserve names. Nothing built here is evidence of Wire parity or compatibility. The research
-and plan are in `docs/`, the decision record in [docs/decisions.md](docs/decisions.md).
+The repository holds the implemented pure-Java Wire port. Claims of parity or compatibility
+are bounded by the ACTIVE suites in `config/verify-suites.json` that `scripts/verify.sh` runs
+and reconciles; evidence beyond them lives in the `docs/` ledgers. The research and plan are
+in `docs/`, the decision record in [docs/decisions.md](docs/decisions.md).
 
 ## Toolchain
 
@@ -42,11 +43,10 @@ any reactor-scoped run.
 3. runs `scripts/check-classpath.sh`: per module, reports where classes under the retained
    prefixes load from and fails if one class name resolves from two artifacts. The retained
    prefixes live in `config/retained-prefixes.txt` (one per line), the single source for the
-   check and the provisional OPEN-1-era list from the compatibility matrix; TASK-4 updates
-   it if namespaces move. The check fails closed when that file is missing or empty;
+   check and the retained-namespace list resolved under OPEN-1; update it if namespaces move. The check fails closed when that file is missing or empty;
 4. runs `scripts/check-java11-bytecode.sh`: module jars and production dependency jars must
    expose only class files Java 11 can select (major version 55 or lower, multi-release aware);
-5. runs `scripts/consumer-check-java11.sh`: compiles and runs the named placeholder consumer
+5. runs `scripts/consumer-check-java11.sh`: compiles and runs the consumer (ProtoWriter and loading-layer smokes)
    on an actual Java 11 JVM against the module jars.
 
 Stale build outputs: after switching revisions, deleted or renamed test classes can survive
@@ -79,18 +79,19 @@ when the module list there and the parent `pom.xml` `<modules>` block disagree.
 `scripts/verify.sh` requires `python3` on PATH: the final registry reconciliation is an
 embedded Python script.
 
-The Java 11 toolchain for step 4 is found via `$JAVA11_HOME`, `$JAVA_HOME_11_X64` (set by
+The Java 11 toolchain for step 5 (the consumer smoke) is found via `$JAVA11_HOME`, `$JAVA_HOME_11_X64` (set by
 CI), `$JAVA_HOME` when itself 11, or sdkman and common system locations. Without one
 locally, the suite reports `NOT_RUN` and the run fails. CI has a single job: Maven runs on
-Temurin 17 while Temurin 11 is provisioned as `JAVA_HOME_11_X64`, and step 4 executes on
+Temurin 17 while Temurin 11 is provisioned as `JAVA_HOME_11_X64`, and step 5 executes on
 that real JDK 11 in the same job; there is no second consumer job and no artifact
 upload or download.
 
 ## Coordinates
 
-The groupId `io.apicurio` is a provisional placeholder. The intended groupId is
-`io.apicurio`, not authorized yet (DEC-8); deployment is disabled (`maven.deploy.skip`) and
-these coordinates must never be published.
+The groupId is `io.apicurio`, resolved by maintainer directive on 2026-10-02 and reconfirmed
+on 2026-10-06 (DEC-8). Authorization to publish is a separate, still-closed gate: deployment
+is disabled (`maven.deploy.skip` is true in the parent pom) and these coordinates must not be
+published before TASK-21's release gates pass and the maintainer approves.
 
 ## Kotlin policy
 

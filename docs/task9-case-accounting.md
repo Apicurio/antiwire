@@ -45,7 +45,7 @@ entry point via mvn verify.
 
 ## Totals
 
-commonTest port: 857 tests in wire-runtime-java (0 failures, 4 upstream skips) of which
+commonTest port: 857 tests at TASK-9 close in wire-runtime-java (909 on 2026-10-06) (0 failures, 4 upstream skips) of which
 ~120 are upstream-translated runtime cases; wire-tests-java: 79 tests (0 failures) of which
 ~90 upstream runtime-behavior cases including the cross-checked adapters, plus the
 unknown-field, redaction and serialization contract tests. Known divergences: 2 (pack error

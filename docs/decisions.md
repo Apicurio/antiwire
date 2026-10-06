@@ -1,6 +1,6 @@
 # antiwire decision record
 
-Status: approved planning baseline, 2026-09-29. This record carries the maintainer decisions taken after the external plan review (see `docs/plan-review.md` for the disposition of every review item) and the open technical decisions assigned to M0. It authorizes planning only: no implementation, no publication, no Apicurio source change, and no repository or organization transfer follows from this document. Rationale and evidence live in `docs/research-wire-java-port-2026-09-29.md`; each entry below names the section that carries it.
+Status: approved planning baseline, 2026-09-29. This record carries the maintainer decisions taken after the external plan review (see `docs/plan-review.md` for the disposition of every review item) and the open technical decisions assigned to M0. Implementation later proceeded under milestones M0-M5 and the publication gate (DEC-8, TASK-21) remains closed; as written on 2026-09-29 it authorized planning only: no implementation, no publication, no Apicurio source change, and no repository or organization transfer follows from this document. Rationale and evidence live in `docs/research-wire-java-port-2026-09-29.md`; each entry below names the section that carries it.
 
 ## Settled decisions
 
@@ -58,7 +58,7 @@ The port is Apache 2.0 overall and preserves upstream attribution verbatim, per 
 
 The release task (TASK-21) depends on the footprint report (TASK-19), the performance report (TASK-20), and the upstream sync demonstration (TASK-23). The transitive closure of those three covers the execution tasks TASK-1 through TASK-20 and TASK-23; the Kafka path (TASK-22) is outside the release gate by DEC-7. M5 therefore carries explicit release gates: measured footprint accepted, measured performance accepted or regressions explicitly accepted, sync procedure demonstrated, full required CI suite green with no pending required case, a release-time recheck that published dependency metadata contains no Kotlin, the Java 11 consumer smoke of DEC-3 run on the final candidate, and freshness checks that every measurement and acceptance record identifies the final candidate's artifact checksums, build revision, and resolved dependency set, with records invalidated by later relevant changes refused.
 
-**DEC-8 resolved 2026-10-02 (maintainer directive):** the provisional `io.github.paoloantinori` coordinates are replaced by `io.apicurio` everywhere (group IDs, the wire-upstream-shaded parity relocation package `io.apicurio.antiwire.parity`, BUILD/docs references). The maintainer's message authorized the namespace use only; publishing artifacts stays a separate gate (TASK-21 AC#1). Measurement docs (footprint, performance) carry dated coordinate-update notes; jar bytes are unchanged by a coordinate switch, recorded checksums remain valid.
+**DEC-8 resolved 2026-10-02 (maintainer directive):** the provisional `io.github.paoloantinori` coordinates are replaced by `io.apicurio` everywhere (group IDs, the wire-upstream-shaded parity relocation package `io.apicurio.antiwire.parity`, BUILD/docs references). The maintainer's message authorized the namespace use only; publishing artifacts stays a separate gate (TASK-21 AC#1). Measurement docs (footprint, performance) carry dated coordinate-update notes; class and resource bytes are unchanged by a coordinate switch, but whole-jar SHA-256 values change with the embedded META-INF/maven groupId path, so whole-jar checksum records were re-issued (footprint.md section 10, performance.md coordinate note).
 
 ## Open technical decisions assigned to M0 (not settled here)
 
@@ -108,7 +108,7 @@ not gzip). The loading surface, previously open, is now implemented and inventor
 okio.Path, okio.FileSystem (SYSTEM over java.nio, openZip over the JDK zip filesystem,
 asResourceFileSystem for classpath reads) and okio.FileMetadata, original code with the okio
 3 API shape; the pinned-source map with consequences and justified exclusions is
-docs/loading-api-inventory.md, and FakeFileSystem is deferred to M2 with the verbatim schema
+docs/loading-api-inventory.md, and FakeFileSystem was ultimately not ported (the schema suites that used it run on real temp directories, docs/task13-case-accounting.md; Apicurio usage is served by asResourceFileSystem behind JdkSchemaLoader), with the verbatim schema
 tests.
 
 ### OPEN-2: resolved
@@ -146,10 +146,10 @@ Encoding-parity evidence: ProtoReader and ProtoWriter translated at the pinned t
 relocated oracle asserts byte-for-byte output over 500 seeded writer sequences and identical
 read transcripts over 200 structured messages, packed replay, group skipping, the recursion
 limit, and six malformed-input vectors with exact exception messages, including
-GHSA-7xpr-hc2w-34m9 on both applicable paths. Total suite 747 tests, 0 failures. The
+GHSA-7xpr-hc2w-34m9 on both applicable paths. Total suite 747 tests, 0 failures (spike-time count; the wire-runtime-java module now runs 909). The
 remaining TASK-5 criteria (upstream test compilation against the slice, pinned fixture
 generation, the 6.4.0-versus-7.1.0 baseline corpus, the null-boundary example suite, the
-Java 11 consumer validation) stay open and are mapped per criterion in the execution ledger.
+Java 11 consumer validation) stay open and are mapped per criterion in the execution ledger (closed 2026-10-02: TASK-5 is Done, every criterion met).
 
 ### Supersessions from the execution branch
 

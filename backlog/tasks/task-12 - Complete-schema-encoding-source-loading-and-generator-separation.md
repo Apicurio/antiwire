@@ -4,7 +4,7 @@ title: 'Complete schema encoding, source loading and generator separation'
 status: Done
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-09-30 01:18'
+updated_date: '2026-10-06 19:06'
 labels: []
 milestone: m-8
 dependencies:
@@ -30,11 +30,19 @@ Translate SchemaEncoder and complete the source-loading implementation selected 
 - [x] #5 Applicable schema encoding and loading cases run in the shared CI entry point with no unrelated upstream implementation on its classpath.
 <!-- AC:END -->
 
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-10-06 audit annotation (history above is kept): the Profile/AdapterConstant 'stay out of core' decision was superseded by TASK-16 (e7b93da): Profile, ProfileLoader and AdapterConstant live poet-free in wire-schema-java core per OPEN-2, and the generator module carries only targets, JavaGenerator and WireCompiler. FakeFileSystem was not ported; TASK-13 used real temp directories (docs/task13-case-accounting.md).
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Landed in three commits (1416e2f translation, b3ccf64 simplify+altitude, 7403054 code-review): Root with file/directory/ZIP roots over the vendored okio FileSystem (listRecursively discovery, import-path validation), internal FileSystems BOM detection, CommonSchemaLoader plus public SchemaLoader facade (nio and okio constructors, permitPackageCycles, opaqueTypes, loadExhaustively, sourcePathFiles, close() releasing opened ZIP filesystems), CoreLoader routed through asResourceFileSystem per the loading inventory, and SchemaEncoder producing descriptor.proto bytes (synthetic map entries nested under declaring messages, proto3-optional synthetic oneofs, unsigned option coercion via Integer/Long.parseUnsigned*, extendee wiring). The vendored okio Path.relativeTo was rewritten as a lexical computation matching okio 3.18.2 (probed; layer-level tests cover direction, edges, cross-provider zip-vs-host, impossible '..' bases). Profile/AdapterConstant stay out of core with TASK-16 as owner (recorded on its task; Path.segments inventory row added for its output-directory check). Tests: SchemaLoaderSmokeTest (8 incl. classpath runtime protos), SchemaEncoderTest (6 incl. oneof and extend crash regressions), LoadingAccessTest +2; 82 schema + 859 runtime green, all 5 ACTIVE suites pass. Known deferrals: profile loading (TASK-16), byte-for-byte upstream encoder parity runner (TASK-14), FakeFileSystem (TASK-13), reportLoadingErrors callers (TASK-13 tests).
+<!-- SECTION:FINAL_SUMMARY:END -->
+
 ## Definition of Done
 <!-- DOD:BEGIN -->
 - [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
-
-## Final Summary
-
-Landed in three commits (1416e2f translation, b3ccf64 simplify+altitude, 7403054 code-review): Root with file/directory/ZIP roots over the vendored okio FileSystem (listRecursively discovery, import-path validation), internal FileSystems BOM detection, CommonSchemaLoader plus public SchemaLoader facade (nio and okio constructors, permitPackageCycles, opaqueTypes, loadExhaustively, sourcePathFiles, close() releasing opened ZIP filesystems), CoreLoader routed through asResourceFileSystem per the loading inventory, and SchemaEncoder producing descriptor.proto bytes (synthetic map entries nested under declaring messages, proto3-optional synthetic oneofs, unsigned option coercion via Integer/Long.parseUnsigned*, extendee wiring). The vendored okio Path.relativeTo was rewritten as a lexical computation matching okio 3.18.2 (probed; layer-level tests cover direction, edges, cross-provider zip-vs-host, impossible '..' bases). Profile/AdapterConstant stay out of core with TASK-16 as owner (recorded on its task; Path.segments inventory row added for its output-directory check). Tests: SchemaLoaderSmokeTest (8 incl. classpath runtime protos), SchemaEncoderTest (6 incl. oneof and extend crash regressions), LoadingAccessTest +2; 82 schema + 859 runtime green, all 5 ACTIVE suites pass. Known deferrals: profile loading (TASK-16), byte-for-byte upstream encoder parity runner (TASK-14), FakeFileSystem (TASK-13), reportLoadingErrors callers (TASK-13 tests).

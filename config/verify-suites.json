@@ -5,7 +5,7 @@
       "name": "build",
       "status": "ACTIVE",
       "owner": "TASK-2",
-      "description": "mvn verify on JDK 17+ with production compilation at --release 11 (DEC-3); module shells only, no parity claimed"
+      "description": "mvn verify on JDK 17+ with production compilation at --release 11 (DEC-3)"
     },
     {
       "name": "dependency-policy",
@@ -17,7 +17,7 @@
       "name": "bytecode-java11",
       "status": "ACTIVE",
       "owner": "TASK-2",
-      "description": "module jars and production dependency jars expose only class files Java 11 can select (major <= 55, multi-release aware); today the production dependency set is empty and is reported as such"
+      "description": "module jars and production dependency jars expose only class files Java 11 can select (major <= 55, multi-release aware); the production dependency set (javapoet for the generator, none for runtime and schema) is scanned and reported"
     },
     {
       "name": "runtime-tests",
@@ -59,7 +59,7 @@
       "name": "java11-consumer",
       "status": "ACTIVE",
       "owner": "TASK-2",
-      "description": "placeholder consumer main compiled and run on an actual Java 11 JVM against the module jars; the placeholder certifies nothing about compatibility, TASK-5 and TASK-21 carry the real smokes (DEC-3)"
+      "description": "consumer main compiled and run on an actual Java 11 JVM against the module jars, exercising ProtoWriter and the loading layer; TASK-21 carries the published-artifact check (DEC-3)"
     },
     {
       "name": "duplicate-class-check",

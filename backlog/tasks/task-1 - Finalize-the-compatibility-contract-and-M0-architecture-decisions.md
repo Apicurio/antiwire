@@ -5,7 +5,7 @@ status: Done
 assignee:
   - assistant
 created_date: '2026-09-29 09:22'
-updated_date: '2026-09-30 02:04'
+updated_date: '2026-10-06 19:06'
 labels: []
 milestone: m-6
 dependencies: []
@@ -36,6 +36,8 @@ Use docs/decisions.md as the approved policy baseline, not a request to reopen s
 
 <!-- SECTION:NOTES:BEGIN -->
 Implementation delegated to a subagent; verification and gate fixes applied by the orchestrator. Commit 67bde64 pushed to origin/main (repo redirects to Apicurio/antiwire).
+
+2026-10-06 audit annotation: the description's 'groupId io.apicurio subject to authorization' is historical; DEC-8 was resolved on 2026-10-02 and reconfirmed on 2026-10-06 (namespace authorized, publication still gated by TASK-21 AC#1).
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

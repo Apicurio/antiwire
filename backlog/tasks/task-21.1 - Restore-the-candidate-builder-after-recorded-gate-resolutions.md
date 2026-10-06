@@ -4,7 +4,7 @@ title: Restore the candidate builder after recorded gate resolutions
 status: Done
 assignee: []
 created_date: '2026-10-06 08:32'
-updated_date: '2026-10-06 10:55'
+updated_date: '2026-10-06 19:06'
 labels:
   - adversarial-audit
   - release-tooling
@@ -48,6 +48,8 @@ The script deliberately requires a manual anchor update when a gate changes stat
 
 <!-- SECTION:NOTES:BEGIN -->
 The real docs/release-candidate.md was deliberately not regenerated: that belongs to TASK-21's final-candidate procedure, because the committed file names candidate a45b0f0 and DEC-13 requires fresh evidence for the final candidate. The builder was proven end to end only in a scratch clone (exit 0, nine artifacts plus MANIFEST.sha256, both gates CLOSED, no publish). A pre-existing portability bug surfaced and was fixed: shasum is absent on Linux, so the manifest step now uses sha256sum and fails closed if neither exists.
+
+2026-10-06 audit correction: the Final Summary claim that --check-gates exits 0 with both gates CLOSED is no longer true. Since footprint.md section 10 reopened the footprint gate (0f860ff PENDING) while sections 8/9.6 still carry identical ACCEPTED rows, the script exits 1 with its fail-closed FATAL (pending and accepted rows both present). Reconciling the historical rows and regenerating the candidate belong to TASK-21.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

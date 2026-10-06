@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  antiwire build skeleton (TASK-2).
+  antiwire parent pom.
 
   Coordinates: groupId io.apicurio per the DEC-8 resolution (maintainer directive
   2026-10-02; docs/decisions.md), which replaced the earlier io.github.paoloantinori
@@ -21,10 +21,10 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>antiwire parent (build skeleton)</name>
+  <name>antiwire parent</name>
   <description>
-    Build skeleton for the pure-Java Wire port. Empty module shells: no functionality or
-    parity is claimed. Production compilation uses --release 11 on a JDK 17+ toolchain (DEC-3).
+    Pure-Java port of Square Wire 7.1.0: runtime, schema, and optional generator modules plus
+    test-only fixture, tests, and protoc-oracle modules. Production compilation uses --release 11 on a JDK 17+ toolchain (DEC-3).
   </description>
 
   <modules>

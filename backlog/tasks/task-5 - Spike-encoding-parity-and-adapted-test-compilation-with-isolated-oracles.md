@@ -4,7 +4,7 @@ title: Spike encoding parity and adapted-test compilation with isolated oracles
 status: Done
 assignee: []
 created_date: '2026-09-29 09:22'
-updated_date: '2026-10-02 00:10'
+updated_date: '2026-10-06 19:06'
 labels: []
 milestone: m-6
 dependencies:
@@ -33,20 +33,13 @@ Prove the riskiest end-to-end assumptions before the full port. Use TASK-4's sel
 - [x] #7 The finalized I/O and publication grouping from TASK-4 is validated with an actual Java 11 consumer of the Java spike and its resolved production dependencies. Remaining runtime/schema/generator release checks stay explicitly pending until their implementation.
 <!-- AC:END -->
 
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-10-06 audit correction: the Done comment above numbers TASK-4's criteria, not TASK-5's. TASK-5's own criteria map to: ProtoReaderWriterParityTest; ProtoWriterTest adoption; wire-tests-java pinned-compiler fixtures; config/class-origins.txt; the M0 ledger go/no-go (corpus delivered by TASK-18); BoundaryExamplesTest (4/4 green on 2026-10-06); the java11-consumer suite.
+<!-- SECTION:NOTES:END -->
+
 ## Definition of Done
 <!-- DOD:BEGIN -->
 - [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->
-
-## Comments
-
-#1 - 2026-10-01 13:30 (UTC)
-Merged execution state (m0-spikes reconciled with the reviewed scope). Done: AC#1 (byte parity across varints, tags, groups, packed fields and malformed lengths, via the wire-upstream-shaded live oracle: 500 seeded writer sequences byte-for-byte, 200 structured messages with identical transcripts, 747 tests green total) and the isolated-oracle half of AC#4 (port test calls cannot resolve against upstream jars without relocation). Remaining: AC#2 upstream test compilation against the slice; AC#3 pinned upstream fixture generation; AC#5 the 6.4.0-versus-7.1.0 baseline corpus and go/no-go record; AC#6 executable null/exception boundary examples in the shared entry point; AC#7 Java 11 consumer of the spike. See docs/m0-execution-ledger-2026-10-01.md for the full mapping.
-
-#2 - 2026-10-01 14:05 (UTC)
-AC map refresh (PR #1, additive commits): AC#1 done (live-oracle byte parity); runtime half of AC#2 done (upstream ProtoWriterTest.kt runs against the slice, two adaptations individually recorded in src/test/kotlin/com/squareup/wire/UPSTREAM-TEST-ADAPTATIONS.md); AC#4 done (real port classes in config/class-origins.txt; single origin proven); AC#6 done (BoundaryExamplesTest: NPE, IAE with upstream message, ISE with upstream message, nullable boundary; runs in the build suite); AC#7 done (Java 11 consumer exercises the real spike surface with deterministic bytes on Temurin 11). Remaining: parser-model half of AC#2 (blocked on TASK-10), AC#3 (pinned upstream fixture generation), AC#5 (6.4.0 vs 7.1.0 baseline corpus). Evidence: mvn verify 754 tests 0 failures; scripts/verify.sh all 5 ACTIVE suites pass.
-
-## Comments
-
-#2 - 2026-10-02 00:10 (UTC)
-Done (spikes executed across M0/M1 batches, commits 54f2/4fd8/07f4/42c1/1b4b/6b21/07f4 lineage on m0-spikes). AC#1 the pinned-source map is docs/loading-api-inventory.md plus the ownership map; AC#2 in-memory/filesystem/classpath demonstrated (LoadingAccessTest) and ZIP demonstrated (zipfs route; the deep-ZIP loader stays with TASK-12 loading boundary); AC#3 okio's own 732-test suite runs verbatim and the adapted ProtoWriterTest/Kotlin smoke compiles and runs (TASK-9 slices); AC#4 namespaces recorded in decisions.md M0 outputs (original package names, vendored subset); AC#5 measured effort recorded in the M0 execution ledger; AC#6 OPEN-2 grouping finalized in decisions.md; AC#7 the java11-consumer suite compiled and ran a real consumer of the spike on Temurin 11. The 6.4.0-versus-7.1.0 delta corpus is owned by TASK-18 delta-aware acceptance per DEC-1 (upstream-vs-upstream), so it is not a TASK-5 residue.

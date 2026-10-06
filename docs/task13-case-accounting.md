@@ -34,7 +34,7 @@ Upstream counts are `@Test` methods; port counts include merged non-upstream cas
 | jvmTest SchemaTest.kt | 102 | SchemaFullTest (102, 1 @Disabled mirroring upstream @Ignore) | Exact SchemaException messages with temp-root normalization. |
 | jvmTest OptionsTest.kt | 13 | OptionsTest (13) | |
 | jvmTest PrunerTest.kt | 99 | PrunerTest (99, 4 @Disabled mirroring upstream @Ignore) | Byte-exact toSchema expectations. |
-| jvmTest SchemaLoaderTest.kt | 16 | SchemaLoaderTest (16, 3 @Disabled) | 3 profile cases deferred with TASK-16 (below). loadSourcePathFiles/reportLoadingErrors widened to public (pre-annotated). |
+| jvmTest SchemaLoaderTest.kt | 16 | SchemaLoaderTest (16, all running; the 3 deferrals were revived by TASK-16) | 3 profile cases deferred with TASK-16 (below). loadSourcePathFiles/reportLoadingErrors widened to public (pre-annotated). |
 | jvmTest RootTest.kt | 6 | RootTest (6) | Symlink targets absolute (port resolves them itself); skip when the host refuses symlinks, mirroring upstream's Windows guard. |
 | jvmTest SchemaProtoAdapterTest.kt | 11 | SchemaProtoAdapterTest (11) | |
 | jvmTest DynamicSerializationTest.kt | 6 | DynamicSerializationTest (9, 1 @Disabled mirroring upstream @Ignore) | JDK time types; EOF/Protocol exception relocations. The Empty/Unit divergence this row carried was resolved by TASK-26 (2026-10-03): the `empty_field` expectation runs again against `UnitValue` (docs/api-surface.md), plus three port-added Empty cases. |
@@ -43,7 +43,7 @@ Upstream counts are `@Test` methods; port counts include merged non-upstream cas
 
 Port-only suites retained alongside the adoptions: LinkingSmokeTest (17), SchemaLoaderSmokeTest (8),
 internal/SchemaEncoderTest (6), ProtoParserTest (10), SemVerTest (3), EnumAndReservedElementTest
-(3), ShellPlaceholderTest (1). Module total: 590 tests, 0 failures, 9 skipped.
+(3), ShellPlaceholderTest (1). Module total at TASK-13 close: 590 tests, 0 failures, 9 skipped (2026-10-06 total: 633 tests, 6 skipped).
 
 ## Deferred with an owner
 
