@@ -3,10 +3,10 @@ id: TASK-24.1
 title: >-
   Reconcile current delivery documentation with implemented scope and recorded
   approvals
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-06 08:20'
-updated_date: '2026-10-06 08:41'
+updated_date: '2026-10-06 09:26'
 labels:
   - adversarial-audit
   - documentation
@@ -44,6 +44,12 @@ Update the reader-facing current status and reconcile task bookkeeping with prim
 - [ ] #4 Historical reports retain their original revisions and dates, and current summaries link to those records without presenting old measurements as proof for a newer candidate.
 - [ ] #5 The generated-output summary distinguishes raw byte identity from identity after approved API mappings, and its corpus size is derived from the actual comparison inputs.
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Edit README.md (stale M0-era lines 3, 25-29, 45, 49) so it describes the implemented runtime, schema loading, consumer API and optional Java generator, separates historical acceptances (bound to c713e9a footprint, 82c3624 performance) from final-candidate freshness and publication approval owned by TASK-21.\n2. Correct docs/team-update-2026-10-05.md: mapping-aware golden identity wording with a corpus size derived from actual comparison inputs, commit count, decode workload count, total vs executed vs skipped protoc cases, and the unsupported claim that an automated check detects every edited expected value.\n3. Fix stale pre-DEC-8 relocation package names in docs/security-regression-inventory.md and docs/upstream-sync.md after verifying against wire-upstream-shaded/pom.xml.\n4. TASK-19 checklist reconciled by the orchestrator through the tracker from a verification list (acceptance criteria 1, 2, 4 and DoD checked against docs/footprint.md evidence; unsupported items stay open).\n5. Out of scope here: api-surface.md and compatibility-matrix.md (TASK-16.1, TASK-27) and config/verify-suites.json (TASK-14.2).\nVerification: grep each changed claim against its primary source; git diff --check; unslop over changed prose; high-effort code review.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 

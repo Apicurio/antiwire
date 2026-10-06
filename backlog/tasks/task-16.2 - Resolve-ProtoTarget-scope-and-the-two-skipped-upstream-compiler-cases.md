@@ -4,6 +4,7 @@ title: Resolve ProtoTarget scope and the two skipped upstream compiler cases
 status: To Do
 assignee: []
 created_date: '2026-10-06 08:41'
+updated_date: '2026-10-06 09:26'
 labels:
   - adversarial-audit
   - scope
@@ -36,6 +37,12 @@ Resolve the inconsistent scope and ownership. Either deliver the intended ProtoT
 - [ ] #3 If explicitly excluded, both cases are recorded as excluded for the named product rather than counted as executed or passed, and supported-feature documentation agrees.
 - [ ] #4 TASK-16's completion record and TASK-21's release checklist reference the resolved disposition without hiding required pending work.
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-10-06: not started. This task requires a maintainer scope decision (port ProtoTarget .proto emission or explicitly exclude it by a new decision) which cannot be inferred. The code-side recorded disposition of the two cases is handled by TASK-14.2 pointing here as owner. Decision needed from the maintainer before implementation.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->

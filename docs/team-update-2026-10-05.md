@@ -19,9 +19,9 @@ The library works: runtime, .proto parser, schema linker, loader (files, directo
 
 | Operation (the Apicurio path) | Result |
 |---|---|
-| Parse .proto files | 1.12x faster |
-| Link + load schemas | 1.08x faster |
-| Descriptor conversion | 1.16x faster, 22% fewer allocations |
+| Parse .proto files | 1.12x faster (initial 2026-10-02 matrix) |
+| Link + load schemas | 1.08x faster (initial 2026-10-02 matrix) |
+| Descriptor conversion | 1.16x faster, 22% fewer allocations (initial 2026-10-02 matrix) |
 | Message encode (4 workloads, forward and reverse paths) | Every cell inside its oracle band; best cell 2.2x faster (UTF-8 fast path) |
 | Message decode (4 workloads) | Every cell inside its oracle band; the extra copy on bytes fields is gone (allocation within 0.2% of upstream) |
 
@@ -31,13 +31,13 @@ Message cells: session-5 matrix on candidate `82c3624` (docs/performance.md). Th
 
 | Proof | Scale |
 |---|---|
-| Upstream test suite adopted, reconciled by case name against the pinned 7.1.0 sources | 967 case names: 963 ported, 4 recorded missing |
+| Upstream test suite adopted, reconciled by case name against the pinned 7.1.0 sources | 967 case names: 963 matched by name, 4 recorded missing; matching by name does not show a case executes (the audit found disabled ones counted as matched, see TASK-14.2) |
 | Interoperability tests against protoc 4.36.1 (Google's compiler), byte-level | 122 recorded cases, 50 of them skipped (72 executed) |
 | Security regression tests covering the library's historical advisories | 24 cases |
 | Generated code byte-identical to the original compiler after the documented Bytes mapping (docs/api-surface.md) | the pinned upstream Java golden corpus, `all_types_proto3` |
 | CI suites, all green on every push (tests, parity reconciliation, bytecode, classpath, upstream watch) | 12 suites |
 
-An automated check reconciles the name of every upstream test case against the pinned 7.1.0 sources at every build, so a lost or unaccounted case fails the run. It compares names, not test bodies: whether each ported case still asserts what upstream asserts was reviewed one by one during the port and recorded in the case ledgers (docs/task9-case-accounting.md, docs/task13-case-accounting.md, docs/task16-case-accounting.md); no automated check proves the semantic equivalence of the test bodies. The build also enforces the zero-Kotlin rule in production scope on every run.
+An automated check reconciles the name of every upstream test case against the pinned 7.1.0 sources at every build, so a case that is lost or unaccounted for by name fails the run; a case that is present but disabled is a separate gap tracked in TASK-14.2. It compares names, not test bodies: whether each ported case still asserts what upstream asserts was reviewed one by one during the port and recorded in the case ledgers (docs/task9-case-accounting.md, docs/task13-case-accounting.md, docs/task16-case-accounting.md); no automated check proves the semantic equivalence of the test bodies. The build also enforces the zero-Kotlin rule in production scope on every run.
 
 ### Apicurio integration
 
