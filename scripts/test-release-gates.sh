@@ -70,7 +70,10 @@ PY
 echo "=== release gate state matrix (real docs, then scratch mutations) ==="
 
 # --- current: the committed docs; read-only run against the real tree ---------------------
-# The output goes to the scratch dir: nothing may be written into the real tree.
+# The output goes to the scratch dir: nothing may be written into the real tree. Read-
+# only is proven by the candidate doc's hash, not by target/ absence: a developer who
+# once ran the real builder legitimately owns target/release locally.
+CANDIDATE_HASH_BEFORE="$(sha256sum "$REAL_ROOT/docs/release-candidate.md" | cut -d' ' -f1)"
 CURRENT_OUT="$WORK/current.out"
 set +e
 bash "$REAL_ROOT/scripts/release-build.sh" --check-gates >"$CURRENT_OUT" 2>&1
@@ -83,8 +86,9 @@ elif ! grep -q "CLOSED: footprint acceptance gate recorded in docs/footprint.md"
   || ! grep -q "CLOSED: encodeForward acceptance gate recorded in docs/performance.md" "$CURRENT_OUT" \
   || ! grep -q "no build, no packaging, no doc rewrite" "$CURRENT_OUT"; then
   fail current "gate statuses not reported CLOSED with the read-only banner"
-elif [ -e "$REAL_ROOT/target/release" ]; then
-  fail current "the gate check must not build anything (target/release exists)"
+elif [ "$(sha256sum "$REAL_ROOT/docs/release-candidate.md" | cut -d' ' -f1)" \
+  != "$CANDIDATE_HASH_BEFORE" ]; then
+  fail current "the gate check rewrote docs/release-candidate.md"
 else
   pass current "recorded ACCEPTED/RESOLVED rows recognized as CLOSED, read-only, exit 0"
 fi
@@ -128,6 +132,19 @@ else
   pass reopened "reopened (pending + accepted) aborts fail-closed"
 fi
 
+# --- unreadablesig: the accepted row matches the anchor but not the signature extraction --
+dir="$(make_scratch unreadablesig)"
+mutate_cell "$dir/docs/footprint.md" "$FOOTPRINT_ACCEPTED_CELL" \
+  '**ACCEPTED by the maintainer verbally, no structured signature recorded**'
+run_check "$dir"
+if [ "$GATE_RC" -eq 0 ]; then
+  fail unreadablesig "CLOSED with an unreadable signature must abort, not pass empty"
+elif ! grep -q "matched the accepted anchor but its signature could not be read" "$dir/out.log"; then
+  fail unreadablesig "the abort must name the unreadable signature"
+else
+  pass unreadablesig "accepted row with unreadable signature aborts fail-closed"
+fi
+
 # --- ambiguous: two different accepted rows -----------------------------------------------
 dir="$(make_scratch ambiguous)"
 mutate_cell "$dir/docs/footprint.md" \
@@ -167,4 +184,4 @@ if [ "$FAILED" -ne 0 ]; then
   exit 1
 fi
 echo "RESULT release-gates-check.status=PASS"
-echo "release gate state matrix: current, pending, missing, reopened, ambiguous and nodoc behaved as specified"
+echo "release gate state matrix: current, pending, missing, reopened, unreadablesig, ambiguous and nodoc behaved as specified"

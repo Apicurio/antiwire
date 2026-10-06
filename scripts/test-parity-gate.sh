@@ -113,6 +113,7 @@ cat >"$BASE/wire-schema-java/src/test/java/com/squareup/wire/schema/SampleTest.j
 package com.squareup.wire.schema;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class SampleTest {
@@ -126,13 +127,21 @@ public class SampleTest {
   @Disabled("mirrors the upstream @Ignore")
   public void testThreePortedMirror() {}
 
+  // Parenthesized multi-line disable body: the annotation's argument spans lines with a
+  // bare closing parenthesis, a form the skip detection must still recognize.
   @Test
-  @Disabled("DEC-6: declared non-ported feature")
+  @Disabled(
+      "DEC-6: declared non-ported feature"
+  )
   public void testFourRecordedDec6() {}
 
   @Test
   @Disabled("pending its owning task")
   public void testFiveRecordedOwner() {}
+
+  // The display name quotes an annotation name: it must not register a phantom case.
+  @DisplayName("checks the @Test scanner, not a case")
+  private void helperNotACase() {}
 }
 JAVA
 
@@ -222,7 +231,8 @@ else
   pass methodskip "unrecorded method-level skip on testTwo reported with its identity"
 fi
 
-# classskip: a class-level @Disabled without a skipped_class record.
+# classskip: a class-level @Disabled without a skipped_class record (annotation on its
+# own line above the class declaration).
 dir="$(mutate classskip)"
 sed -i 's/^public class SampleTest {/@Disabled("whole class disabled: no record")\npublic class SampleTest {/' \
   "$dir/wire-schema-java/src/test/java/com/squareup/wire/schema/SampleTest.java"
@@ -231,6 +241,36 @@ if [ "$CPC_RC" -eq 0 ] || ! grep -q "disabled at class level without a recorded"
   fail classskip "an unrecorded class-level skip must fail"
 else
   pass classskip "unrecorded class-level skip rejected"
+fi
+
+# classskipsameline: the same, with the disable annotation on the class declaration's
+# own line (a form whose misparse would blame an individual case instead).
+dir="$(mutate classskipsameline)"
+sed -i 's/^public class SampleTest {/@Disabled("whole class disabled: no record") public class SampleTest {/' \
+  "$dir/wire-schema-java/src/test/java/com/squareup/wire/schema/SampleTest.java"
+check_parity "$dir"
+if [ "$CPC_RC" -eq 0 ] || ! grep -q "disabled at class level without a recorded" "$dir/check.out"; then
+  fail classskipsameline "a same-line class-level skip must fail as class-level"
+else
+  pass classskipsameline "same-line class-level skip reported at class level"
+fi
+
+# bareparen: the disable annotation's argument is parenthesized across lines and its
+# map record is removed; the skip must still be detected and reported by identity.
+dir="$(mutate bareparen)"
+python3 - "$dir/config/upstream-case-map.json" <<'PY'
+import json, sys
+path = sys.argv[1]
+cm = json.load(open(path))
+entry = cm["modules"]["wire-schema/src/jvmTest/kotlin"]["files"]["com/squareup/wire/schema/SampleTest.kt"]
+del entry["skipped"]["testFourRecordedDec6"]
+json.dump(cm, open(path, "w"), indent=2)
+PY
+check_parity "$dir"
+if [ "$CPC_RC" -eq 0 ] || ! grep -q "case testFourRecordedDec6 is skipped" "$dir/check.out"; then
+  fail bareparen "a parenthesized multi-line disable must be detected without a record"
+else
+  pass bareparen "parenthesized multi-line disable detected and reported"
 fi
 
 # fixture: the executable entry is flipped to fixture:true.
@@ -328,4 +368,4 @@ if [ "$FAILED" -ne 0 ]; then
   exit 1
 fi
 echo "RESULT parity-gate-check.status=PASS"
-echo "parity gate check: baseline plus seven mutation probes behaved as specified"
+echo "parity gate check: baseline plus ten mutation probes behaved as specified"

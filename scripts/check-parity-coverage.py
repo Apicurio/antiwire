@@ -120,8 +120,11 @@ def extract_test_info(path):
     disable annotation sits on the class declaration itself. Backtick-named Kotlin tests
     are normalized by stripping the backticks; a method counts when a test annotation
     precedes its declaration (same line or the next non-annotation line). Annotation
-    continuations (multi-line @Disabled("..." + "...") bodies, quoted argument lines)
-    never end the pending state, so a skip is detected however long its reason is.
+    names are read only up to the first string literal, so argument text mentioning an
+    annotation cannot register a phantom. Annotation continuations (multi-line
+    @Disabled("..." + "...") bodies, quoted argument lines, and the bare closing
+    parenthesis of a parenthesized multi-line argument) never end the pending state, so
+    a skip is detected however long its reason is.
 
     Results are memoized per path: the source-presence pass and the execution pass both
     read the same files during one run, and the tree is read-only for that run. The
@@ -147,9 +150,13 @@ def extract_test_info(path):
                 or stripped.startswith("/*"):
             continue
         if stripped.startswith("@"):
-            if TEST_RE.search(stripped):
+            # Annotation names are matched on the line up to its first string literal, so
+            # an argument string that merely mentions "@Test" or "@Disabled" (a display
+            # name, a reason quoting another case) cannot register a phantom case.
+            code = stripped.split('"', 1)[0]
+            if TEST_RE.search(code):
                 pending_test = True
-            if DISABLE_RE.search(stripped):
+            if DISABLE_RE.search(code):
                 pending_disable = True
             decl = same_line_decl(stripped)
             if decl and pending_test and not stripped.endswith(","):
@@ -158,9 +165,16 @@ def extract_test_info(path):
                 if pending_disable:
                     disabled.add(decl.strip("`"))
                 pending_test = pending_disable = False
+            elif CLASS_DECL_RE.search(stripped) and pending_disable and not pending_test:
+                # Class-level disable written on the class declaration's own line.
+                class_disabled = True
+                pending_test = pending_disable = False
             continue
-        if stripped.startswith("+") or stripped.startswith('"'):
-            # Annotation-argument continuations (multi-line @Disabled bodies).
+        if stripped.startswith("+") or stripped.startswith('"') or stripped == ")":
+            # Annotation-argument continuations: string concatenation lines, quoted
+            # argument lines, and the bare closing parenthesis of a multi-line
+            # @Disabled("..."
+            # ) body.
             continue
         if pending_test or pending_disable:
             if stripped.startswith("@"):
@@ -225,12 +239,14 @@ def strip_invocation_suffix(name):
 
 
 def read_surefire_reports(root, modules, problems):
-    """Returns {(module, classname): {"tests", "skipped", "failed"}} from the per-class
-    surefire XML reports of the given modules. Canonicalized identities, so a class
-    missing entirely from its module's reports is distinguishable from a class whose
-    cases did not run. Keyed by module too: com.squareup.wire.ProtoAdapterTest exists in
-    both wire-runtime-java and wire-tests-java with different case sets, so the bare
-    class name would merge two different classes.
+    """Returns {(module, classname): {"tests", "skipped"}} from the per-class surefire
+    XML reports of the given modules. Canonicalized identities, so a class missing
+    entirely from its module's reports is distinguishable from a class whose cases did
+    not run. Keyed by module too: com.squareup.wire.ProtoAdapterTest exists in both
+    wire-runtime-java and wire-tests-java with different case sets, so the bare class
+    name would merge two different classes. Failures and errors are deliberately not
+    collected: mvn verify is the failure authority; this reconciliation is about which
+    identities ran at all.
     """
     reports = {}
     for module in sorted(modules):
@@ -249,7 +265,7 @@ def read_surefire_reports(root, modules, problems):
                 continue
             record = reports.setdefault(
                 (module, suite.get("name") or ""),
-                {"tests": set(), "skipped": set(), "failed": set()})
+                {"tests": set(), "skipped": set()})
             for testcase in suite.iter("testcase"):
                 name = canonical(strip_invocation_suffix(testcase.get("name") or ""))
                 if not name:
@@ -257,9 +273,6 @@ def read_surefire_reports(root, modules, problems):
                 record["tests"].add(name)
                 if testcase.find("skipped") is not None:
                     record["skipped"].add(name)
-                elif testcase.find("failure") is not None \
-                        or testcase.find("error") is not None:
-                    record["failed"].add(name)
     return reports
 
 
@@ -366,8 +379,6 @@ def main():
                 # must genuinely carry no test methods.
                 up_names, _up_disabled, _up_class = extract_test_info(
                     os.path.join(clone, module_entry["root"], relative))
-                port_names, _port_disabled, _port_class = extract_test_info(
-                    os.path.join(ROOT, entry["port"]))
                 if up_names is None:
                     problems.append("cannot read upstream file %s/%s" % (module, relative))
                 elif up_names:
@@ -375,13 +386,20 @@ def main():
                                     "carries %d test method(s); an executable upstream "
                                     "file cannot leave the inventory through the fixture "
                                     "flag" % (module, relative, len(up_names)))
-                if port_names is None:
-                    problems.append("mapped port file missing: %s" % entry["port"])
-                elif port_names:
-                    problems.append("%s/%s is marked fixture but its port file %s "
-                                    "carries %d test method(s); an executable file cannot "
-                                    "leave the inventory through the fixture flag"
-                                    % (module, relative, entry["port"], len(port_names)))
+                if "port" not in entry:
+                    problems.append("%s/%s is marked fixture but maps no port file"
+                                    % (module, relative))
+                else:
+                    port_names, _port_disabled, _port_class = extract_test_info(
+                        os.path.join(ROOT, entry["port"]))
+                    if port_names is None:
+                        problems.append("mapped port file missing: %s" % entry["port"])
+                    elif port_names:
+                        problems.append("%s/%s is marked fixture but its port file %s "
+                                        "carries %d test method(s); an executable file "
+                                        "cannot leave the inventory through the fixture "
+                                        "flag" % (module, relative, entry["port"],
+                                                  len(port_names)))
                 report["totals"]["fixture_files"] += 1
                 continue
 
@@ -531,7 +549,7 @@ def main():
                 if not entry.get("port") or entry.get("fixture") \
                         or entry.get("status", "adopted") not in ("adopted", "partial"):
                     continue
-                port_names, port_disabled, _port_class = extract_test_info(
+                port_names, _unused_disabled, _unused_class = extract_test_info(
                     os.path.join(ROOT, entry["port"]))
                 if not port_names:
                     continue

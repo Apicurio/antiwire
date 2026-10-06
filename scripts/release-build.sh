@@ -93,8 +93,16 @@ maintainer_gate() { # <doc> <gate-name> <pending-pattern> <accepted-pattern> <op
       echo "FATAL: the $gate gate in $doc carries multiple different accepted rows; ambiguous evidence must be reconciled by hand before any candidate" >&2
       exit "$EXIT_FAIL"
     fi
+    signature="$(printf '%s\n' "$accepted" | sed 's/^[0-9]*://' | sort -u | head -n 1 | sed -n "$sig_sed")"
+    if [ -z "$signature" ]; then
+      # The row matched the accepted anchor but its recorded signature could not be
+      # extracted: reporting CLOSED without the evidence would be the dangerous
+      # direction, so the signature extraction must be re-anchored by hand.
+      echo "FATAL: the $gate acceptance row in $doc matched the accepted anchor but its signature could not be read; re-anchor the signature extraction" >&2
+      exit "$EXIT_FAIL"
+    fi
     printf 'CLOSED: %s gate recorded in %s (%s); DEC-13 freshness still binds the record to the measured candidate, so a later candidate needs renewed acceptance\n' \
-      "$gate" "${doc#"$ROOT"/}" "$(printf '%s\n' "$accepted" | sed 's/^[0-9]*://' | sort -u | head -n 1 | sed -n "$sig_sed")"
+      "$gate" "${doc#"$ROOT"/}" "$signature"
   elif [ -n "$pending" ]; then
     printf 'OPEN: %s\n' "$open_msg"
   else

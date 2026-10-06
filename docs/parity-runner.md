@@ -33,9 +33,11 @@ mapped port file, and enforces per `config/upstream-case-map.json`:
   file's `renames` map and minus its `missing` entries (each of which carries a reason
   naming the non-ported feature). Port-only extra cases are reported, not fatal.
 - `skipped` dispositions: a port case that is `@Disabled`/`@Ignore` is lawful only when
-  the pinned upstream ignores the same case (a mirrored skip, read from the clone; the 4
-  PrunerTest map-variant cases, `boxOneOfsJava`, the ParseTest and TestAllTypes upstream
-  ignores are mirrors) or the map records the skip with a reason and exactly one of:
+  the pinned upstream ignores the same case (a mirrored skip, read from the clone; the
+  ten currently mirrored skips are PrunerTest's four map-variant cases, ParseTest's two,
+  InteropTest `boxOneOfsJava`, DynamicSerializationTest `mapTest`, SchemaTest
+  `linkExtendTypeInOuterMessage`, and TestAllTypes `testUnknownFieldsTypeMismatch`) or
+  the map records the skip with a reason and exactly one of:
   `exclusion` naming a DEC (a declared non-ported feature, DEC-6 today) or `owner` naming
   the TASK that owes the case (currently the two ProtoTarget cases under TASK-16.2 and
   the generated-model Empty case under TASK-16.1). Any other skip fails with the case
