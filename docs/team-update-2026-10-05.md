@@ -1,5 +1,7 @@
 # antiwire status update, 2026-10-05
 
+> Status banner (2026-10-06): dated postscript: the empty-generated-message gap was closed by TASK-16.1 and TASK-21.1 is Done; the footprint renewal at 0f860ff awaits maintainer signature; TASK-16.2.1 remains open.
+
 For context: antiwire is a pure-Java port of Square Wire (Square's protobuf library), with no Kotlin in production scope, built for Apicurio Registry first and Kafka later. The original is written in Kotlin and drags kotlin-stdlib, okio, and other heavy dependencies into every consumer.
 
 ## What exists on main today (113 commits at `295ef5f`)

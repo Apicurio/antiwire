@@ -1,5 +1,7 @@
 # Plan review disposition ledger
 
+> Status banner (2026-10-06): a dated record of the 2026-09-29 review. Statements such as "TASK-1..23 remain To Do" and "no code exists in this repository yet" were true at review time; the tasks have since closed (see decisions.md and the backlog).
+
 Date: 2026-09-29. This is the durable record of the external review of the antiwire plan and of how every review item was disposed. The reviewed state is commit `32971455274637fe95ba292ff527d30508fc8cb6` (working tree of that morning). Review evidence bases, all pinned: square/wire at tag 7.1.0 (annotated tag object `da24c33ee1fe772a7a04617018087f46f26d1708`, commit `9f62097dfe4995b5709d001ca0187e30ca0530ef`), Maven Central POMs and jar sizes retrieved 2026-09-29, a local apicurio-registry clone at commit `48e2742acc68fae456fe252cc8b08243e376ebfc` (2026-09-24, carrying unrelated local modifications), apache/kafka trunk build files retrieved 2026-09-29, and a mechanical recomputation of the backlog dependency graph. Single-source figures are attributed, not restated as fact.
 
 ## How to read this ledger

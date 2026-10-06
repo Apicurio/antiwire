@@ -2,10 +2,10 @@
 # Java 11 consumer smoke (TASK-2 AC#5, DEC-3).
 #
 # Compiles and runs scripts/consumer-placeholder on an ACTUAL Java 11 JVM (discovered below,
-# separate from the JDK 17+ build toolchain) against the module jars. The consumer is a named
-# PLACEHOLDER: it only proves the jars sit on a Java 11 compile and runtime classpath and
-# their empty shell classes load. It certifies NOTHING about runtime compatibility; TASK-5
-# exercises the spike on this path and TASK-21 checks the final published artifacts.
+# separate from the JDK 17+ build toolchain) against the module jars. The consumer (still
+# named PlaceholderConsumerMain for history) puts the jars on a Java 11 compile and runtime
+# classpath and exercises ProtoWriter and the loading layer (FileSystem round trip). TASK-21
+# checks the final published artifacts.
 #
 # JDK 11 discovery order: $JAVA11_HOME, $JAVA_HOME_11_X64 (set by a second actions/setup-java
 # step in the CI build job), $JAVA_HOME when itself 11, then sdkman and common system

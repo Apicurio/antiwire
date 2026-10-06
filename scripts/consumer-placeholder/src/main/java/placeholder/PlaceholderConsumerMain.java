@@ -1,12 +1,10 @@
 package placeholder;
 
 /**
- * TASK-2 consumer smoke placeholder.
+ * Java 11 consumer smoke (named for its TASK-2 origin).
  *
- * <p>It proves only that the module jars can be placed on a real Java 11 compile and runtime
- * classpath and that their empty shell classes load from those jars. It certifies NOTHING
- * about Wire compatibility or runtime behavior; TASK-5 replaces the exercised surface with
- * the real spike and TASK-21 runs the final published artifacts.
+ * <p>It places the module jars on a real Java 11 compile and runtime classpath and exercises
+ * ProtoWriter and the loading layer; TASK-21 runs the final published artifacts.
  */
 public final class PlaceholderConsumerMain {
 

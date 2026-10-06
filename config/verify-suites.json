@@ -23,13 +23,13 @@
       "name": "runtime-tests",
       "status": "ACTIVE",
       "owner": "TASK-9",
-      "description": "applicable upstream wire-runtime test cases with tracked adaptations (DEC-5); interim key is the wire-runtime-java module total inside mvn verify (adapted plus port-only cases); TASK-14 owns per-case reconciliation"
+      "description": "applicable upstream wire-runtime test cases with tracked adaptations (DEC-5); key is the wire-runtime-java module total inside mvn verify (adapted plus port-only cases); TASK-14 owns per-case reconciliation"
     },
     {
       "name": "schema-tests",
       "status": "ACTIVE",
       "owner": "TASK-13",
-      "description": "applicable upstream wire-schema test cases with tracked adaptations (DEC-5); interim key is the wire-schema-java module total inside mvn verify (adapted plus port-only cases); per-case ledger docs/task13-case-accounting.md, reconciliation TASK-14"
+      "description": "applicable upstream wire-schema test cases with tracked adaptations (DEC-5); key is the wire-schema-java module total inside mvn verify (adapted plus port-only cases); per-case ledger docs/task13-case-accounting.md, reconciliation TASK-14"
     },
     {
       "name": "parity-coverage",
@@ -41,7 +41,7 @@
       "name": "protoc-oracle",
       "status": "ACTIVE",
       "owner": "TASK-15",
-      "description": "protoc 4.36.1 interoperability oracle: pinned protoc reference models and pinned upstream wire-compiler fixtures in the never-published wire-protoc-compat-java module; interim key is that module total inside mvn verify (per-case skip dispositions, 48 recorded DEC-6 fixture exclusions and 1 mirrored upstream ignore (boxOneOfsJava), are in config/upstream-case-map.json; the module total moves with new port-only cases), ledger in the module test sources"
+      "description": "protoc 4.36.1 interoperability oracle: pinned protoc reference models and pinned upstream wire-compiler fixtures in the never-published wire-protoc-compat-java module; key is that module total inside mvn verify (per-case skip dispositions, 48 recorded DEC-6 fixture exclusions and 1 mirrored upstream ignore (boxOneOfsJava), are in config/upstream-case-map.json; the module total moves with new port-only cases), ledger in the module test sources"
     },
     {
       "name": "compiler-tests",

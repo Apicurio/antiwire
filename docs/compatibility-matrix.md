@@ -88,11 +88,11 @@ Every deliberate source change implied by this matrix, with owner and migration 
 | Change | Trigger | Owner | Migration requirement |
 |---|---|---|---|
 | Public Java range type replaces Kotlin `IntRange` in `ReservedElement`/`ExtensionsElement` values | No Java equivalent; Apicurio branches on `instanceof IntRange` | TASK-10 | Documented public type with endpoint and maximum-value semantics tested; TASK-18 rewrites `FileDescriptorUtils.java` and `ProtobufFile.java` branches on the enumerated corpus |
-| Loading boundary and FakeFileSystem handling | `SchemaLoader`'s public constructor takes `okio.FileSystem`; Apicurio builds an in-memory `FakeFileSystem` in main code | TASK-12 (boundary on the OPEN-1 route), TASK-18 (integration) | Patch Apicurio's usage or vendor a Java equivalent, decided at integration; `ProtobufSchemaLoader.java` and `ProtoContent.java` rewrites plus the POM's `okio-jvm`/`okio-fakefilesystem` declarations |
+| Loading boundary and FakeFileSystem handling | `SchemaLoader`'s public constructor takes `okio.FileSystem`; Apicurio builds an in-memory `FakeFileSystem` in main code | TASK-12, TASK-25 (JdkSchemaLoader), TASK-18 (integration), all Done | Resolved: Apicurio's usage was patched onto `JdkSchemaLoader` and FakeFileSystem was not ported; `ProtobufSchemaLoader.java` and `ProtoContent.java` rewrites plus the POM's `okio-jvm`/`okio-fakefilesystem` declarations |
 | Companion/static and constructor call shapes | `ProtoParser.Companion.parse` and `new ProtoParser(...)` become static and public-constructor forms in Java | TASK-10 (shape), TASK-18 (sites) | Every census call site in [section F](#f-observed-apicurio-call-site-census) rewritten and exercised by the delta-aware corpus |
-| Duplicate-class coexistence excluded | The port and an upstream Wire artifact on one application classpath | DEC-2 policy; TASK-1 records the layout rules in this matrix; TASK-2 encodes them in the module shells | Layout rules must make accidental coexistence detectable; deliberate coexistence is out of contract |
-| Publication grouping | Separate artifacts with a transitive edge, a single core jar, or another reviewed grouping | TASK-4 finalizes on spike evidence, TASK-5 validates before M1 | PROVISIONAL per OPEN-2: no grouping is chosen here; only the boundaries are fixed, runtime and schema independently consumable, generator optional |
-| Okio namespace choice | OPEN-1 route selection | TASK-4 selects, TASK-5 validates | The three consequence areas recorded with the choice per [section B](#b-embedded-okio-types-namespace-resolved-2026-10-01-open-1); attribution per DEC-12 regardless |
+| Duplicate-class coexistence excluded | The port and an upstream Wire artifact on one application classpath | DEC-2 policy; TASK-1 records the layout rules in this matrix; TASK-2 encodes them in the build checks | Layout rules must make accidental coexistence detectable; deliberate coexistence is out of contract |
+| Publication grouping | Separate artifacts with a transitive edge, a single core jar, or another reviewed grouping | TASK-4 finalized, TASK-5 validated (OPEN-2, 2026-10-01) | Resolved: separate runtime, schema and optional generator artifacts with the schema-to-runtime edge; runtime and schema independently consumable |
+| Okio namespace choice | OPEN-1 route selection | Resolved 2026-10-01 (TASK-4 selected, TASK-5 validated) | The three consequence areas recorded with the choice per [section B](#b-embedded-okio-types-namespace-resolved-2026-10-01-open-1); attribution per DEC-12 regardless |
 | Generated-code external type mapping | Generated output referenced `okio.ByteString` and `kotlin.Unit` | TASK-16, resolved (Bytes phase 2, Empty TASK-16.1) | The bounded mappings are documented and golden-checked per [section E](#e-generated-code-contract); the deprecated bridge members the pinned upstream fixtures reference stay in the runtime |
 
 ### Duplicate-class prevention rules (register row: coexistence excluded)
@@ -104,18 +104,18 @@ Deliberate coexistence of the port and an upstream Wire artifact on one applicat
 3. TASK-18 asserts the rule on the Apicurio integration classpaths (AC#5) and TASK-21 rechecks it on the release candidate (AC#4) and the published artifacts (AC#6); a duplicate-class finding is a release blocker, not a warning.
 4. The optional generator artifact carries no runtime or schema classes of its own and depends on the core artifacts, so adding it cannot introduce a second copy (OPEN-2).
 
-## H. Provisional items (awaiting their owning tasks' evidence)
+## H. Provisional items (historical register; status as of 2026-10-06 per item)
 
-These items are PROVISIONAL; no I/O choice, footprint figure, or delivery estimate in this document or its sources is proven (AC#4; DEC-9, DEC-10, and the estimate status in [decisions.md](decisions.md)).
+These items were PROVISIONAL when this register was written, and each item below now states its status; as written then, no I/O choice, footprint figure, or delivery estimate in this document or its sources was proven (AC#4; DEC-9, DEC-10, and the estimate status in [decisions.md](decisions.md)).
 
-1. The I/O route and okio namespace ([section B](#b-embedded-okio-types-namespace-resolved-2026-10-01-open-1)): PROVISIONAL until TASK-4 selects on spike evidence and TASK-5 validates.
-2. The publication grouping ([section G](#g-migration-site-register)): PROVISIONAL per OPEN-2; TASK-4 finalizes, TASK-5 validates before M1. The module boundaries themselves are fixed, not provisional.
+1. The I/O route and okio namespace ([section B](#b-embedded-okio-types-namespace-resolved-2026-10-01-open-1)): resolved 2026-10-01 (OPEN-1; TASK-4 selected, TASK-5 validated), JDK-typed consumer API since DEC-14.
+2. The publication grouping ([section G](#g-migration-site-register)): resolved 2026-10-01 (OPEN-2): separate runtime, schema and optional generator artifacts with the schema-to-runtime edge. The module boundaries are fixed.
 3. The generated-code external type mapping, including the `Empty` representation that replaces `kotlin.Unit` ([section E](#e-generated-code-contract)): resolved; the bounded mapping (Bytes, phase 2; Empty, TASK-16.1) is documented in docs/api-surface.md and checked mechanically against the pinned upstream golden.
-4. The loading API surface and FakeFileSystem mechanism ([section F](#f-observed-apicurio-call-site-census) and [section G](#g-migration-site-register)): PROVISIONAL until TASK-12 implements the boundary and TASK-18 decides patch-versus-vendor at integration.
+4. The loading API surface and FakeFileSystem mechanism ([section F](#f-observed-apicurio-call-site-census) and [section G](#g-migration-site-register)): resolved: JdkSchemaLoader (TASK-25) and TASK-18 migrated the Apicurio sites onto it; FakeFileSystem was not ported.
 5. The exact shape of the public Java range type: owned by TASK-10 with tested endpoint and maximum-value semantics; only the requirement is fixed here, not the type.
-6. `AndroidMessage` packaging (compile-only Android artifact versus keep-name exception, [section A](#a-public-wire-runtime-types-port-surface-wire-runtime-commonmain-plus-jvmmain)): PROVISIONAL, owner TASK-6 within DEC-4.
-7. The Apicurio census itself: an observed minimum at the recorded SHA, superseded by the TASK-18 re-inventory.
-8. Upstream facts carried from the research report and not re-verifiable at this pin without further evidence: okio 1.x source purity (unverified), javapoet and kotlinpoet-jvm jar sizes (unmeasured), and test-suite counts (await the M0 mechanical recount).
+6. `AndroidMessage` packaging (compile-only Android artifact versus keep-name exception, [section A](#a-public-wire-runtime-types-port-surface-wire-runtime-commonmain-plus-jvmmain)): deferred with cause (no AndroidMessage.java; no Android consumer in scope, see m1-ownership-map.md).
+7. The Apicurio census itself: an observed minimum at the recorded SHA, superseded by the TASK-18 re-inventory (23 files migrated).
+8. Upstream facts carried from the research report and not re-verifiable at this pin without further evidence: okio 1.x source purity (resolved at M0 by the file headers), javapoet and kotlinpoet-jvm jar sizes (measured in footprint.md), and test-suite counts (recounted mechanically, see the case-accounting docs).
 
 ## Maintenance
 

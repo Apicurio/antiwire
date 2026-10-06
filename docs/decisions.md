@@ -64,11 +64,11 @@ The release task (TASK-21) depends on the footprint report (TASK-19), the perfor
 
 These are recorded as open so that no document pretends they are decided. TASK-4 owns the evaluation, TASK-5 validates it, and the results land back in this file as M0 outputs.
 
-### OPEN-1 I/O strategy, namespaces, and the type bridge
+### OPEN-1 I/O strategy, namespaces, and the type bridge (resolved 2026-10-01; see "OPEN-1, buffer half: resolved" and DEC-14)
 
 The exact I/O route is an M0 spike outcome. Candidates: reviewed pure-Java dependencies, a translated okio subset (under original or relocated package names), a scoped `java.nio` replacement, or a bounded combination. The inventory that any route must cover: ByteString and its companion operations, Buffer, Source/Sink and buffered variants, UTF-8 handling, exception types (okio IOException, EOFException; okio ProtocolException appears at the pin only in test scope, per the compatibility matrix), Closeable, utf8Size, FileSystem, Path, FileHandle, in-memory sources, classpath resources, and ZIP loading (the loader's compression-relevant concern is ZIP, not gzip). No forced drop-in assumption: modern okio is Kotlin and barred from production scope; okio 1.x ended at 1.17.6 and its source purity is unverified, so it is not assumed to be a drop-in replacement. The chosen public namespaces constrain upstream test adaptation, generated code, and the Apicurio migration sites; all three consequences are recorded with the choice.
 
-### OPEN-2 Publishing combination (module boundaries are fixed)
+### OPEN-2 Publishing combination (module boundaries are fixed; resolved 2026-10-01, see "OPEN-2: resolved")
 
 The development module boundaries are settled, not open: runtime and schema are separate modules that stay independently consumable, and the Java generator is optional, so no consumer of runtime or schema pulls generator dependencies (TASK-1 AC#3, TASK-16 AC#5). What remains an M0 result is only the publishing combination: separate runtime and schema artifacts with a transitive edge (matching upstream), a single core jar, or another reviewed grouping. TASK-2 creates the provisional module shells so M0 experiments are not blocked; TASK-1 records the provisional grouping (AC#3); TASK-4 finalizes the grouping alongside the I/O route using spike evidence (AC#6), within the fixed boundaries of runtime and schema independent consumability and the optional generator; TASK-5 validates the finalized combination before M1 (AC#7). The duplicate-class prevention rules of DEC-2 apply throughout.
 

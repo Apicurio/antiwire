@@ -1,6 +1,6 @@
 # Retained class-name prefixes, one per line, consumed by scripts/check-classpath.sh
 # (fail-closed when the file is missing or empty). Authority: the compatibility matrix,
-# docs/compatibility-matrix.md sections B and G. This is the provisional OPEN-1-era list;
-# TASK-4 updates it if namespaces move.
+# docs/compatibility-matrix.md sections B and G. This is the list resolved under OPEN-1;
+# update it if namespaces move.
 com/squareup/wire/
 okio/

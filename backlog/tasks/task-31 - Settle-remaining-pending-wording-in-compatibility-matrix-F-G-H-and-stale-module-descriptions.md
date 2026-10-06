@@ -3,9 +3,10 @@ id: TASK-31
 title: >-
   Settle remaining pending wording in compatibility-matrix F/G/H and stale
   module descriptions
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-06 19:06'
+updated_date: '2026-10-06 19:36'
 labels:
   - adversarial-audit
   - docs
@@ -22,13 +23,19 @@ priority: low
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Sections F, G and H of compatibility-matrix.md and the OPEN-1/OPEN-2 headings state resolved outcomes with dates.
-- [ ] #2 Historical planning artifacts carry a dated status banner.
-- [ ] #3 Placeholder and shell wording is gone from scripts, poms and config comments.
-- [ ] #4 Run /code-review at high effort on the final diff
+- [x] #1 Sections F, G and H of compatibility-matrix.md and the OPEN-1/OPEN-2 headings state resolved outcomes with dates.
+- [x] #2 Historical planning artifacts carry a dated status banner.
+- [x] #3 Placeholder and shell wording is gone from scripts, poms and config comments.
+- [x] #4 Run /code-review at high effort on the final diff
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Matrix sections F/G/H and the register rows state resolved outcomes with dates; OPEN-1/OPEN-2 headings carry resolution pointers; dated status banners added to the research report, plan-review, M0 ledger and the 2026-10-05 team update; placeholder/shell wording removed from consumer-check-java11.sh, PlaceholderConsumerMain javadoc, retained-prefixes.txt and verify-suites.json. Gates: /code-review high ran (4 findings: 3 fixed, 1 cosmetic fixed), scripts/verify.sh 12/12 PASS before the review fixes (docs-only follow-up edits).
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->

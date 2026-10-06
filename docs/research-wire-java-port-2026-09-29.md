@@ -1,5 +1,7 @@
 # Research Report: Porting Square Wire to Pure Java (Project "antiwire")
 
+> Status banner (2026-10-06): historical planning artifact. The plan below is kept for the record and was executed differently: about one week rather than the 4 to 6 months estimated, OPEN-1, OPEN-2 and DEC-8 are resolved, and the milestone list m-6..m-11 is superseded by m-6..m-12. Statements such as "no code exists yet" describe 2026-09-29.
+
 **Date**: 2026-09-29, revised the same day after the external plan review
 **Depth**: exhaustive
 **Confidence**: HIGH for dependency/footprint/test-infrastructure facts (verified against the real artifacts: cloned sources, published POMs, jar sizes); MEDIUM for effort estimates and performance expectations. Feasibility remains unproven until the M0 spikes run; no code exists yet.

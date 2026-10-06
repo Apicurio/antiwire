@@ -1,5 +1,7 @@
 # M0 execution ledger (2026-10-01)
 
+> Status banner (2026-10-06): a dated record. TASK-4 and TASK-5 are since Done, and the interim io.github.paoloantinori namespace was replaced by io.apicurio (DEC-8, 2026-10-02).
+
 Reconciliation record for the merge of the m0-spikes execution branch into the reviewed
 planning baseline. It maps what the execution branch actually built onto the decision
 record (DEC-x), the open technical decisions (OPEN-x), and the re-scoped task acceptance
