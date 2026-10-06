@@ -16,7 +16,7 @@ vendored notice was altered. The 2026-10-06 refresh enumerated the tree at `0f86
 (`git diff --name-status a45b0f0 0f860ff`), and classified every file the diff surfaced
 against its upstream counterpart. It also re-verified that the 159 first-audit files
 still carry their documented notices; that re-verification corrected one provenance
-classification from the first audit and flagged a header discrepancy on the same file
+classification from the first audit and corrected the header of the same file
 (ProtoReader32AsProtoReader, detailed below). Every table below was recomputed
 mechanically with a script; the column sums were checked against the file totals. This
 inventory binds to
@@ -43,18 +43,18 @@ notice in the rows below, and the per-module totals count files):
 
 | Module | Square Apache 2.0 | antiwire Apache 2.0 | Google Nano BSD | Square + Nano | R8 BSD | JetBrains Apache 2.0 | ASF header | Total files |
 |---|---|---|---|---|---|---|---|---|
-| wire-runtime-java | 54 | 6 | 3 | 1 | 1 | 4 | 1 | 70 |
+| wire-runtime-java | 55 | 5 | 3 | 1 | 1 | 4 | 1 | 70 |
 | wire-schema-java | 79 | 2 | 0 | 0 | 0 | 0 | 0 | 81 |
 | wire-java-generator | 9 | 1 | 0 | 0 | 0 | 0 | 0 | 10 |
-| **Total** | **142** | **9** | **3** | **1** | **1** | **4** | **1** | **161** |
+| **Total** | **143** | **8** | **3** | **1** | **1** | **4** | **1** | **161** |
 
 Arithmetic check, recomputed mechanically by script: 54+6+3+1+1+4+1 = 70,
 79+2 = 81, 9+1 = 10, and the total row 142+9+3+1+1+4+1 = 161; every row's cells sum to
 its file total, and 70+81+10 = 161 files matches `git ls-files` over the three modules.
 The columns count the notices the files carry. One translated file
-(`ProtoReader32AsProtoReader.java`) carries the antiwire header where translated material
-conventionally carries the Square header; that discrepancy is flagged below, and the
-census counts the notice actually carried.
+(`ProtoReader32AsProtoReader.java`) carried the antiwire header where translated material
+carries the Square header; the 2026-10-06 refresh corrected it to the upstream Square 2024
+header (see the correction below), and the census counts the corrected notice.
 
 Embedded resources (wire-schema-java `src/main/resources`):
 
@@ -72,7 +72,7 @@ Three assumptions in circulation before this audit are corrected by reading the 
    `DoubleArrayList`, `FloatArrayList`, and `LongArrayList` carry JetBrains Apache-2.0
    notices. The only R8-notice file is `internal/MathMethods.java`, matching DEC-12.
 2. `ProtoReader32AsProtoReader.java` does **not** carry a Google Nano notice; it carries
-   the antiwire header. The Nano-derived family is `ProtoReader`,
+   the Square Apache-2.0 header of its upstream source (corrected 2026-10-06, below). The Nano-derived family is `ProtoReader`,
    `ProtoReader32`, and `ByteArrayProtoReader32` (leading Nano notice) plus `ProtoWriter`
    (Square header, Nano notice in body), which matches DEC-12's five BSD-carrying files.
    The first audit also called this file an antiwire original; the 2026-10-06 refresh
@@ -114,19 +114,21 @@ material. `ProtoTarget.java`, added after the first audit, is a Java translation
 `ProtoTarget` data class declared in upstream `Target.kt` at the pinned tag, and its
 header is byte-identical to that upstream file's header.
 
-## Flagged header discrepancy (maintainer decision)
+## Header correction made during the 2026-10-06 refresh
 
 `ProtoReader32AsProtoReader.java` is translated material, not an antiwire original. The
 pinned upstream tree carries `wire-runtime/src/commonMain/kotlin/com/squareup/wire/ProtoReader32AsProtoReader.kt`
 with a Square 2024 Apache-2.0 header; the port file mirrors its methods with the upstream
 javadoc copied nearly verbatim, and docs/m1-ownership-map.md records it as translated in
 TASK-6 batch 5. The first audit missed the same-named upstream file, classified the port
-file as an antiwire original, and concluded that no header fixes were needed. The port
-file carries the antiwire header, which contradicts the port's convention that translated
-material carries the Square header of its upstream source (and DEC-12's verbatim per-file
-attribution). The tables in this document count the notice the file actually carries;
-whether to change the header to the Square form is a maintainer decision. This audit did
-not edit any source header.
+file as an antiwire original, and the file carried the antiwire header, which contradicted
+the port's convention that translated material carries the Square header of its upstream
+source (and DEC-12's verbatim per-file attribution). The copyright line of the port file
+was changed from `Copyright (C) 2026 the antiwire authors` to `Copyright (C) 2024 Square,
+Inc.`; the 15 header lines are now identical to the upstream file's header (checked with
+`diff`). It is the only source header changed by the refresh. The change is
+comment-only, so the compiled classes are unchanged in behavior, but the jar bytes and
+checksums of any candidate built before this correction differ from one built after it.
 
 ## Vendored layers
 
@@ -191,7 +193,7 @@ NOTICE reproduction.
 | `wire-runtime-java/src/main/java/com/squareup/wire/ProtoAdapter.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader.java` | Google Nano BSD |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader32.java` | Google Nano BSD |
-| `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader32AsProtoReader.java` | antiwire Apache 2.0 (translated file; header flagged) |
+| `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader32AsProtoReader.java` | Square Apache 2.0 (translated file; header corrected 2026-10-06) |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ProtoWriter.java` | Square Apache 2.0 + Google Nano BSD (in body) |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ReverseProtoWriter.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/RuntimeEnumAdapter.java` | Square Apache 2.0 |
