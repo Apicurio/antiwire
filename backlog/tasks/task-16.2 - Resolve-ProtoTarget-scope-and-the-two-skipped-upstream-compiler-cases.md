@@ -4,7 +4,7 @@ title: Resolve ProtoTarget scope and the two skipped upstream compiler cases
 status: Done
 assignee: []
 created_date: '2026-10-06 08:41'
-updated_date: '2026-10-06 13:00'
+updated_date: '2026-10-06 15:36'
 labels:
   - adversarial-audit
   - scope
@@ -34,7 +34,7 @@ Resolve the inconsistent scope and ownership. Either deliver the intended ProtoT
 <!-- AC:BEGIN -->
 - [x] #1 The decision record explicitly states whether ProtoTarget .proto emission belongs to the initial release, with maintainer approval required for any new exclusion.
 - [x] #2 If retained in scope, ProtoTarget behavior executes both pinned upstream cases with preserved expectations and has a Java 11-compatible implementation.
-- [x] #3 If explicitly excluded, both cases are recorded as excluded for the named product rather than counted as executed or passed, and supported-feature documentation agrees.
+- [ ] #3 If explicitly excluded, both cases are recorded as excluded for the named product rather than counted as executed or passed, and supported-feature documentation agrees.
 - [x] #4 TASK-16's completion record and TASK-21's release checklist reference the resolved disposition without hiding required pending work.
 <!-- AC:END -->
 
@@ -52,15 +52,15 @@ Verification: the two revived cases pass; module tests; scripts/check-parity-cov
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-2026-10-06: not started. This task requires a maintainer scope decision (port ProtoTarget .proto emission or explicitly exclude it by a new decision) which cannot be inferred. The code-side recorded disposition of the two cases is handled by TASK-14.2 pointing here as owner. Decision needed from the maintainer before implementation.
+2026-10-06: the maintainer retained ProtoTarget .proto emission in the initial release scope ("Fallo"), so it was implemented, not excluded. Acceptance criterion 3 describes the exclusion branch, which was not taken; it stays unchecked on purpose and does not apply.
 
-Acceptance criterion 3 (the exclusion branch) does not apply: the maintainer chose to retain ProtoTarget in scope on 2026-10-06, so it is checked as satisfied by not being needed, not by an exclusion record.
+The scope decision is recorded in docs/decisions.md as a dated note under DEC-6. The earlier plan note that said the decision was still needed was replaced by this note.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Maintainer decision on 2026-10-06: ProtoTarget .proto emission stays in the initial release scope and is implemented. docs/decisions.md records it as a dated scope note under DEC-6, which never listed it. The port gains wire-java-generator/.../schema/ProtoTarget.java, a Java 11 translation of upstream Target.kt lines 222 to 277: for every proto file in the source path that is non-empty and not an embedded Wire runtime proto it writes protoFile.toSchema() under the file's relative directory, logs artifactHandled with "Proto", and produces nothing for types, services or extends. One recorded divergence: the per-file IOException travels as a RuntimeException with upstream's message, because the port's SchemaHandler declares no checked IOException (the JavaSchemaHandler precedent). Upstream builds ProtoTarget only in the Gradle plugin and tests, and WireCompiler has no proto output flag, so the port adds no CLI or manifest surface and documents that. WireRunTest.protoOnly and protoTargetNeverEmitsGoogleProtobufDescriptor are revived with upstream bodies and expectations; I confirmed both appear as executed, not skipped, in the surefire report. The two owner records were removed from config/upstream-case-map.json and the ledger, registry and compatibility notes updated. Verified by me: scripts/check-parity-coverage.py --require-complete passes with 0 skips owned by open tasks (990 cases, 89 skipped: 10 mirrored upstream ignores, the rest recorded DEC-6 exclusions), and scripts/test-parity-gate.sh passes its baseline plus ten mutation probes. The worker's full scripts/verify.sh passed all 12 ACTIVE suites. Also fixed here: the README open-items paragraph still named three already closed audit tasks. Gates: /simplify on four angles with no findings left, a high-effort /code-review whose six findings concerned plan text and repository hygiene and were dispositioned, tests re-run.
+Maintainer decision on 2026-10-06: ProtoTarget .proto emission stays in the initial release scope and is implemented. docs/decisions.md records it as a dated scope note under DEC-6, which never listed it. The port gains wire-java-generator/.../schema/ProtoTarget.java, a Java 11 translation of upstream Target.kt lines 222 to 277: for every proto file in the source path that is non-empty and not an embedded Wire runtime proto it writes protoFile.toSchema() under the file's relative directory, logs artifactHandled with "Proto", and produces nothing for types, services or extends. One recorded divergence: the per-file IOException travels as a RuntimeException with upstream's message, because the port's SchemaHandler declares no checked IOException (the JavaSchemaHandler precedent). Upstream builds ProtoTarget only in the Gradle plugin and tests, and WireCompiler has no proto output flag, so the port adds no CLI or manifest surface and documents that. WireRunTest.protoOnly and protoTargetNeverEmitsGoogleProtobufDescriptor are revived with upstream bodies and expectations; both appear as executed, not skipped, in the surefire report. The two owner records were removed from config/upstream-case-map.json. Verified by me before the push: scripts/check-parity-coverage.py --require-complete passes with 0 skips owned by open tasks (990 cases, 89 skipped: 10 mirrored upstream ignores, the rest recorded DEC-6 exclusions), scripts/test-parity-gate.sh passes its baseline plus ten mutation probes, and a full scripts/verify.sh on the integrated main passed all 12 ACTIVE suites (exit 0, run by me at 0f860ff). A review of the closing commit found one real gap that is tracked separately: ProtoTarget does not apply the output-directory containment guard that JavaSchemaHandler applies (TASK-16.2.1). Gates: /simplify on four angles with no findings left, a high-effort /code-review on the implementation whose findings were dispositioned, tests re-run.
 <!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
