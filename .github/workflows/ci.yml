@@ -53,11 +53,13 @@ jobs:
         run: scripts/fetch-upstream.sh "$HOME/antiwire-upstream"
 
       # Offline script-level regression checks (stubbed mvn, synthetic upstream): the
-      # verify.sh clone prerequisite and the parity-gate negative probes. They need no
-      # network and run before the build so a broken gate script fails the job early.
+      # verify.sh clone prerequisite, the parity-gate negative probes and the release
+      # gate state matrix. They need no network and run before the build so a broken
+      # gate script fails the job early.
       - name: run the script regression checks
         run: |
           scripts/test-bootstrap.sh
+          scripts/test-parity-gate.sh
 
       - name: run the verification entry point
         run: ANTIWIRE_UPSTREAM="$HOME/antiwire-upstream" scripts/verify.sh

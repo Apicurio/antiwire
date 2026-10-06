@@ -151,7 +151,11 @@ record_suite upstream-watch "$watch_rc" "$WATCH_LOG"
 rm -f "$WATCH_LOG"
 
 # Module test suites (runtime-tests TASK-9, schema-tests TASK-13): their evidence is the
-# per-module surefire summary inside the green mvn verify log above.
+# per-module surefire summary inside the green mvn verify log above. The summary is an
+# aggregate: the per-case IDENTITY reconciliation (every mapped case must run, and every
+# skip must carry a recorded disposition) is the parity-coverage suite's --execution
+# pass below, because aggregate module totals cannot express it (port-only extras,
+# parameterized invocations and unmapped port-only classes all shift the counts).
 module_test_summary() { # <artifactId>
   awk -v prefix="] Building antiwire $1 " '
     /] Building antiwire / {
@@ -178,7 +182,7 @@ module_tests_suite() { # <suite> <artifactId>
   skipped="$(printf '%s\n' "$summary" | sed -n 's/^.*Skipped: \([0-9][0-9]*\)$/\1/p')"
   if [ -n "$count" ] && [ "$zero_failures" -eq 1 ]; then
     res "$suite.status=PASS"
-    res "$suite.note=$count $artifact cases inside mvn verify, $skipped skipped (Failures: 0, Errors: 0)"
+    res "$suite.note=$count $artifact cases inside mvn verify, $skipped skipped (Failures: 0, Errors: 0); skips reconciled by identity in the parity-coverage suite"
   else
     KEEP_LOG=1
     res "$suite.status=FAIL"

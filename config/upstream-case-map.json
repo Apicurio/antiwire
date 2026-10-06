@@ -1,5 +1,5 @@
 {
-  "comment": "TASK-14: reconciliation map from pinned upstream test files to port artifacts. statuses: adopted (name-set equality modulo renames/missing), partial (adopted semantics plus a recorded missing set), deferred (owner required, no port yet), excluded (reason required). missing entries carry per-case reasons. Sources: docs/task9-case-accounting.md, docs/task13-case-accounting.md.",
+  "comment": "TASK-14: reconciliation map from pinned upstream test files to port artifacts. statuses: adopted (name-set equality modulo renames/missing), partial (adopted semantics plus a recorded missing set), deferred (owner required, no port yet), excluded (reason required). missing entries carry per-case reasons. skipped entries (TASK-14.2) are the lawful dispositions for port cases that are @Disabled/@Ignore without a mirrored upstream ignore: each carries a reason plus exactly one of exclusion (a DEC reference naming the declared non-ported feature) or owner (the TASK that owes the case; release validation rejects while any owner skip is open). fixture entries must carry no test methods on either side (validated). Sources: docs/task9-case-accounting.md, docs/task13-case-accounting.md.",
   "modules": {
     "wire-runtime/src/commonTest/kotlin": {
       "root": "wire-runtime/src/commonTest/kotlin",
@@ -20,14 +20,10 @@
           "port": "wire-runtime-java/src/test/java/com/squareup/wire/ProtoAdapterTest.java"
         },
         "com/squareup/wire/DurationTest.kt": {
-          "port": "wire-runtime-java/src/test/kotlin/com/squareup/wire/DurationTest.java"
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/DurationTest.java"
         },
         "com/squareup/wire/InstantTest.kt": {
-          "port": "wire-runtime-java/src/test/kotlin/com/squareup/wire/InstantTest.java",
-          "missing": {
-            "negativeNearZero": "common-only ofEpochSecond normalization; JVM actual covered by negativeNanoRejectedLikeTheJvmUpstream boundary lock (task9 ledger)",
-            "negativeValues": "common-only ofEpochSecond normalization; JVM actual covered by negativeNanoRejectedLikeTheJvmUpstream boundary lock (task9 ledger)"
-          }
+          "port": "wire-runtime-java/src/test/java/com/squareup/wire/InstantTest.java"
         },
         "com/squareup/wire/FieldMaskTest.kt": {
           "port": "wire-runtime-java/src/test/java/com/squareup/wire/FieldMaskTest.java"
@@ -71,8 +67,7 @@
           "port": "wire-tests-java/src/test/java/com/squareup/wire/RuntimeMessageAdapterRedactTest.java"
         },
         "com/squareup/wire/TestAllTypes.java": {
-          "port": "wire-tests-java/src/test/java/com/squareup/wire/TestAllTypes.java",
-          "fixture": true
+          "port": "wire-tests-java/src/test/java/com/squareup/wire/TestAllTypes.java"
         },
         "com/squareup/wire/TestAllTypesData.java": {
           "port": "wire-tests-java/src/test/java/com/squareup/wire/TestAllTypesData.java",
@@ -243,22 +238,206 @@
           "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/InteropChecker.java"
         },
         "com/squareup/wire/InteropTest.kt": {
-          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/InteropTest.java"
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/InteropTest.java",
+          "skipped": {
+            "boxOneOfsKotlin": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the Kotlin boxed-oneof model shape (OneOf(InteropBoxOneOfK*.OPTION_A, ...)) is a Kotlin-generator product; the oracle module generates the Java models only."
+            },
+            "buildersOnlyMessage": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the builders-only Kotlin model (squareup.proto2.kotlin.buildersonly) is a Kotlin-generator product the oracle module does not generate."
+            },
+            "keywordNamedConstant": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the Easter fixtures (squareup.proto3.kotlin.unrecognized_constant on the wire side, EasterOuterClass on the protoc side) are Kotlin-generator proto packages that the oracle module's pinned fixture generation excludes."
+            },
+            "repeatedEnums": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the only live upstream check builds InteropRepeatedEnumsK3 with an Unrecognized(8) constant; the Kotlin sealed-enum shape is a Kotlin-generator product and the Java enum model cannot express an unrecognized constant. Upstream's Java-model check is commented out upstream (\\ Without EnumMode.SEALED_CLASS, Wire fails to print the unknown constant\\ ."
+            },
+            "sealedOneOfsKotlin": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: sealed oneofs are a Kotlin-generator product; the oracle module generates the Java models only."
+            },
+            "sealedOneOfsKotlin_BuildersOnly": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: sealed oneofs with builders-only Kotlin models are Kotlin-generator products; the oracle module generates the Java models only."
+            },
+            "unknownEnumsWithUnrecognizedConstant": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the wire side of this case is the Kotlin unrecognized-constant enum shape (EasterK3 with Unrecognized values), a Kotlin-generator product the oracle module does not generate."
+            }
+          }
         },
         "com/squareup/wire/Proto2WireProtocCompatibilityTests.kt": {
-          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/Proto2WireProtocCompatibilityTests.java"
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/Proto2WireProtocCompatibilityTests.java",
+          "skipped": {
+            "allTypesSerialization": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the proto2 AllTypes fixtures and their extensions live in the Kotlin proto package com.squareup.wire.proto2.kotlin.alltypes, excluded by the oracle module's pinned fixture generation; no Java-model equivalent was generated."
+            },
+            "allTypesSerializationWithEmptyOrIdentityValues": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: same fixtures as allTypesSerialization (com.squareup.wire.proto2.kotlin. alltypes), excluded by the oracle module's pinned fixture generation."
+            },
+            "encodingAndDecodingOfUnrecognizedEnumConstants_knownValue_proto2Message": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the Easter fixtures live in the Kotlin proto package com.squareup.wire.proto2.kotlin.unrecognized_constant, excluded by the oracle module's pinned fixture generation; no Java-model equivalent was generated."
+            },
+            "encodingAndDecodingOfUnrecognizedEnumConstants_negativeValue_proto2Message": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the Easter fixtures live in the Kotlin proto package com.squareup.wire.proto2.kotlin.unrecognized_constant, excluded by the oracle module's pinned fixture generation; no Java-model equivalent was generated."
+            },
+            "encodingAndDecodingOfUnrecognizedEnumConstants_unknownValue_proto2Message": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the Easter fixtures live in the Kotlin proto package com.squareup.wire.proto2.kotlin.unrecognized_constant, excluded by the oracle module's pinned fixture generation; no Java-model equivalent was generated."
+            },
+            "mapKeysAndValuesDefaultsToTheirRespectiveIdentityValue": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the MapTypes fixtures live in the Kotlin proto package com.squareup.wire.proto2.kotlin, excluded by the oracle module's pinned fixture generation; no Java-model equivalent was generated."
+            },
+            "protocDontThrowUpOnWireExtensions": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the WireMessage extension fixtures live in the Kotlin proto packages com.squareup.wire.proto2.wire.extensions and com.squareup.wire.proto2.kotlin.extensions, excluded by the oracle module's pinned fixture generation."
+            },
+            "repeatedEnumIsPackedAndLengthIsZero": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the QuiltContainer/Quilt/RepeatedEnum fixtures live in the Kotlin proto package com.squareup.wire.proto2.kotlin.interop, excluded by the oracle module's pinned fixture generation; no Java-model equivalent was generated."
+            },
+            "simpleMessage": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the SimpleMessage fixtures live in the Kotlin proto package com.squareup.wire.proto2.kotlin.simple, which the oracle module's pinned fixture generation excludes; no Java-model equivalent was generated."
+            }
+          }
         },
         "com/squareup/wire/Proto3WireProtocCompatibilityTests.kt": {
-          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/Proto3WireProtocCompatibilityTests.java"
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/Proto3WireProtocCompatibilityTests.java",
+          "skipped": {
+            "all64JsonProtocMaxValue": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: All64OuterClass is a kotlin-package fixture (all64.proto), not generated in this module."
+            },
+            "all64JsonProtocMinValue": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: All64OuterClass is a kotlin-package fixture (all64.proto), not generated in this module."
+            },
+            "deserializeDefaultAllTypesProtoc": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the JSON golden (all_types_proto3.json) targets the kotlin-package AllTypes model (my_-prefixed field names); see the serializeDefaultAllTypesProtoc note."
+            },
+            "deserializeExplicitIdentityAllTypesProtoc": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the JSON golden (all_types_explicit_identity_proto3.json) targets the kotlin-package AllTypes model (my_-prefixed field names); see the serializeDefaultAllTypesProtoc note."
+            },
+            "deserializeIdentityAllTypesProtoc": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the JSON golden (all_types_identity_proto3.json) targets the kotlin-package AllTypes model (my_-prefixed field names); see the serializeDefaultAllTypesProtoc note."
+            },
+            "encodingAndDecodingOfUnrecognizedEnumConstants_knownValue_proto3Message": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: easter fixtures live only in the kotlin package (unrecognized_constant); see the negativeValue case note."
+            },
+            "encodingAndDecodingOfUnrecognizedEnumConstants_negativeValue_proto3Message": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: easter fixtures live only in the kotlin package (unrecognized_constant); EasterK3's Unrecognized sealed-enum shape is the Kotlin model itself and the protoc reference (EasterOuterClass) is generated from the same excluded package."
+            },
+            "encodingAndDecodingOfUnrecognizedEnumConstants_unknownValue_proto3Message": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: easter fixtures live only in the kotlin package (unrecognized_constant); see the negativeValue case note."
+            },
+            "instantProto": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the Timestamp well-known interop has no java-package fixture; upstream's PizzaDeliveryK/PizzaOuterClass (kotlin packages) are not generated in this module."
+            },
+            "mapKeysAndValuesDefaultsToTheirRespectiveIdentityValue": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: MapTypesOuterClass and MapTypesK are kotlin-package fixtures (map_types.proto), not generated in this module."
+            },
+            "protocAndRequiredExtensions": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: fixtures live only in the kotlin packages (required_extension.proto is not generated: com.squareup.wire.proto3.kotlin.requiredextension on the wire side and squareup.proto3.kotlin.requiredextension on the protoc side)."
+            },
+            "protocDontThrowUpOnWireExtensions": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: both fixtures are kotlin-package (WireMessageOuterClass from squareup.proto3.kotlin.extensions, WireMessage from squareup.proto3.wire.extensions), not generated in this module."
+            },
+            "protocJson": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: PizzaOuterClass and PizzaDeliveryK are kotlin-package fixtures (pizza.proto), not generated in this module; the case's assertJsonEquals also relies on the excluded moshi JSON surface."
+            },
+            "protocValidationCamelCaseJson": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: CamelCaseOuterClass is a kotlin-package fixture (camel_case.proto), not generated in this module."
+            },
+            "serializeDefaultAllTypesProtoc": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the JSON golden (all_types_proto3.json) is written for the kotlin-package AllTypes model, whose scalar fields are named my_int32/my_uint32/...; the java-package AllTypes proto generated here uses unprefixed names (int32/uint32/...). Expected values may not change (translation-conventions.md 6.4), so the golden cannot be reused."
+            },
+            "serializeExplicitIdentityAllTypesProtoc": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the JSON golden (all_types_explicit_identity_proto3.json) targets the kotlin-package AllTypes model (my_-prefixed field names); see the serializeDefaultAllTypesProtoc note."
+            },
+            "serializeIdentityAllTypesProtoc": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the JSON golden (all_types_identity_proto3.json) targets the kotlin-package AllTypes model (my_-prefixed field names); see the serializeDefaultAllTypesProtoc note."
+            },
+            "validateAll32MaxJson": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: All32OuterClass is a kotlin-package fixture (all32.proto), not generated in this module."
+            },
+            "validateAll32MinJson": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: All32OuterClass is a kotlin-package fixture (all32.proto), not generated in this module."
+            },
+            "validateMapTypesJson": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: MapTypesOuterClass is a kotlin-package fixture (map_types.proto), not generated in this module."
+            }
+          }
         },
         "com/squareup/wire/LargeFieldNumberInteropTest.kt": {
-          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/LargeFieldNumberInteropTest.java"
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/LargeFieldNumberInteropTest.java",
+          "skipped": {
+            "fieldNumberAtAndAboveBoundary": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: LargeFieldMessage fixtures are in the Kotlin proto package com.squareup.wire.proto2.kotlin.largefield, excluded by the oracle module's pinned fixture generation; no Java-model equivalent was generated."
+            },
+            "fieldNumberBelowBoundary": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: LargeFieldMessage fixtures are in the Kotlin proto package com.squareup.wire.proto2.kotlin.largefield, excluded by the oracle module's pinned fixture generation; no Java-model equivalent was generated."
+            }
+          }
         },
         "com/squareup/wire/StructTest.kt": {
-          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/StructTest.java"
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/StructTest.java",
+          "skipped": {
+            "kotlinListsAreDeeplyImmutable": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: Kotlin-generator model fixture (AllStructsK) is not generated"
+            },
+            "kotlinMapsAreDeeplyImmutable": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: Kotlin-generator model fixture (AllStructsK) is not generated"
+            },
+            "kotlinStructsInListValuesAreDeeplyImmutable": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: Kotlin-generator model fixture (AllStructsK) is not generated"
+            },
+            "kotlinStructsInMapValuesAreDeeplyImmutable": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: Kotlin-generator model fixture (AllStructsK) is not generated"
+            }
+          }
         },
         "com/squareup/wire/EmptyRoundTripTest.kt": {
-          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/EmptyRoundTripTest.java"
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/EmptyRoundTripTest.java",
+          "skipped": {
+            "allEmpty": {
+              "owner": "TASK-16.1",
+              "reason": "Generated-code Empty divergence (wire-side AllEmpty model not generated; TASK-16/DEC-6) (recorded by TASK-14.2; the owning task stays open)"
+            }
+          }
         },
         "com/squareup/wire/DurationRoundTripTest.kt": {
           "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/DurationRoundTripTest.java"
@@ -267,10 +446,38 @@
           "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/InstantRoundTripTest.java"
         },
         "com/squareup/wire/FieldMaskRoundTripTest.kt": {
-          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/FieldMaskRoundTripTest.java"
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/FieldMaskRoundTripTest.java",
+          "skipped": {
+            "degeneratePathsMatchProtobufJava": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: JSON adapters (moshi/gson) and protobuf-java-util are not ported"
+            },
+            "jsonRoundTrip": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: JSON adapters (moshi/gson) and protobuf-java-util are not ported"
+            },
+            "jsonRoundTripPackedInAny": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: JSON adapters (moshi/gson) and protobuf-java-util are not ported"
+            }
+          }
         },
         "com/squareup/wire/SchemaEncoderInteropTest.kt": {
-          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/SchemaEncoderInteropTest.java"
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/SchemaEncoderInteropTest.java",
+          "skipped": {
+            "proto2AllOptions": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: Kotlin-package alloptions fixtures are excluded"
+            },
+            "proto2AllTypes": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: Kotlin-package proto2 alltypes fixtures are excluded"
+            },
+            "proto2InteropService": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: Kotlin-package interop_service.proto and its gRPC fixtures are excluded"
+            }
+          }
         },
         "com/squareup/wire/ProtocWrappersHelper.kt": {
           "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/ProtocWrappersHelper.java"
@@ -303,7 +510,13 @@
       "root": "wire-compiler/src/test/java",
       "files": {
         "com/squareup/wire/CommandLineOptionsTest.kt": {
-          "port": "wire-java-generator/src/test/java/com/squareup/wire/CommandLineOptionsTest.java"
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/CommandLineOptionsTest.java",
+          "skipped": {
+            "kotlinEnumMode": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: --kotlin_out and --kotlin_enum_mode belong to the excluded Kotlin generator"
+            }
+          }
         },
         "com/squareup/wire/ManifestParseTest.kt": {
           "port": "wire-java-generator/src/test/java/com/squareup/wire/ManifestParseTest.java"
@@ -319,6 +532,20 @@
           "port": "wire-java-generator/src/test/java/com/squareup/wire/WireCompilerTest.java",
           "renames": {
             "default": "default_"
+          },
+          "skipped": {
+            "allFlags": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the flag set includes --kotlin_out/--swift_out and Kotlin-only flags the port rejects"
+            },
+            "allTargetsAndAllOptions": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts KotlinTarget and SwiftTarget outputs the port cannot construct"
+            },
+            "treeShaking": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: --kotlin_out and the KotlinTarget assertions cover the excluded Kotlin generator"
+            }
           }
         },
         "com/squareup/wire/schema/CycleCheckerTest.kt": {
@@ -335,7 +562,125 @@
           "port": "wire-java-generator/src/test/java/com/squareup/wire/schema/OptionsLinkingTest.java"
         },
         "com/squareup/wire/schema/WireRunTest.kt": {
-          "port": "wire-java-generator/src/test/java/com/squareup/wire/schema/WireRunTest.java"
+          "port": "wire-java-generator/src/test/java/com/squareup/wire/schema/WireRunTest.java",
+          "skipped": {
+            "conflictingExtends": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts generated .kt files through KotlinTarget"
+            },
+            "crashWhenServiceGenerationConflicts": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the conflict needs Kotlin service generation; only one generator is ported"
+            },
+            "customLogger": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts KotlinTarget artifactHandled logs (target=Kotlin)"
+            },
+            "emitAppliedOptions": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: expectations list .java and .kt files from paired Java and Kotlin targets"
+            },
+            "emitDeclaredOptions": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: expectations list .java and .kt files from paired Java and Kotlin targets"
+            },
+            "emitProtoReader32": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: emitProtoReader32 is a Kotlin-generator-only emission mode"
+            },
+            "excludesTypeName": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: expectations mix .kt and .java files via KotlinTarget"
+            },
+            "excludesWildcard": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: expectations mix .kt and .java files via KotlinTarget"
+            },
+            "includeSubTypes": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts a generated .kt file through KotlinTarget"
+            },
+            "includeSubTypesWithPruning": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts a generated .kt file through KotlinTarget"
+            },
+            "javaDoesNotClaimServices": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts Kotlin-generated service clients; the Kotlin generator is not ported"
+            },
+            "javaPackageWithUnusualButHarmlessSegmentsIsAccepted": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts KotlinTarget output; the Kotlin generator is not ported"
+            },
+            "javaThenKt": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: KotlinTarget generation; the Kotlin generator is not ported"
+            },
+            "ktOnly": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: KotlinTarget generation; the Kotlin generator is not ported"
+            },
+            "ktOnlyWithBlockingService": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: KotlinTarget BLOCKING RpcCallStyle; the Kotlin generator is not ported"
+            },
+            "ktOnlyWithService": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: KotlinTarget service generation; the Kotlin generator is not ported"
+            },
+            "ktOnlyWithServiceAsSingleMethod": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: KotlinTarget single-method services; the Kotlin generator is not ported"
+            },
+            "ktThenJava": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: KotlinTarget generation; the Kotlin generator is not ported"
+            },
+            "nonExclusiveTypeEmittedTwice": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: the case's subject is the same type emitted by two generators; only one is ported"
+            },
+            "opaqueBeforeGeneratingKtThenJava": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: KotlinTarget ByteString field assertions; the Kotlin generator is not ported"
+            },
+            "optionNameIsPreciseToAvoidConflict_kotlin": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: KotlinTarget generation; the Kotlin generator is not ported"
+            },
+            "permitUnusedRootsOrPrunes": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts a generated .kt file through KotlinTarget"
+            },
+            "proto3ReadAlways": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts generated .kt files through KotlinTarget"
+            },
+            "protoOnly": {
+              "owner": "TASK-16.2",
+              "reason": "ProtoTarget is not part of the ported compiler surface (TASK-16 scope) (recorded by TASK-14.2; the owning task stays open)"
+            },
+            "protoTargetNeverEmitsGoogleProtobufDescriptor": {
+              "owner": "TASK-16.2",
+              "reason": "ProtoTarget is not part of the ported compiler surface (TASK-16 scope) (recorded by TASK-14.2; the owning task stays open)"
+            },
+            "skipAppliedOptions": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: expectations list .java and .kt files from paired Java and Kotlin targets"
+            },
+            "skipProtoReader32": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: ProtoReader32 emission is a Kotlin-generator-only feature"
+            },
+            "treeShakingRoots": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts a generated .kt file through KotlinTarget"
+            },
+            "treeShakingRubbish": {
+              "exclusion": "DEC-6",
+              "reason": "DEC-6: asserts a generated .kt file through KotlinTarget"
+            }
+          }
         }
       }
     }

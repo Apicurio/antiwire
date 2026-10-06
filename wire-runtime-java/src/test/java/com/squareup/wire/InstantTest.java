@@ -16,9 +16,7 @@
 package com.squareup.wire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import okio.ByteString;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -42,12 +40,21 @@ public class InstantTest {
     assertEquals(java.time.Instant.ofEpochSecond(0L, 0L), java.time.Instant.ofEpochSecond(0L, 0L));
   }
 
-  // Upstream's negativeNearZero and negativeValues cases pass negative nanos to the common
-  // ofEpochSecond, which normalizes; the JVM actual (and this port, which follows it) maps to
-  // java.time.Instant.ofEpochSecond, which throws for negative nano. Those cases exercise the
-  // non-JVM normalization and are excluded here exactly as the JVM upstream excludes them.
-  @Test public void negativeNanoRejectedLikeTheJvmUpstream() {
-    assertThrows(java.time.DateTimeException.class,
-        () -> java.time.Instant.ofEpochSecond(0L, -200_000_000L));
+  // Upstream's negative cases pass negative nanos to the common ofEpochSecond, which
+  // normalizes; java.time.Instant.ofEpochSecond normalizes the same way (verified:
+  // ofEpochSecond(0, -200M) is -1s + 800M nano), so both cases run here unchanged.
+  // TASK-14.2: they were previously recorded missing on the false premise that the JVM
+  // factory rejects negative nano; the port's own never-compiled boundary lock asserted
+  // that premise and failed the first time it ran, so the cases are ported for real.
+  @Test public void negativeNearZero() {
+    java.time.Instant wireMessage = java.time.Instant.ofEpochSecond(0L, -200_000_000L);
+    assertEquals(-1L, wireMessage.getEpochSecond());
+    assertEquals(800_000_000, wireMessage.getNano());
+  }
+
+  @Test public void negativeValues() {
+    java.time.Instant wireMessage = java.time.Instant.ofEpochSecond(-1L, -200_000_000L);
+    assertEquals(-2L, wireMessage.getEpochSecond());
+    assertEquals(800_000_000, wireMessage.getNano());
   }
 }
