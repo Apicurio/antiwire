@@ -8,8 +8,9 @@ corpus translated with the TASK-16 compiler/generator batch, in the format of
 per-file adaptations, disabled cases, and port changes the adoption forced. Upstream paths are
 relative to the pinned clone (square/wire tag 7.1.0, default `/tmp/wire`).
 
-Totals: 190 upstream cases across 14 upstream test files; 157 ported and running, 33 disabled
-with recorded reasons, 0 missing.
+Totals: 190 upstream cases across 14 upstream test files; 159 ported and running, 31 disabled
+with recorded reasons, 0 missing (protoOnly and protoTargetNeverEmitsGoogleProtobufDescriptor
+revived by TASK-16.2, 2026-10-06).
 
 ## Batch 1: wire-schema-java/src/test/java (TASK-13 deferrals adopted here)
 
@@ -33,7 +34,7 @@ with recorded reasons, 0 missing.
 | wire-compiler CommandLineOptionsTest.kt | 8 ported, 1 disabled | .../CommandLineOptionsTest.java | assertk to JUnit 5; package-visible compiler fields read directly. Disabled (DEC-6): kotlinEnumMode. |
 | wire-compiler ManifestParseTest.kt | 3 ported | .../ManifestParseTest.java | The internal top-level parseManifestModules is the port's package-private WireCompiler.parseManifestModules; unknown-key assertions keep upstream kaml wording. |
 | wire-compiler StringWireLogger.kt | helper | .../StringWireLogger.java | Kotlin string templates to concatenation; trimMargin log shapes probed against the real Kotlin stdlib (no trailing newline in the unused* blocks). |
-| wire-compiler schema/WireRunTest.kt | 44 ported, 29 disabled | .../schema/WireRunTest.java | FakeFileSystem to @TempDir: every target out directory is rooted at the temp directory (upstream's FakeFileSystem roots them at "/"), so the crashWhenTypeGenerationConflicts message interpolates the absolute out directory; exact messages otherwise verbatim. KotlinTarget substituted with JavaTarget only where no assertion mentions Kotlin output (myEventListenerSuccess, unusedTreeShakingRoots, unusedTreeShakingPrunes, unusedTreeShakingRootsAndPrunes, skipDeclaredOptions, importNotFoundIncludesReferencingFile); javaPackageForJvmLanguages keeps its Java half and drops the Kotlin half (TASK-15 mixed-case convention). Disabled: 27 DEC-6 (Kotlin generator expectations) and 2 for the unported ProtoTarget (protoOnly, protoTargetNeverEmitsGoogleProtobufDescriptor; a TASK-16 scope gap, recorded below). |
+| wire-compiler schema/WireRunTest.kt | 46 ported, 27 disabled | .../schema/WireRunTest.java | FakeFileSystem to @TempDir: every target out directory is rooted at the temp directory (upstream's FakeFileSystem roots them at "/"), so the crashWhenTypeGenerationConflicts message interpolates the absolute out directory; exact messages otherwise verbatim. KotlinTarget substituted with JavaTarget only where no assertion mentions Kotlin output (myEventListenerSuccess, unusedTreeShakingRoots, unusedTreeShakingPrunes, unusedTreeShakingRootsAndPrunes, skipDeclaredOptions, importNotFoundIncludesReferencingFile); javaPackageForJvmLanguages keeps its Java half and drops the Kotlin half (TASK-15 mixed-case convention). Disabled: 27 DEC-6 (Kotlin generator expectations). protoOnly and protoTargetNeverEmitsGoogleProtobufDescriptor run against the ported ProtoTarget since TASK-16.2 (2026-10-06), inputs and expectations verbatim. |
 | wire-compiler schema/CycleCheckerTest.kt | 6 ported | .../schema/CycleCheckerTest.java | FakeFileSystem to @TempDir; cycle messages print import paths only, so they run verbatim. |
 | wire-compiler schema/LinkerTest.kt | 14 ported | .../schema/LinkerTest.java | FakeFileSystem to @TempDir (location lists and opaque-type messages interpolate the temp roots); the proto-path root is materialized because the port loader rejects missing roots; schemaIsDeterministicEvenIfProtoPathOrderIsNot reverses list() per directory because the vendored okio keeps listRecursively final. |
 | wire-compiler schema/OptionsLinkingTest.kt | 5 ported | .../schema/OptionsLinkingTest.java | FakeFileSystem to @TempDir; Kotlin mapOf to an insertion-ordered LinkedHashMap helper; option maps and messages verbatim. |
@@ -57,10 +58,14 @@ with recorded reasons, 0 missing.
 
 ## Reported divergences (no port change; recorded, not hidden)
 
-- ProtoTarget is not part of the ported compiler surface, so `protoOnly` and
-  `protoTargetNeverEmitsGoogleProtobufDescriptor` cannot run. Upstream's ProtoTarget emits
-  `.proto` files and lives in wire-schema; TASK-16's production batch did not port it. If proto
-  emission becomes in scope, both cases revive verbatim against @TempDir trees.
+- ProtoTarget was not part of the ported compiler surface when this batch landed, so
+  `protoOnly` and `protoTargetNeverEmitsGoogleProtobufDescriptor` could not run. Resolved
+  (TASK-16.2, 2026-10-06): the maintainer retained ProtoTarget `.proto` emission in the
+  initial release scope (docs/decisions.md, DEC-6 scope note), `ProtoTarget` is ported into
+  the generator module beside `JavaTarget` and `CustomTarget`, and both cases now run with
+  inputs and expectations verbatim. The CLI surface is unchanged: upstream's compiler exposes
+  no proto output flag (its only construction sites are the excluded Gradle plugin and API
+  callers), so the port mirrors exactly that.
 - The port's `Profile` returns target names as strings and `AdapterConstant` without poet
   classes (OPEN-2 decision, recorded in Profile's javadoc); ProfileLoaderTest asserts the same
   values in string form.
@@ -88,5 +93,7 @@ with recorded reasons, 0 missing.
   ManifestPartitionTest, 4 ProfileLoaderTest, 4 ProfileParserTest, 7 TypeMoverTest; the 3
   revived SchemaLoaderTest cases were already present as skipped and now execute).
 - `JAVA_HOME=~/.sdkman/candidates/java/17.0.12-tem mvn -pl wire-java-generator test`: green,
-  171 tests, 33 skipped (all disabled with reasons above).
+  171 tests, 33 skipped (all disabled with reasons above). Re-run after TASK-16.2 (JDK
+  21.0.11-tem): green, 188 tests, 31 skipped (the two ProtoTarget cases revived here; the
+  executed total also moved with TASK-16.1's and TASK-27's port-only additions).
 - `python3 scripts/check-parity-coverage.py`: PASS, 0 deferred files.

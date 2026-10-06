@@ -39,8 +39,9 @@ mapped port file, and enforces per `config/upstream-case-map.json`:
   `linkExtendTypeInOuterMessage`, and TestAllTypes `testUnknownFieldsTypeMismatch`) or
   the map records the skip with a reason and exactly one of:
   `exclusion` naming a DEC (a declared non-ported feature, DEC-6 today) or `owner` naming
-  the TASK that owes the case (currently the two ProtoTarget cases under TASK-16.2 and
-  the generated-model Empty case under TASK-16.1). Any other skip fails with the case
+  the TASK that owes the case (none remain open: the generated-model Empty case closed
+  with TASK-16.1 and the two ProtoTarget cases closed with TASK-16.2's port). Any other
+  skip fails with the case
   identity; the annotation's reason string alone is never a disposition. Class-level
   disables need a `skipped_class` record.
 - `fixture`: a fixture entry must carry no `@Test` methods on either side; an executable

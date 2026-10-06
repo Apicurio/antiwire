@@ -47,7 +47,7 @@
       "name": "compiler-tests",
       "status": "ACTIVE",
       "owner": "TASK-16",
-      "description": "Java generator and compiler behavior: wire-java-generator cases inside mvn verify (33 disabled: 31 recorded DEC-6 Kotlin-generator exclusions, 2 ProtoTarget cases owned by TASK-16.2; per-case dispositions in config/upstream-case-map.json; the module total moves with new port-only cases); ledger docs/task16-case-accounting.md; interim module-total key, per-case reconciliation via parity-coverage"
+      "description": "Java generator and compiler behavior: wire-java-generator cases inside mvn verify (31 disabled, all recorded DEC-6 Kotlin-generator exclusions; the two ProtoTarget cases were revived by TASK-16.2; per-case dispositions in config/upstream-case-map.json; the module total moves with new port-only cases); ledger docs/task16-case-accounting.md; interim module-total key, per-case reconciliation via parity-coverage"
     },
     {
       "name": "security-corpus",

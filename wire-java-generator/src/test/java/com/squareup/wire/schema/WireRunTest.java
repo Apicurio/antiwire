@@ -53,9 +53,12 @@ import org.junit.jupiter.api.io.TempDir;
  * substituted with JavaTarget only in the cases whose assertions never mention Kotlin output
  * (myEventListenerSuccess, the three unusedTreeShaking* cases, skipDeclaredOptions, and
  * importNotFoundIncludesReferencingFile), keeping every asserted string untouched. Cases whose
- * inputs or expectations require the Kotlin generator, the unported ProtoTarget, or the
- * Kotlin-specific ProtoReader32 emission are {@code @Disabled} naming DEC-6 with the reason
- * recorded in this header and in the TASK-16 ledger. javaPackageForJvmLanguages keeps only its
+ * inputs or expectations require the Kotlin generator or the Kotlin-specific ProtoReader32
+ * emission are {@code @Disabled} naming DEC-6 with the reason recorded in this header and in
+ * the TASK-16 ledger. The ProtoTarget cases (protoOnly,
+ * protoTargetNeverEmitsGoogleProtobufDescriptor) run against the ported ProtoTarget since
+ * TASK-16.2 with the same inputs and expectations as upstream.
+ * javaPackageForJvmLanguages keeps only its
  * Java half (the Kotlin half of that mixed case is dropped, TASK-15 convention).
  */
 public class WireRunTest {
@@ -343,14 +346,44 @@ public class WireRunTest {
   }
 
   @Test
-  @Disabled("ProtoTarget is not part of the ported compiler surface (TASK-16 scope)")
-  public void protoOnly() {
-    // Upstream regenerates .proto files through ProtoTarget, which the port does not carry.
+  public void protoOnly() throws IOException {
+    writeBlueProto();
+    writeRedProto();
+    writeTriangleProto();
+
+    WireRun wireRun = newWireRun(
+        Collections.singletonList(location("colors/src/main/proto")),
+        Collections.singletonList(location("polygons/src/main/proto")),
+        new ProtoTarget(outDir("generated/proto")));
+    wireRun.execute(okio.FileSystem.SYSTEM, logger);
+
+    assertContainsExactlyInAnyOrderAsRelativePaths(filesUnder("generated"),
+        "generated/proto/squareup/colors/blue.proto",
+        "generated/proto/squareup/colors/red.proto");
+    assertTrue(readUtf8("generated/proto/squareup/colors/blue.proto")
+        .contains("message Blue {"));
+    assertTrue(readUtf8("generated/proto/squareup/colors/red.proto")
+        .contains("message Red {"));
   }
 
   @Test
-  @Disabled("ProtoTarget is not part of the ported compiler surface (TASK-16 scope)")
-  public void protoTargetNeverEmitsGoogleProtobufDescriptor() {
+  public void protoTargetNeverEmitsGoogleProtobufDescriptor() throws IOException {
+    writeSquareProto();
+    writeMinimalGoogleProtobufProtos();
+    writeMinimalWireProtos();
+
+    WireRun wireRun = newWireRun(
+        Arrays.asList(
+            location("polygons/src/main/proto"),
+            location("google/src/main/proto"),
+            location("wire/src/main/proto")),
+        Collections.emptyList(),
+        new ProtoTarget(outDir("generated/proto")));
+    wireRun.execute(okio.FileSystem.SYSTEM, logger);
+
+    // We're happy if google.protobuf.descriptor isn't here.
+    assertContainsExactlyInAnyOrderAsRelativePaths(filesUnder("generated"),
+        "generated/proto/squareup/polygons/square.proto");
   }
 
   @Test

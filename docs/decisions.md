@@ -28,6 +28,8 @@ Every relevant upstream test case is mandatory, including full runtime and refle
 
 JSON adapters (gson-support, moshi-adapter), the gRPC client, the gRPC reflection product `wire-reflector` and its grpcurl interop suite, Kotlin and Swift generator products, the Gradle plugin, editions support (upstream itself rejects editions at the pinned tag), and non-JVM targets are excluded from the initial release. The wire-reflector exclusion is a product exclusion only: the runtime's own JVM reflection machinery is not gRPC reflection and stays mandatory test scope under DEC-5. Upstream generators may still run as isolated build-time fixture tools under DEC-4. Consequence: the 7.1.0 JSON null-element rejection fix lives in the excluded adapters and is recorded as out of scope, not silently dropped. Rationale: research report F1, F4.
 
+**DEC-6 scope note, 2026-10-06 (maintainer decision):** ProtoTarget `.proto` emission is retained in the initial release scope. DEC-6 itself is unchanged because its exclusion list never named ProtoTarget or `.proto` emission; TASK-16's delivery framing around the Java-target compiler did not by itself narrow the retained compiler surface. TASK-16.2 therefore ports `ProtoTarget` to the optional generator module and revives its two upstream cases (`protoOnly`, `protoTargetNeverEmitsGoogleProtobufDescriptor`).
+
 ### DEC-7 Consumer priority: Apicurio first, Kafka deferred
 
 Apicurio Registry is the initial release acceptance target. Apache Kafka is a later adoption target and does not gate the first release. The concrete Kafka use case is a product decision to be named when that phase starts. Rationale: research report F5, F6.

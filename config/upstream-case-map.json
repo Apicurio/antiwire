@@ -650,14 +650,6 @@
               "exclusion": "DEC-6",
               "reason": "DEC-6: asserts generated .kt files through KotlinTarget"
             },
-            "protoOnly": {
-              "owner": "TASK-16.2",
-              "reason": "ProtoTarget is not part of the ported compiler surface (TASK-16 scope) (recorded by TASK-14.2; the owning task stays open)"
-            },
-            "protoTargetNeverEmitsGoogleProtobufDescriptor": {
-              "owner": "TASK-16.2",
-              "reason": "ProtoTarget is not part of the ported compiler surface (TASK-16 scope) (recorded by TASK-14.2; the owning task stays open)"
-            },
             "skipAppliedOptions": {
               "exclusion": "DEC-6",
               "reason": "DEC-6: expectations list .java and .kt files from paired Java and Kotlin targets"
