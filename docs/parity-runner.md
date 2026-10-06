@@ -1,8 +1,10 @@
 # Parity runner (TASK-14)
 
 One reproducible command verifies the port against the pinned upstream: `./scripts/verify.sh`.
-Its `parity-coverage` suite proves provenance and reconciles the upstream test inventory
-against the port artifacts, blocking on lost cases and unrecorded drift.
+Its first step bootstraps the pinned upstream clone (before the build: the clone-dependent
+tests initialize inside `mvn verify`), and its `parity-coverage` suite proves provenance and
+reconciles the upstream test inventory against the port artifacts, blocking on lost cases
+and unrecorded drift.
 
 ## Pins and provenance
 
@@ -12,7 +14,12 @@ resolve to (`9f62097dfe4995b5709d001ca0187e30ca0530ef`), plus the build-time fix
 (wire-compiler jars from Maven Central, protobuf-java test oracle 4.36.1).
 `scripts/fetch-upstream.sh` retrieves the clone (default `/tmp/wire`, override with
 `$ANTIWIRE_UPSTREAM` or the first argument), fetches the tag into an existing clone when
-missing, and refuses to proceed when the resolved identity differs from the pins.
+missing, and refuses to proceed when the resolved identity differs from the pins or when
+the worktree carries local modifications: reconciliation reads the working tree, so a
+modified clone is not the pinned sources. `scripts/verify.sh` runs this fetch as a
+prerequisite before `mvn verify` (fail fast with an explicit message, no build), and
+`scripts/test-bootstrap.sh` is the offline regression check covering absent, valid,
+modified, wrong-pin and unreachable clone states with a stubbed mvn.
 
 ## Reconciliation
 

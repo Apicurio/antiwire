@@ -47,3 +47,13 @@ fi
 verify_pin
 # The pin constrains refs; reconciliation reads the working tree, so put the tree AT the pin.
 git -C "$CLONE_PATH" checkout --quiet --detach "$COMMIT"
+
+# A locally modified clone is not the pinned sources: reconciliation reads files, not
+# refs, so a dirty worktree would silently reconcile against edited upstream tests.
+if [ -n "$(git -C "$CLONE_PATH" status --porcelain)" ]; then
+  echo "FAIL: $CLONE_PATH has local modifications; reconciliation reads the working tree," >&2
+  echo "  so a modified clone is rejected. Restore it with:" >&2
+  echo "    git -C $CLONE_PATH checkout --quiet --detach $COMMIT" >&2
+  echo "    git -C $CLONE_PATH clean -fd" >&2
+  exit 1
+fi

@@ -14,6 +14,14 @@
 # MISSING with a not-attributable note (the overall verdict stays FAIL). dependency-policy
 # is the one exception: when the enforcer's bannedDependencies rule is what failed, it is
 # recorded FAIL with that attribution, because the enforcer verdict IS attributable.
+#
+# Clone prerequisite (TASK-14.1): the clone-dependent tests (TestFiles.upstreamClone in
+# SchemaEncoderInteropTest and the golden corpora) run INSIDE mvn verify, so the pinned
+# upstream sources must exist and be validated before the build starts. Before this step
+# existed the fetch lived only in the parity-coverage suite after a green build, so a
+# clean checkout without the clone failed six SchemaEncoderInteropTest static
+# initializers and never reached the fetch. The step reuses an existing correct clone,
+# rejects a wrong or modified one, and fails fast before the long build.
 set -uo pipefail
 
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
@@ -83,6 +91,20 @@ fi
 
 echo "=== antiwire verification entry point: scripts/verify.sh ==="
 echo "build toolchain JVM: ${build_jvm:-(none found: no java executable on PATH)}"
+
+echo
+echo "--- prerequisite: pinned upstream sources (scripts/fetch-upstream.sh) ---"
+if ! bash "$ROOT/scripts/fetch-upstream.sh" >"$LOG" 2>&1; then
+  cat "$LOG"
+  {
+    echo "FATAL: prerequisite failed: the pinned upstream sources could not be obtained and validated."
+    echo "       Clone-dependent tests initialize against the clone inside mvn verify, so no build"
+    echo "       was started. Fix the fetch (network, pin, clone path; docs/parity-runner.md) and"
+    echo "       re-run. ANTIWIRE_UPSTREAM overrides the clone location."
+  } >&2
+  exit "$EXIT_FAIL"
+fi
+cat "$LOG"
 
 echo
 echo "--- suite: build (mvn verify; includes the dependency-policy enforcer rules) ---"
