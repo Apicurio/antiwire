@@ -4,7 +4,7 @@ title: Publish 0.1.0 with attribution and docs
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-06 08:54'
+updated_date: '2026-10-06 11:57'
 labels: []
 milestone: m-11
 dependencies:
@@ -56,6 +56,8 @@ created: 2026-10-02 17:50
 Mechanical release groundwork landed (no publish, no tag, no deploy): docs/license-inventory.md (per-file notice audit, all 159 production sources plus 9 resources, zero missing notices, three working assumptions corrected: IntArrayList family is JetBrains not R8, ProtoReader32AsProtoReader carries the antiwire header not a Nano notice, okio/Base64 carries the ASF header it vendored with; open discrepancy flagged: NOTICE attributes the ProtoReader family and MathMethods to Google under Apache 2.0 while the files carry BSD-style notices, and DEC-12 says NOTICE carries the BSD texts verbatim); README release-contract section; scripts/release-build.sh producing target/release/ (9 jars + MANIFEST.sha256) and the generated docs/release-candidate.md identifying candidate a45b0f0 with the two open gates (footprint signature with the guava pin observation, encodeForward) auto-filled from the live acceptance rows plus the DEC-13 freshness caveat; pom.xml header comment corrected for the resolved DEC-8 (comment-only, effective model identical). verify.sh on JDK 17.0.12: all 12 ACTIVE suites PASS. No AC ticked: publication approval, final-candidate freshness, and the Java 11 published-artifact smoke remain.
 
 GitHub tracking issue: https://github.com/Apicurio/antiwire/issues/3
+
+2026-10-06 progress on prerequisites, on branch audit-m6-followups (not on main, not pushed): TASK-14.1, TASK-14.2, TASK-16.1 and TASK-21.1 are Done, and the whole battery passes on the integrated tree (scripts/verify.sh, all 12 ACTIVE suites). TASK-16.2 stays open and still blocks release completeness: --require-complete rejects its two ProtoTarget cases until the maintainer decides the scope. Not done and still owned here: final-candidate freshness of the footprint and performance records (the runtime and schema changed after c713e9a and 82c3624), regeneration of docs/release-candidate.md for the final candidate, the license inventory entry for Bytes.java, same-candidate Apicurio revalidation, the published-artifact Java 11 check, and explicit publication approval.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
