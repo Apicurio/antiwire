@@ -38,3 +38,12 @@ Feedback as GitHub issues on Apicurio/antiwire, or directly to Paolo.
 ## Honest caveats
 
 Nothing of wire-schema itself is translated yet; today the port covers the encoding core and the vendored buffer engine only. The estimates above are estimates. Upstream Wire still rejects protobuf editions, so the port does too; parity with Wire is the contract, not parity with protoc. And the branch with all of this is not pushed yet, so the links above show the research and backlog state until it lands.
+
+## Correction, 2026-10-06
+
+This note is kept as the record of 2026-10-01. Two statements in it are out of date. The
+`io.apicurio` namespace is now authorized by the maintainer (DEC-8, resolved 2026-10-02 and
+reconfirmed 2026-10-06), so the coordinates are no longer provisional; publishing artifacts
+stays a separate gate (TASK-21 AC#1). The decision record now runs to DEC-14, which records
+the confirmed JDK-typed public API with okio as an internal engine only. See
+[decisions.md](decisions.md).

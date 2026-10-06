@@ -36,7 +36,7 @@ Apicurio Registry is the initial release acceptance target. Apache Kafka is a la
 
 ### DEC-8 Publication and organization boundaries
 
-The intended Maven groupId is `io.apicurio`, explicitly conditional on Apicurio organization namespace and publication authorization; no such authorization is recorded here or assumed. No organization transfer happens now. Defining the plan can precede implementation, but hosting or transferring the repository under an organization requires agreed scope, namespace permission, and maintenance arrangements. Rationale: consumer-slice governance verification.
+The Maven groupId is `io.apicurio`. The namespace use is authorized by the maintainer (directive 2026-10-02, reconfirmed 2026-10-06); authorization to publish artifacts is a separate gate that stays closed until TASK-21's release gates pass and the maintainer approves the release explicitly (TASK-21 AC#1). Defining the plan can precede implementation, but hosting or transferring the repository under an organization requires agreed scope, namespace permission, and maintenance arrangements. Rationale: consumer-slice governance verification.
 
 ### DEC-9 Performance: measure and approve before release
 
@@ -58,7 +58,7 @@ The port is Apache 2.0 overall and preserves upstream attribution verbatim, per 
 
 The release task (TASK-21) depends on the footprint report (TASK-19), the performance report (TASK-20), and the upstream sync demonstration (TASK-23). The transitive closure of those three covers the execution tasks TASK-1 through TASK-20 and TASK-23; the Kafka path (TASK-22) is outside the release gate by DEC-7. M5 therefore carries explicit release gates: measured footprint accepted, measured performance accepted or regressions explicitly accepted, sync procedure demonstrated, full required CI suite green with no pending required case, a release-time recheck that published dependency metadata contains no Kotlin, the Java 11 consumer smoke of DEC-3 run on the final candidate, and freshness checks that every measurement and acceptance record identifies the final candidate's artifact checksums, build revision, and resolved dependency set, with records invalidated by later relevant changes refused.
 
-**DEC-8 resolved 2026-10-02 (maintainer directive):** the provisional `io.github.paoloantinori` coordinates are replaced by `io.apicurio` everywhere (group IDs, the wire-upstream-shaded parity relocation package `io.apicurio.antiwire.parity`, BUILD/docs references). The maintainer's message is the org authorization this decision was waiting on. Measurement docs (footprint, performance) carry dated coordinate-update notes; jar bytes are unchanged by a coordinate switch, recorded checksums remain valid.
+**DEC-8 resolved 2026-10-02 (maintainer directive):** the provisional `io.github.paoloantinori` coordinates are replaced by `io.apicurio` everywhere (group IDs, the wire-upstream-shaded parity relocation package `io.apicurio.antiwire.parity`, BUILD/docs references). The maintainer's message authorized the namespace use only; publishing artifacts stays a separate gate (TASK-21 AC#1). Measurement docs (footprint, performance) carry dated coordinate-update notes; jar bytes are unchanged by a coordinate switch, recorded checksums remain valid.
 
 ## Open technical decisions assigned to M0 (not settled here)
 
@@ -154,9 +154,42 @@ Java 11 consumer validation) stay open and are mapped per criterion in the execu
 ### Supersessions from the execution branch
 
 The execution branch's earlier artifacts are superseded where they conflict with this
-record: its own decision list (D1 through D8, including D5a) is subsumed by DEC-1 through
-DEC-13 above and by this section; its zero-dependency enforcer and its separate CI
-dependency-list assertion are dropped in favor of the reviewed dependency policy and the
-scripts/verify.sh suite registry; its provisional `io.apicurio` coordinates are replaced by
-the DEC-8 provisional namespace io.github.paoloantinori throughout, including the parity
-relocation packages.
+record: its own decision list (D1 through D8) is subsumed by DEC-1 through DEC-13 above
+and by this section, except D5a, which the maintainer confirmed on 2026-10-06 and which is
+recorded below as DEC-14; its zero-dependency enforcer and its separate CI dependency-list
+assertion are dropped in favor of the reviewed dependency policy and the scripts/verify.sh
+suite registry. Its `io.apicurio` coordinates are the final ones (DEC-8, resolved): the
+interim `io.github.paoloantinori` namespace was a placeholder and is gone everywhere,
+including the parity relocation packages.
+
+### DEC-14 Consumer-facing API is JDK-typed; okio stays an internal engine (confirmed 2026-10-06)
+
+The consumer-facing Java API of the port exposes no okio types. Wire-owned `Bytes` and
+JDK-typed canonical members are the public forms for adapters, messages, `AnyMessage`,
+`FieldEncoding` and the schema loading facade (`JdkSchemaLoader`). okio remains legal only as
+the internal engine layer vendored inside `wire-runtime-java` under its original package
+names, with no okio artifact on any production classpath.
+
+Two kinds of okio-typed members remain, and they are different in kind:
+
+1. `@Deprecated` compatibility bridges on the consumer-facing classes. They exist because the
+   pinned-upstream fixtures (wire-tests-java, wire-protoc-compat-java) are generated by the
+   unmodified upstream compiler and reference `okio.ByteString` (DEC-5). The port's own
+   generator emits the `Bytes` forms, and the golden corpus is compared under the documented
+   mapping (OPEN-4).
+2. Engine surfaces that are deliberately NOT deprecated and are not consumer-facing:
+   `ProtoReader`, `ProtoWriter`, `ReverseProtoWriter`, `ProtoReader32`,
+   `ByteArrayProtoReader32` and `ProtoReader32AsProtoReader` (`readBytes()` returns okio),
+   `SchemaLoader`'s okio-typed constructor, `SchemaEncoder.encode(ProtoFile)`, and the
+   `com.squareup.wire.internal.*` packages. [api-surface.md](api-surface.md) lists them under
+   "What remains okio-typed and why". A consumer who uses these classes directly is on the
+   engine API and is not covered by the no-okio statement.
+
+Enforcement is mechanical but bounded. `ConsumerApiSurfaceTest` checks the public
+non-deprecated members of four root classes (`ProtoAdapter`, `Message`, `AnyMessage`,
+`FieldEncoding`) and their public nested classes, and `JdkSchemaLoaderValidationTest`
+(`noOkioTypesInPublicSignatures`) checks `JdkSchemaLoader`. Both fail closed on a new
+okio-typed member on those classes, even a deprecated one. They do not cover other public
+classes: a new okio-typed public member elsewhere is not caught by them and is a review
+item. This refines DEC-2: source compatibility for upstream's okio-typed members is not a
+goal; it is preserved through the deprecated bridge only where the DEC-5 fixtures require it.

@@ -91,7 +91,7 @@ Nothing below implements a feature. TASK-1 through TASK-23 remain To Do. TASK-24
 | F-7 | The Kafka use case is undefined | NOTED and ENCODED. Deferred by DEC-7; TASK-22 AC#1 requires a maintainer-approved scenario and acceptance criteria before any POC; AC#4 forbids claiming community approval or an unverified written policy. |
 | Consumer D3 | Keep the zero-dependency requirement | SUPERSEDED. DEC-4 allows reviewed pure-Java dependencies with measured footprint; no-Kotlin remains the hard rule. |
 | Consumer Q1 | Apicurio adaptation direction | DECIDED. DEC-2 (scope approval; implementation still gated). |
-| Consumer Q2 | Publication groupId | DECIDED. DEC-8: `io.apicurio` intended, conditional on authorization not recorded here or assumed; ENCODED in TASK-21 AC#1. |
+| Consumer Q2 | Publication groupId | DECIDED. DEC-8: `io.apicurio` namespace authorized by the maintainer (2026-10-02, reconfirmed 2026-10-06); publication itself stays gated by TASK-21 AC#1. |
 | Consumer Q3 | Comparison design | SUPERSEDED by X3. |
 
 ## Upstream slice

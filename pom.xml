@@ -60,7 +60,7 @@
       typeSpec, ParameterizedTypeName.rawType).
     -->
     <javapoet.version>1.13.0</javapoet.version>
-    <!-- Guard for DEC-8: provisional placeholder coordinates must never be deployed. -->
+    <!-- Guard for DEC-8: publishing is a separate gate (TASK-21 AC#1); nothing may be deployed before the maintainer approves the release. -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 

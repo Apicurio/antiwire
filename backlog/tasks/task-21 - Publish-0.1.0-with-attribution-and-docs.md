@@ -4,7 +4,7 @@ title: Publish 0.1.0 with attribution and docs
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-06 15:36'
+updated_date: '2026-10-06 18:41'
 labels: []
 milestone: m-11
 dependencies:
@@ -32,7 +32,7 @@ Publish the first release only after the approved compatibility, complete applic
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Explicit maintainer release approval and io.apicurio namespace/publication authorization are recorded before artifacts are published; sources, javadoc and POM metadata accompany a reproducible release build.
+- [ ] #1 Explicit maintainer release approval for publishing artifacts is recorded before anything is published; the io.apicurio namespace itself is already authorized (DEC-8). Sources, javadoc and POM metadata accompany a reproducible release build.
 - [ ] #2 The final release candidate passes all applicable runtime/schema/protoc/compiler/profile/golden checks with no required case pending, and the recorded Apicurio integration evidence matches the same candidate.
 - [ ] #3 Footprint/performance reports and their acceptance records identify the released candidate by build revision, artifact checksums and resolved dependency identities. Relevant changes require remeasurement and renewed acceptance; stale records block release. TASK-23's demonstrated synchronization procedure is available.
 - [ ] #4 The candidate POMs and resolved consumer classpaths contain no Kotlin, Kotlin-backed production dependencies, leaked test/build tools or duplicate upstream/port classes. Production bytecode and API use selected on Java 11 satisfy that baseline, including multi-release dependencies.
@@ -63,6 +63,8 @@ Historical record, recovered verbatim from commit 295ef5f0e7a1e45937417b9f621044
 Mechanical release groundwork landed (no publish, no tag, no deploy): docs/license-inventory.md (per-file notice audit, all 159 production sources plus 9 resources, zero missing notices, three working assumptions corrected: IntArrayList family is JetBrains not R8, ProtoReader32AsProtoReader carries the antiwire header not a Nano notice, okio/Base64 carries the ASF header it vendored with; open discrepancy flagged: NOTICE attributes the ProtoReader family and MathMethods to Google under Apache 2.0 while the files carry BSD-style notices, and DEC-12 says NOTICE carries the BSD texts verbatim); README release-contract section; scripts/release-build.sh producing target/release/ (9 jars + MANIFEST.sha256) and the generated docs/release-candidate.md identifying candidate a45b0f0 with the two open gates (footprint signature with the guava pin observation, encodeForward) auto-filled from the live acceptance rows plus the DEC-13 freshness caveat; pom.xml header comment corrected for the resolved DEC-8 (comment-only, effective model identical). verify.sh on JDK 17.0.12: all 12 ACTIVE suites PASS. No AC ticked: publication approval, final-candidate freshness, and the Java 11 published-artifact smoke remain.
 
 GitHub tracking issue: https://github.com/Apicurio/antiwire/issues/3
+
+2026-10-06 maintainer confirmations, recorded in docs/decisions.md. (1) The io.apicurio namespace is confirmed for use (DEC-8 reconfirmed). This covers the namespace only: AC#1's explicit release approval for publishing artifacts remains open and is the maintainer's gate, so no publish, tag or deploy follows from this note. (2) The JDK-typed public API without okio is confirmed as the intended design (new DEC-14, backed by ConsumerApiSurfaceTest and JdkSchemaLoaderValidationTest).
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done

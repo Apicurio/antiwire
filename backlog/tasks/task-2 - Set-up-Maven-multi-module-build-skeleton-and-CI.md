@@ -5,7 +5,7 @@ status: Done
 assignee:
   - assistant
 created_date: '2026-09-29 09:22'
-updated_date: '2026-09-30 04:35'
+updated_date: '2026-10-06 18:40'
 labels: []
 milestone: m-6
 dependencies:
@@ -37,6 +37,8 @@ Create only the minimum Maven structure needed for M0 experiments and later modu
 Implementation delegated to a subagent; simplify and code-review findings fixed by a second worker; orchestrator re-verified build and entry point before commit 2a60bed. The push triggers the first CI run; its result should be checked before TASK-5 relies on the workflow.
 
 CI evidence recorded post-completion: run 36664501304 on Apicurio/antiwire (commit 2a60bed) completed with success in 59s, verifying AC#5's CI execution empirically. Process note: AC#5 was checked minutes before that run finished; the success evidence closes the gap, and future AC checks wait for the named evidence before being marked.
+
+2026-10-06 update: the placeholder groupId noted in the Final Summary is superseded. io.apicurio is the final namespace (DEC-8, authorized by the maintainer on 2026-10-02 and reconfirmed on 2026-10-06); publication stays gated by TASK-21 AC#1 and maven.deploy.skip. The Final Summary above records the state on 2026-09-30.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
