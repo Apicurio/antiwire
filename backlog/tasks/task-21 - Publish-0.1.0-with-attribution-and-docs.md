@@ -4,7 +4,7 @@ title: Publish 0.1.0 with attribution and docs
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-06 11:57'
+updated_date: '2026-10-06 13:00'
 labels: []
 milestone: m-11
 dependencies:
@@ -58,6 +58,8 @@ Mechanical release groundwork landed (no publish, no tag, no deploy): docs/licen
 GitHub tracking issue: https://github.com/Apicurio/antiwire/issues/3
 
 2026-10-06 progress on prerequisites, on branch audit-m6-followups (not on main, not pushed): TASK-14.1, TASK-14.2, TASK-16.1 and TASK-21.1 are Done, and the whole battery passes on the integrated tree (scripts/verify.sh, all 12 ACTIVE suites). TASK-16.2 stays open and still blocks release completeness: --require-complete rejects its two ProtoTarget cases until the maintainer decides the scope. Not done and still owned here: final-candidate freshness of the footprint and performance records (the runtime and schema changed after c713e9a and 82c3624), regeneration of docs/release-candidate.md for the final candidate, the license inventory entry for Bytes.java, same-candidate Apicurio revalidation, the published-artifact Java 11 check, and explicit publication approval.
+
+2026-10-06 update: TASK-16.2 is Done. The maintainer retained ProtoTarget .proto emission in scope and it is implemented, so --require-complete now reports no skipped case owned by an open task. This removes the last audit-driven code blocker to release completeness. What still stands before release: final-candidate remeasurement of footprint and performance (the runtime and schema changed after c713e9a and 82c3624), regeneration of docs/release-candidate.md through the repaired builder, the license inventory (it predates Bytes.java and now ProtoTarget.java), same-candidate Apicurio revalidation, the published-artifact Java 11 check, and explicit publication approval. All of these are in the acceptance criteria above.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
