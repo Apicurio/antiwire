@@ -1,7 +1,10 @@
-# Building antiwire (module shells)
+# Building antiwire
 
-The repository currently contains the TASK-2 build skeleton only: empty module shells that
-reserve names. Nothing built here is evidence of Wire parity or compatibility. The research
+The repository contains the TASK-2 build skeleton plus the TASK-4 I/O layer: the
+wire-runtime-java module carries the translated okio 3.18.2 subset under the retained
+`okio.*` names (OPEN-1 resolution in [docs/decisions.md](docs/decisions.md)), with its
+adapted behavior suite wired into the verification entry point. Nothing built here is
+evidence of Wire parity or compatibility beyond what the ACTIVE suites state. The research
 and plan are in `docs/`, the decision record in [docs/decisions.md](docs/decisions.md).
 
 ## Toolchain
@@ -24,7 +27,14 @@ and plan are in `docs/`, the decision record in [docs/decisions.md](docs/decisio
 3. runs `scripts/check-java11-bytecode.sh`: module jars and production dependency jars must
    expose only class files Java 11 can select (major version 55 or lower, multi-release aware);
 4. runs `scripts/consumer-check-java11.sh`: compiles and runs the named placeholder consumer
-   on an actual Java 11 JVM against the module jars.
+   on an actual Java 11 JVM against the module jars;
+5. runs `scripts/check-okio-behavior.sh` (TASK-4): verifies the adapted okio behavior
+   cases are green against the port's translated subset AND, for the shared files in
+   `okio-behavior-tests/`, against upstream `com.squareup.okio:okio-jvm:3.18.2` compiled
+   and executed only inside the isolated `okio-behavior-oracle` module (test scope, never
+   a port-under-test classpath; the enforcer permits it there and the duplicate-class
+   check scans it). The suite fails if the two sides run different numbers of shared
+   cases. Adaptations are ledgered in `okio-behavior-tests/ADAPTATION-LEDGER.md`.
 
 The suite registry it prints comes from `config/verify-suites.json`. Each suite carries a
 declared status, `ACTIVE` or `PENDING`; only the owning task flips one. PENDING suites are

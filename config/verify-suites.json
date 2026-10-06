@@ -56,6 +56,12 @@
       "description": "placeholder consumer main compiled and run on an actual Java 11 JVM against the module jars; the placeholder certifies nothing about compatibility, TASK-5 and TASK-21 carry the real smokes (DEC-3)"
     },
     {
+      "name": "okio-behavior",
+      "status": "ACTIVE",
+      "owner": "TASK-4",
+      "description": "adapted upstream okio 3.18.2 behavior tests (ByteString, Buffer) pass against the port's translated okio subset AND, for the shared files, against upstream okio-jvm 3.18.2 in the isolated oracle module (DEC-5, OPEN-1)"
+    },
+    {
       "name": "duplicate-class-check",
       "status": "ACTIVE",
       "owner": "TASK-2",

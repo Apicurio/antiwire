@@ -6,3 +6,10 @@
 com.squareup.wire.package-info
 com.squareup.wire.schema.package-info
 com.squareup.wire.java.package-info
+# TASK-4: real port-under-test classes of the translated okio subset (OPEN-1 route).
+okio.ByteString
+okio.SegmentedByteString
+okio.Buffer
+okio.Options
+okio.Path
+okio.FileSystem

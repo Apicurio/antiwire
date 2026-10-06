@@ -11,7 +11,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # The build modules, defined once here; the parent pom.xml <modules> block must match
 # (enforced by check_modules_consistency, which every consumer script runs at startup).
-MODULES=(wire-runtime-java wire-schema-java wire-java-generator)
+MODULES=(wire-runtime-java wire-schema-java wire-java-generator okio-behavior-oracle)
 
 # A check ran and passed.
 # shellcheck disable=SC2034  # consumed by the scripts that source this file

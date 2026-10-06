@@ -32,6 +32,10 @@
     <module>wire-runtime-java</module>
     <module>wire-schema-java</module>
     <module>wire-java-generator</module>
+    <!-- Isolated oracle harness (TASK-4): test-scope-only module running the shared adapted
+         okio behavior tests against upstream okio-jvm 3.18.2. Not a published artifact and
+         not a port module; see okio-behavior-oracle/pom.xml. -->
+    <module>okio-behavior-oracle</module>
   </modules>
 
   <properties>

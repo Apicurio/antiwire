@@ -16,6 +16,39 @@
 
   <artifactId>wire-runtime-java</artifactId>
 
-  <name>antiwire wire-runtime-java (module shell)</name>
-  <description>Empty shell reserving the runtime module. No functionality or parity is claimed.</description>
+  <name>antiwire wire-runtime-java (runtime port)</name>
+  <description>
+    Runtime module. Carries the translated okio subset under the retained okio.* names
+    (OPEN-1 route) that the Wire runtime and schema loader build on.
+  </description>
+
+  <build>
+    <plugins>
+      <!--
+        Test tooling only (DEC-4): the shared adapted okio behavior tests are compiled against
+        this module's okio classes AND, in the isolated okio-behavior-oracle module, against
+        upstream okio-jvm 3.18.2. Same files, two implementations, one fidelity statement.
+      -->
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
+        <executions>
+          <execution>
+            <id>kotlin-test-compile</id>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                <sourceDir>${project.basedir}/../okio-behavior-tests/src/kotlin</sourceDir>
+              </sourceDirs>
+              <jvmTarget>11</jvmTarget>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

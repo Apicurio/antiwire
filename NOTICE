@@ -1,0 +1,19 @@
+antiwire
+Copyright 2026 the antiwire authors
+
+This product includes software developed at antiwire
+(https://github.com/pantinor/antiwire).
+
+This product includes software licensed under the Apache License, Version 2.0 that is
+copyright Square, Inc. and other contributors:
+
+  Portions of the okio library, copyright 2014-2021 Square, Inc. and Apache Harmony
+  contributors, translated from square/okio tag parent-3.18.2, commit
+  9403a094ac98d5a6ba8bad4ec3301399796fad67 into the wire-runtime-java module's okio
+  package. The translated files carry their upstream Apache-2.0 notices verbatim in
+  their headers; Base64.java, ZipFiles.java, ZipFileSystem.java, and ZipEntry.java
+  additionally carry the upstream Apache Software Foundation notice blocks verbatim.
+
+  The BSD-style notices required for the wire runtime sources are recorded in
+  docs/decisions.md DEC-12 and docs/translation-conventions.md section 7.1 and will be
+  added to this file verbatim when those files are translated in TASK-6 through TASK-8.

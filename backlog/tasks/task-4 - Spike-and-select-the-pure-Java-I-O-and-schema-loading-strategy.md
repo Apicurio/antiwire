@@ -1,10 +1,11 @@
 ---
 id: TASK-4
 title: Spike and select the pure-Java I/O and schema-loading strategy
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - assistant
 created_date: '2026-09-29 09:22'
-updated_date: '2026-09-30 01:18'
+updated_date: '2026-09-30 04:36'
 labels: []
 milestone: m-6
 dependencies:
