@@ -24,9 +24,13 @@ import com.squareup.wire.SchemaBuilder;
 import com.squareup.wire.StringWireLogger;
 import com.squareup.wire.schema.JavaTarget;
 import com.squareup.wire.schema.Location;
+import com.squareup.wire.schema.ProtoFile;
+import com.squareup.wire.schema.ProtoTarget;
 import com.squareup.wire.schema.Schema;
+import com.squareup.wire.schema.SchemaHandler;
 import com.squareup.wire.schema.WireRun;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -155,5 +159,42 @@ public class JavaGeneratorSecurityCorpusTest {
         () -> wireRun.execute(FileSystem.SYSTEM, logger));
     assertTrue(e.getMessage().contains("Refusing to write a generated file outside the output directory"),
         e.getMessage());
+  }
+
+  /**
+   * Port-only hardening (TASK-16.2.1): ProtoTarget, like every other emitting handler, refuses a
+   * recorded location path that traverses out of the output directory; upstream applies no check
+   * here, so this is a deliberate divergence. An in-directory path is still written.
+   */
+  @Test public void protoTargetRefusesEscapingLocationPath() throws IOException {
+    java.nio.file.Path out = tempDir.resolve("generated/proto");
+    Schema base = new SchemaBuilder()
+        .add("escape.proto", "syntax = \"proto2\";\nmessage Escape {\n  optional string a = 1;\n}\n")
+        .build();
+    ProtoFile pf = base.protoFile("escape.proto");
+    Schema escapeSchema = new Schema(Collections.singletonList(pf.copy(
+        Location.get("../escape.proto"), pf.imports(), pf.publicImports(), pf.weakImports(),
+        pf.packageName(), pf.types(), pf.services(), pf.extendList(), pf.options(),
+        pf.syntax())));
+    SchemaHandler handler = new ProtoTarget(out.toString()).newHandler();
+    SchemaHandler.Context context = contextFor(out, escapeSchema);
+
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> handler.handle(escapeSchema, context));
+    assertTrue(e.getMessage().contains("Refusing to write a generated file outside the output directory"),
+        e.getMessage());
+    assertFalse(Files.exists(tempDir.resolve("generated/escape.proto")));
+
+    Schema okSchema = new SchemaBuilder()
+        .add("pkg/ok.proto", "syntax = \"proto2\";\nmessage Ok {\n  optional string a = 1;\n}\n")
+        .build();
+    SchemaHandler.Context okContext = contextFor(out, okSchema);
+    handler.handle(okSchema, okContext);
+    assertTrue(Files.exists(out.resolve("pkg/ok.proto")));
+  }
+
+  private static SchemaHandler.Context contextFor(java.nio.file.Path out, Schema schema) {
+    return new SchemaHandler.Context(
+        FileSystem.SYSTEM, okio.Path.get(out.toString()), new StringWireLogger(), schema);
   }
 }

@@ -17,6 +17,7 @@ package com.squareup.wire.schema;
 
 import com.squareup.wire.WireLogger;
 import com.squareup.wire.internal.Serializable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -371,6 +372,15 @@ public abstract class SchemaHandler {
               + "path or one that traverses outside the output directory.\n"
               + "  output directory: " + normalizedOut + "\n"
               + "  resolved path:    " + normalizedPath);
+    }
+  }
+
+  /** Creates the context's output directory, mapping an {@link IOException} to unchecked. */
+  protected static void createOutDirectory(Context context) {
+    try {
+      context.fileSystem().createDirectories(context.outDirectory(), false);
+    } catch (IOException e) {
+      throw new RuntimeException("Error creating output directory " + context.outDirectory(), e);
     }
   }
 

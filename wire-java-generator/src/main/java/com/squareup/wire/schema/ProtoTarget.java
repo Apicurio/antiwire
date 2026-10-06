@@ -64,14 +64,10 @@ public final class ProtoTarget extends Target {
 
   private static final class ProtoSchemaHandler extends SchemaHandler {
     @Override public void handle(Schema schema, Context context) {
+      Path outDirectory = context.outDirectory();
       // The port's SchemaHandler.handle carries no checked IOException (upstream Kotlin has
       // none), so IO failures propagate unchecked like every other handler in the port.
-      Path outDirectory = context.outDirectory();
-      try {
-        context.fileSystem().createDirectories(outDirectory, false);
-      } catch (IOException e) {
-        throw new RuntimeException("Error creating output directory " + outDirectory, e);
-      }
+      createOutDirectory(context);
 
       for (ProtoFile protoFile : schema.protoFiles()) {
         if (!context.inSourcePath(protoFile)
@@ -87,6 +83,8 @@ public final class ProtoTarget extends Target {
         String relativePath = lastSlash == -1 ? "." : locationPath.substring(0, lastSlash);
         Path outputDirectory = outDirectory.div(relativePath);
         Path outputFilePath = outputDirectory.div(protoFile.name() + ".proto");
+        // Deliberate hardening: upstream applies no containment check here (compatibility-matrix).
+        checkPathInOutDirectory(outputFilePath, outDirectory);
         context.logger().artifactHandled(outputDirectory, locationPath, "Proto");
 
         try {

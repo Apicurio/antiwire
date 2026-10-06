@@ -105,12 +105,7 @@ public class JavaSchemaHandler extends SchemaHandler {
         .withOptions(emitDeclaredOptions, emitAppliedOptions)
         .withBuildersOnly(buildersOnly);
 
-    try {
-      context.fileSystem().createDirectories(context.outDirectory(), false);
-    } catch (IOException e) {
-      throw new RuntimeException(
-          "Error creating output directory " + context.outDirectory(), e);
-    }
+    createOutDirectory(context);
 
     super.handle(schema, context);
   }

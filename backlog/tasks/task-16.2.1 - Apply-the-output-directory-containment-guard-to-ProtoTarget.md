@@ -1,9 +1,10 @@
 ---
 id: TASK-16.2.1
 title: Apply the output-directory containment guard to ProtoTarget
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-06 15:33'
+updated_date: '2026-10-06 19:43'
 labels:
   - adversarial-audit
   - codegen
@@ -32,13 +33,19 @@ Apply the existing guard to the proto output path and remove the duplicated wrap
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A proto file whose recorded location path is absolute or traverses upward is rejected by ProtoTarget with the same refusal message the other handlers use, and nothing is written outside the output directory.
-- [ ] #2 A regression test covers an in-directory path (accepted) and an escaping path (rejected), and the revived upstream cases protoOnly and protoTargetNeverEmitsGoogleProtobufDescriptor still pass unchanged.
-- [ ] #3 The directory-creation error wrapping shared by ProtoTarget and JavaSchemaHandler lives in one place instead of being duplicated, with no change in behavior or messages.
-- [ ] #4 The divergence from upstream (a guard upstream does not apply) is recorded in the compatibility matrix as a deliberate hardening, with the reason.
+- [x] #1 A proto file whose recorded location path is absolute or traverses upward is rejected by ProtoTarget with the same refusal message the other handlers use, and nothing is written outside the output directory.
+- [x] #2 A regression test covers an in-directory path (accepted) and an escaping path (rejected), and the revived upstream cases protoOnly and protoTargetNeverEmitsGoogleProtobufDescriptor still pass unchanged.
+- [x] #3 The directory-creation error wrapping shared by ProtoTarget and JavaSchemaHandler lives in one place instead of being duplicated, with no change in behavior or messages.
+- [x] #4 The divergence from upstream (a guard upstream does not apply) is recorded in the compatibility matrix as a deliberate hardening, with the reason.
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+ProtoTarget now calls checkPathInOutDirectory (same refusal text as the other handlers); the directory-creation wrapping lives once in the protected static SchemaHandler.createOutDirectory, used by ProtoTarget and JavaSchemaHandler with identical messages. Regression test JavaGeneratorSecurityCorpusTest.protoTargetRefusesEscapingLocationPath covers an escaping path (rejected, nothing written) and an in-directory path (written); I confirmed it fails with the guard commented out and passes with it, and protoOnly plus protoTargetNeverEmitsGoogleProtobufDescriptor pass unchanged. Divergence recorded in compatibility-matrix.md, the helper in api-surface.md. Gates: /code-review high ran (3 findings: import order fixed; message wording and the new protected helper recorded as accepted divergences); scripts/verify.sh 12/12 PASS (compiler-tests 189 cases).
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->

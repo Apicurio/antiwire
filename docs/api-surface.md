@@ -347,3 +347,7 @@ and byte-compares against the protoc oracle (`AllEmptyOuterClass`, now generated
 `scripts/generate-protoc-compat-fixtures.sh`). What stays excluded is only the pinned
 UPSTREAM compiler's own Empty output (kotlin.Unit), which the wire-model side of the fixture
 script still skips, and the Kotlin generator product itself (DEC-6).
+
+## Port-only handler helper (TASK-16.2.1, 2026-10-06)
+
+`SchemaHandler.createOutDirectory(Context)` is a protected static helper with no upstream counterpart. It creates the context's output directory and maps an `IOException` to an unchecked `RuntimeException` with the message "Error creating output directory <dir>"; `JavaSchemaHandler` and `ProtoTarget` share it instead of duplicating the wrapping. It is outside the consumer-API enforcement of `ConsumerApiSurfaceTest` (which covers the four root classes).
