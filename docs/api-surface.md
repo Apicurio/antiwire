@@ -245,17 +245,35 @@ bridge costs, owned by the next perf session: `WireBytesAdapter.decode` and
 value: the reader's own read plus the `fromByteString` conversion), where a reader that hands
 out an adoptable `byte[]` would pay one.
 
-### Known limitation: the `Bytes` import can be shadowed
+### User types named like generated references: verified behavior, not a limitation (TASK-27)
 
-A single-type-import shadows same-package types declared in other compilation units (JLS
-6.4.1), so a proto declaring `message Bytes` in a package whose other messages also use bytes
-fields generates output that cannot compile: sibling files bind bare `Bytes` to the runtime
-type, and the message's own file collides with the import. Upstream shares this hazard class
-for every name it imports (`okio.ByteString`, `java.time.Duration`, `kotlin.Unit`; a
-same-package `message Duration` breaks upstream output identically); phase 2 only raises the
-likelihood because `Bytes` is a plausible message name. The clean fix, per-file
-always-qualified emission, needs javapoet `alwaysQualify`, which exists only in the palantir
-fork that DEC-3 forbids; the gap is tracked as TASK-27.
+An earlier version of this section claimed (2026-10-03) that a proto declaring `message Bytes`
+in a package whose other messages also use bytes fields cannot compile, through JLS 6.4.1
+single-type-import shadowing. The 2026-10-06 delivery audit refuted that claim for every shape
+it tested, and TASK-27 pinned the behavior as regression coverage in
+`wire-java-generator`'s `GeneratedBytesCollisionCompileTest`: same-package and cross-package
+`message Bytes`, a `Bytes` message with its own bytes field, repeated bytes, map values,
+repeated message values, an enum named `Bytes`, a nested `Bytes`, proto2, oneof, an extension
+field, and messages colliding with always-emitted imports (`FieldEncoding`, `ProtoWriter`,
+`Internal`) all generate, compile with `javac --release 11` against the port runtime with no
+Kotlin on the classpath, and bind every field to its intended type in round-trips: runtime
+bytes to `com.squareup.wire.Bytes`, user fields to the user message or enum, with the emitted
+source asserting the mechanism (no contested import, qualified runtime references).
+
+The mechanism is JavaPoet's collision handling, not the language: when a referenced type's
+simple name is contested by a user type in scope, the generator skips the import and emits the
+runtime name fully qualified, so the bare name stays the user type. The earlier JLS reading
+was wrong in the other direction too: had the contested import been emitted into a sibling
+file, JLS 6.4.1 would shadow the same-package user type unconditionally (a single-file probe
+confirms the imported name wins whenever the import is present); what prevents that is the
+generator never emitting the contested import, and the regression suite pins that emission
+behavior, not a language guarantee. The same section's claim that upstream's generator breaks
+identically on a same-package `message Duration` was never verified and is withdrawn; nothing
+here asserts upstream parity for collision shapes either way. What stays unclaimed: every
+possible collision shape is not proven safe, only the pinned ones above are verified. If a
+future schema produces a real failing shape, the record is a minimal reproducer and the named
+remedy is per-file always-qualified emission (javapoet `alwaysQualify`, which exists only in
+the palantir fork that DEC-3 forbids), not an unrequested rewrite.
 
 ### Performance note (out of scope here, recorded for the next session)
 

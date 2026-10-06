@@ -47,23 +47,43 @@ public final class TestCompilers {
    */
   public static Class<?> compileRelease11(
       Path sourceFile, String className, Path classesDir, Class<?> context) throws Exception {
+    ClassLoader loader = compileRelease11(new Path[] { sourceFile }, classesDir, context);
+    return Class.forName(className, true, loader);
+  }
+
+  /**
+   * The multi-source form of {@link #compileRelease11(Path, String, Path, Class)}, returning
+   * the loader instead of one class so tests can load a whole generated tree from it.
+   */
+  public static ClassLoader compileRelease11(
+      Path[] sourceFiles, Path classesDir, Class<?> context) throws Exception {
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
     if (compiler == null) {
       throw new IllegalStateException("tests must run on a JDK: no system java compiler");
     }
-    int exit = compiler.run(null, null, System.err,
+    String[] options = new String[] {
         "--release", "11",
         "-classpath", classpathWithoutKotlin(context),
         "-d", classesDir.toString(),
-        sourceFile.toString());
+    };
+    String[] sources = new String[sourceFiles.length];
+    for (int i = 0; i < sourceFiles.length; i++) {
+      sources[i] = sourceFiles[i].toString();
+    }
+    String[] args = new String[options.length + sources.length];
+    System.arraycopy(options, 0, args, 0, options.length);
+    System.arraycopy(sources, 0, args, options.length, sources.length);
+    int exit = compiler.run(null, null, System.err, args);
     if (exit != 0) {
       throw new IllegalStateException(
-          "generated source " + sourceFile + " did not compile under --release 11 (exit "
-              + exit + ")");
+          (sourceFiles.length == 1
+              ? "generated source " + sourceFiles[0]
+              : sourceFiles.length + " generated sources (first: "
+                  + (sourceFiles.length == 0 ? "<none>" : sourceFiles[0]) + ")")
+              + " did not compile under --release 11 (exit " + exit + ")");
     }
-    URLClassLoader loader = new URLClassLoader(
+    return new URLClassLoader(
         new URL[] { classesDir.toUri().toURL() }, context.getClassLoader());
-    return Class.forName(className, true, loader);
   }
 
   /** The test classpath of {@code context} with every Kotlin artifact jar removed. */

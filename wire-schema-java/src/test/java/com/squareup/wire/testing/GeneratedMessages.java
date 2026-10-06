@@ -33,6 +33,18 @@ public final class GeneratedMessages {
     return (ProtoAdapter<Object>) messageClass.getField("ADAPTER").get(null);
   }
 
+  /** A fresh builder of the generated message class, from its declaring classloader. */
+  public static Object builderOf(Class<?> messageClass) throws Exception {
+    return Class.forName(messageClass.getName() + "$Builder", true, messageClass.getClassLoader())
+        .getDeclaredConstructor()
+        .newInstance();
+  }
+
+  /** Calls {@code build()} on a generated builder and returns the message. */
+  public static Object build(Object builder) throws Exception {
+    return builder.getClass().getMethod("build").invoke(builder);
+  }
+
   /** The value of the generated public field {@code name} on {@code message}. */
   public static Object field(Class<?> messageClass, Object message, String name)
       throws Exception {
