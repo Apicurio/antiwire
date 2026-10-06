@@ -54,7 +54,7 @@ run_check() { # <dir>: runs the scratch gate check; sets GATE_RC, output in <dir
   set -e
 }
 
-mutate_footprint() { # <file> <old-cell> <new-cell> [count]
+mutate_cell() { # <file> <old-cell> <new-cell> [count]
   python3 - "$1" "$2" "$3" "${4:-all}" <<'PY'
 import sys
 path, old, new, count = sys.argv[1:5]
@@ -91,8 +91,8 @@ fi
 
 # --- pending: revert both acceptance rows to the pre-resolution PENDING wording ----------
 dir="$(make_scratch pending)"
-mutate_footprint "$dir/docs/footprint.md" "$FOOTPRINT_ACCEPTED_CELL" '**PENDING maintainer signature**'
-mutate_footprint "$dir/docs/performance.md" "$PERF_RESOLVED_CELL" 'PENDING maintainer'
+mutate_cell "$dir/docs/footprint.md" "$FOOTPRINT_ACCEPTED_CELL" '**PENDING maintainer signature**'
+mutate_cell "$dir/docs/performance.md" "$PERF_RESOLVED_CELL" 'PENDING maintainer'
 run_check "$dir"
 if [ "$GATE_RC" -ne 0 ]; then
   fail pending "a pending gate is a recognized state and must not abort"
@@ -105,7 +105,7 @@ fi
 
 # --- missing-evidence: the acceptance row is reworded beyond both anchors ----------------
 dir="$(make_scratch missing)"
-mutate_footprint "$dir/docs/footprint.md" "$FOOTPRINT_ACCEPTED_CELL" '**REVIEW IN PROGRESS**'
+mutate_cell "$dir/docs/footprint.md" "$FOOTPRINT_ACCEPTED_CELL" '**REVIEW IN PROGRESS**'
 run_check "$dir"
 if [ "$GATE_RC" -eq 0 ]; then
   fail missing "a reworded acceptance row must abort, not infer a verdict"
@@ -130,7 +130,7 @@ fi
 
 # --- ambiguous: two different accepted rows -----------------------------------------------
 dir="$(make_scratch ambiguous)"
-mutate_footprint "$dir/docs/footprint.md" \
+mutate_cell "$dir/docs/footprint.md" \
   "section 9.1 candidate c713e9a with the guava-free marginal" \
   "section 4 candidate other123 with a different record" 1
 run_check "$dir"

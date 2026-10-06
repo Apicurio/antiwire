@@ -81,6 +81,10 @@ TASK_RE = re.compile(r"TASK-\d+(?:\.\d+)?")
 
 PORT_CLASS_RE = re.compile(r"src/test/(?:java|kotlin)/(.*)\.(?:java|kt)$")
 
+# Memoization for extract_test_info: one run reads each mapped file twice (the
+# source-presence pass and the execution pass) and the tree is read-only during a run.
+_PARSE_CACHE = {}
+
 
 def canonical(name):
     """Canonical comparison form: lowercase alphanumerics only, backticks stripped.
@@ -118,12 +122,20 @@ def extract_test_info(path):
     precedes its declaration (same line or the next non-annotation line). Annotation
     continuations (multi-line @Disabled("..." + "...") bodies, quoted argument lines)
     never end the pending state, so a skip is detected however long its reason is.
+
+    Results are memoized per path: the source-presence pass and the execution pass both
+    read the same files during one run, and the tree is read-only for that run. The
+    returned sets are shared through the cache; callers must treat them as read-only.
     """
+    if path in _PARSE_CACHE:
+        return _PARSE_CACHE[path]
     try:
         with open(path, encoding="utf-8") as f:
             lines = f.readlines()
     except FileNotFoundError:
-        return None, None, None
+        result = (None, None, None)
+        _PARSE_CACHE[path] = result
+        return result
     names = set()
     disabled = set()
     class_disabled = False
@@ -163,7 +175,24 @@ def extract_test_info(path):
                 if pending_disable and not pending_test:
                     class_disabled = True
         pending_test = pending_disable = False
-    return names, disabled, class_disabled
+    result = (names, disabled, class_disabled)
+    _PARSE_CACHE[path] = result
+    return result
+
+
+def canonical_renames(entry):
+    """The entry's renames in canonical form, shared by both reconciliation passes."""
+    return {canonical(k): canonical(v) for k, v in entry.get("renames", {}).items()}
+
+
+def mirrored_skips(entry, upstream_names, upstream_disabled, upstream_class_disabled):
+    """Canonical port-side names of cases the pinned upstream itself ignores: every
+    case when the upstream class is ignored wholesale, else the renamed identities of
+    the upstream method-level ignores. A port skip of exactly these cases is lawful."""
+    renames = canonical_renames(entry)
+    if upstream_class_disabled:
+        return {renames.get(canonical(n), canonical(n)) for n in upstream_names}
+    return {renames.get(canonical(n), canonical(n)) for n in upstream_disabled}
 
 
 def upstream_test_files(clone, module_root):
@@ -378,7 +407,7 @@ def main():
                 problems.append("mapped port file missing: %s" % entry["port"])
                 continue
 
-            renames = {canonical(k): canonical(v) for k, v in entry.get("renames", {}).items()}
+            renames = canonical_renames(entry)
             missing = {canonical(k) for k in entry.get("missing", {})}
             upstream_canonical = {canonical(name) for name in upstream_names}
             port_canonical = {canonical(name) for name in port_names}
@@ -403,12 +432,8 @@ def main():
                 problems.append("%s/%s: skipped must map case names to disposition "
                                 "records" % (module, relative))
                 skipped_records = {}
-            mirrored = set()
-            if upstream_class_disabled:
-                mirrored = set(expected)
-            else:
-                for name in upstream_disabled:
-                    mirrored.add(renames.get(canonical(name), canonical(name)))
+            mirrored = mirrored_skips(entry, upstream_names, upstream_disabled,
+                                      upstream_class_disabled)
             class_record = entry.get("skipped_class")
             if port_class_disabled and class_record is None and not upstream_class_disabled:
                 problems.append("%s/%s is disabled at class level without a recorded "
@@ -494,8 +519,7 @@ def main():
     # port source means stale compiled tests ran.
     report["totals"]["open_owner_skipped_cases"] = len(open_owner_skips)
     if args.execution:
-        execution = {"modules": {}, "reconciled_classes": 0, "executed_cases": 0,
-                     "skipped_cases": 0}
+        execution = {"reconciled_classes": 0, "executed_cases": 0, "skipped_cases": 0}
         modules = sorted({entry["port"].split("/")[0]
                           for module_entry in case_map["modules"].values()
                           for entry in module_entry["files"].values()
@@ -524,17 +548,12 @@ def main():
                                     "class did not run in the build"
                                     % (entry["port"], classname, build_module))
                     continue
-                renames = {canonical(k): canonical(v)
-                           for k, v in entry.get("renames", {}).items()}
                 skipped_records = {canonical(k) for k in entry.get("skipped", {})
                                    if isinstance(entry["skipped"][k], dict)}
                 upstream_names, upstream_disabled, upstream_class_disabled = extract_test_info(
                     os.path.join(clone, module_entry["root"], relative))
-                if upstream_class_disabled:
-                    mirrored = {renames.get(canonical(n), canonical(n)) for n in upstream_names}
-                else:
-                    mirrored = {renames.get(canonical(n), canonical(n))
-                                for n in (upstream_disabled or ())}
+                mirrored = mirrored_skips(entry, upstream_names, upstream_disabled,
+                                          upstream_class_disabled)
                 if entry.get("skipped_class"):
                     mirrored |= {canonical(n) for n in port_names}
                 execution["reconciled_classes"] += 1

@@ -63,23 +63,25 @@ WIRE_COMMIT="${PINS##* }"
 # different accepted rows (ambiguous). This script cannot tell a signature from a
 # rewording, and a false "closed" is the dangerous direction, so any change to a row's
 # wording must be re-anchored here by hand.
+# anchor_lines <doc> <gate> <pattern>: the rows matching one gate anchor, with line
+# numbers. grep exit 1 (no match) is a normal verdict input; anything above it means the
+# doc could not be read, which is fatal.
+anchor_lines() { # <doc> <gate> <pattern>
+  local doc="$1" gate="$2" pattern="$3" rc=0
+  local lines
+  lines="$(grep -En "$pattern" "$doc")" || rc=$?
+  if [ "$rc" -gt 1 ]; then
+    echo "FATAL: could not read the $gate gate status from $doc (grep exit $rc)" >&2
+    exit "$EXIT_FAIL"
+  fi
+  printf '%s\n' "$lines"
+}
+
 maintainer_gate() { # <doc> <gate-name> <pending-pattern> <accepted-pattern> <open-message> <accepted-signature-sed>
   local doc="$1" gate="$2" pending_pat="$3" accepted_pat="$4" open_msg="$5" sig_sed="$6"
-  local pending accepted rc
-  pending=""
-  rc=0
-  pending="$(grep -En "$pending_pat" "$doc")" || rc=$?
-  if [ "$rc" -gt 1 ]; then
-    echo "FATAL: could not read the $gate gate status from $doc (grep exit $rc)" >&2
-    exit "$EXIT_FAIL"
-  fi
-  accepted=""
-  rc=0
-  accepted="$(grep -En "$accepted_pat" "$doc")" || rc=$?
-  if [ "$rc" -gt 1 ]; then
-    echo "FATAL: could not read the $gate gate status from $doc (grep exit $rc)" >&2
-    exit "$EXIT_FAIL"
-  fi
+  local pending accepted
+  pending="$(anchor_lines "$doc" "$gate" "$pending_pat")"
+  accepted="$(anchor_lines "$doc" "$gate" "$accepted_pat")"
   if [ -n "$pending" ] && [ -n "$accepted" ]; then
     echo "FATAL: the $gate gate in $doc carries BOTH a pending and an accepted acceptance row; reopened or contradictory evidence must be reconciled by hand before any candidate" >&2
     exit "$EXIT_FAIL"
