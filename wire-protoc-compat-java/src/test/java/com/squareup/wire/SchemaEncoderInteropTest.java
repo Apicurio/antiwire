@@ -49,7 +49,8 @@ import squareup.proto3.java.alltypes.AllTypesOuterClass;
  * this module's UPSTREAM-TEST-ADAPTATIONS.md.
  */
 public class SchemaEncoderInteropTest {
-  private static final Path PROTO_ROOT = TestFiles.upstreamClone()
+  /** Package-visible: the pinned module protos, shared with EmptyRoundTripTest. */
+  static final Path PROTO_ROOT = TestFiles.upstreamClone()
       .resolve("wire-protoc-compatibility-tests/src/main/proto");
 
   private final Schema schema = loadSchema();

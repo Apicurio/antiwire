@@ -33,13 +33,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * The pinned golden corpus under the phase-2 bytes mapping (docs/api-surface.md). The port's
- * generated output diverges from upstream's by exactly the documented mechanical mapping that
- * swaps okio's {@code ByteString} for the wire-owned {@code com.squareup.wire.Bytes}; this test
- * rewrites the UPSTREAM golden by that mapping and requires the port's raw CLI output to be
- * byte-identical to it, so any other divergence, including a regression back to an okio-typed
- * member the mapping covers, fails. The upstream golden is the single Java golden of
- * wire-golden-files at the pinned tag, read from the clone fetched by
+ * The pinned golden corpus under the bounded generated-code mapping (docs/api-surface.md):
+ * the phase-2 bytes mapping that swaps okio's {@code ByteString} for the wire-owned
+ * {@code com.squareup.wire.Bytes}, plus the Empty mapping (TASK-16.1) that swaps upstream's
+ * {@code kotlin.Unit} fields and {@code ProtoAdapter.EMPTY} references for
+ * {@code ProtoAdapter.UnitValue} and {@code ProtoAdapter.WIRE_EMPTY}. This test rewrites the
+ * UPSTREAM golden by that mapping and requires the port's raw CLI output to be byte-identical
+ * to it, so any other divergence, including a regression back to an okio-typed or
+ * kotlin-typed member the mapping covers, fails. The upstream golden is the single Java
+ * golden of wire-golden-files at the pinned tag, read from the clone fetched by
  * scripts/fetch-upstream.sh ($ANTIWIRE_UPSTREAM, default /tmp/wire).
  */
 public class AllTypesGoldenBytesMappingTest {
@@ -61,10 +63,17 @@ public class AllTypesGoldenBytesMappingTest {
    * The documented divergence mapping, upstream form to port form, as ordered regex/replacement
    * pairs over generated source text. Order matters where one pattern is a prefix of another
    * ({@code ProtoAdapter.BYTES_VALUE} before {@code ProtoAdapter.BYTES}; the qualified name
-   * before the bare token). The word boundary keeps {@code ProtoAdapter.BYTES_VALUE} intact for
-   * its own rule, and the import sort absorbs the mapped import's new collation position.
+   * before the bare token; the kotlin.Unit import before the bare {@code Unit} token, whose
+   * port form is the nested {@code ProtoAdapter.UnitValue} referenced through the already
+   * imported {@code ProtoAdapter}, so no import replaces it). The word boundary keeps
+   * {@code ProtoAdapter.BYTES_VALUE} and {@code ProtoAdapter.UnitValue} intact for their own
+   * rules, and the import sort absorbs the mapped import's new collation position.
    */
   private static final String[][] BYTES_MAPPING = {
+      {"import kotlin\\.Unit;\\n", ""},
+      {"\\bUnit\\b", "ProtoAdapter.UnitValue"},
+      {"ProtoAdapter\\.EMPTY\\b", "ProtoAdapter.WIRE_EMPTY"},
+      {"ProtoAdapter#EMPTY\\b", "ProtoAdapter#WIRE_EMPTY"},
       {"okio\\.ByteString", "com.squareup.wire.Bytes"},
       {"\\bByteString\\b", "Bytes"},
       {"\\bendMessageAndGetUnknownFields\\(", "endMessageAndGetUnknownFieldsBytes("},
@@ -109,13 +118,17 @@ public class AllTypesGoldenBytesMappingTest {
       throws IOException, WireException {
     String golden = readUtf8(UPSTREAM_GOLDEN);
 
-    // Non-vacuity: the golden really is upstream's okio-typed output, so the mapping above has
-    // something to rewrite on it.
+    // Non-vacuity: the golden really is upstream's okio-typed, kotlin-typed output, so the
+    // mapping above has something to rewrite on it.
     assertTrue(golden.contains("import okio.ByteString;"), golden.substring(0, 2000));
     assertTrue(golden.contains("ProtoAdapter.BYTES."), "golden lacks the bytes adapter usages");
     assertTrue(golden.contains("adapter = \"com.squareup.wire.ProtoAdapter#BYTES\""),
         "golden lacks the bytes adapter string");
     assertTrue(golden.contains("unknownFields()"), "golden lacks unknown-field call sites");
+    assertTrue(golden.contains("import kotlin.Unit;"), "golden lacks the Empty import");
+    assertTrue(golden.contains("ProtoAdapter.EMPTY."), "golden lacks the Empty adapter usages");
+    assertTrue(golden.contains("adapter = \"com.squareup.wire.ProtoAdapter#EMPTY\""),
+        "golden lacks the Empty adapter string");
 
     Path out = tempDir.resolve("java_out");
     WireCompiler.forArgs(
@@ -132,11 +145,15 @@ public class AllTypesGoldenBytesMappingTest {
     // (JavaPoet emits the import block sorted, matching the golden-side sort).
     String generated = readUtf8(generatedFile);
 
-    // The port's output is okio-free and uses the canonical bytes forms.
+    // The port's output is okio-free, kotlin-free, and uses the canonical bytes and Empty forms.
     assertFalse(generated.contains("okio."), "okio leaked into generated output");
     assertTrue(generated.contains("import com.squareup.wire.Bytes;"));
     assertTrue(generated.contains("ProtoAdapter.WIRE_BYTES."));
     assertTrue(generated.contains("adapter = \"com.squareup.wire.ProtoAdapter#WIRE_BYTES\""));
+    assertFalse(generated.contains("kotlin"), "kotlin leaked into generated output");
+    assertTrue(generated.contains("ProtoAdapter.UnitValue"));
+    assertTrue(generated.contains("ProtoAdapter.WIRE_EMPTY."));
+    assertTrue(generated.contains("adapter = \"com.squareup.wire.ProtoAdapter#WIRE_EMPTY\""));
 
     String expected = mapUpstreamSource(golden);
     if (!expected.equals(generated)) {

@@ -80,7 +80,9 @@ public final class JvmLanguages {
     }
     if (type.equals(ProtoType.DURATION)) return protoAdapterName + "#DURATION";
     if (type.equals(ProtoType.TIMESTAMP)) return protoAdapterName + "#INSTANT";
-    if (type.equals(ProtoType.EMPTY)) return protoAdapterName + "#EMPTY";
+    // The port's Empty mapping (TASK-16.1): generated code references the UnitValue-typed
+    // WIRE_EMPTY, so the reflection adapter string follows (docs/api-surface.md).
+    if (type.equals(ProtoType.EMPTY)) return protoAdapterName + "#WIRE_EMPTY";
     if (type.equals(ProtoType.FIELD_MASK)) return protoAdapterName + "#FIELD_MASK";
     if (type.equals(ProtoType.STRUCT_MAP)) return protoAdapterName + "#STRUCT_MAP";
     if (type.equals(ProtoType.STRUCT_VALUE)) return protoAdapterName + "#STRUCT_VALUE";
