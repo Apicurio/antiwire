@@ -1,10 +1,10 @@
 # antiwire status update, 2026-10-05
 
-For context: antiwire is a pure-Java port of Square Wire (Square's protobuf library), with no Kotlin anywhere, built for Apicurio Registry first and Kafka later. The original is written in Kotlin and drags kotlin-stdlib, okio, and other heavy dependencies into every consumer.
+For context: antiwire is a pure-Java port of Square Wire (Square's protobuf library), with no Kotlin in production scope, built for Apicurio Registry first and Kafka later. The original is written in Kotlin and drags kotlin-stdlib, okio, and other heavy dependencies into every consumer.
 
-## What exists on main today (110 commits)
+## What exists on main today (113 commits at `295ef5f`)
 
-The library works and is complete: runtime, .proto parser, schema linker, loader (files, directories, zip/jar archives), command-line compiler, and the Java code generator. All of it on Java 11.
+The library works: runtime, .proto parser, schema linker, loader (files, directories, zip/jar archives), command-line compiler, and the Java code generator. All of it on Java 11. One known gap: protos using `google.protobuf.Empty` generate code that needs Kotlin and does not compile against the port runtime; the gap is recorded and owned (TASK-16.1).
 
 ### Footprint vs upstream
 
@@ -22,20 +22,22 @@ The library works and is complete: runtime, .proto parser, schema linker, loader
 | Parse .proto files | 1.12x faster |
 | Link + load schemas | 1.08x faster |
 | Descriptor conversion | 1.16x faster, 22% fewer allocations |
-| Message encode (8 workloads) | Parity or better; best cell 2.2x faster (UTF-8 fast path) |
-| Message decode (8 workloads) | Parity or better; bytes fields now zero-extra-copy |
+| Message encode (4 workloads, forward and reverse paths) | Every cell inside its oracle band; best cell 2.2x faster (UTF-8 fast path) |
+| Message decode (4 workloads) | Every cell inside its oracle band; the extra copy on bytes fields is gone (allocation within 0.2% of upstream) |
+
+The message cells are the session-5 matrix, measured on candidate `82c3624` (docs/performance.md). The three schema-operation cells are the initial 2026-10-02 matrix, measured on a superseded candidate; they are due for renewal on the final release candidate before release acceptance.
 
 ### Evidence
 
 | Proof | Scale |
 |---|---|
-| Upstream test suite adopted, reconciled case by case against the pinned 7.1.0 sources | 967 cases |
-| Interoperability tests against protoc 4.36.1 (Google's compiler), byte-level | 122 cases |
+| Upstream test suite adopted, reconciled by case name against the pinned 7.1.0 sources | 967 case names: 963 ported, 4 recorded missing |
+| Interoperability tests against protoc 4.36.1 (Google's compiler), byte-level | 122 recorded cases, 50 of them skipped (72 executed) |
 | Security regression tests covering the library's historical advisories | 24 cases |
-| Generated code byte-identical to the original compiler | 13 reference files |
+| Generated code byte-identical to the original compiler after the documented Bytes mapping (docs/api-surface.md) | the pinned upstream Java golden corpus, `all_types_proto3` |
 | CI suites, all green on every push (tests, parity reconciliation, bytecode, classpath, upstream watch) | 12 suites |
 
-An automated check verifies at every build that no upstream test was lost, no expected value was edited, and nothing was forgotten. The build also enforces the zero-Kotlin rule in production scope on every run.
+An automated check reconciles the name of every upstream test case against the pinned 7.1.0 sources at every build, so a lost or unaccounted case fails the run. It compares names, not test bodies: whether each ported case still asserts what upstream asserts was reviewed one by one during the port and recorded in the case ledgers (docs/task9-case-accounting.md, docs/task13-case-accounting.md, docs/task16-case-accounting.md); no automated check proves the semantic equivalence of the test bodies. The build also enforces the zero-Kotlin rule in production scope on every run.
 
 ### Apicurio integration
 
@@ -57,9 +59,9 @@ An automated check verifies at every build that no upstream test was lost, no ex
 
 | Item | Status | Blocking on |
 |---|---|---|
-| [0.1.0 release](https://github.com/Apicurio/antiwire/issues/3) | All measurements signed off; release build ready | Maintainer's final go, and who uploads the artifacts. Deferred as not urgent |
+| [0.1.0 release](https://github.com/Apicurio/antiwire/issues/3) | Measurements accepted on their recorded candidates (footprint `c713e9a`, performance `82c3624`); renewal on the final candidate and the release-builder guard update still to do | Maintainer's final go, final-candidate remeasurement (TASK-21, TASK-21.1), and who uploads the artifacts. Deferred as not urgent |
 | [Kafka adoption](https://github.com/Apicurio/antiwire/issues) (TASK-22) | Proposal C1 written up, waiting | Deferred by the maintainer |
-| [`Bytes` name-collision bug](https://github.com/Apicurio/antiwire/issues/2) | Documented, two fix directions written | No urgency; upstream shares this class of problem |
+| [`Bytes` name-collision question](https://github.com/Apicurio/antiwire/issues/2) | Original claim refuted for the tested top-level shapes (audit 2026-10-06); TASK-27 pins the verified behavior and dispositions the remaining shapes | Low priority; the remaining shapes are unverified, not confirmed defects |
 | Apicurio PR | Branch ready locally | Maintainer's call on whether and when |
 
-In short: the technical work is done and verified. What remains are three maintainer decisions (publish, Kafka, PR) and one documented bug nobody is forced to rush on.
+In short: the measured work is done and recorded against its candidates, and the verification battery is green at the revision named above. What remains: renewal of the measurements on the final candidate, the 2026-10-06 audit follow-ups (Empty generation is the one demonstrated functional gap), and the maintainer decisions (publish, Kafka, PR).
