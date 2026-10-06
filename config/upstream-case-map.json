@@ -431,13 +431,7 @@
           }
         },
         "com/squareup/wire/EmptyRoundTripTest.kt": {
-          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/EmptyRoundTripTest.java",
-          "skipped": {
-            "allEmpty": {
-              "owner": "TASK-16.1",
-              "reason": "Generated-code Empty divergence (wire-side AllEmpty model not generated; TASK-16/DEC-6) (recorded by TASK-14.2; the owning task stays open)"
-            }
-          }
+          "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/EmptyRoundTripTest.java"
         },
         "com/squareup/wire/DurationRoundTripTest.kt": {
           "port": "wire-protoc-compat-java/src/test/java/com/squareup/wire/DurationRoundTripTest.java"
