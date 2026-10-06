@@ -25,7 +25,7 @@ The library works: runtime, .proto parser, schema linker, loader (files, directo
 | Message encode (4 workloads, forward and reverse paths) | Every cell inside its oracle band; best cell 2.2x faster (UTF-8 fast path) |
 | Message decode (4 workloads) | Every cell inside its oracle band; the extra copy on bytes fields is gone (allocation within 0.2% of upstream) |
 
-The message cells are the session-5 matrix, measured on candidate `82c3624` (docs/performance.md). The three schema-operation cells are the initial 2026-10-02 matrix, measured on a superseded candidate; they are due for renewal on the final release candidate before release acceptance.
+Message cells: session-5 matrix on candidate `82c3624` (docs/performance.md). The three schema-operation cells: initial 2026-10-02 matrix on a superseded candidate, to be renewed on the final candidate before release acceptance.
 
 ### Evidence
 
@@ -64,4 +64,4 @@ An automated check reconciles the name of every upstream test case against the p
 | [`Bytes` name-collision question](https://github.com/Apicurio/antiwire/issues/2) | Original claim refuted for the tested top-level shapes (audit 2026-10-06); TASK-27 pins the verified behavior and dispositions the remaining shapes | Low priority; the remaining shapes are unverified, not confirmed defects |
 | Apicurio PR | Branch ready locally | Maintainer's call on whether and when |
 
-In short: the measured work is done and recorded against its candidates, and the verification battery is green at the revision named above. What remains: renewal of the measurements on the final candidate, the 2026-10-06 audit follow-ups (Empty generation is the one demonstrated functional gap), and the maintainer decisions (publish, Kafka, PR).
+In short: the measured work is done and recorded against its candidates, and the verification battery is green at `295ef5f`. What remains: remeasurement on the final candidate, the 2026-10-06 audit follow-ups, and the maintainer decisions (publish, Kafka, PR).
