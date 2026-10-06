@@ -1,8 +1,10 @@
 # Parity runner (TASK-14)
 
 One reproducible command verifies the port against the pinned upstream: `./scripts/verify.sh`.
-Its `parity-coverage` suite proves provenance and reconciles the upstream test inventory
-against the port artifacts, blocking on lost cases and unrecorded drift.
+Its first step bootstraps the pinned upstream clone (before the build: the clone-dependent
+tests initialize inside `mvn verify`), and its `parity-coverage` suite proves provenance and
+reconciles the upstream test inventory against the port artifacts, blocking on lost cases
+and unrecorded drift.
 
 ## Pins and provenance
 
@@ -12,20 +14,38 @@ resolve to (`9f62097dfe4995b5709d001ca0187e30ca0530ef`), plus the build-time fix
 (wire-compiler jars from Maven Central, protobuf-java test oracle 4.36.1).
 `scripts/fetch-upstream.sh` retrieves the clone (default `/tmp/wire`, override with
 `$ANTIWIRE_UPSTREAM` or the first argument), fetches the tag into an existing clone when
-missing, and refuses to proceed when the resolved identity differs from the pins.
+missing, and refuses to proceed when the resolved identity differs from the pins or when
+the worktree carries local modifications: reconciliation reads the working tree, so a
+modified clone is not the pinned sources. `scripts/verify.sh` runs this fetch as a
+prerequisite before `mvn verify` (fail fast with an explicit message, no build), and
+`scripts/test-bootstrap.sh` is the offline regression check covering absent, valid,
+modified, wrong-pin and unreachable clone states with a stubbed mvn.
 
 ## Reconciliation
 
 `scripts/check-parity-coverage.py` walks the in-scope upstream modules
 (wire-runtime commonTest; wire-schema commonTest + jvmTest; wire-tests jvm-java-kotlin and
-jvm-kotlin-proto-reader-32), extracts `@Test` method names from every upstream file and from
-each mapped port file, and enforces per `config/upstream-case-map.json`:
+jvm-kotlin-proto-reader-32; the protoc compatibility suites; the Java generator and
+compiler suites), extracts `@Test` method names from every upstream file and from each
+mapped port file, and enforces per `config/upstream-case-map.json`:
 
 - `adopted`/`partial`: every upstream case must exist in the mapped port file, after the
   file's `renames` map and minus its `missing` entries (each of which carries a reason
   naming the non-ported feature). Port-only extra cases are reported, not fatal.
-- `deferred`: an owning task must be recorded (currently TASK-16: profile layer and
-  compiler machinery; see the deferred table in
+- `skipped` dispositions: a port case that is `@Disabled`/`@Ignore` is lawful only when
+  the pinned upstream ignores the same case (a mirrored skip, read from the clone; the
+  ten currently mirrored skips are PrunerTest's four map-variant cases, ParseTest's two,
+  InteropTest `boxOneOfsJava`, DynamicSerializationTest `mapTest`, SchemaTest
+  `linkExtendTypeInOuterMessage`, and TestAllTypes `testUnknownFieldsTypeMismatch`) or
+  the map records the skip with a reason and exactly one of:
+  `exclusion` naming a DEC (a declared non-ported feature, DEC-6 today) or `owner` naming
+  the TASK that owes the case (currently the two ProtoTarget cases under TASK-16.2 and
+  the generated-model Empty case under TASK-16.1). Any other skip fails with the case
+  identity; the annotation's reason string alone is never a disposition. Class-level
+  disables need a `skipped_class` record.
+- `fixture`: a fixture entry must carry no `@Test` methods on either side; an executable
+  file cannot leave the inventory through the fixture flag.
+- `deferred`: an owning task must be recorded (currently none; see the deferred table in
   [task13-case-accounting.md](task13-case-accounting.md)).
 - `excluded`: a reason naming the excluded feature must be recorded (DEC-6 JSON adapters,
   the manual ParsingTester harness, the shared Assertions helper).
@@ -36,6 +56,28 @@ Fixture directories and non-executable upstream modules are distinguished in the
 that is absent from the map fails the run, as does a map entry whose upstream file
 disappeared: both directions of drift are caught.
 
+### Execution reconciliation
+
+Source-presence is not execution. With `--execution` (added by `scripts/parity-coverage.sh`
+after the green build), the checker parses the per-class surefire XML reports of the five
+test modules and reconciles case IDENTITIES: every `@Test` method declared in a mapped
+executable port file must appear in its class's report, every runtime skip must carry the
+lawful disposition validated above (an annotation-free skip, e.g. a JUnit assumption,
+needs a record too), and a report case absent from the port source means stale compiled
+tests ran (clean build required). Aggregate module totals deliberately play no gate role:
+port-only extra classes (the okio suites, the security corpus, parity locks), parameterized
+invocations (`name[1]`, `name[Buffer]`) and port-only extras all shift counts without
+saying anything about coverage, which is exactly why the reconciliation is per-case
+identity. The `runtime-tests`/`schema-tests`/`protoc-oracle`/`compiler-tests` suites keep
+reporting their module totals, with skips reconciled by identity here.
+
+`scripts/test-parity-gate.sh` is the offline regression check: deletion, unrecorded
+method-level skip, class-level skip and false-fixture mutations of a scratch tree must
+each fail for the intended reason, mirrored and recorded skips must pass, an unrecorded
+extra skip in a replayed module summary must be caught by the identity reconciliation, and
+release validation must reject owner-recorded skips while accepting DEC-approved
+exclusions.
+
 Case ledgers (the human-readable counterparts of the map):
 [task9-case-accounting.md](task9-case-accounting.md) for the runtime suites,
 [task13-case-accounting.md](task13-case-accounting.md) for the schema suites.
@@ -43,8 +85,10 @@ Case ledgers (the human-readable counterparts of the map):
 ## Release validation
 
 `python3 scripts/check-parity-coverage.py --require-complete` additionally fails while any
-deferred case remains. TASK-21's release procedure must run it; partial M2/M3 coverage is
-never release parity.
+deferred case remains and while any skip disposition still carries an open `owner` task,
+so required cases that are skipped pending their owner block release, while DEC-approved
+feature exclusions do not. TASK-21's release procedure must run it; partial M2/M3 coverage
+is never release parity.
 
 ## Extension contract
 

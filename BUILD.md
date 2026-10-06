@@ -28,16 +28,32 @@ any reactor-scoped run.
 
 `scripts/verify.sh` is the single entry point and the only command CI's build job runs. It:
 
-1. runs `mvn verify` (build, enforcer dependency policy, module smoke tests, classpath exports);
-2. runs `scripts/check-classpath.sh`: per module, reports where classes under the retained
+1. bootstraps the pinned upstream clone: `scripts/fetch-upstream.sh` runs BEFORE the build,
+   because clone-dependent tests (`TestFiles.upstreamClone`, the golden corpora) initialize
+   inside `mvn verify`. The clone path defaults to `/tmp/wire` and is overridden with
+   `ANTIWIRE_UPSTREAM` (CI passes its cached `~/antiwire-upstream` this way, so local and
+   CI runs share one contract). An existing correct clone is reused, never re-cloned; a
+   clone whose tag resolves elsewhere, or whose worktree carries local modifications, is
+   rejected with an actionable error; when the sources cannot be obtained (network, pin),
+   the run fails fast with an explicit prerequisite message and no build is started.
+   `scripts/test-bootstrap.sh` is the offline regression check for these states (stubbed
+   mvn, synthetic upstream repository);
+2. runs `mvn verify` (build, enforcer dependency policy, module smoke tests, classpath exports);
+3. runs `scripts/check-classpath.sh`: per module, reports where classes under the retained
    prefixes load from and fails if one class name resolves from two artifacts. The retained
    prefixes live in `config/retained-prefixes.txt` (one per line), the single source for the
    check and the provisional OPEN-1-era list from the compatibility matrix; TASK-4 updates
    it if namespaces move. The check fails closed when that file is missing or empty;
-3. runs `scripts/check-java11-bytecode.sh`: module jars and production dependency jars must
+4. runs `scripts/check-java11-bytecode.sh`: module jars and production dependency jars must
    expose only class files Java 11 can select (major version 55 or lower, multi-release aware);
-4. runs `scripts/consumer-check-java11.sh`: compiles and runs the named placeholder consumer
+5. runs `scripts/consumer-check-java11.sh`: compiles and runs the named placeholder consumer
    on an actual Java 11 JVM against the module jars.
+
+Stale build outputs: after switching revisions, deleted or renamed test classes can survive
+as stale `.class` files under a module's `target/test-classes`, and surefire runs them (or
+fails discovery) against sources that no longer exist. The supported recovery is a clean
+build of the affected module (`mvn clean verify`, or remove that module's `target/`); no
+test exclusion ever papers over stale outputs.
 
 The suite registry it prints comes from `config/verify-suites.json`. Each suite carries a
 declared status, `ACTIVE` or `PENDING`; only the owning task flips one. PENDING suites are

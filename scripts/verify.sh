@@ -14,6 +14,14 @@
 # MISSING with a not-attributable note (the overall verdict stays FAIL). dependency-policy
 # is the one exception: when the enforcer's bannedDependencies rule is what failed, it is
 # recorded FAIL with that attribution, because the enforcer verdict IS attributable.
+#
+# Clone prerequisite (TASK-14.1): the clone-dependent tests (TestFiles.upstreamClone in
+# SchemaEncoderInteropTest and the golden corpora) run INSIDE mvn verify, so the pinned
+# upstream sources must exist and be validated before the build starts. Before this step
+# existed the fetch lived only in the parity-coverage suite after a green build, so a
+# clean checkout without the clone failed six SchemaEncoderInteropTest static
+# initializers and never reached the fetch. The step reuses an existing correct clone,
+# rejects a wrong or modified one, and fails fast before the long build.
 set -uo pipefail
 
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
@@ -85,6 +93,20 @@ echo "=== antiwire verification entry point: scripts/verify.sh ==="
 echo "build toolchain JVM: ${build_jvm:-(none found: no java executable on PATH)}"
 
 echo
+echo "--- prerequisite: pinned upstream sources (scripts/fetch-upstream.sh) ---"
+if ! bash "$ROOT/scripts/fetch-upstream.sh" >"$LOG" 2>&1; then
+  cat "$LOG"
+  {
+    echo "FATAL: prerequisite failed: the pinned upstream sources could not be obtained and validated."
+    echo "       Clone-dependent tests initialize against the clone inside mvn verify, so no build"
+    echo "       was started. Fix the fetch (network, pin, clone path; docs/parity-runner.md) and"
+    echo "       re-run. ANTIWIRE_UPSTREAM overrides the clone location."
+  } >&2
+  exit "$EXIT_FAIL"
+fi
+cat "$LOG"
+
+echo
 echo "--- suite: build (mvn verify; includes the dependency-policy enforcer rules) ---"
 build_ok=1
 if mvn -B -ntp -f "$ROOT/pom.xml" verify >"$LOG" 2>&1; then
@@ -129,7 +151,11 @@ record_suite upstream-watch "$watch_rc" "$WATCH_LOG"
 rm -f "$WATCH_LOG"
 
 # Module test suites (runtime-tests TASK-9, schema-tests TASK-13): their evidence is the
-# per-module surefire summary inside the green mvn verify log above.
+# per-module surefire summary inside the green mvn verify log above. The summary is an
+# aggregate: the per-case IDENTITY reconciliation (every mapped case must run, and every
+# skip must carry a recorded disposition) is the parity-coverage suite's --execution
+# pass below, because aggregate module totals cannot express it (port-only extras,
+# parameterized invocations and unmapped port-only classes all shift the counts).
 module_test_summary() { # <artifactId>
   awk -v prefix="] Building antiwire $1 " '
     /] Building antiwire / {
@@ -156,7 +182,7 @@ module_tests_suite() { # <suite> <artifactId>
   skipped="$(printf '%s\n' "$summary" | sed -n 's/^.*Skipped: \([0-9][0-9]*\)$/\1/p')"
   if [ -n "$count" ] && [ "$zero_failures" -eq 1 ]; then
     res "$suite.status=PASS"
-    res "$suite.note=$count $artifact cases inside mvn verify, $skipped skipped (Failures: 0, Errors: 0)"
+    res "$suite.note=$count $artifact cases inside mvn verify, $skipped skipped (Failures: 0, Errors: 0); skips reconciled by identity in the parity-coverage suite"
   else
     KEEP_LOG=1
     res "$suite.status=FAIL"

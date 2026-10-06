@@ -35,19 +35,19 @@
       "name": "parity-coverage",
       "status": "ACTIVE",
       "owner": "TASK-14",
-      "description": "pinned upstream tag provenance verified and every in-scope upstream test file reconciled against port artifacts (config/upstream-case-map.json); unaccounted files, lost cases, or missing reasons fail the run"
+      "description": "pinned upstream tag provenance verified and every in-scope upstream test file reconciled against port artifacts (config/upstream-case-map.json); unaccounted files, lost cases, missing reasons, unrecorded skips (every @Disabled/@Ignore needs a mirrored upstream ignore or a recorded disposition), false fixture classifications, and (post-build) executed-case identities all fail the run"
     },
     {
       "name": "protoc-oracle",
       "status": "ACTIVE",
       "owner": "TASK-15",
-      "description": "protoc 4.36.1 interoperability oracle: pinned protoc reference models and pinned upstream wire-compiler fixtures in the never-published wire-protoc-compat-java module; interim key is that module total inside mvn verify (72 ported, 50 disabled each naming DEC-6/TASK-26), ledger in the module test sources"
+      "description": "protoc 4.36.1 interoperability oracle: pinned protoc reference models and pinned upstream wire-compiler fixtures in the never-published wire-protoc-compat-java module; interim key is that module total inside mvn verify (72 ported, 50 disabled: 48 recorded DEC-6 fixture exclusions, 1 mirrored upstream ignore (boxOneOfsJava), 1 generated-model Empty divergence owned by TASK-16.1; per-case dispositions in config/upstream-case-map.json), ledger in the module test sources"
     },
     {
       "name": "compiler-tests",
       "status": "ACTIVE",
       "owner": "TASK-16",
-      "description": "Java generator and compiler behavior: 171 wire-java-generator cases inside mvn verify (138 ported incl. the byte-identical golden corpus, 33 disabled each naming DEC-6/ProtoTarget); ledger docs/task16-case-accounting.md; interim module-total key, per-case reconciliation via parity-coverage"
+      "description": "Java generator and compiler behavior: 171 wire-java-generator cases inside mvn verify (138 ported incl. the byte-identical golden corpus, 33 disabled: 31 recorded DEC-6 Kotlin-generator exclusions, 2 ProtoTarget cases owned by TASK-16.2; per-case dispositions in config/upstream-case-map.json); ledger docs/task16-case-accounting.md; interim module-total key, per-case reconciliation via parity-coverage"
     },
     {
       "name": "security-corpus",
