@@ -5,4 +5,4 @@ title: "M6 Adversarial delivery audit 2026-10-06"
 
 ## Description
 
-Close verified gaps between the approved pure-Java Wire port scope and the delivered project at 295ef5f0e7a1e45937417b9f621044d8139df6f5. Includes reproducible correctness defects, missing validation and delivery evidence, and inconsistent current-state documentation. Preserve explicit initial exclusions, maintainer approval gates and deferred Kafka scope. Track existing work without duplicating it. This milestone does not authorize implementation, publication or upstream changes.
+Close verified gaps between the approved pure-Java Wire port scope and the delivered project at 295ef5f0e7a1e45937417b9f621044d8139df6f5. Includes reproducible correctness defects, missing validation and delivery evidence, and inconsistent current-state documentation. Preserve explicit initial exclusions, maintainer approval gates and deferred Kafka scope. Track existing work without duplicating it. This milestone authorizes nothing beyond its tasks: each implementing task carries its own dated maintainer decision, and no publication or upstream change is authorized.

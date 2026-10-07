@@ -321,12 +321,12 @@ LENGTH_DELIMITED skip path. Table verdict: `wire-runtime` common JVM, so
 
 The port HAS the fix. Both readers guard the skip path:
 
-- `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader.java:285`:
+- `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader.java` (call site at line 295):
   `requireNonNegativeLength(length, tag);` inside `STATE_LENGTH_DELIMITED` within
-  `skipGroup`, with the throwing body at lines 546 to 550
+  `skipGroup`, with the throwing body in `requireNonNegativeLength(int, int)` (line 569 onward)
   (`if (length < 0) throw new ProtocolException("Negative length: " + length + ...)`).
 - `wire-runtime-java/src/main/java/com/squareup/wire/ByteArrayProtoReader32.java:269`:
-  the same call in the same branch, body at lines 537 to 541.
+  the same call in the same branch (line 269), body in `requireNonNegativeLength(int, int)` (line 553 onward).
 
 Upstream pinned evidence for comparison: `ProtoReader.kt:270` and
 `ByteArrayProtoReader32.kt:240` at tag 7.1.0 (inventory item 1). The port's helper is a

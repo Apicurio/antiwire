@@ -51,7 +51,7 @@ reported; state in the note). Drilled failure modes are recorded in the doc's se
 snapshot, unparsed tag names); today's real output is state=CURRENT with pin 7.1.0 the
 newest upstream tag. The rehearsal (doc section 9) replays GHSA-7xpr-hc2w-34m9 end to end
 against the real clone objects: detection greps, triage (port has both guards:
-ProtoReader.java:285, ByteArrayProtoReader32.java:269), routing record (local only, no
+ProtoReader.java:295 (285 when this note was written), ByteArrayProtoReader32.java:269), routing record (local only, no
 notifications), upstream diff quoted, adaptation state and corpus assertions cited, full
 parity rerun on isolated classpaths: VERDICT: all 12 ACTIVE suites passed.
 

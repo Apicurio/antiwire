@@ -10,9 +10,8 @@ It includes software developed at Square, Inc. (https://squareup.com):
   licensed under the Apache License, Version 2.0
 
 The protobuf-derived code in the ProtoReader family and the R8-derived code
-in internal/MathMethods are licensed by Google LLC under the Apache License,
-Version 2.0, and additionally carry the following original BSD-style
-notices, reproduced verbatim per file:
+in internal/MathMethods carry the following original BSD-style notices from
+Google, reproduced verbatim per file:
 
 Google "Nano" Protocol Buffer-derived code (the ProtoReader family:
 ProtoReader, ProtoReader32, ByteArrayProtoReader32, and the ProtoWriter
@@ -85,6 +84,10 @@ wrapped in the source file):
 
 It includes software licensed by JetBrains s.r.o. under the Apache License,
 Version 2.0 (ArrayList utility classes).
+
+The wire-java-generator module depends on Square JavaPoet 1.13.0
+(https://github.com/square/javapoet), licensed under the Apache License,
+Version 2.0.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use these files except in compliance with the License. You may obtain a copy

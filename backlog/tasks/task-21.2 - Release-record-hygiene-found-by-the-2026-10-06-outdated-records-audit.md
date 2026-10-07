@@ -1,9 +1,10 @@
 ---
 id: TASK-21.2
 title: Release-record hygiene found by the 2026-10-06 outdated-records audit
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-06 19:06'
+updated_date: '2026-10-07 05:59'
 labels:
   - adversarial-audit
   - release-tooling
@@ -21,14 +22,20 @@ Items from the audit that touch maintainer-owned acceptance records or release e
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 scripts/release-build.sh --check-gates runs without the pending-and-accepted FATAL and still fails closed on contradictory evidence.
-- [ ] #2 performance.md and release-candidate.md carry dated stale markers until regenerated or remeasured for the final candidate.
-- [ ] #3 NOTICE and license-inventory.md agree with DEC-12 (javapoet attributed, no Apache clause over BSD-only files).
-- [ ] #4 Line citations in the security and sync docs resolve or are symbol references.
-- [ ] #5 Run /code-review at high effort on the final diff
+- [x] #1 scripts/release-build.sh --check-gates runs without the pending-and-accepted FATAL and still fails closed on contradictory evidence.
+- [x] #2 performance.md and release-candidate.md carry dated stale markers until regenerated or remeasured for the final candidate.
+- [x] #3 NOTICE and license-inventory.md agree with DEC-12 (javapoet attributed, no Apache clause over BSD-only files).
+- [x] #4 Line citations in the security and sync docs resolve or are symbol references.
+- [x] #5 Run /code-review at high effort on the final diff
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Maintainer approved the fixes on 2026-10-07 ("fix all the incorrect information, sure"). Footprint sections 8 and 9.6 historical acceptance rows reworded as signed-history so they no longer match the live accepted anchor; section 10.6 now documents how to sign; release-build.sh --check-gates exits 0 (footprint OPEN, encodeForward CLOSED) and scripts/test-release-gates.sh passes all 8 states including a new accepted state. performance.md and release-candidate.md carry dated STALE banners (regeneration and remeasurement on the final candidate remain TASK-21 items); performance.md wording, bytes-decode figure and checksum supersession corrected. license-inventory sums fixed; NOTICE drops the Apache sentence over BSD-only files and adds JavaPoet 1.13.0. Drifted line citations fixed in security-regression-inventory.md, upstream-sync.md and the TASK-23 note; TASK-21 AC#7 and milestones m-8, m-11, m-12 reworded. The footprint signature itself was not recorded (maintainer-owned). Gates: /code-review high ran (5 findings, all fixed); scripts/verify.sh 12/12 PASS; docs, comments and test-script changes only.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
+- [x] #1 Run /code-review at high effort on the final diff and resolve or explicitly disposition every finding before marking Done
 <!-- DOD:END -->

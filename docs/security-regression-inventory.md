@@ -80,8 +80,8 @@ last occurrence wins, is documented in the upstream changelog entry and diff).
   path.
 - Pinned evidence: `wire-runtime/src/commonMain/kotlin/com/squareup/wire/ProtoReader.kt:270` and
   `ByteArrayProtoReader32.kt:240` (`requireNonNegativeLength(length, tag)` in the skip branch).
-- Port evidence: `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader.java:285` and
-  `ByteArrayProtoReader32.java:269`.
+- Port evidence: `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader.java:295` and
+  `ByteArrayProtoReader32.java:269` (the `requireNonNegativeLength(length, tag)` calls in `skipGroup`).
 - Cases: `ghsa7xpr_negativeLengthGroupSkip_okioReader`,
   `ghsa7xpr_negativeLengthGroupSkip_byteArrayReader32`.
 - Detection: pre-fix the payload silently decodes (table above); the cases require
@@ -126,7 +126,7 @@ last occurrence wins, is documented in the upstream changelog entry and diff).
   documentation, extension-source locations, and enclosing-type Javadoc through it.
 - Pinned evidence: `wire-java-generator/src/main/java/com/squareup/wire/java/JavaGenerator.java:642-643`
   plus the sanitized call sites.
-- Port evidence: `wire-java-generator/.../JavaGenerator.java:607-608`.
+- Port evidence: `wire-java-generator/.../JavaGenerator.java:617-620` (the documentation escaping).
 - Case: `issue3600_commentDelimitersEscapedInGeneratedJavadoc`.
 - Detection: the case asserts the escaped forms appear and the raw `*/` sequence does not;
   reverting the escaping lets the raw delimiter through and the case fails.
@@ -208,8 +208,8 @@ last occurrence wins, is documented in the upstream changelog entry and diff).
   earlier ones for these adapters, contrary to the protobuf specification.
 - Pinned evidence: `wire-runtime/src/commonMain/kotlin/com/squareup/wire/internal/RuntimeMessageAdapter.kt:178-185`,
   `internal/Internal.kt:336-340`.
-- Port evidence: `wire-runtime-java/.../internal/RuntimeMessageAdapter.java:222-228`,
-  `Internal.java:323-333`.
+- Port evidence: `wire-runtime-java/.../internal/RuntimeMessageAdapter.java:234` (the `Internal.decodeMessageOrMerge` call),
+  `Internal.java:324` (`decodeMessageOrMerge`).
 - Cases: `issue3652_reflectionAdapterMergesDuplicateSingularMessage`,
   `issue3652_decodeMessageOrMergeAppendsFieldMaskPaths`,
   `issue3652_schemaAdapterMergesDuplicateSingularFieldMask`.

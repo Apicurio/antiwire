@@ -34,8 +34,13 @@ pass() { # <state> <message>
   echo "PASS [$1]: $2"
 }
 
-FOOTPRINT_ACCEPTED_CELL='**ACCEPTED by the maintainer (P. Antinori, 2026-10-03, session record): section 9.1 candidate c713e9a with the guava-free marginal; bound to the recorded checksums and revision per the invalidation rule**'
+FOOTPRINT_PENDING_CELL='**PENDING maintainer signature: candidate 0f860ff of 10.1 (revision, nine checksums, resolved identities), antiwire column renewed in 10.2 to 10.4, Apicurio marginal outstanding per 10.5**'
+FOOTPRINT_ACCEPTED_CELL='**ACCEPTED by the maintainer (P. Antinori, 2026-10-07, test fixture): section 10.1 candidate 0f860ff; bound to the recorded checksums and revision per the invalidation rule**'
 PERF_RESOLVED_CELL='RESOLVED, port now 2.2x faster (mandate floor 0.95 exceeded in both repetitions)'
+
+accept_footprint() { # <dir>: turn the live PENDING footprint row into an ACCEPTED one
+  mutate_cell "$1/docs/footprint.md" "$FOOTPRINT_PENDING_CELL" "$FOOTPRINT_ACCEPTED_CELL"
+}
 
 make_scratch() { # <name>: scratch repo copy; prints its dir
   local dir="$WORK/$1"
@@ -82,20 +87,31 @@ set -e
 if [ "$CURRENT_RC" -ne 0 ]; then
   fail current "the gate section does not recognize the recorded states of the real docs:"
   sed 's/^/    /' "$CURRENT_OUT" >&2
-elif ! grep -q "CLOSED: footprint acceptance gate recorded in docs/footprint.md" "$CURRENT_OUT" \
+elif ! grep -Eq "(OPEN: footprint acceptance is unsigned|CLOSED: footprint acceptance gate recorded in docs/footprint.md)" "$CURRENT_OUT" \
   || ! grep -q "CLOSED: encodeForward acceptance gate recorded in docs/performance.md" "$CURRENT_OUT" \
   || ! grep -q "no build, no packaging, no doc rewrite" "$CURRENT_OUT"; then
-  fail current "gate statuses not reported CLOSED with the read-only banner"
+  fail current "gate statuses not reported (footprint OPEN or CLOSED, encodeForward CLOSED) with the read-only banner"
 elif [ "$(sha256sum "$REAL_ROOT/docs/release-candidate.md" | cut -d' ' -f1)" \
   != "$CANDIDATE_HASH_BEFORE" ]; then
   fail current "the gate check rewrote docs/release-candidate.md"
 else
-  pass current "recorded ACCEPTED/RESOLVED rows recognized as CLOSED, read-only, exit 0"
+  pass current "real docs: footprint gate recognized (OPEN while pending, CLOSED once signed), encodeForward CLOSED, read-only, exit 0"
+fi
+
+# --- accepted: the live PENDING footprint row is signed -----------------------------------
+dir="$(make_scratch accepted)"
+accept_footprint "$dir"
+run_check "$dir"
+if [ "$GATE_RC" -ne 0 ]; then
+  fail accepted "a recorded ACCEPTED row must be recognized"
+elif ! grep -q "CLOSED: footprint acceptance gate recorded in docs/footprint.md" "$dir/out.log"; then
+  fail accepted "an ACCEPTED footprint row must be reported CLOSED"
+else
+  pass accepted "ACCEPTED footprint row recognized as CLOSED"
 fi
 
 # --- pending: revert both acceptance rows to the pre-resolution PENDING wording ----------
 dir="$(make_scratch pending)"
-mutate_cell "$dir/docs/footprint.md" "$FOOTPRINT_ACCEPTED_CELL" '**PENDING maintainer signature**'
 mutate_cell "$dir/docs/performance.md" "$PERF_RESOLVED_CELL" 'PENDING maintainer'
 run_check "$dir"
 if [ "$GATE_RC" -ne 0 ]; then
@@ -109,7 +125,7 @@ fi
 
 # --- missing-evidence: the acceptance row is reworded beyond both anchors ----------------
 dir="$(make_scratch missing)"
-mutate_cell "$dir/docs/footprint.md" "$FOOTPRINT_ACCEPTED_CELL" '**REVIEW IN PROGRESS**'
+mutate_cell "$dir/docs/footprint.md" "$FOOTPRINT_PENDING_CELL" '**REVIEW IN PROGRESS**'
 run_check "$dir"
 if [ "$GATE_RC" -eq 0 ]; then
   fail missing "a reworded acceptance row must abort, not infer a verdict"
@@ -121,6 +137,7 @@ fi
 
 # --- reopened: an accepted row AND a new pending row --------------------------------------
 dir="$(make_scratch reopened)"
+accept_footprint "$dir"
 printf '\n| **Acceptance of the measured footprint (AC#3, reopened after remeasurement)** | **PENDING maintainer signature** |\n' \
   >>"$dir/docs/footprint.md"
 run_check "$dir"
@@ -134,7 +151,7 @@ fi
 
 # --- unreadablesig: the accepted row matches the anchor but not the signature extraction --
 dir="$(make_scratch unreadablesig)"
-mutate_cell "$dir/docs/footprint.md" "$FOOTPRINT_ACCEPTED_CELL" \
+mutate_cell "$dir/docs/footprint.md" "$FOOTPRINT_PENDING_CELL" \
   '**ACCEPTED by the maintainer verbally, no structured signature recorded**'
 run_check "$dir"
 if [ "$GATE_RC" -eq 0 ]; then
@@ -147,9 +164,9 @@ fi
 
 # --- ambiguous: two different accepted rows -----------------------------------------------
 dir="$(make_scratch ambiguous)"
-mutate_cell "$dir/docs/footprint.md" \
-  "section 9.1 candidate c713e9a with the guava-free marginal" \
-  "section 4 candidate other123 with a different record" 1
+accept_footprint "$dir"
+printf '\n| **Acceptance of the measured footprint (AC#3, second row)** | **ACCEPTED by the maintainer (P. Antinori, 2026-10-07, test fixture): section 4 candidate other123 with a different record; bound to the recorded checksums** |\n' \
+  >>"$dir/docs/footprint.md"
 run_check "$dir"
 if [ "$GATE_RC" -eq 0 ]; then
   fail ambiguous "two different accepted rows must abort"
@@ -172,7 +189,7 @@ else
 fi
 
 # No scratch state may have produced packaging output or a doc rewrite.
-for state in pending missing reopened ambiguous nodoc; do
+for state in accepted pending missing reopened ambiguous nodoc; do
   if [ -e "$WORK/$state/target" ] || [ -e "$WORK/$state/docs/release-candidate.md.tmp" ]; then
     fail "$state" "the gate check must not write build output or touch the candidate doc"
   fi
@@ -184,4 +201,4 @@ if [ "$FAILED" -ne 0 ]; then
   exit 1
 fi
 echo "RESULT release-gates-check.status=PASS"
-echo "release gate state matrix: current, pending, missing, reopened, unreadablesig, ambiguous and nodoc behaved as specified"
+echo "release gate state matrix: current, accepted, pending, missing, reopened, unreadablesig, ambiguous and nodoc behaved as specified"

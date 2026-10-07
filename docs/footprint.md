@@ -550,12 +550,10 @@ final build action.
 | Apicurio marginal measurements (section 4) | Measured and reproducible |
 | Generator cost (section 5) | Measured and reproducible |
 | Kotlin and Okio absence in production scope (section 6) | Verified, three-way evidence |
-| **Acceptance of the measured footprint (AC#3, "the maintainer explicitly accepts the measured footprint before release")** | **ACCEPTED by the maintainer (P. Antinori, 2026-10-03, session record): section 9.1 candidate c713e9a with the guava-free marginal; bound to the recorded checksums and revision per the invalidation rule** |
+| **Historical record of the footprint acceptance (AC#3), superseded by section 10** | **Signed by the maintainer (P. Antinori, 2026-10-03, session record) for section 9.1 candidate c713e9a with the guava-free marginal; bound to the recorded checksums and revision per the invalidation rule** |
 
-The acceptance row is deliberately unsigned. The measured candidate to accept is the one
-identified in section 0 (revision, checksums, resolved identities), under the invalidation
-rule stated there. The open point the maintainer should weigh with it is the guava pin
-observation in section 4.4.
+This row was left unsigned when section 8 was written and was signed on 2026-10-03 for the
+c713e9a candidate of section 9.1; the current acceptance state is the row in section 10.6.
 
 ### Coordinate update 2026-10-02
 
@@ -810,13 +808,11 @@ source audit for all migrated modules.
 | Apicurio marginal measurements (9.5, guava-free branch 6ce5582c) | Measured and reproducible |
 | Generator cost (9.4) | Measured and reproducible |
 | Kotlin and Okio absence in production scope (section 6 evidence, plus the trees of 9.5) | Verified, three-way evidence |
-| **Acceptance of the measured footprint (AC#3, "the maintainer explicitly accepts the measured footprint before release")** | **ACCEPTED by the maintainer (P. Antinori, 2026-10-03, session record): section 9.1 candidate c713e9a with the guava-free marginal; bound to the recorded checksums and revision per the invalidation rule** |
+| **Historical record of the footprint acceptance (AC#3), superseded by section 10** | **Signed by the maintainer (P. Antinori, 2026-10-03, session record) for section 9.1 candidate c713e9a with the guava-free marginal; bound to the recorded checksums and revision per the invalidation rule** |
 
-The row is again deliberately unsigned. The candidate to accept is the one identified in
-9.1 (revision, nine checksums, resolved identities), with the marginal evidence of 9.5 on
-the guava-free branch; the open point previously attached to acceptance (the guava pin of
-section 4.4) is gone with the rebuild, so what remains for the maintainer to weigh is the
-footprint itself. The invalidation rule of section 0 continues to bind.
+This row was signed on 2026-10-03 for the c713e9a candidate of section 9.1 (marginal evidence
+of 9.5 on the guava-free branch). The invalidation rule of section 0 continues to bind, and
+the current acceptance state is the row in section 10.6.
 
 Superseded on 2026-10-06 by the renewal in section 10: candidate 0f860ff renews the
 antiwire column, and its acceptance is PENDING maintainer signature. This c713e9a
@@ -1043,8 +1039,11 @@ notes) is the owner of that run.
 The row is unsigned by construction: acceptance is the maintainer's act. The candidate to
 accept is the one identified in 10.1, with the renewal status exactly as the rows above
 state it, including that the marginal evidence of 9.5 does not carry to this candidate
-until 10.5 is run. The c713e9a acceptance of 9.6 stays as history. The invalidation rule
-of section 0 continues to bind.
+until 10.5 is run. The c713e9a acceptance of 9.6 stays as history. To record a signature,
+reword only the row above (10.6) to the "ACCEPTED by the maintainer (<who>, <date>, <record>): <candidate>;" form that
+scripts/release-build.sh anchors on; the two historical rows in sections 8 and 9.6 are
+deliberately worded so they do not match that anchor. The invalidation rule of section 0
+continues to bind.
 
 ### 10.7 Verification run
 

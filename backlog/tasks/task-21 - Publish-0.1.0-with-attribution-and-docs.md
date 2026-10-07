@@ -4,7 +4,7 @@ title: Publish 0.1.0 with attribution and docs
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-06 18:41'
+updated_date: '2026-10-07 05:59'
 labels: []
 milestone: m-11
 dependencies:
@@ -38,7 +38,7 @@ Publish the first release only after the approved compatibility, complete applic
 - [ ] #4 The candidate POMs and resolved consumer classpaths contain no Kotlin, Kotlin-backed production dependencies, leaked test/build tools or duplicate upstream/port classes. Production bytecode and API use selected on Java 11 satisfy that baseline, including multi-release dependencies.
 - [ ] #5 License/header/in-file notice auditing covers the actual derived files and dependencies; README documents the source-migration contract, upstream pin, supported features and excluded functionality.
 - [ ] #6 Using the final candidate artifacts and resolved production dependencies, actual Java 11 consumer runs exercise runtime encoding/decoding, schema parsing/loading and the optional Java generator. The same checks run against published artifacts before release completion; JDK 17-only runs cannot satisfy this gate.
-- [ ] #7 Every production source and resource shipped in the final candidate is listed in docs/license-inventory.md with a verified header, including files added after the 0f860ff audit.
+- [ ] #7 Every production source and resource shipped in the final candidate is listed in docs/license-inventory.md with a verified header, including files added after the 2026-10-06 audit (baseline 295ef5f).
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -65,6 +65,8 @@ Mechanical release groundwork landed (no publish, no tag, no deploy): docs/licen
 GitHub tracking issue: https://github.com/Apicurio/antiwire/issues/3
 
 2026-10-06 maintainer confirmations, recorded in docs/decisions.md. (1) The io.apicurio namespace is confirmed for use (DEC-8 reconfirmed). This covers the namespace only: AC#1's explicit release approval for publishing artifacts remains open and is the maintainer's gate, so no publish, tag or deploy follows from this note. (2) The JDK-typed public API without okio is confirmed as the intended design (new DEC-14, backed by ConsumerApiSurfaceTest and JdkSchemaLoaderValidationTest).
+
+2026-10-07 audit note: the NOTICE discrepancy mentioned in the 2026-10-02 groundwork note (Apache attribution over BSD-only files) is now resolved: NOTICE reproduces the BSD notices verbatim without the Apache sentence and carries a JavaPoet 1.13.0 attribution (see docs/license-inventory.md, 2026-10-07). The 159-source count there was the a45b0f0 figure; HEAD has 161 (docs/license-inventory.md).
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done

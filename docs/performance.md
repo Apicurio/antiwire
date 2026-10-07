@@ -1,5 +1,8 @@
 # Runtime and Apicurio schema performance comparison (TASK-20)
 
+> STALE (2026-10-07): the last valid measurement is session 5 at candidate 82c3624. Later commits changed measured modules (275dcc2 TASK-26, 84a6a9f TASK-16.1, ec15e18 TASK-16.2, 7297b66 TASK-21, 68823ba TASK-16.2.1), so under DEC-13 this record does not cover the current HEAD and must be renewed on the final candidate (TASK-21).
+
+
 Measured on 2026-10-02 in three sessions: 12:08-12:56 CEST (initial full matrix, 15 wire
 benchmarks), 13:36-13:50 CEST (decode re-measurement after the decode entry-point
 fix: the four decode cells plus three encode control cells, identical JMH configuration),
@@ -595,7 +598,7 @@ acceptance record. This document grants no acceptance.
 
 Why renewed: TASK-28 (`bc3ad43`, the zero-copy `readBytesAsBytes` bytes decode) changed
 `wire-runtime-java` after session 4, firing the invalidation rule (section 0) a fourth
-time; this renewal records the fix on the final release candidate and is the measurement
+time; this renewal records the fix on the session-5 candidate (not the final release candidate, see the freshness banner) and is the measurement
 the maintainer's 2026-10-03 release-record confirmation (end of this document)
 anticipated. The full 12-cell runtime matrix was re-measured end to end with the identical
 JMH configuration and interleave (start times 17:50, 17:56, 18:02, 18:08; last run
@@ -693,7 +696,7 @@ except the two the fix moved (bytes decode 36,752 -> 19,072, all_types decode
 9,040 -> 8,944).
 
 Renewal statement (TASK-21 evidence): this record renews the full 12-cell runtime matrix
-on the final release candidate (`82c3624`, code identical to the TASK-28 fix `bc3ad43`)
+on the session-5 candidate (`82c3624`, code identical to the TASK-28 fix `bc3ad43`)
 by revision, artifact checksums, unchanged oracle pins, generated-model identity, and
 unchanged identity fingerprints, and it closes the last open performance item of the
 session-4 statement (the TASK-28 fix and its re-measurement). Together with the
@@ -895,8 +898,8 @@ reference cells on the `2d175e2` candidate per the invalidation rule (section 0)
 
 ### Coordinate update 2026-10-02
 
-The maintainer resolved DEC-8: coordinates are now `io.apicurio` (was `io.github.paoloantinori`). A coordinate switch changes no class or resource byte (diff -rq of unpacked old/new jars differs only in the embedded META-INF/maven groupId directory), but whole-jar SHA-256 values therefore change. Current checksums under io.apicurio: wire-schema-java ac9a36f2..., wire-runtime-java 129a25cb... (old values 7bc11249.../43c810fb... superseded). The measured artifact set, sizes, and dependency graph are unchanged; resolution re-verified on the Apicurio integration branch (dependency:tree shows io.apicurio nodes, zero stale coordinates, Oracle A still 20/20 byte-identical).
+The maintainer resolved DEC-8: coordinates are now `io.apicurio` (was `io.github.paoloantinori`). A coordinate switch changes no class or resource byte (diff -rq of unpacked old/new jars differs only in the embedded META-INF/maven groupId directory), but whole-jar SHA-256 values therefore change. Current checksums under io.apicurio: wire-schema-java ac9a36f2..., wire-runtime-java 129a25cb... (old values 7bc11249.../43c810fb... superseded). The measured artifact set, sizes, and dependency graph are unchanged; resolution re-verified on the Apicurio integration branch (dependency:tree shows io.apicurio nodes, zero stale coordinates, Oracle A still 20/20 byte-identical). Superseded: whole-jar checksums were re-issued for later candidates (session 5 records 0f8bb019, 97f7cb22 and dbb2afd4); the ac9a36f2 and 129a25cb values are no longer current.
 
 ### Release-record confirmation (2026-10-03)
 
-The maintainer confirmed the performance reports as the release reference (session record, 2026-10-03). At confirmation time every cell is inside its oracle band and both former findings are resolved by fix, not acceptance: EmailSearchBench.encodeForward by the Utf8.size fast path (2.24-2.25x across sessions 3-4) and BytesBench.decode by TASK-28's zero-copy readBytesAsBytes (0.880, allocation back to one-copy parity). A session-5 renewal on the final release candidate (post TASK-28) records the bytes-decode fix measurements; any later relevant change re-fires the invalidation rule.
+The maintainer confirmed the performance reports as the release reference (session record, 2026-10-03). At confirmation time every cell is inside its oracle band and both former findings are resolved by fix, not acceptance: EmailSearchBench.encodeForward by the Utf8.size fast path (2.24-2.25x across sessions 3-4) and BytesBench.decode by TASK-28's zero-copy readBytesAsBytes (session 5: pooled ratio 1.156 per the session-5 table, allocation back to one-copy parity; the 0.880 in the session-5-versus-session-4 table is the upstream median-move control column, not the port ratio). A session-5 renewal on the final release candidate (post TASK-28) records the bytes-decode fix measurements; any later relevant change re-fires the invalidation rule.

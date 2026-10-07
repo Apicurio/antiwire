@@ -48,8 +48,8 @@ notice in the rows below, and the per-module totals count files):
 | wire-java-generator | 9 | 1 | 0 | 0 | 0 | 0 | 0 | 10 |
 | **Total** | **143** | **8** | **3** | **1** | **1** | **4** | **1** | **161** |
 
-Arithmetic check, recomputed mechanically by script: 54+6+3+1+1+4+1 = 70,
-79+2 = 81, 9+1 = 10, and the total row 142+9+3+1+1+4+1 = 161; every row's cells sum to
+Arithmetic check, recomputed mechanically by script: 55+5+3+1+1+4+1 = 70,
+79+2 = 81, 9+1 = 10, and the total row 143+8+3+1+1+4+1 = 161; every row's cells sum to
 its file total, and 70+81+10 = 161 files matches `git ls-files` over the three modules.
 The columns count the notices the files carry. One translated file
 (`ProtoReader32AsProtoReader.java`) carried the antiwire header where translated material
@@ -146,7 +146,8 @@ The first audit flagged a discrepancy. The root `NOTICE` file stated Google LLC 
 internal/MathMethods" under the Apache License 2.0, while those files carry BSD-style
 3-clause notices (see the table above). DEC-12 also says the
 NOTICE file "carries the BSD-style notices verbatim": resolved 2026-10-02, NOTICE now
-reproduces both notices verbatim. The 2026-10-06 refresh re-verified both files at
+reproduces both notices verbatim.
+The 2026-10-06 refresh re-verified both files at
 `0f860ff`. `LICENSE` is the standard Apache-2.0 text (byte-identical to the pinned
 upstream checkout's `LICENSE.txt`), and both BSD blocks in `NOTICE` match their source
 files word for word, with the R8 block re-wrapped exactly as NOTICE itself discloses
@@ -155,6 +156,11 @@ applied to the five translated source files; the eight google/protobuf/*.proto r
 shipped in the wire-schema-java jar keep their intact in-jar Google 2008 BSD notices
 (7 full 3-clause + descriptor.proto short form), covered by their presence rather than by
 NOTICE reproduction.
+
+2026-10-07: the NOTICE sentence that attributed an Apache-2.0 grant to Google over those
+BSD-only files was removed (the BSD notices are reproduced verbatim instead), and the Square
+JavaPoet 1.13.0 attribution for the generator module's production dependency was added
+(DEC-12).
 
 ## Per-file listing
 
