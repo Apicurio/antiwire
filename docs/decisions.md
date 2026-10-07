@@ -193,3 +193,7 @@ okio-typed member on those classes, even a deprecated one. They do not cover oth
 classes: a new okio-typed public member elsewhere is not caught by them and is a review
 item. This refines DEC-2: source compatibility for upstream's okio-typed members is not a
 goal; it is preserved through the deprecated bridge only where the DEC-5 fixtures require it.
+
+### Provenance mechanism (decided 2026-10-07, TASK-30)
+
+The per-file "Translated from" header that `docs/translation-conventions.md` section 7.2 proposed on 2026-09-30 is not adopted. The audit of 2026-10-06 found it on none of the 310 production files (161 in the three shipped modules, the rest in the never-published test modules), and adding it would change the class files and sources jars of the shipped modules and re-fire the DEC-13 invalidation rule without adding information the existing records do not carry. Provenance is carried by the retained package and class names, the pin in `config/parity-pins.json` (DEC-1), the verbatim upstream notices (DEC-12), `docs/license-inventory.md`, the adapted-test ledgers and case-accounting documents, `config/upstream-case-map.json` reconciled by the `parity-coverage` suite, and the task and commit history. Section 7.2 now states this mechanism.

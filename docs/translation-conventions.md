@@ -54,7 +54,7 @@ enforced at the boundary; a declaration of type `T?` means the Java side accepts
 performs no null check of its own. Kotlin platform types (`T!`) arise only where upstream calls
 Java APIs. For those sites the translator treats the value as nullable unless the upstream usage
 proves non-null (an immediate non-null transfer, a `!!`, or a compiler-injected check on the
-next declaration), and records the decision in the file's translation notes (section 7.2).
+next declaration), and records the decision in the porting task's code-review disposition and, where behavior depends on it, in a test (section 7.2, item 3).
 
 ### 2.2 Null-check placement
 
@@ -485,26 +485,42 @@ Rules for the translation:
 
 ### 7.2 Methodology recording
 
-Each translated production file records its provenance once, in a short header comment, and
-nowhere else: source tag and commit, upstream path, a one-line statement that the file is a
-translated derivative, and, where applicable, translation-notes lines carrying the per-site
-decisions other sections require to be recorded (section 2.1 platform-type nullability calls,
-rule R2 bridge signatures, rule R3 entry-point rewrites). Example shape:
+Provenance is recorded by the mechanisms the repository actually uses, not by a per-file
+"Translated from" header (the header proposed on 2026-09-30 was never adopted; decision recorded
+2026-10-07 under TASK-30, because 310 header edits (161 in the three shipped modules) would change
+the class files and sources jars of the shipped modules and re-fire the DEC-13 invalidation rule
+for no information the records below do not already carry):
 
-```java
-/*
- * Translated from wire-runtime/src/commonMain/kotlin/com/squareup/wire/ProtoReader.kt
- * at square/wire tag 7.1.0, tag object da24c33ee1fe772a7a04617018087f46f26d1708,
- * commit 9f62097dfe4995b5709d001ca0187e30ca0530ef. Derivative work under the notices below.
- */
-```
+1. **Upstream identity of each file.** Translated classes keep their upstream package and
+   simple name (`com.squareup.wire.ProtoReader` is `ProtoReader.kt` at the pin), so the source
+   file is derivable from the name; the pin itself (tag 7.1.0, tag object
+   `da24c33ee1fe772a7a04617018087f46f26d1708`, commit `9f62097dfe4995b5709d001ca0187e30ca0530ef`)
+   is recorded once in `config/parity-pins.json` and `docs/decisions.md` (DEC-1).
+2. **Upstream notices.** Each file carries the notice of its source verbatim (section 7.1),
+   so the derivation is stated in the file wherever a notice exists; `docs/license-inventory.md`
+   lists every production source and resource of the three shipped modules (wire-runtime-java,
+   wire-schema-java, wire-java-generator) with its verified header class; the never-published
+   wire-tests-java and wire-protoc-compat-java modules carry their upstream notices in the
+   files and are not inventoried.
+3. **Per-declaration decisions.** Section 2.1 platform-type nullability calls are recorded in
+   the porting task's code-review disposition and, where behavior depends on them, pinned by a
+   test (the TASK-5 boundary examples and the adapted upstream suites). The test-adaptation
+   rules R1 to R5 (including R2 bridge signatures and R3 entry-point rewrites) are recorded per
+   site in the adapted-test ledgers (section 6.2) and the case-accounting documents
+   (`docs/task9-case-accounting.md`, `docs/task13-case-accounting.md`,
+   `docs/task16-case-accounting.md`); `docs/m1-ownership-map.md` records where classes live.
+   Comments inside method bodies are reserved for constraints the code cannot express, per
+   repository norm.
+4. **Upstream test cases** are mapped by identity to port artifacts in
+   `config/upstream-case-map.json` and reconciled by the `parity-coverage` suite.
+5. **Review trail and methodology narrative** live in the task records and git history of each
+   porting task (every task carries its code-review disposition).
 
-The full methodology narrative (tooling used for translation, review trail, the per-file mapping
-between upstream declarations and translated members) lives once in the project's provenance
-record maintained with the release tasks, not in repetitive per-method comments: per DEC-12 and
-the research risk register item 6, the methodology must be documentable per file for provenance
-purposes, which the header plus the mapping record satisfy. Comments inside method bodies are
-reserved for constraints the code cannot express, per repository norm.
+A new translated file therefore needs: the upstream package and name, the upstream notice
+where one exists, an inventory row at release, and ledger rows for any adapted test. Section 6.2's
+five-field ledger format is used by the runtime and protoc-compat adaptations
+(`UPSTREAM-TEST-ADAPTATIONS.md`); schema, wire-tests-java and generator accounting use the
+case-accounting table format of the documents named above.
 
 ## 8. Verification hooks
 
@@ -523,7 +539,7 @@ Where each convention is enforced. "CI" means `scripts/verify.sh`, the single en
 | Kotlin boundary (section 5.2) | Maven enforcer `bannedDependencies` (transitive), `scripts/check-classpath.sh` duplicate-class check over `config/retained-prefixes.txt`, both in CI; release-time dependency recheck by TASK-21 |
 | Test adaptation rules and ledger (section 6) | Ledger review per adaptation; TASK-9 and TASK-13 case inventories; TASK-14 AC#6 source-versus-build reconciliation rejecting missing relevant cases |
 | Exclusions discipline (section 6.5) | Ledger rows naming the DEC-6 exclusion; TASK-14 and TASK-17 case accounting |
-| Provenance (section 7) | Per-file header review in each porting task's code review; NOTICE inventory verification at release (TASK-21); any vendored dependency's notices re-read from the pinned artifact |
+| Provenance (section 7) | No automated check of production-file provenance exists: the `parity-coverage` suite reconciles upstream test-case identity only; enforcement is per-file notice review in each porting task's code review; `docs/license-inventory.md` verification at release (TASK-21); any vendored dependency's notices re-read from the pinned artifact |
 
 ## Maintenance
 
