@@ -47,7 +47,33 @@ any reactor-scoped run.
 4. runs `scripts/check-java11-bytecode.sh`: module jars and production dependency jars must
    expose only class files Java 11 can select (major version 55 or lower, multi-release aware);
 5. runs `scripts/consumer-check-java11.sh`: compiles and runs the consumer (ProtoWriter and loading-layer smokes)
-   on an actual Java 11 JVM against the module jars.
+   on an actual Java 11 JVM against the module jars;
+6. runs `scripts/surface-check.sh` (suite `surface-check`, TASK-34): the source-compatibility
+   surface check described below. The full list of suites, 13 ACTIVE at the time of writing, is
+   the registry in `config/verify-suites.json`; this numbered list is a summary of the steps.
+
+### Source-compatibility surface check
+
+Compatibility target (maintainer decision 2026-10-09): source compatibility for every public
+upstream member that Java can express without Kotlin types (DEC-4) and without okio in the
+signature (DEC-14). Binary compatibility is not promised (DEC-2).
+
+`scripts/surface-check.py` compares every public and protected member of the real Wire 7.1.0 jars
+(`wire-runtime-jvm`, `wire-schema-jvm`, `wire-java-generator`, `wire-compiler`) with the port's
+module jars, by full signature. The upstream jars are fetched from Maven Central into
+`target/surface-check/jars` and verified against the SHA-256 pinned in `config/parity-pins.json`
+and the SHA-1 Maven Central publishes; without a verified copy the suite is `NOT_RUN`, never
+skipped. Each member is MATCH (counted only), GAP (to fix or consciously accept, with an owner
+task) or EXCLUDED (Kotlin type, okio type, Kotlin internal, out-of-scope feature, data-class
+bridge). Checked-exception differences are a separate `THROWS` category. The small consumer
+programs in `scripts/surface-consumer/` are compiled against the real jars (must compile) and
+against the port (must compile, unless the header records `surface-expect: port=fail owner=...
+reason=...`).
+
+The ledger `config/surface-baseline.tsv` must equal the computed result: a new difference, or a
+gap that was fixed and is now stale, fails the suite. After a reviewed change, regenerate it with
+`scripts/surface-check.sh --update` (add `--allow-new` to accept new rows) and review the diff.
+
 
 Stale build outputs: after switching revisions, deleted or renamed test classes can survive
 as stale `.class` files under a module's `target/test-classes`, and surefire runs them (or

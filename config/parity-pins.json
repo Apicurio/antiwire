@@ -31,5 +31,18 @@
         "sha256": "f31cc53f105a7e48c093683bbd5437561d1233920513774b470805641bedbc09"
       }
     }
+  },
+  "upstream_surface_jars": {
+    "comment": "Additional real Wire 7.1.0 jars compared by scripts/surface-check.py (TASK-34), together with wire-runtime-jvm.jar and wire-schema-jvm.jar from upstream_jars above. Fetched from Maven Central and verified by SHA-256 (pinned here) and by the SHA-1 Maven Central publishes before use; the check fails closed otherwise. The entries list sha256 before url on purpose: CompiledAgainstUpstreamTest scans this file with a url-then-sha256 pattern and must keep seeing exactly the four jars of upstream_jars.",
+    "files": {
+      "wire-java-generator.jar": {
+        "sha256": "d6d1c0c5d0d88ef7ee2a4591f06b1a138162b63f6000188cd01d466533079142",
+        "url": "https://repo1.maven.org/maven2/com/squareup/wire/wire-java-generator/7.1.0/wire-java-generator-7.1.0.jar"
+      },
+      "wire-compiler.jar": {
+        "sha256": "8f4ea1f5a7f2739c49491b1cf2c4437bcb2a84866cef3b141a95a32b318ac215",
+        "url": "https://repo1.maven.org/maven2/com/squareup/wire/wire-compiler/7.1.0/wire-compiler-7.1.0.jar"
+      }
+    }
   }
 }

@@ -245,10 +245,12 @@ if [ "$build_ok" -eq 1 ]; then
   run_suite duplicate-class-check scripts/check-classpath.sh
   run_suite bytecode-java11 scripts/check-java11-bytecode.sh
   run_suite java11-consumer scripts/consumer-check-java11.sh
+  run_suite surface-check scripts/surface-check.sh
 else
   skip_suite duplicate-class-check scripts/check-classpath.sh
   skip_suite bytecode-java11 scripts/check-java11-bytecode.sh
   skip_suite java11-consumer scripts/consumer-check-java11.sh
+  skip_suite surface-check scripts/surface-check.sh
 fi
 
 echo
