@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-10-09 15:01'
-updated_date: '2026-10-09 15:35'
+updated_date: '2026-10-09 18:21'
 labels:
   - user-feedback
   - compatibility
@@ -54,6 +54,8 @@ Delivery gap is worse than stated: commits a11d7cfa and 6ce5582c are not valid o
 2026-10-09 history note: the first scan of the Apicurio target jars (3.3.4-SNAPSHOT, built 2026-09-24 from ce003bf8e plus an unproven tree, not from 48e2742 or 3620f08c) gave 120 referenced members, 30 resolved, 84 getters and 6 other (Companion form, private ProtoParser constructor, MessageType.toElement(), Schema.protoFile(okio.Path), OneOf constructor). The rescan at 3620f08c splits the same kinds into 2 Companion form, 2 constructors and 2 other, so the 'other' counts of the two scans are not comparable. The description now quotes only the 3620f08c numbers; AC#2's 'measured counts above' means those.
 
 2026-10-09: PR #4 (EricWittmann, open, unreviewed) adds the two missing ProtoAdapter(FieldEncoding, Class) and (FieldEncoding, Class, String) constructors, found by swapping Wire for antiwire in Retrofit; it is further evidence for option (b) and for TASK-34. My javap comparison missed this class (constructors with the same name and different signatures).
+
+2026-10-09 verified (supersedes 'may be lost'): the TASK-18 branch existed on the Mac at /tmp/apicurio and was erased (4058 directories, 0 files, empty .git/objects; Mac rebooted 2026-10-02 16:51; likely macOS /tmp cleanup, unconfirmed); it is not on bird. AC#1 therefore means redoing the migration, not locating it. Redo it on a new branch cut from apicurio-registry 3620f08c (the user's commit) in a persistent location, push it, and keep ANTIWIRE_MIGRATION.md and the parity drivers in a tracked path, never /tmp. With the 2026-10-09 getter rename (TASK-33.1) done, the migration no longer needs getter rewrites; what remains for the four protobuf modules at 3620f08c is the ProtoParser.Companion form, the ProtoParser constructor, the OneOf constructor, MessageType.toElement() and Schema.protoFile(okio.Path), plus the loader rewrite onto JdkSchemaLoader.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done

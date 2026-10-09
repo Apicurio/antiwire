@@ -4,7 +4,7 @@ title: Publish 0.1.0 with attribution and docs
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-09 15:30'
+updated_date: '2026-10-09 18:21'
 labels: []
 milestone: m-11
 dependencies:
@@ -69,6 +69,8 @@ GitHub tracking issue: https://github.com/Apicurio/antiwire/issues/3
 2026-10-07 audit note: the NOTICE discrepancy mentioned in the 2026-10-02 groundwork note (Apache attribution over BSD-only files) is now resolved: NOTICE reproduces the BSD notices verbatim without the Apache sentence and carries a JavaPoet 1.13.0 attribution (see docs/license-inventory.md, 2026-10-07). The 159-source count there was the a45b0f0 figure; HEAD has 161 (docs/license-inventory.md).
 
 2026-10-09 correction: open item 3 above says the integration branch existed only on the Mac. It is not on the Mac either (a11d7cfa and 6ce5582c are invalid objects in the Apicurio clones on both hosts, no antiwire-integration branch anywhere checked). Same-candidate Apicurio revalidation and the Apicurio footprint marginal now also require locating or redoing the TASK-18 migration; see TASK-33.
+
+2026-10-09 verified finding (supersedes the earlier 2026-10-09 correction): the integration branch was on the Mac at /tmp/apicurio and was wiped (4058 empty directories, 0 files, no git objects; Mac rebooted 2026-10-02 16:51, the last cleanup most likely macOS /tmp housekeeping, mechanism unconfirmed). It is absent from bird as well. Open item 3 therefore means redoing the TASK-18 migration on a fresh Apicurio branch and keeping it in a persistent location (pushed to a branch of a fork or an antiwire-owned repo), not /tmp. Same-candidate Apicurio revalidation and the Apicurio footprint marginal depend on it. See TASK-33 and TASK-18.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done

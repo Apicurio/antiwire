@@ -6,7 +6,7 @@ title: >-
 status: Done
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-09 15:30'
+updated_date: '2026-10-09 18:21'
 labels: []
 milestone: m-10
 dependencies:
@@ -38,6 +38,8 @@ Prepare a separate Apicurio integration branch at a recorded commit using the po
 2026-10-06 audit note: the integration branch cited in the Final Summary (a11d7cfa, later 6ce5582c) is Mac-hosted and absent from this host's Apicurio clones and /tmp/apicurio (footprint.md 10.1 records the same). Same-candidate revalidation is owned by TASK-21.
 
 2026-10-09 correction to the 2026-10-06 note above: the claim that the integration branch (a11d7cfa, later 6ce5582c) is Mac-hosted was taken from the repo's own records and is not supported. The apicurio-registry agent found neither commit as a valid object in the Apicurio clone on bird or on the Mac, no antiwire-integration branch in either, and no Apicurio pom that references antiwire; antiwire 0.1.0-SNAPSHOT artifacts are installed in bird's ~/.m2 (2026-10-06) but nothing resolves them. The migration work (ANTIWIRE_MIGRATION.md, 23 migrated files, antiwire-parity/ drivers) is therefore not located. See TASK-33.
+
+2026-10-09 verified finding (supersedes the 'not located' wording of the earlier 2026-10-09 note): the integration branch did exist on the Mac. /tmp/apicurio on the Mac is the exact path the Final Summary names, and it is now an empty skeleton: 4058 directories, 0 regular files, .git/objects with 96 empty subdirectories, so a11d7cfa and 6ce5582c are gone. Directory timestamps are Oct 7-8, and the Mac was rebooted on 2026-10-02 16:51, after the 11:23 closing commit 63e98b7; footprint.md names macOS 26.7.1 as the measuring host. The most likely cause is the automatic cleanup of /tmp on macOS, which removes old files and leaves empty directories; I did not confirm the mechanism. Not on bird either: no clone there contains either commit, no ref or reflog or stash mentions antiwire, and no ANTIWIRE_MIGRATION.md or antiwire-parity file exists on bird. What survives as evidence: this Final Summary, footprint.md sections 4 and 10 (which cite the branch), and the port fix fb044bc in this repo (the insertion-ordered Schema indexes found while running Apicurio against the port). The 23-file migration, ANTIWIRE_MIGRATION.md and the antiwire-parity drivers and outputs must be redone (TASK-33 AC#1). Process lesson: the 2026-10-06 audit note called the branch 'Mac-hosted' without checking the Mac; it was one ssh command away.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
