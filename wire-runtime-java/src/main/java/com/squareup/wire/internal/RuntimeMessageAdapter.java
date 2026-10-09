@@ -69,22 +69,40 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
   private final MessageBinding<M, B> binding;
   private final boolean preservingProtoFieldNames;
   private final Class<?> messageType;
-  public final Map<Integer, FieldOrOneOfBinding<M, B>> fields;
+  private final Map<Integer, FieldOrOneOfBinding<M, B>> fields;
+
+  public Map<Integer, FieldOrOneOfBinding<M, B>> getFields() {
+    return fields;
+  }
 
   /** Field bindings by index, consistent with jsonNames and jsonAlternateNames. */
-  public final FieldOrOneOfBinding<M, B>[] fieldBindingsArray;
-  public final List<String> jsonNames;
-  public final List<String> jsonAlternateNames;
+  private final FieldOrOneOfBinding<M, B>[] fieldBindingsArray;
+
+  public FieldOrOneOfBinding<M, B>[] getFieldBindingsArray() {
+    return fieldBindingsArray;
+  }
+
+  private final List<String> jsonNames;
+
+  public List<String> getJsonNames() {
+    return jsonNames;
+  }
+
+  private final List<String> jsonAlternateNames;
+
+  public List<String> getJsonAlternateNames() {
+    return jsonAlternateNames;
+  }
 
   @SuppressWarnings("unchecked")
   public RuntimeMessageAdapter(MessageBinding<M, B> binding, boolean preservingProtoFieldNames) {
-    super(FieldEncoding.LENGTH_DELIMITED, binding.messageType(), binding.typeUrl(),
-        binding.syntax(), null, null);
+    super(FieldEncoding.LENGTH_DELIMITED, binding.messageType(), binding.getTypeUrl(),
+        binding.getSyntax(), null, null);
     this.binding = binding;
     this.preservingProtoFieldNames = preservingProtoFieldNames;
     this.messageType = binding.messageType();
-    this.fields = binding.fields();
-    this.fieldBindingsArray = binding.fields().values().toArray(
+    this.fields = binding.getFields();
+    this.fieldBindingsArray = binding.getFields().values().toArray(
         new FieldOrOneOfBinding[0]);
 
     List<String> jsonNames = new ArrayList<>(fieldBindingsArray.length);
@@ -96,12 +114,12 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
     List<String> jsonAlternateNames = new ArrayList<>(fieldBindingsArray.length);
     for (FieldOrOneOfBinding<M, B> field : fieldBindingsArray) {
       String alternate;
-      if (!jsonName(field).equals(field.declaredName())) {
-        alternate = field.declaredName();
-      } else if (!jsonName(field).equals(field.name())) {
-        alternate = field.name();
+      if (!jsonName(field).equals(field.getDeclaredName())) {
+        alternate = field.getDeclaredName();
+      } else if (!jsonName(field).equals(field.getName())) {
+        alternate = field.getName();
       } else {
-        String camelCaseDeclaredName = Internal.camelCase(field.declaredName(), false);
+        String camelCaseDeclaredName = Internal.camelCase(field.getDeclaredName(), false);
         if (!jsonName(field).equals(camelCaseDeclaredName)
             // Do not shadow an existing jsonName.
             && !jsonNames.contains(camelCaseDeclaredName)) {
@@ -116,9 +134,9 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
   }
 
   private String jsonName(FieldOrOneOfBinding<M, B> field) {
-    return field.wireFieldJsonName().isEmpty() || preservingProtoFieldNames
-        ? field.declaredName()
-        : field.wireFieldJsonName();
+    return field.getWireFieldJsonName().isEmpty() || preservingProtoFieldNames
+        ? field.getDeclaredName()
+        : field.getWireFieldJsonName();
   }
 
   public B newBuilder() {
@@ -133,7 +151,7 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
     for (FieldOrOneOfBinding<M, B> field : fields.values()) {
       Object fieldValue = field.get(value);
       if (fieldValue == null) continue;
-      size += field.adapter().encodedSizeWithTag(field.tag(), fieldValue);
+      size += field.getAdapter().encodedSizeWithTag(field.getTag(), fieldValue);
     }
     size += binding.unknownFields(value).size();
 
@@ -145,7 +163,7 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
     for (FieldOrOneOfBinding<M, B> field : fields.values()) {
       Object bound = field.get(value);
       if (bound == null) continue;
-      field.adapter().encodeWithTag(writer, field.tag(), bound);
+      field.getAdapter().encodeWithTag(writer, field.getTag(), bound);
     }
     writer.writeBytes(binding.unknownFields(value));
   }
@@ -156,7 +174,7 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
       FieldOrOneOfBinding<M, B> field = fieldBindingsArray[f];
       Object bound = field.get(value);
       if (bound == null) continue;
-      field.adapter().encodeWithTag(writer, field.tag(), bound);
+      field.getAdapter().encodeWithTag(writer, field.getTag(), bound);
     }
   }
 
@@ -164,20 +182,20 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
   @Override public M redact(M value) {
     B builder = binding.newBuilder();
     for (FieldOrOneOfBinding<M, B> field : fields.values()) {
-      if (field.redacted() && field.label() == WireField.Label.REQUIRED) {
+      if (field.getRedacted() && field.getLabel() == WireField.Label.REQUIRED) {
         throw new UnsupportedOperationException(
-            "Field '" + field.name() + "' in " + type + " is required and cannot be redacted.");
+            "Field '" + field.getName() + "' in " + type + " is required and cannot be redacted.");
       }
       boolean isMessage = field.isMessage();
-      if (field.redacted() || isMessage && !field.label().isRepeated()) {
+      if (field.getRedacted() || isMessage && !field.getLabel().isRepeated()) {
         Object builderValue = field.getFromBuilder(builder);
         if (builderValue != null) {
-          Object redactedValue = field.adapter().redact(builderValue);
+          Object redactedValue = field.getAdapter().redact(builderValue);
           field.set(builder, redactedValue);
         }
-      } else if (isMessage && field.label().isRepeated()) {
+      } else if (isMessage && field.getLabel().isRepeated()) {
         List<Object> values = (List<Object>) field.getFromBuilder(builder);
-        ProtoAdapter<Object> adapter = (ProtoAdapter<Object>) field.singleAdapter();
+        ProtoAdapter<Object> adapter = (ProtoAdapter<Object>) field.getSingleAdapter();
         field.set(builder, Internal.redactElements(values, adapter));
       }
     }
@@ -204,9 +222,9 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
       if (bound == null) continue;
       if (!first) result.append(", ");
       first = false;
-      result.append(field.name());
+      result.append(field.getName());
       result.append('=');
-      result.append(field.redacted() ? REDACTED : bound);
+      result.append(field.getRedacted() ? REDACTED : bound);
     }
     result.append('}');
     return result.toString();
@@ -223,12 +241,12 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
       try {
         if (field != null) {
           if (field.isMap()) {
-            Object value = field.adapter().decode(reader);
+            Object value = field.getAdapter().decode(reader);
             field.value(builder, value);
           } else {
-            ProtoAdapter<?> singleAdapter = field.singleAdapter();
+            ProtoAdapter<?> singleAdapter = field.getSingleAdapter();
             if ((field.isMessage() || MESSAGE_BACKED_BUILT_IN_ADAPTERS.contains(singleAdapter))
-                && !field.label().isRepeated()) {
+                && !field.getLabel().isRepeated()) {
               ProtoAdapter<Object> adapter = (ProtoAdapter<Object>) singleAdapter;
               Object value =
                   Internal.decodeMessageOrMerge(adapter, reader, field.getFromBuilder(builder));
@@ -263,8 +281,8 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
     for (int index = 0; index < fieldBindingsArray.length; index++) {
       FieldOrOneOfBinding<M, B> field = fieldBindingsArray[index];
       Object value = field.get(message);
-      if (field.omitFromJson(syntax, value)) continue;
-      if (field.redacted() && redactedFieldsAdapter != null && value != null) {
+      if (field.omitFromJson(getSyntax(), value)) continue;
+      if (field.getRedacted() && redactedFieldsAdapter != null && value != null) {
         // Initialize here to avoid a performance hit for non-redacted code.
         if (redactedFields == null) {
           redactedFields = new ArrayList<>();

@@ -24,21 +24,21 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class Type {
-  public abstract Location location();
+  public abstract Location getLocation();
 
-  public abstract ProtoType type();
+  public abstract ProtoType getType();
 
-  public abstract String name();
+  public abstract String getName();
 
-  public abstract String documentation();
+  public abstract String getDocumentation();
 
-  public abstract Options options();
+  public abstract Options getOptions();
 
-  public abstract List<Type> nestedTypes();
+  public abstract List<Type> getNestedTypes();
 
-  public abstract List<Extend> nestedExtendList();
+  public abstract List<Extend> getNestedExtendList();
 
-  public abstract Syntax syntax();
+  public abstract Syntax getSyntax();
 
   abstract void linkMembers(Linker linker);
 
@@ -63,7 +63,7 @@ public abstract class Type {
   public List<Type> typesAndNestedTypes() {
     List<Type> typesAndNestedTypes = new ArrayList<>();
     typesAndNestedTypes.add(this);
-    for (Type type : nestedTypes()) {
+    for (Type type : getNestedTypes()) {
       typesAndNestedTypes.addAll(type.typesAndNestedTypes());
     }
     return typesAndNestedTypes;
@@ -84,7 +84,7 @@ public abstract class Type {
       Syntax syntax) {
     List<Type> result = new ArrayList<>();
     for (TypeElement element : elements) {
-      ProtoType protoType = ProtoType.get(packageName, element.name());
+      ProtoType protoType = ProtoType.get(packageName, element.getName());
       List<String> namespaces = packageName == null
           ? Collections.emptyList()
           : Collections.singletonList(packageName);

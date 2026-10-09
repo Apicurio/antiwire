@@ -125,19 +125,19 @@ public final class SchemaUtil {
       return schema;
     }
     List<ProtoFile> protoFiles = new java.util.ArrayList<>();
-    for (ProtoFile protoFile : schema.protoFiles()) {
+    for (ProtoFile protoFile : schema.getProtoFiles()) {
       List<Type> types = new java.util.ArrayList<>();
-      for (Type type : protoFile.types()) {
-        types.add(typesToStub.contains(type.type()) ? asStub(type) : type);
+      for (Type type : protoFile.getTypes()) {
+        types.add(typesToStub.contains(type.getType()) ? asStub(type) : type);
       }
       List<Service> services = new java.util.ArrayList<>();
-      for (Service service : protoFile.services()) {
+      for (Service service : protoFile.getServices()) {
         services.add(typesToStub.contains(service.type()) ? asStub(service) : service);
       }
       protoFiles.add(protoFile.copy(
-          protoFile.location(), protoFile.imports(), protoFile.publicImports(),
-          protoFile.weakImports(), protoFile.packageName(), types, services,
-          protoFile.extendList(), protoFile.options(), protoFile.syntax()));
+          protoFile.getLocation(), protoFile.getImports(), protoFile.getPublicImports(),
+          protoFile.getWeakImports(), protoFile.getPackageName(), types, services,
+          protoFile.getExtendList(), protoFile.getOptions(), protoFile.getSyntax()));
     }
     return new Schema(protoFiles);
   }
@@ -145,47 +145,47 @@ public final class SchemaUtil {
   /** Return a copy of this type with all possible type references removed. */
   private static Type asStub(Type type) {
     // Don't stub the built-in protobuf types which model concepts like options.
-    if (type.type().toString().startsWith("google.protobuf.")) {
+    if (type.getType().toString().startsWith("google.protobuf.")) {
       return type;
     }
 
     if (type instanceof MessageType) {
       MessageType messageType = (MessageType) type;
       List<Type> nestedTypes = new java.util.ArrayList<>();
-      for (Type nestedType : messageType.nestedTypes()) {
+      for (Type nestedType : messageType.getNestedTypes()) {
         nestedTypes.add(asStub(nestedType));
       }
       return messageType.copy(
-          messageType.type(), messageType.location(), messageType.documentation(),
-          messageType.name(), java.util.Collections.emptyList(), new java.util.ArrayList<>(),
-          messageType.oneOfs(), nestedTypes, messageType.nestedExtendList(),
-          messageType.extensionsList(), messageType.reserveds(),
+          messageType.getType(), messageType.getLocation(), messageType.getDocumentation(),
+          messageType.getName(), java.util.Collections.emptyList(), new java.util.ArrayList<>(),
+          messageType.getOneOfs(), nestedTypes, messageType.getNestedExtendList(),
+          messageType.getExtensionsList(), messageType.reserveds(),
           new Options(Options.MESSAGE_OPTIONS, java.util.Collections.emptyList()),
-          messageType.syntax());
+          messageType.getSyntax());
     }
 
     if (type instanceof EnumType) {
       EnumType enumType = (EnumType) type;
       return enumType.copy(
-          enumType.type(), enumType.location(), enumType.documentation(), enumType.name(),
+          enumType.getType(), enumType.getLocation(), enumType.getDocumentation(), enumType.getName(),
           java.util.Collections.emptyList(), enumType.reserveds(),
           new Options(Options.ENUM_OPTIONS, java.util.Collections.emptyList()),
-          enumType.syntax());
+          enumType.getSyntax());
     }
 
     if (type instanceof EnclosingType) {
       EnclosingType enclosingType = (EnclosingType) type;
       List<Type> nestedTypes = new java.util.ArrayList<>();
-      for (Type nestedType : enclosingType.nestedTypes()) {
+      for (Type nestedType : enclosingType.getNestedTypes()) {
         nestedTypes.add(asStub(nestedType));
       }
       return enclosingType.copy(
-          enclosingType.location(), enclosingType.type(), enclosingType.name(),
-          enclosingType.documentation(), nestedTypes, enclosingType.nestedExtendList(),
-          enclosingType.syntax());
+          enclosingType.getLocation(), enclosingType.getType(), enclosingType.getName(),
+          enclosingType.getDocumentation(), nestedTypes, enclosingType.getNestedExtendList(),
+          enclosingType.getSyntax());
     }
 
-    throw new AssertionError("Unknown type " + type.type());
+    throw new AssertionError("Unknown type " + type.getType());
   }
 
   /** Return a copy of this service with all possible type references removed. */

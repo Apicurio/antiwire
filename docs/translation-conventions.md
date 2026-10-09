@@ -247,6 +247,15 @@ Java shape for the canonical upstream case, `FieldElement`
 field comparison used by generated messages; `java.util.Objects.equals` is an accepted Java
 equivalent (same truth table for every upstream operand type).
 
+**Property accessors.** A Kotlin property `x` is exposed to Java as `getX()`, and a Boolean
+property named `isX` as `isX()`; the port declares exactly those names (decision 2026-10-09,
+TASK-33.1; `AccessorNameParityTest` pins them against the real 7.1.0 jars). Never `x()`, and
+no public field `x` next to the getter: a field is public only where upstream has `@JvmField`
+(for example generated message fields), a property backed by a private field gets its getter. A
+member upstream names with `@JvmName("x")` keeps the plain name (`Service.type()`,
+`MessageType.fields()`, `Message.adapter()`). When a Kotlin interface property is implemented,
+the implementation uses the same `getX()` name.
+
 **copy() and componentN() bridges.** Kotlin generates a public all-argument `copy` (the
 default-omitting `copy$default` synthetic is invisible to and unusable from Java) and public
 `componentN()` accessors in declaration order. Kotlin code can call a Java method only

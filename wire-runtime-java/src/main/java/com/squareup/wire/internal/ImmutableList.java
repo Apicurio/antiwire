@@ -35,6 +35,11 @@ public class ImmutableList<T> extends AbstractList<T> implements RandomAccess, S
     this.list = new ArrayList<>(list);
   }
 
+  /** The upstream-visible name of {@link #size()} (Kotlin collections expose {@code getSize()}). */
+  public int getSize() {
+    return size();
+  }
+
   @Override public int size() {
     return list.size();
   }

@@ -40,7 +40,7 @@ public class FieldElementTest {
     // the order is fixed by construction so both assertions accept the same values.
     assertEquals(Arrays.asList(
         OptionElement.create("default", ENUM, "TEST"),
-        OptionElement.create("deprecated", BOOLEAN, "true")), field.options);
+        OptionElement.create("deprecated", BOOLEAN, "true")), field.getOptions());
   }
 
   @Test public void addMultipleOptions() {
@@ -49,7 +49,7 @@ public class FieldElementTest {
     FieldElement field = new FieldElement(location, Label.REQUIRED, "string", "name", null,
         null, 1, "", Arrays.asList(kitKat, fooBar));
 
-    assertEquals(2, field.options.size());
+    assertEquals(2, field.getOptions().size());
   }
 
   @Test public void defaultIsSet() {

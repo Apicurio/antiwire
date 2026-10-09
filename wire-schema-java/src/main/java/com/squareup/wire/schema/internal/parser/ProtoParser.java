@@ -64,18 +64,18 @@ public final class ProtoParser {
       Object declaration = readDeclaration(documentation, Context.FILE);
       if (declaration instanceof TypeElement) {
         TypeElement element = (TypeElement) declaration;
-        TypeElement duplicate = findNestedType(element.name());
+        TypeElement duplicate = findNestedType(element.getName());
         if (duplicate != null) {
-          throw new IllegalStateException(element.name() + " (" + element.location() + ") is"
-              + " already defined at " + duplicate.location());
+          throw new IllegalStateException(element.getName() + " (" + element.getLocation() + ") is"
+              + " already defined at " + duplicate.getLocation());
         }
         nestedTypes.add(element);
       } else if (declaration instanceof ServiceElement) {
         ServiceElement element = (ServiceElement) declaration;
-        ServiceElement duplicate = findService(element.name);
+        ServiceElement duplicate = findService(element.getName());
         if (duplicate != null) {
-          throw new IllegalStateException(element.name + " (" + element.location + ") is already"
-              + " defined at " + duplicate.location);
+          throw new IllegalStateException(element.getName() + " (" + element.getLocation() + ") is already"
+              + " defined at " + duplicate.getLocation());
         }
         services.add(element);
       } else if (declaration instanceof OptionElement) {
@@ -88,14 +88,14 @@ public final class ProtoParser {
 
   private TypeElement findNestedType(String name) {
     for (TypeElement type : nestedTypes) {
-      if (type.name().equals(name)) return type;
+      if (type.getName().equals(name)) return type;
     }
     return null;
   }
 
   private ServiceElement findService(String name) {
     for (ServiceElement service : services) {
-      if (service.name.equals(name)) return service;
+      if (service.getName().equals(name)) return service;
     }
     return null;
   }
@@ -373,9 +373,9 @@ public final class ProtoParser {
     Iterator<OptionElement> iterator = options.iterator();
     while (iterator.hasNext()) {
       OptionElement element = iterator.next();
-      if (element.name.equals(name)) {
+      if (element.getName().equals(name)) {
         iterator.remove();
-        result = element.value.toString();
+        result = element.getValue().toString();
       }
     }
     return result;

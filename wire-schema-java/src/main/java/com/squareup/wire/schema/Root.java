@@ -41,7 +41,7 @@ import okio.Path;
  */
 public abstract class Root {
   /** Returns the location's base, or null if this root has none. */
-  public abstract String base();
+  public abstract String getBase();
 
   /** Returns all proto files within this root. */
   public abstract List<ProtoFilePath> allProtoFiles() throws IOException;
@@ -66,24 +66,24 @@ public abstract class Root {
     if (CoreLoader.isWireRuntimeProto(location)) {
       // Handle descriptor.proto, etc. by returning a placeholder path.
       return Collections.singletonList(
-          new ProtoFilePath(location, fs, Path.get(location.path)));
+          new ProtoFilePath(location, fs, Path.get(location.getPath())));
     }
-    if (!location.base.isEmpty()) {
-      List<Root> roots = baseToRoots.get(location.base);
+    if (!location.getBase().isEmpty()) {
+      List<Root> roots = baseToRoots.get(location.getBase());
       if (roots == null) {
-        roots = roots(Location.get(location.base), fs, new LinkedHashMap<>());
-        baseToRoots.put(location.base, roots);
+        roots = roots(Location.get(location.getBase()), fs, new LinkedHashMap<>());
+        baseToRoots.put(location.getBase(), roots);
       }
       for (Root root : roots) {
-        ProtoFilePath resolved = root.resolve(location.path);
+        ProtoFilePath resolved = root.resolve(location.getPath());
         if (resolved != null) return Collections.singletonList(resolved);
       }
       throw new IllegalArgumentException("unable to resolve " + location);
     }
-    List<Root> cached = baseToRoots.get(location.path);
+    List<Root> cached = baseToRoots.get(location.getPath());
     if (cached != null) return cached;
-    List<Root> result = pathRoots(Path.get(location.path), fs, location);
-    baseToRoots.put(location.path, result);
+    List<Root> result = pathRoots(Path.get(location.getPath()), fs, location);
+    baseToRoots.put(location.getPath(), result);
     return result;
   }
 
@@ -95,11 +95,11 @@ public abstract class Root {
         : path;
     metadata = fileSystem.metadataOrNull(realPath);
     if (metadata != null && Boolean.TRUE.equals(metadata.isDirectory)) {
-      if (!location.base.isEmpty()) {
+      if (!location.getBase().isEmpty()) {
         throw new IllegalStateException("Check failed");
       }
       return Collections.singletonList(
-          new DirectoryRoot(location.path, fileSystem, realPath));
+          new DirectoryRoot(location.getPath(), fileSystem, realPath));
     }
 
     if (realPath.toString().endsWith(".proto")) {
@@ -108,12 +108,12 @@ public abstract class Root {
 
     // Handle a .zip or .jar file by adding all .proto files within.
     try {
-      if (!location.base.isEmpty()) {
+      if (!location.getBase().isEmpty()) {
         throw new IllegalStateException("Check failed");
       }
       FileSystem sourceFs = fileSystem.openZip(realPath);
       return Collections.singletonList(
-          new DirectoryRoot(location.path, sourceFs, Path.get("/"), true));
+          new DirectoryRoot(location.getPath(), sourceFs, Path.get("/"), true));
     } catch (IOException e) {
       throw new IllegalArgumentException(
           "expected a directory, archive (.zip / .jar / etc.), or .proto: " + realPath, e);
@@ -135,7 +135,7 @@ public abstract class Root {
       this.path = path;
     }
 
-    @Override public String base() {
+    @Override public String getBase() {
       return null;
     }
 
@@ -144,7 +144,7 @@ public abstract class Root {
     }
 
     @Override public ProtoFilePath resolve(String importPath) {
-      if (importPath.equals(location.path)) return this;
+      if (importPath.equals(location.getPath())) return this;
       return null;
     }
 
@@ -203,7 +203,7 @@ public abstract class Root {
       }
     }
 
-    @Override public String base() {
+    @Override public String getBase() {
       return base;
     }
 

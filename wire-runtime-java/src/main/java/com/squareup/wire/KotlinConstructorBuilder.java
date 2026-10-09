@@ -116,7 +116,7 @@ public class KotlinConstructorBuilder<M extends Message<M, B>, B extends Message
     // Proto3 singular fields have non-nullable types with default parameters; pass the identity
     // value to please the constructor.
     if (value == null && field.label() == WireField.Label.OMIT_IDENTITY) {
-      return ProtoAdapter.get(field.adapter()).identity;
+      return ProtoAdapter.get(field.adapter()).getIdentity();
     }
     return value;
   }

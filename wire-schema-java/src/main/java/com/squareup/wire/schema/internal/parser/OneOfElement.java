@@ -20,12 +20,41 @@ import com.squareup.wire.schema.internal.SchemaUtil;
 import java.util.List;
 
 public final class OneOfElement {
-  public final String name;
-  public final String documentation;
-  public final List<FieldElement> fields;
-  public final List<GroupElement> groups;
-  public final List<OptionElement> options;
-  public final Location location;
+  private final String name;
+
+  public String getName() {
+    return name;
+  }
+
+  private final String documentation;
+
+  public String getDocumentation() {
+    return documentation;
+  }
+
+  private final List<FieldElement> fields;
+
+  public List<FieldElement> getFields() {
+    return fields;
+  }
+
+  private final List<GroupElement> groups;
+
+  public List<GroupElement> getGroups() {
+    return groups;
+  }
+
+  private final List<OptionElement> options;
+
+  public List<OptionElement> getOptions() {
+    return options;
+  }
+
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
 
   public OneOfElement(String name, String documentation, List<FieldElement> fields,
       List<GroupElement> groups, List<OptionElement> options, Location location) {

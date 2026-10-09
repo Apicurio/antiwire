@@ -96,7 +96,7 @@ final class SchemaProtoAdapterFactory {
 
   @SuppressWarnings("unchecked")
   ProtoAdapter<Object> get(ProtoType protoType) {
-    if (protoType.isMap) throw new UnsupportedOperationException("map types not supported");
+    if (protoType.isMap()) throw new UnsupportedOperationException("map types not supported");
     ProtoAdapter<?> result = adapterMap.get(protoType);
     if (result != null) {
       return (ProtoAdapter<Object>) result;
@@ -112,18 +112,18 @@ final class SchemaProtoAdapterFactory {
     }
     if (type instanceof MessageType) {
       MessageType messageType = (MessageType) type;
-      SchemaMessageBinding messageBinding = new SchemaMessageBinding(messageType.type.typeUrl(),
-          messageType.syntax(), includeUnknown);
+      SchemaMessageBinding messageBinding = new SchemaMessageBinding(messageType.type.getTypeUrl(),
+          messageType.getSyntax(), includeUnknown);
       // Put the adapter in the map early to mitigate the recursive calls to get() made below.
       DeferredAdapter<Map<String, Object>> deferredAdapter =
           new DeferredAdapter<>(messageBinding);
       adapterMap.put(protoType, deferredAdapter);
       for (Field field : messageType.fields()) {
-        messageBinding.fields.put(field.tag(), new SchemaFieldOrOneOfBinding(field, null));
+        messageBinding.fields.put(field.getTag(), new SchemaFieldOrOneOfBinding(field, null));
       }
-      for (OneOf oneOf : messageType.oneOfs()) {
-        for (Field field : oneOf.fields()) {
-          messageBinding.fields.put(field.tag(), new SchemaFieldOrOneOfBinding(field, oneOf));
+      for (OneOf oneOf : messageType.getOneOfs()) {
+        for (Field field : oneOf.getFields()) {
+          messageBinding.fields.put(field.getTag(), new SchemaFieldOrOneOfBinding(field, oneOf));
         }
       }
       RuntimeMessageAdapter<Map<String, Object>, Map<String, Object>> messageAdapter =
@@ -140,8 +140,8 @@ final class SchemaProtoAdapterFactory {
     ProtoAdapter<T> delegate;
 
     DeferredAdapter(SchemaMessageBinding binding) {
-      super(FieldEncoding.LENGTH_DELIMITED, (Class) Map.class, binding.typeUrl(),
-          binding.syntax());
+      super(FieldEncoding.LENGTH_DELIMITED, (Class) Map.class, binding.getTypeUrl(),
+          binding.getSyntax());
     }
 
     @Override public T decode(ProtoReader reader) throws IOException {
@@ -169,18 +169,18 @@ final class SchemaProtoAdapterFactory {
     private final EnumType enumType;
 
     EnumAdapter(EnumType enumType) {
-      super(FieldEncoding.VARINT, Object.class, null, enumType.syntax());
+      super(FieldEncoding.VARINT, Object.class, null, enumType.getSyntax());
       this.enumType = enumType;
     }
 
     @Override public int encodedSize(Object value) {
       if (value instanceof String) {
-        return INT32.encodedSize(enumType.constant((String) value).tag());
+        return INT32.encodedSize(enumType.constant((String) value).getTag());
       }
       if (value instanceof Integer) {
         return INT32.encodedSize((Integer) value);
       }
-      throw new IllegalArgumentException("unexpected " + enumType.type() + ": " + value);
+      throw new IllegalArgumentException("unexpected " + enumType.getType() + ": " + value);
     }
 
     @Override public void encode(ProtoWriter writer, Object value) throws IOException {
@@ -193,28 +193,28 @@ final class SchemaProtoAdapterFactory {
 
     private void writeVarint32(ProtoWriter writer, Object value) throws IOException {
       if (value instanceof String) {
-        writer.writeVarint32(enumType.constant((String) value).tag());
+        writer.writeVarint32(enumType.constant((String) value).getTag());
       } else if (value instanceof Integer) {
         writer.writeVarint32((Integer) value);
       } else {
-        throw new IllegalArgumentException("unexpected " + enumType.type() + ": " + value);
+        throw new IllegalArgumentException("unexpected " + enumType.getType() + ": " + value);
       }
     }
 
     private void writeVarint32(ReverseProtoWriter writer, Object value) throws IOException {
       if (value instanceof String) {
-        writer.writeVarint32(enumType.constant((String) value).tag());
+        writer.writeVarint32(enumType.constant((String) value).getTag());
       } else if (value instanceof Integer) {
         writer.writeVarint32((Integer) value);
       } else {
-        throw new IllegalArgumentException("unexpected " + enumType.type() + ": " + value);
+        throw new IllegalArgumentException("unexpected " + enumType.getType() + ": " + value);
       }
     }
 
     @Override public Object decode(ProtoReader reader) throws IOException {
       int value = UINT32.decode(reader);
       EnumConstant constant = enumType.constant(value);
-      return constant != null ? constant.name() : value;
+      return constant != null ? constant.getName() : value;
     }
 
     @Override public Object redact(Object value) {
@@ -242,15 +242,15 @@ final class SchemaProtoAdapterFactory {
     }
 
     @Override
-    public Map<Integer, FieldOrOneOfBinding<Map<String, Object>, Map<String, Object>>> fields() {
+    public Map<Integer, FieldOrOneOfBinding<Map<String, Object>, Map<String, Object>>> getFields() {
       return fields;
     }
 
-    @Override public String typeUrl() {
+    @Override public String getTypeUrl() {
       return typeUrl;
     }
 
-    @Override public Syntax syntax() {
+    @Override public Syntax getSyntax() {
       return syntax;
     }
 
@@ -300,13 +300,13 @@ final class SchemaProtoAdapterFactory {
       this.oneOf = oneOf;
     }
 
-    @Override public int tag() {
-      return field.tag();
+    @Override public int getTag() {
+      return field.getTag();
     }
 
-    @Override public WireField.Label label() {
+    @Override public WireField.Label getLabel() {
       if (oneOf != null) return WireField.Label.ONE_OF;
-      switch (field.encodeMode()) {
+      switch (field.getEncodeMode()) {
         case OMIT_IDENTITY:
           return WireField.Label.OMIT_IDENTITY;
         case NULL_IF_ABSENT:
@@ -322,56 +322,56 @@ final class SchemaProtoAdapterFactory {
       }
     }
 
-    @Override public boolean redacted() {
+    @Override public boolean getRedacted() {
       return field.isRedacted();
     }
 
     @Override public boolean isMap() {
-      return field.type().isMap;
+      return field.getType().isMap();
     }
 
     @Override public boolean isMessage() {
-      return schema.getType(field.type()) instanceof MessageType;
+      return schema.getType(field.getType()) instanceof MessageType;
     }
 
-    @Override public String name() {
-      return field.name();
+    @Override public String getName() {
+      return field.getName();
     }
 
-    @Override public String declaredName() {
-      return field.name();
+    @Override public String getDeclaredName() {
+      return field.getName();
     }
 
-    @Override public String wireFieldJsonName() {
-      return field.jsonName();
+    @Override public String getWireFieldJsonName() {
+      return field.getJsonName();
     }
 
-    @Override public boolean writeIdentityValues() {
+    @Override public boolean getWriteIdentityValues() {
       return false;
     }
 
-    @Override public ProtoAdapter<?> keyAdapter() {
-      return SchemaProtoAdapterFactory.this.get(field.type().keyType);
+    @Override public ProtoAdapter<?> getKeyAdapter() {
+      return SchemaProtoAdapterFactory.this.get(field.getType().getKeyType());
     }
 
-    @Override public ProtoAdapter<?> singleAdapter() {
-      return SchemaProtoAdapterFactory.this.get(field.type());
+    @Override public ProtoAdapter<?> getSingleAdapter() {
+      return SchemaProtoAdapterFactory.this.get(field.getType());
     }
 
     @SuppressWarnings("unchecked")
     @Override public void value(Map<String, Object> builder, Object value) {
       if (isMap()) {
-        Map<String, Object> map = (Map<String, Object>) builder.get(field.name());
+        Map<String, Object> map = (Map<String, Object>) builder.get(field.getName());
         if (map == null) {
           map = new LinkedHashMap<>();
-          builder.put(field.name(), map);
+          builder.put(field.getName(), map);
         }
         map.putAll((Map<String, Object>) value);
       } else if (field.isRepeated()) {
-        List<Object> list = (List<Object>) builder.get(field.name());
+        List<Object> list = (List<Object>) builder.get(field.getName());
         if (list == null) {
           list = new ArrayList<>();
-          builder.put(field.name(), list);
+          builder.put(field.getName(), list);
         }
         list.add(value);
       } else {
@@ -381,19 +381,19 @@ final class SchemaProtoAdapterFactory {
 
     @Override public void set(Map<String, Object> builder, Object value) {
       if (oneOf != null) {
-        for (Field member : oneOf.fields()) {
-          builder.remove(member.name());
+        for (Field member : oneOf.getFields()) {
+          builder.remove(member.getName());
         }
       }
-      builder.put(field.name(), value);
+      builder.put(field.getName(), value);
     }
 
     @Override public Object get(Map<String, Object> message) {
-      return message.get(field.name());
+      return message.get(field.getName());
     }
 
     @Override public Object getFromBuilder(Map<String, Object> builder) {
-      return builder.get(field.name());
+      return builder.get(field.getName());
     }
   }
 }

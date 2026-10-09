@@ -59,7 +59,7 @@ public class MessageElementTest {
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
         Arrays.asList(firstName, lastName), Collections.emptyList(), Collections.emptyList(),
         Collections.emptyList(), Collections.emptyList());
-    assertEquals(2, element.fields.size());
+    assertEquals(2, element.getFields().size());
   }
 
   @Test public void simpleWithDocumentationToSchema() {
@@ -169,7 +169,7 @@ public class MessageElementTest {
             null, null, 1, "", Collections.emptyList())),
         Collections.emptyList(), Arrays.asList(fives, sixes), Collections.emptyList(),
         Collections.emptyList());
-    assertEquals(2, element.extensions.size());
+    assertEquals(2, element.getExtensions().size());
   }
 
   @Test public void oneOfToSchema() {
@@ -230,7 +230,7 @@ public class MessageElementTest {
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
         Collections.emptyList(), Arrays.asList(hi, hey), Collections.emptyList(),
         Collections.emptyList(), Collections.emptyList());
-    assertEquals(2, element.oneOfs.size());
+    assertEquals(2, element.getOneOfs().size());
   }
 
   @Test public void reservedToSchema() {

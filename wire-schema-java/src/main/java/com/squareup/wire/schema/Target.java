@@ -26,7 +26,7 @@ public abstract class Target implements Serializable {
    * <p>This list should contain package names (suffixed with {@code .*}) and type names only. It
    * should not contain member names.
    */
-  public abstract List<String> includes();
+  public abstract List<String> getIncludes();
 
   /**
    * Proto types to excluded generated sources for. Types listed here will not be generated for
@@ -35,13 +35,13 @@ public abstract class Target implements Serializable {
    * <p>This list should contain package names (suffixed with {@code .*}) and type names only. It
    * should not contain member names.
    */
-  public abstract List<String> excludes();
+  public abstract List<String> getExcludes();
 
   /**
    * True if types emitted for this target should not also be emitted for other targets. Use this
    * to cause multiple outputs to be emitted for the same input type.
    */
-  public abstract boolean exclusive();
+  public abstract boolean getExclusive();
 
   /**
    * Directory where this target will write its output.
@@ -49,7 +49,7 @@ public abstract class Target implements Serializable {
    * <p>In Gradle, when this class is serialized, this is relative to the project to improve build
    * cacheability. Callers must use {@link #copyTarget} to resolve it to real path prior to use.
    */
-  public abstract String outDirectory();
+  public abstract String getOutDirectory();
 
   /**
    * Returns a new Target object that is a copy of this one, but with the given fields updated.
@@ -64,15 +64,15 @@ public abstract class Target implements Serializable {
   );
 
   public Target copyTarget(List<String> includes, List<String> excludes, boolean exclusive) {
-    return copyTarget(includes, excludes, exclusive, outDirectory());
+    return copyTarget(includes, excludes, exclusive, getOutDirectory());
   }
 
   public Target copyTarget(List<String> includes, List<String> excludes) {
-    return copyTarget(includes, excludes, exclusive());
+    return copyTarget(includes, excludes, getExclusive());
   }
 
   public Target copyTarget(List<String> includes) {
-    return copyTarget(includes, excludes());
+    return copyTarget(includes, getExcludes());
   }
 
   public abstract SchemaHandler newHandler();

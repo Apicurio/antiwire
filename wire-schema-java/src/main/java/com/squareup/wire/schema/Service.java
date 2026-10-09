@@ -74,7 +74,7 @@ public final class Service {
   /** Returns the RPC named {@code name}, or null if this service has no such method. */
   public Rpc rpc(String name) {
     for (Rpc rpc : rpcs) {
-      if (rpc.name().equals(name)) return rpc;
+      if (rpc.getName().equals(name)) return rpc;
     }
     return null;
   }
@@ -105,10 +105,10 @@ public final class Service {
   private void validateRpcUniqueness(Linker linker, List<Rpc> rpcs) {
     Map<String, List<Rpc>> nameToRpc = new LinkedHashMap<>();
     for (Rpc rpc : rpcs) {
-      List<Rpc> list = nameToRpc.get(rpc.name());
+      List<Rpc> list = nameToRpc.get(rpc.getName());
       if (list == null) {
         list = new ArrayList<>();
-        nameToRpc.put(rpc.name(), list);
+        nameToRpc.put(rpc.getName(), list);
       }
       list.add(rpc);
     }
@@ -118,10 +118,10 @@ public final class Service {
         error.append("mutable rpcs share name ").append(entry.getKey()).append(":");
         List<Rpc> conflicting = entry.getValue();
         for (int i = 0; i < conflicting.size(); i++) {
-          error.append("\n  ").append(i + 1).append(". ").append(conflicting.get(i).name())
-              .append(" (").append(conflicting.get(i).location()).append(")");
+          error.append("\n  ").append(i + 1).append(". ").append(conflicting.get(i).getName())
+              .append(" (").append(conflicting.get(i).getLocation()).append(")");
         }
-        linker.errors.add(error.toString());
+        linker.getErrors().add(error.toString());
       }
     }
   }
@@ -135,7 +135,7 @@ public final class Service {
     List<Rpc> retainedRpcs = new ArrayList<>();
     for (Rpc rpc : rpcs) {
       Rpc retainedRpc = rpc.retainAll(schema, markSet);
-      if (retainedRpc != null && markSet.contains(ProtoMember.get(type, rpc.name()))) {
+      if (retainedRpc != null && markSet.contains(ProtoMember.get(type, rpc.getName()))) {
         retainedRpcs.add(retainedRpc);
       }
     }
@@ -145,17 +145,17 @@ public final class Service {
   }
 
   static Service fromElement(ProtoType protoType, ServiceElement element) {
-    List<Rpc> rpcs = Rpc.fromElements(element.rpcs);
-    Options options = new Options(Options.SERVICE_OPTIONS, element.options);
+    List<Rpc> rpcs = Rpc.fromElements(element.getRpcs());
+    Options options = new Options(Options.SERVICE_OPTIONS, element.getOptions());
 
-    return new Service(protoType, element.location, element.documentation, element.name, rpcs,
+    return new Service(protoType, element.getLocation(), element.getDocumentation(), element.getName(), rpcs,
         options);
   }
 
   static List<Service> fromElements(String packageName, List<ServiceElement> elements) {
     List<Service> result = new ArrayList<>();
     for (ServiceElement service : elements) {
-      ProtoType protoType = ProtoType.get(packageName, service.name);
+      ProtoType protoType = ProtoType.get(packageName, service.getName());
       result.add(fromElement(protoType, service));
     }
     return result;
@@ -165,7 +165,7 @@ public final class Service {
     List<ServiceElement> result = new ArrayList<>();
     for (Service service : services) {
       result.add(new ServiceElement(service.location, service.name, service.documentation,
-          Rpc.toElements(service.rpcs), service.options.elements()));
+          Rpc.toElements(service.rpcs), service.options.getElements()));
     }
     return result;
   }

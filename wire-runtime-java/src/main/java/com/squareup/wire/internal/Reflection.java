@@ -82,7 +82,7 @@ public final class Reflection {
             classLoader));
       } else if (messageField.getType() == OneOf.class) {
         for (OneOf.Key<?> key : getKeys(messageField)) {
-          fields.put(key.tag, new OneOfBinding<>(messageField, builderType, key,
+          fields.put(key.getTag(), new OneOfBinding<>(messageField, builderType, key,
               writeIdentityValues));
         }
       } else {
@@ -106,7 +106,7 @@ public final class Reflection {
           ClassLoader classLoader) {
     ProtoAdapter<?> defaultAdapter = ProtoAdapter.get(messageType);
     return createRuntimeMessageAdapter(
-        messageType, defaultAdapter.typeUrl, defaultAdapter.syntax, classLoader,
+        messageType, defaultAdapter.getTypeUrl(), defaultAdapter.getSyntax(), classLoader,
         writeIdentityValues, preservingProtoFieldNames);
   }
 
@@ -182,15 +182,15 @@ public final class Reflection {
       return messageType;
     }
 
-    @Override public Map<Integer, FieldOrOneOfBinding<M, B>> fields() {
+    @Override public Map<Integer, FieldOrOneOfBinding<M, B>> getFields() {
       return fields;
     }
 
-    @Override public String typeUrl() {
+    @Override public String getTypeUrl() {
       return typeUrl;
     }
 
-    @Override public Syntax syntax() {
+    @Override public Syntax getSyntax() {
       return syntax;
     }
 

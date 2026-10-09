@@ -67,23 +67,23 @@ public final class EnumType extends Type {
         syntax);
   }
 
-  @Override public ProtoType type() {
+  @Override public ProtoType getType() {
     return type;
   }
 
-  @Override public Location location() {
+  @Override public Location getLocation() {
     return location;
   }
 
-  @Override public String documentation() {
+  @Override public String getDocumentation() {
     return documentation;
   }
 
-  @Override public String name() {
+  @Override public String getName() {
     return name;
   }
 
-  public List<EnumConstant> constants() {
+  public List<EnumConstant> getConstants() {
     return constants;
   }
 
@@ -91,19 +91,19 @@ public final class EnumType extends Type {
     return reserveds;
   }
 
-  @Override public Options options() {
+  @Override public Options getOptions() {
     return options;
   }
 
-  @Override public Syntax syntax() {
+  @Override public Syntax getSyntax() {
     return syntax;
   }
 
-  @Override public List<Type> nestedTypes() {
+  @Override public List<Type> getNestedTypes() {
     return Collections.emptyList(); // Enums do not allow nested type declarations.
   }
 
-  @Override public List<Extend> nestedExtendList() {
+  @Override public List<Extend> getNestedExtendList() {
     return Collections.emptyList(); // Enums do not allow nested type declarations.
   }
 
@@ -115,7 +115,7 @@ public final class EnumType extends Type {
     return "true".equals(deprecated);
   }
 
-  public String enumMode() {
+  public String getEnumMode() {
     Object mode = options.get(WIRE_ENUM_MODE);
     return mode != null ? mode.toString() : null;
   }
@@ -123,7 +123,7 @@ public final class EnumType extends Type {
   /** Returns the constant named {@code name}, or null if this enum has no such constant. */
   public EnumConstant constant(String name) {
     for (EnumConstant constant : constants) {
-      if (constant.name().equals(name)) return constant;
+      if (constant.getName().equals(name)) return constant;
     }
     return null;
   }
@@ -131,7 +131,7 @@ public final class EnumType extends Type {
   /** Returns the constant tagged {@code tag}, or null if this enum has no such constant. */
   public EnumConstant constant(int tag) {
     for (EnumConstant constant : constants) {
-      if (constant.tag() == tag) return constant;
+      if (constant.getTag() == tag) return constant;
     }
     return null;
   }
@@ -156,17 +156,17 @@ public final class EnumType extends Type {
       validateTagUniqueness(scoped);
     }
     validateTagNameAmbiguity("true".equals(allowAlias), scoped);
-    syntaxRules.validateEnumConstants(constants, scoped.errors);
+    syntaxRules.validateEnumConstants(constants, scoped.getErrors());
 
     for (EnumConstant constant : constants) {
       for (Reserved reserved : reserveds) {
-        if (reserved.matchesTag(constant.tag())) {
-          scoped.errors.at(constant)
-              .add("tag " + constant.tag() + " is reserved (" + reserved.location() + ")");
+        if (reserved.matchesTag(constant.getTag())) {
+          scoped.getErrors().at(constant)
+              .add("tag " + constant.getTag() + " is reserved (" + reserved.getLocation() + ")");
         }
-        if (reserved.matchesName(constant.name())) {
-          scoped.errors.at(constant)
-              .add("name '" + constant.name() + "' is reserved (" + reserved.location() + ")");
+        if (reserved.matchesName(constant.getName())) {
+          scoped.getErrors().at(constant)
+              .add("name '" + constant.getName() + "' is reserved (" + reserved.getLocation() + ")");
         }
       }
     }
@@ -177,7 +177,7 @@ public final class EnumType extends Type {
     for (EnumConstant constant : constants) {
       // Identifiers are ASCII-only ([a-zA-Z0-9_-]), so Locale.US lowercasing matches the
       // upstream per-char A-Z fold exactly.
-      String key = SchemaUtil.toEnglishLowerCase(constant.name());
+      String key = SchemaUtil.toEnglishLowerCase(constant.getName());
       List<EnumConstant> list = nameToConstants.get(key);
       if (list == null) {
         list = new ArrayList<>();
@@ -194,10 +194,10 @@ public final class EnumType extends Type {
         error.append("Ambiguous constant names (if you are using allow_alias, use the same value "
             + "for these constants):");
         for (EnumConstant constant : ambiguous) {
-          error.append("\n  ").append(constant.name()).append(":").append(constant.tag())
-              .append(" (").append(constant.location()).append(")");
+          error.append("\n  ").append(constant.getName()).append(":").append(constant.getTag())
+              .append(" (").append(constant.getLocation()).append(")");
         }
-        linker.errors.add(error.toString());
+        linker.getErrors().add(error.toString());
       }
     }
   }
@@ -205,7 +205,7 @@ public final class EnumType extends Type {
   private int countDistinctTags(List<EnumConstant> constants) {
     List<Integer> tags = new ArrayList<>();
     for (EnumConstant constant : constants) {
-      if (!tags.contains(constant.tag())) tags.add(constant.tag());
+      if (!tags.contains(constant.getTag())) tags.add(constant.getTag());
     }
     return tags.size();
   }
@@ -213,10 +213,10 @@ public final class EnumType extends Type {
   private void validateTagUniqueness(Linker linker) {
     Map<Integer, List<EnumConstant>> tagToConstants = new LinkedHashMap<>();
     for (EnumConstant constant : constants) {
-      List<EnumConstant> list = tagToConstants.get(constant.tag());
+      List<EnumConstant> list = tagToConstants.get(constant.getTag());
       if (list == null) {
         list = new ArrayList<>();
-        tagToConstants.put(constant.tag(), list);
+        tagToConstants.put(constant.getTag(), list);
       }
       list.add(constant);
     }
@@ -227,10 +227,10 @@ public final class EnumType extends Type {
         StringBuilder error = new StringBuilder();
         error.append("multiple enum constants share tag ").append(entry.getKey()).append(":");
         for (int i = 0; i < sharing.size(); i++) {
-          error.append("\n  ").append(i + 1).append(". ").append(sharing.get(i).name())
-              .append(" (").append(sharing.get(i).location()).append(")");
+          error.append("\n  ").append(i + 1).append(". ").append(sharing.get(i).getName())
+              .append(" (").append(sharing.get(i).getLocation()).append(")");
         }
-        linker.errors.add(error.toString());
+        linker.getErrors().add(error.toString());
       }
     }
   }
@@ -241,7 +241,7 @@ public final class EnumType extends Type {
 
     List<EnumConstant> retainedConstants = new ArrayList<>();
     for (EnumConstant constant : constants) {
-      if (markSet.contains(ProtoMember.get(type, constant.name()))) {
+      if (markSet.contains(ProtoMember.get(type, constant.getName()))) {
         retainedConstants.add(constant.retainAll(schema, markSet));
       }
     }
@@ -269,14 +269,14 @@ public final class EnumType extends Type {
   }
 
   EnumElement toElement() {
-    return new EnumElement(location, name, documentation, options.elements(),
+    return new EnumElement(location, name, documentation, options.getElements(),
         EnumConstant.toElements(constants), Reserved.toElements(reserveds));
   }
 
   static EnumType fromElement(ProtoType protoType, EnumElement enumElement, Syntax syntax) {
     return new EnumType(protoType, enumElement.location, enumElement.documentation,
-        enumElement.name, EnumConstant.fromElements(enumElement.constants),
-        Reserved.fromElements(enumElement.reserveds),
+        enumElement.name, EnumConstant.fromElements(enumElement.getConstants()),
+        Reserved.fromElements(enumElement.getReserveds()),
         new Options(Options.ENUM_OPTIONS, enumElement.options), syntax);
   }
 

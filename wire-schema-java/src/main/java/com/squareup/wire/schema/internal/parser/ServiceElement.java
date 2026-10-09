@@ -20,11 +20,35 @@ import com.squareup.wire.schema.internal.SchemaUtil;
 import java.util.List;
 
 public final class ServiceElement {
-  public final Location location;
-  public final String name;
-  public final String documentation;
-  public final List<RpcElement> rpcs;
-  public final List<OptionElement> options;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final String name;
+
+  public String getName() {
+    return name;
+  }
+
+  private final String documentation;
+
+  public String getDocumentation() {
+    return documentation;
+  }
+
+  private final List<RpcElement> rpcs;
+
+  public List<RpcElement> getRpcs() {
+    return rpcs;
+  }
+
+  private final List<OptionElement> options;
+
+  public List<OptionElement> getOptions() {
+    return options;
+  }
 
   public ServiceElement(Location location, String name, String documentation,
       List<RpcElement> rpcs, List<OptionElement> options) {

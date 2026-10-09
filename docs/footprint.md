@@ -1045,6 +1045,8 @@ scripts/release-build.sh anchors on; the two historical rows in sections 8 and 9
 deliberately worded so they do not match that anchor. The invalidation rule of section 0
 continues to bind.
 
+Dated note 2026-10-09: the accessor rename of TASK-33.1 (upstream getX()/isX() names) postdates candidate 0f860ff, so the nine checksums of 10.1 and the sizes of 10.2 to 10.4 no longer describe the current code; under DEC-13 the footprint must be remeasured on the final candidate before any signature. This note edits no measured value and no acceptance row.
+
 ### 10.7 Verification run
 
 No full `scripts/verify.sh` battery was run during this renewal: the change is

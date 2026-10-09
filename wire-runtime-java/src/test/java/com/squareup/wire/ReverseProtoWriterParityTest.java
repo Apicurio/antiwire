@@ -111,9 +111,9 @@ public class ReverseProtoWriterParityTest {
 
   @Test public void byteCountParity() throws IOException {
     ReverseProtoWriter writer = new ReverseProtoWriter();
-    int before = writer.byteCount();
+    int before = writer.getByteCount();
     writer.writeString("measure me");
-    int after = writer.byteCount();
+    int after = writer.getByteCount();
     assertEquals("measure me".getBytes(java.nio.charset.StandardCharsets.UTF_8).length,
         after - before);
   }

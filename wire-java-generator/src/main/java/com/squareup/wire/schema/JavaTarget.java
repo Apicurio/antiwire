@@ -85,19 +85,19 @@ public final class JavaTarget extends Target {
     this.buildersOnly = buildersOnly;
   }
 
-  @Override public List<String> includes() {
+  @Override public List<String> getIncludes() {
     return includes;
   }
 
-  @Override public List<String> excludes() {
+  @Override public List<String> getExcludes() {
     return excludes;
   }
 
-  @Override public boolean exclusive() {
+  @Override public boolean getExclusive() {
     return exclusive;
   }
 
-  @Override public String outDirectory() {
+  @Override public String getOutDirectory() {
     return outDirectory;
   }
 
@@ -124,5 +124,29 @@ public final class JavaTarget extends Target {
         emitDeclaredOptions,
         emitAppliedOptions,
         buildersOnly);
+  }
+
+  public boolean getAndroid() {
+    return android;
+  }
+
+  public boolean getAndroidAnnotations() {
+    return androidAnnotations;
+  }
+
+  public boolean getCompact() {
+    return compact;
+  }
+
+  public boolean getEmitDeclaredOptions() {
+    return emitDeclaredOptions;
+  }
+
+  public boolean getEmitAppliedOptions() {
+    return emitAppliedOptions;
+  }
+
+  public boolean getBuildersOnly() {
+    return buildersOnly;
   }
 }

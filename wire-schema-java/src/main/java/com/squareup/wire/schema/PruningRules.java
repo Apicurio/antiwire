@@ -103,23 +103,23 @@ public final class PruningRules {
     this.only = builder.only;
   }
 
-  public Set<String> roots() {
+  public Set<String> getRoots() {
     return roots;
   }
 
-  public Set<String> prunes() {
+  public Set<String> getPrunes() {
     return prunes;
   }
 
-  public String since() {
+  public String getSince() {
     return since != null ? since.version : null;
   }
 
-  public String until() {
+  public String getUntil() {
     return until != null ? until.version : null;
   }
 
-  public String only() {
+  public String getOnly() {
     return only != null ? only.version : null;
   }
 
@@ -128,12 +128,12 @@ public final class PruningRules {
   }
 
   /** Returns true unless {@code options} specifies a version that is outside the range. */
-  boolean isFieldRetainedVersion(Options options) {
+  public boolean isFieldRetainedVersion(Options options) {
     return isRetainedVersion(options, FIELD_SINCE, FIELD_UNTIL);
   }
 
   /** Returns true unless {@code options} specifies a version that is outside the range. */
-  boolean isEnumConstantRetainedVersion(Options options) {
+  public boolean isEnumConstantRetainedVersion(Options options) {
     return isRetainedVersion(options, ENUM_CONSTANT_SINCE, ENUM_CONSTANT_UNTIL);
   }
 

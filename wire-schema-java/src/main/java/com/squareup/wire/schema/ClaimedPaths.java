@@ -69,18 +69,18 @@ public final class ClaimedPaths {
 
   private static String asErrorMessage(Extend extend) {
     StringBuilder fields = new StringBuilder();
-    for (Field field : extend.fields()) {
+    for (Field field : extend.getFields()) {
       if (fields.length() > 0) fields.append(", ");
       fields.append(field);
     }
-    return extend.type().simpleName() + "." + fields + " at " + extend.location();
+    return extend.getType().getSimpleName() + "." + fields + " at " + extend.getLocation();
   }
 
   private static String asErrorMessage(Type type) {
-    return type.type().simpleName() + " at " + type.location();
+    return type.getType().getSimpleName() + " at " + type.getLocation();
   }
 
   private static String asErrorMessage(Service service) {
-    return service.type().simpleName() + " at " + service.location();
+    return service.type().getSimpleName() + " at " + service.location();
   }
 }

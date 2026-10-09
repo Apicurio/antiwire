@@ -66,6 +66,6 @@ public final class RuntimeEnumAdapter<E extends WireEnum> extends EnumAdapter<E>
 
   public static <E extends WireEnum> RuntimeEnumAdapter<E> create(Class<E> enumType) {
     ProtoAdapter<?> defaultAdapter = ProtoAdapter.get(enumType);
-    return new RuntimeEnumAdapter<>(enumType, defaultAdapter.syntax);
+    return new RuntimeEnumAdapter<>(enumType, defaultAdapter.getSyntax());
   }
 }

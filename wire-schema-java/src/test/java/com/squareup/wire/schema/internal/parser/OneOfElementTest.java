@@ -57,7 +57,7 @@ public class OneOfElementTest {
                     new OptionElement("my_other_oneof_option", STRING, "Yet again", true)),
                 location.at(3, 3))),
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-    MessageElement element = (MessageElement) ProtoParser.parse(location, elementAsString).types.get(0);
+    MessageElement element = (MessageElement) ProtoParser.parse(location, elementAsString).getTypes().get(0);
     assertEquals(expectedElement, element);
     assertEquals(elementAsString, element.toSchema());
   }

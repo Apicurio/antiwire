@@ -85,7 +85,7 @@ public class JavaSchemaHandler extends SchemaHandler {
 
   @Override public void handle(Schema schema, Context context) {
     String profileName = android ? "android" : "java";
-    ProfileLoader profileLoader = context.profileLoader();
+    ProfileLoader profileLoader = context.getProfileLoader();
     if (profileLoader == null) {
       throw new IllegalStateException("JavaSchemaHandler requires a profile loader");
     }
@@ -111,11 +111,11 @@ public class JavaSchemaHandler extends SchemaHandler {
   }
 
   @Override public Path handle(Type type, Context context) {
-    if (JavaGenerator.builtInType(type.type())) return null;
+    if (JavaGenerator.builtInType(type.getType())) return null;
 
     TypeSpec typeSpec = javaGenerator.generateType(type);
     ClassName javaTypeName = javaGenerator.generatedTypeName(type);
-    return write(javaTypeName, typeSpec, type.type(), type.location(), context);
+    return write(javaTypeName, typeSpec, type.getType(), type.getLocation(), context);
   }
 
   @Override public List<Path> handle(Service service, Context context) {
@@ -127,7 +127,7 @@ public class JavaSchemaHandler extends SchemaHandler {
     TypeSpec typeSpec = javaGenerator.generateOptionType(extend, field);
     if (typeSpec == null) return null;
     ClassName javaTypeName = javaGenerator.generatedTypeName(extend.member(field));
-    return write(javaTypeName, typeSpec, field.qualifiedName(), field.location(), context);
+    return write(javaTypeName, typeSpec, field.getQualifiedName(), field.getLocation(), context);
   }
 
   private Path write(
@@ -136,7 +136,7 @@ public class JavaSchemaHandler extends SchemaHandler {
       Object source,
       Location location,
       Context context) {
-    Path outDirectory = context.outDirectory();
+    Path outDirectory = context.getOutDirectory();
     JavaFile javaFile = JavaFile.builder(javaTypeName.packageName(), typeSpec)
         .addFileComment("$L", CODE_GENERATED_BY_WIRE)
         .addFileComment("\nSource: $L in $L", source, location.withPathOnly())
@@ -148,14 +148,14 @@ public class JavaSchemaHandler extends SchemaHandler {
         .div(javaTypeName.simpleName() + ".java");
     checkPathInOutDirectory(filePath, outDirectory);
 
-    context.logger().artifactHandled(
+    context.getLogger().artifactHandled(
         outDirectory,
         javaFile.packageName + "." + javaFile.typeSpec.name,
         "Java");
     try {
-      context.fileSystem().createDirectories(filePath.parent(), false);
+      context.getFileSystem().createDirectories(filePath.parent(), false);
       // The vendored okio FileSystem has no write() extension; open a sink and write UTF-8.
-      try (BufferedSink sink = Okio.buffer(context.fileSystem().sink(filePath, false))) {
+      try (BufferedSink sink = Okio.buffer(context.getFileSystem().sink(filePath, false))) {
         sink.writeUtf8(javaFile.toString());
       }
     } catch (IOException e) {

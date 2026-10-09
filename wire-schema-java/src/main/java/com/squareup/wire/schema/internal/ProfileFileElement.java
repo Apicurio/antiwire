@@ -52,10 +52,29 @@ import java.util.Objects;
  * }</pre>
  */
 public final class ProfileFileElement {
-  public final Location location;
-  public final String packageName;
-  public final List<String> imports;
-  public final List<TypeConfigElement> typeConfigs;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final String packageName;
+
+  public String getPackageName() {
+    return packageName;
+  }
+
+  private final List<String> imports;
+
+  public List<String> getImports() {
+    return imports;
+  }
+
+  private final List<TypeConfigElement> typeConfigs;
+
+  public List<TypeConfigElement> getTypeConfigs() {
+    return typeConfigs;
+  }
 
   public ProfileFileElement(Location location, String packageName, List<String> imports,
       List<TypeConfigElement> typeConfigs) {

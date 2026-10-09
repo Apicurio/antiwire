@@ -89,9 +89,9 @@ public class ReverseProtoWriterTest {
 
     Buffer reverseBuffer = new Buffer();
     ReverseProtoWriter reverse = new ReverseProtoWriter();
-    int byteCountBefore = reverse.byteCount();
+    int byteCountBefore = reverse.getByteCount();
     reverse.writeString("hello world");
-    reverse.writeVarint32(reverse.byteCount() - byteCountBefore);
+    reverse.writeVarint32(reverse.getByteCount() - byteCountBefore);
     reverse.writeTag(3, FieldEncoding.LENGTH_DELIMITED);
     reverse.writeTo(reverseBuffer);
 
@@ -107,9 +107,9 @@ public class ReverseProtoWriterTest {
 
     Buffer reverseBuffer = new Buffer();
     ReverseProtoWriter reverse = new ReverseProtoWriter();
-    int byteCountBefore = reverse.byteCount();
+    int byteCountBefore = reverse.getByteCount();
     reverse.writeBytes(ByteString.encodeUtf8("hello world"));
-    reverse.writeVarint32(reverse.byteCount() - byteCountBefore);
+    reverse.writeVarint32(reverse.getByteCount() - byteCountBefore);
     reverse.writeTag(3, FieldEncoding.LENGTH_DELIMITED);
     reverse.writeTo(reverseBuffer);
 

@@ -90,7 +90,7 @@ public class ProtoFileElementTest {
         Arrays.asList("example.other", "example.another"), Collections.emptyList(),
         Collections.emptyList(), Collections.singletonList(element), Collections.emptyList(),
         Collections.emptyList(), Collections.emptyList());
-    assertEquals(2, file.imports.size());
+    assertEquals(2, file.getImports().size());
   }
 
   @Test public void simpleWithPublicImportsToSchema() {
@@ -119,7 +119,7 @@ public class ProtoFileElementTest {
         Arrays.asList("example.other", "example.another"), Collections.emptyList(),
         Collections.singletonList(element), Collections.emptyList(), Collections.emptyList(),
         Collections.emptyList());
-    assertEquals(2, file.publicImports.size());
+    assertEquals(2, file.getPublicImports().size());
   }
 
   @Test public void simpleWithMultipleImportTypesToSchema() {
@@ -172,7 +172,7 @@ public class ProtoFileElementTest {
     ProtoFileElement file = new ProtoFileElement(location, null, null, Collections.emptyList(),
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
         Arrays.asList(service1, service2), Collections.emptyList(), Collections.emptyList());
-    assertEquals(2, file.services.size());
+    assertEquals(2, file.getServices().size());
   }
 
   @Test public void simpleWithOptionsToSchema() {
@@ -203,7 +203,7 @@ public class ProtoFileElementTest {
     ProtoFileElement file = new ProtoFileElement(location, null, null, Collections.emptyList(),
         Collections.emptyList(), Collections.emptyList(), Collections.singletonList(element),
         Collections.emptyList(), Collections.emptyList(), Arrays.asList(kitKat, fooBar));
-    assertEquals(2, file.options.size());
+    assertEquals(2, file.getOptions().size());
   }
 
   @Test public void simpleWithExtendsToSchema() {
@@ -233,7 +233,7 @@ public class ProtoFileElementTest {
     ProtoFileElement file = new ProtoFileElement(location, null, null, Collections.emptyList(),
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
         Collections.emptyList(), Arrays.asList(extend1, extend2), Collections.emptyList());
-    assertEquals(2, file.extendDeclarations.size());
+    assertEquals(2, file.getExtendDeclarations().size());
   }
 
   @Test public void multipleEverythingToSchema() {

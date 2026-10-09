@@ -57,7 +57,7 @@ public final class JvmLanguages {
 
   public static String builtInAdapterString(ProtoType type, boolean useArray) {
     String protoAdapterName = ProtoAdapter.class.getName();
-    if (type.isScalar) {
+    if (type.isScalar()) {
       if (useArray) {
         // Upstream compares with Kotlin '==' which is equals(); the linker produces ProtoType
         // instances that are equal to but not identical with the scalar singletons.
@@ -101,23 +101,23 @@ public final class JvmLanguages {
   }
 
   public static boolean eligibleAsAnnotationMember(Schema schema, Field field) {
-    ProtoType type = field.type();
+    ProtoType type = field.getType();
 
     if (type.equals(ProtoType.BYTES)) {
       return false;
     }
 
-    if (!type.isScalar && !(schema.getType(type) instanceof EnumType)) {
+    if (!type.isScalar() && !(schema.getType(type) instanceof EnumType)) {
       return false;
     }
 
-    String qualifiedName = field.qualifiedName();
+    String qualifiedName = field.getQualifiedName();
     if (qualifiedName.startsWith("google.protobuf.")
         || qualifiedName.startsWith("wire.")) {
       return false; // Don't emit annotations for packed, since, etc.
     }
 
-    if (field.name().equals("redacted")) {
+    if (field.getName().equals("redacted")) {
       return false; // Redacted is built-in.
     }
 
@@ -125,7 +125,7 @@ public final class JvmLanguages {
   }
 
   public static ElementType annotationTargetType(Extend extend) {
-    ProtoType type = extend.type();
+    ProtoType type = extend.getType();
     if (type.equals(Options.MESSAGE_OPTIONS) || type.equals(Options.ENUM_OPTIONS)
         || type.equals(Options.SERVICE_OPTIONS)) {
       return ElementType.TYPE;
@@ -195,7 +195,7 @@ public final class JvmLanguages {
       return checkPackageOptionValue(javaPackage, "java_package", protoFile);
     }
 
-    return protoFile.packageName() != null ? protoFile.packageName() : "";
+    return protoFile.getPackageName() != null ? protoFile.getPackageName() : "";
   }
 
   /**
@@ -224,7 +224,7 @@ public final class JvmLanguages {
                 + "  option:    " + optionName + "\n"
                 + "  value:     " + displayForError(value) + "\n"
                 + "  character: " + displayForError(c) + "\n"
-                + "  file:      " + protoFile.location());
+                + "  file:      " + protoFile.getLocation());
       }
     }
     return value;
@@ -270,9 +270,9 @@ public final class JvmLanguages {
   public static String legacyQualifiedFieldName(Field field) {
     // for backwards compatibility with older generated code, we use
     // package name + field name instead of the fully-qualified name.
-    return field.packageName().isBlank()
-        ? field.name()
-        : field.packageName() + "." + field.name();
+    return field.getPackageName().isBlank()
+        ? field.getName()
+        : field.getPackageName() + "." + field.getName();
     // TODO: If a qualified name is really appropriate, it should
     //   be the fully-qualified name, not this weird hybrid.
   }
@@ -284,9 +284,9 @@ public final class JvmLanguages {
 
   public static <T> T annotationName(
       ProtoFile protoFile, Field extension, NameFactory<T> factory, String simpleNameSuffix) {
-    String simpleName = Internal.camelCase(extension.name(), true) + simpleNameSuffix;
+    String simpleName = Internal.camelCase(extension.getName(), true) + simpleNameSuffix;
     // collect class names: all enclosing message names plus simpleName
-    List<String> namespaces = extension.namespaces();
+    List<String> namespaces = extension.getNamespaces();
     List<String> names;
     if (namespaces.size() == 0 || namespaces.size() == 1) {
       // 0 means no package and no enclosing messages

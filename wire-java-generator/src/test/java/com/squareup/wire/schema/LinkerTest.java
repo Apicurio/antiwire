@@ -63,8 +63,8 @@ public class LinkerTest {
     Schema schema = loadAndLinkSchema();
 
     List<Location> locations = new ArrayList<>();
-    for (ProtoFile protoFile : schema.protoFiles()) {
-      locations.add(protoFile.location());
+    for (ProtoFile protoFile : schema.getProtoFiles()) {
+      locations.add(protoFile.getLocation());
     }
     assertEquals(Arrays.asList(
         Location.get(tempDir.resolve("source-path").toString(), "a.proto"),
@@ -96,7 +96,7 @@ public class LinkerTest {
         + "}\n");
     Schema schema = loadAndLinkSchema(ProtoType.get("cafe.EspressoShot"));
     assertEquals(ProtoType.BYTES,
-        ((MessageType) schema.getType("cafe.CafeDrink")).field("shots").type());
+        ((MessageType) schema.getType("cafe.CafeDrink")).field("shots").getType());
     assertEquals(""
         + "// Proto schema formatted by Wire, do not edit.\n"
         + "// Source: cafe/cafe.proto\n"
@@ -199,7 +199,7 @@ public class LinkerTest {
         + "}\n");
     Schema schema = loadAndLinkSchema(ProtoType.get("cafe.EspressoShot"));
     assertEquals(ProtoType.BYTES,
-        ((MessageType) schema.getType("cafe.CafeDrink")).extensionField("cafe.shots").type());
+        ((MessageType) schema.getType("cafe.CafeDrink")).extensionField("cafe.shots").getType());
     assertEquals(""
         + "// Proto schema formatted by Wire, do not edit.\n"
         + "// Source: cafe/cafe.proto\n"
@@ -251,9 +251,9 @@ public class LinkerTest {
         + "}\n");
     Schema schema = loadAndLinkSchema(ProtoType.get("cafe.EspressoShot"), ProtoType.get("cafe.Roast"));
     assertEquals(ProtoType.BYTES,
-        ((MessageType) schema.getType("cafe.CafeDrink")).field("shots").type());
+        ((MessageType) schema.getType("cafe.CafeDrink")).field("shots").getType());
     assertEquals(ProtoType.BYTES,
-        ((MessageType) schema.getType("cafe.EspressoShot")).field("roast").type());
+        ((MessageType) schema.getType("cafe.EspressoShot")).field("roast").getType());
     assertEquals(""
         + "// Proto schema formatted by Wire, do not edit.\n"
         + "// Source: cafe/cafe.proto\n"
@@ -313,8 +313,8 @@ public class LinkerTest {
     Schema schema = loadAndLinkSchema();
 
     List<Location> locations = new ArrayList<>();
-    for (ProtoFile protoFile : schema.protoFiles()) {
-      locations.add(protoFile.location());
+    for (ProtoFile protoFile : schema.getProtoFiles()) {
+      locations.add(protoFile.getLocation());
     }
     assertEquals(Arrays.asList(
         Location.get(tempDir.resolve("source-path").toString(), "a.proto"),
@@ -433,7 +433,7 @@ public class LinkerTest {
     Schema schema = loadAndLinkSchema();
 
     Field enumValueDeprecated = schema.getField(Options.ENUM_VALUE_OPTIONS, "deprecated");
-    assertNotNull(enumValueDeprecated.encodeMode());
+    assertNotNull(enumValueDeprecated.getEncodeMode());
   }
 
   @Test
@@ -454,15 +454,15 @@ public class LinkerTest {
 
     Schema schemaSorted = loadAndLinkSchema();
     List<String> sortedNames = new ArrayList<>();
-    for (Field field : ((MessageType) schemaSorted.getType("A")).extensionFields()) {
-      sortedNames.add(field.name());
+    for (Field field : ((MessageType) schemaSorted.getType("A")).getExtensionFields()) {
+      sortedNames.add(field.getName());
     }
     assertEquals(Arrays.asList("b", "c"), sortedNames);
 
     Schema schemaReversed = loadAndLinkSchemaReverseSort();
     List<String> reversedNames = new ArrayList<>();
-    for (Field field : ((MessageType) schemaReversed.getType("A")).extensionFields()) {
-      reversedNames.add(field.name());
+    for (Field field : ((MessageType) schemaReversed.getType("A")).getExtensionFields()) {
+      reversedNames.add(field.getName());
     }
     assertEquals(Arrays.asList("b", "c"), reversedNames);
   }

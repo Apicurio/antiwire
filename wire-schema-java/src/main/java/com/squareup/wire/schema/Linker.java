@@ -41,7 +41,11 @@ public class Linker {
   final boolean loadExhaustively;
 
   /** Errors accumulated by this load. */
-  public final ErrorCollector errors;
+  private final ErrorCollector errors;
+
+  public ErrorCollector getErrors() {
+    return errors;
+  }
 
   public Linker(Loader loader, ErrorCollector errors, boolean permitPackageCycles,
       boolean loadExhaustively, List<ProtoType> opaqueTypes) {
@@ -99,7 +103,7 @@ public class Linker {
     List<FileLinker> sourceFiles = new ArrayList<>();
     for (ProtoFile sourceFile : sourceProtoFiles) {
       FileLinker fileLinker = new FileLinker(sourceFile, withContext(sourceFile));
-      fileLinkers.put(sourceFile.location.path, fileLinker);
+      fileLinkers.put(sourceFile.location.getPath(), fileLinker);
       sourceFiles.add(fileLinker);
     }
 
@@ -132,7 +136,7 @@ public class Linker {
     // The order of the input files shows up in the order of extension fields in the output
     // files. Sort the inputs to get consistent output even when the order of input files is
     // inconsistent.
-    sourceFiles.sort(Comparator.comparing(fileLinker -> fileLinker.protoFile.location.path));
+    sourceFiles.sort(Comparator.comparing(fileLinker -> fileLinker.protoFile.location.getPath()));
 
     for (FileLinker fileLinker : sourceFiles) {
       fileLinker.requireTypesRegistered();
@@ -191,14 +195,14 @@ public class Linker {
       // Retain this type if it's used by anything in the source path.
       boolean anyTypeIsUsed = false;
       for (Type type : fileLinker.protoFile.typesAndNestedTypes()) {
-        if (requestedTypes.contains(type.type())) {
+        if (requestedTypes.contains(type.getType())) {
           anyTypeIsUsed = true;
           break;
         }
       }
       boolean anyFieldIsUsed = false;
       for (Extend extend : fileLinker.protoFile.extendList) {
-        for (Field field : extend.fields()) {
+        for (Field field : extend.getFields()) {
           if (requestedFields.contains(field)) {
             anyFieldIsUsed = true;
             break;
@@ -232,7 +236,7 @@ public class Linker {
   private ProtoType resolveType(String name, boolean messageOnly) {
     ProtoType type = ProtoType.get(name);
 
-    if (type.isScalar) {
+    if (type.isScalar()) {
       if (messageOnly) {
         errors.add("expected a message but was " + name);
       }
@@ -242,12 +246,12 @@ public class Linker {
       return type;
     }
 
-    if (type.isMap) {
+    if (type.isMap()) {
       if (messageOnly) {
         errors.add("expected a message but was " + name);
       }
-      ProtoType keyType = resolveType(type.keyType.toString(), false);
-      ProtoType valueType = resolveType(type.valueType.toString(), false);
+      ProtoType keyType = resolveType(type.getKeyType().toString(), false);
+      ProtoType valueType = resolveType(type.getValueType().toString(), false);
       return ProtoType.get(keyType, valueType, name);
     }
 
@@ -270,15 +274,15 @@ public class Linker {
       return ProtoType.BYTES; // Just return any placeholder.
     }
 
-    if (opaqueTypes.contains(resolved.type())) {
+    if (opaqueTypes.contains(resolved.getType())) {
       if (resolved instanceof EnumType) {
-        errors.add("Enums like " + resolved.type() + " cannot be opaqued");
-        return resolved.type();
+        errors.add("Enums like " + resolved.getType() + " cannot be opaqued");
+        return resolved.getType();
       }
       return ProtoType.BYTES;
     }
-    requestedTypes.add(resolved.type());
-    return resolved.type();
+    requestedTypes.add(resolved.getType());
+    return resolved.getType();
   }
 
   public <T> T resolve(String name, Map<String, T> map) {
@@ -308,7 +312,7 @@ public class Linker {
     for (int i = contextStack.size() - 1; i >= 0; i--) {
       Object context = contextStack.get(i);
       if (context instanceof Type) {
-        return ((Type) context).type().toString();
+        return ((Type) context).getType().toString();
       }
       if (context instanceof ProtoFile) {
         String packageName = ((ProtoFile) context).packageName;
@@ -331,11 +335,11 @@ public class Linker {
       if (context instanceof ProtoFile) {
         location = ((ProtoFile) context).location;
       } else if (context instanceof Field && ((Field) context).isExtension()) {
-        location = ((Field) context).location();
+        location = ((Field) context).getLocation();
       }
 
       if (location != null) {
-        String path = location.path;
+        String path = location.getPath();
         FileLinker fileLinker = getFileLinker(path);
         for (String effectiveImport : fileLinker.effectiveImports()) {
           result.add(getFileLinker(effectiveImport));
@@ -377,7 +381,7 @@ public class Linker {
     Type result = get(protoType);
     if (result == null) return null;
 
-    FileLinker fileLinker = getFileLinker(result.location().path);
+    FileLinker fileLinker = getFileLinker(result.getLocation().getPath());
     fileLinker.requireMembersLinked(result);
     return result;
   }
@@ -418,32 +422,32 @@ public class Linker {
     Map<String, Set<Field>> jsonNameToField = new LinkedHashMap<>();
 
     for (Field field : fields) {
-      int tag = field.tag();
+      int tag = field.getTag();
       if (!SchemaUtil.isValidTag(tag)) {
         errors.at(field).add("tag is out of range: " + tag);
       }
 
       for (Reserved reserved : reserveds) {
         if (reserved.matchesTag(tag)) {
-          errors.at(field).add("tag " + tag + " is reserved (" + reserved.location() + ")");
+          errors.at(field).add("tag " + tag + " is reserved (" + reserved.getLocation() + ")");
         }
-        if (reserved.matchesName(field.name())) {
+        if (reserved.matchesName(field.getName())) {
           errors.at(field).add(
-              "name '" + field.name() + "' is reserved (" + reserved.location() + ")");
+              "name '" + field.getName() + "' is reserved (" + reserved.getLocation() + ")");
         }
       }
 
       tagToField.computeIfAbsent(tag, k -> new LinkedHashSet<>()).add(field);
-      nameToField.computeIfAbsent(field.qualifiedName(), k -> new LinkedHashSet<>()).add(field);
+      nameToField.computeIfAbsent(field.getQualifiedName(), k -> new LinkedHashSet<>()).add(field);
       // We allow JSON collisions for extensions.
       if (!field.isExtension()) {
         jsonNameToField
-            .computeIfAbsent(syntaxRules.jsonName(field.name(), field.declaredJsonName()),
+            .computeIfAbsent(syntaxRules.jsonName(field.getName(), field.getDeclaredJsonName()),
                 k -> new LinkedHashSet<>())
             .add(field);
       }
 
-      syntaxRules.validateTypeReference(get(field.type()), errors.at(field));
+      syntaxRules.validateTypeReference(get(field.getType()), errors.at(field));
     }
 
     for (Map.Entry<Integer, Set<Field>> entry : tagToField.entrySet()) {
@@ -453,8 +457,8 @@ public class Linker {
         error.append("multiple fields share tag ").append(entry.getKey()).append(":");
         int index = 1;
         for (Field field : values) {
-          error.append("\n  ").append(index++).append(". ").append(field.name())
-              .append(" (").append(field.location()).append(")");
+          error.append("\n  ").append(index++).append(". ").append(field.getName())
+              .append(" (").append(field.getLocation()).append(")");
         }
         errors.add(error.toString());
       }
@@ -466,11 +470,11 @@ public class Linker {
         hasCollidingFields = true;
         Field first = collidingFields.iterator().next();
         StringBuilder error = new StringBuilder();
-        error.append("multiple fields share name ").append(first.name()).append(":");
+        error.append("multiple fields share name ").append(first.getName()).append(":");
         int index = 1;
         for (Field field : collidingFields) {
-          error.append("\n  ").append(index++).append(". ").append(field.name())
-              .append(" (").append(field.location()).append(")");
+          error.append("\n  ").append(index++).append(". ").append(field.getName())
+              .append(" (").append(field.getLocation()).append(")");
         }
         errors.add(error.toString());
       }
@@ -485,8 +489,8 @@ public class Linker {
               .append("':");
           int index = 1;
           for (Field field : collidingJsonFields) {
-            error.append("\n  ").append(index++).append(". ").append(field.name())
-                .append(" (").append(field.location()).append(")");
+            error.append("\n  ").append(index++).append(". ").append(field.getName())
+                .append(" (").append(field.getLocation()).append(")");
           }
           errors.add(error.toString());
         }
@@ -519,21 +523,21 @@ public class Linker {
     Map<String, List<Type>> conflicting = new LinkedHashMap<>();
     for (FileLinker fileLinker : fileLinkers) {
       for (Type type : fileLinker.protoFile.types) {
-        String key = type.type() + "->" + type.location();
+        String key = type.getType() + "->" + type.getLocation();
         conflicting.computeIfAbsent(key, k -> new ArrayList<>()).add(type);
       }
     }
 
     for (List<Type> typesAndLocations : conflicting.values()) {
       if (typesAndLocations.size() <= 1) continue;
-      ProtoType type = typesAndLocations.get(0).type();
+      ProtoType type = typesAndLocations.get(0).getType();
       StringBuilder error = new StringBuilder();
       error.append("same type '").append(type)
           .append("' from the same file loaded from different paths:");
       int index = 1;
       for (Type entry : typesAndLocations) {
-        error.append("\n  ").append(index++).append(". base:").append(entry.location().base)
-            .append(", path:").append(entry.location().withoutBase());
+        error.append("\n  ").append(index++).append(". base:").append(entry.getLocation().getBase())
+            .append(", path:").append(entry.getLocation().withoutBase());
       }
       errors.add(error.toString());
     }
@@ -543,8 +547,8 @@ public class Linker {
     Map<String, Set<EnumType>> nameToType = new LinkedHashMap<>();
     for (Type type : nestedTypes) {
       if (type instanceof EnumType) {
-        for (EnumConstant enumConstant : ((EnumType) type).constants()) {
-          nameToType.computeIfAbsent(enumConstant.name(), k -> new LinkedHashSet<>()).add(
+        for (EnumConstant enumConstant : ((EnumType) type).getConstants()) {
+          nameToType.computeIfAbsent(enumConstant.getName(), k -> new LinkedHashSet<>()).add(
               (EnumType) type);
         }
       }
@@ -558,9 +562,9 @@ public class Linker {
         error.append("multiple enums share constant ").append(constant).append(":");
         int index = 1;
         for (EnumType enumType : values) {
-          error.append("\n  ").append(index++).append(". ").append(enumType.type())
+          error.append("\n  ").append(index++).append(". ").append(enumType.getType())
               .append(".").append(constant)
-              .append(" (").append(enumType.constant(constant).location()).append(")");
+              .append(" (").append(enumType.constant(constant).getLocation()).append(")");
         }
         errors.add(error.toString());
       }
@@ -569,12 +573,12 @@ public class Linker {
 
   public void validateImportForType(Location location, ProtoType type) {
     // Map key type is always scalar. No need to validate it.
-    if (type.isMap) type = type.valueType;
+    if (type.isMap()) type = type.getValueType();
 
-    if (type.isScalar) return;
+    if (type.isScalar()) return;
 
-    String path = location.path;
-    String requiredImport = get(type).location().path;
+    String path = location.getPath();
+    String requiredImport = get(type).getLocation().getPath();
     FileLinker fileLinker = getFileLinker(path);
     if (!path.equals(requiredImport) && !fileLinker.effectiveImports().contains(requiredImport)) {
       errors.add(path + " needs to import " + requiredImport);
@@ -582,7 +586,7 @@ public class Linker {
   }
 
   public void validateImportForPath(Location location, String requiredImport) {
-    String path = location.path;
+    String path = location.getPath();
     FileLinker fileLinker = getFileLinker(path);
     if (!path.equals(requiredImport) && !fileLinker.effectiveImports().contains(requiredImport)) {
       errors.add(path + " needs to import " + requiredImport);
@@ -592,5 +596,9 @@ public class Linker {
   /** Returns a new linker that uses {@code context} to resolve type names and report errors. */
   public Linker withContext(Object context) {
     return new Linker(this, context);
+  }
+
+  public boolean getLoadExhaustively() {
+    return loadExhaustively;
   }
 }

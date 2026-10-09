@@ -20,15 +20,15 @@ import java.util.List;
 
 /** A message type or enum type declaration. */
 public interface TypeElement {
-  Location location();
+  Location getLocation();
 
-  String name();
+  String getName();
 
-  String documentation();
+  String getDocumentation();
 
-  List<OptionElement> options();
+  List<OptionElement> getOptions();
 
-  List<TypeElement> nestedTypes();
+  List<TypeElement> getNestedTypes();
 
   String toSchema();
 }

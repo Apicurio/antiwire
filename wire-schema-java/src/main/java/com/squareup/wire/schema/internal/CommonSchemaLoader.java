@@ -107,7 +107,7 @@ public final class CommonSchemaLoader implements Loader {
     protoPathRoots = allRoots(protoPath);
   }
 
-  public boolean permitPackageCycles() {
+  public boolean getPermitPackageCycles() {
     return permitPackageCycles;
   }
 
@@ -115,7 +115,7 @@ public final class CommonSchemaLoader implements Loader {
     this.permitPackageCycles = permitPackageCycles;
   }
 
-  public List<ProtoType> opaqueTypes() {
+  public List<ProtoType> getOpaqueTypes() {
     return opaqueTypes;
   }
 
@@ -123,7 +123,7 @@ public final class CommonSchemaLoader implements Loader {
     this.opaqueTypes = opaqueTypes;
   }
 
-  public boolean loadExhaustively() {
+  public boolean getLoadExhaustively() {
     return loadExhaustively;
   }
 
@@ -132,7 +132,7 @@ public final class CommonSchemaLoader implements Loader {
   }
 
   /** Subset of the schema that was loaded from the source path. */
-  public List<ProtoFile> sourcePathFiles() {
+  public List<ProtoFile> getSourcePathFiles() {
     return sourcePathFiles;
   }
 
@@ -207,7 +207,7 @@ public final class CommonSchemaLoader implements Loader {
 
   private ProtoFile load(Root.ProtoFilePath protoFilePath) throws IOException {
     if (CoreLoader.isWireRuntimeProto(protoFilePath.location)) {
-      return CoreLoader.INSTANCE.load(protoFilePath.location.path);
+      return CoreLoader.INSTANCE.load(protoFilePath.location.getPath());
     }
 
     ProtoFile protoFile = protoFilePath.parse();
@@ -215,10 +215,10 @@ public final class CommonSchemaLoader implements Loader {
 
     // If the .proto was specified as a full path without a separate base directory that it's
     // relative to, confirm that the import path and file system path agree.
-    if (protoFilePath.location.base.isEmpty()
-        && !protoFilePath.location.path.equals(importPath)
-        && !protoFilePath.location.path.endsWith("/" + importPath)) {
-      errors.add("expected " + protoFilePath.location.path
+    if (protoFilePath.location.getBase().isEmpty()
+        && !protoFilePath.location.getPath().equals(importPath)
+        && !protoFilePath.location.getPath().endsWith("/" + importPath)) {
+      errors.add("expected " + protoFilePath.location.getPath()
           + " to have a path ending with " + importPath);
     }
 
@@ -264,17 +264,17 @@ public final class CommonSchemaLoader implements Loader {
 
   public Profile loadProfile(String name, Schema schema) throws IOException {
     List<Location> allLocations = new ArrayList<>();
-    for (ProtoFile protoFile : schema.protoFiles()) {
-      allLocations.add(protoFile.location());
+    for (ProtoFile protoFile : schema.getProtoFiles()) {
+      allLocations.add(protoFile.getLocation());
     }
     Set<Location> locationsToCheck = locationsToCheck(name, allLocations);
 
     List<ProfileFileElement> profileElements = new ArrayList<>();
     for (Location location : locationsToCheck) {
-      List<Root> roots = baseToRoots.get(location.base);
+      List<Root> roots = baseToRoots.get(location.getBase());
       if (roots == null) continue;
       for (Root root : roots) {
-        Root.ProtoFilePath resolved = root.resolve(location.path);
+        Root.ProtoFilePath resolved = root.resolve(location.getPath());
         if (resolved == null) continue;
         profileElements.add(resolved.parseProfile());
       }
@@ -288,8 +288,8 @@ public final class CommonSchemaLoader implements Loader {
   /** Confirms that {@code profileFiles} link correctly against {@code schema}. */
   private void validate(Schema schema, List<ProfileFileElement> profileFiles) {
     for (ProfileFileElement profileFile : profileFiles) {
-      for (TypeConfigElement typeConfig : profileFile.typeConfigs) {
-        ProtoType imported = importedType(ProtoType.get(typeConfig.type));
+      for (TypeConfigElement typeConfig : profileFile.getTypeConfigs()) {
+        ProtoType imported = importedType(ProtoType.get(typeConfig.getType()));
         if (imported == null) continue;
 
         Type resolvedType = schema.getType(imported);
@@ -304,10 +304,10 @@ public final class CommonSchemaLoader implements Loader {
           continue;
         }
 
-        String requiredImport = resolvedType.location().path;
-        if (!profileFile.imports.contains(requiredImport)) {
-          errors.add(typeConfig.location.path + " needs to import " + requiredImport
-              + " (" + typeConfig.location + ")");
+        String requiredImport = resolvedType.getLocation().getPath();
+        if (!profileFile.getImports().contains(requiredImport)) {
+          errors.add(typeConfig.getLocation().getPath() + " needs to import " + requiredImport
+              + " (" + typeConfig.getLocation() + ")");
         }
       }
     }
@@ -318,8 +318,8 @@ public final class CommonSchemaLoader implements Loader {
   /** Returns the type to import for {@code type}. */
   private ProtoType importedType(ProtoType type) {
     // Map key type is always scalar.
-    if (type.isMap) type = type.valueType;
-    return type.isScalar ? null : type;
+    if (type.isMap()) type = type.getValueType();
+    return type.isScalar() ? null : type;
   }
 
   /**
@@ -333,29 +333,29 @@ public final class CommonSchemaLoader implements Loader {
     while (true) {
       Location protoLocation = queue.pollFirst();
       if (protoLocation == null) break;
-      int lastSlash = protoLocation.path.lastIndexOf("/");
-      String parentPath = protoLocation.path.substring(0, lastSlash + 1);
+      int lastSlash = protoLocation.getPath().lastIndexOf("/");
+      String parentPath = protoLocation.getPath().substring(0, lastSlash + 1);
       Location profileLocation = new Location(
-          protoLocation.base, parentPath + name + ".wire", protoLocation.line,
-          protoLocation.column);
+          protoLocation.getBase(), parentPath + name + ".wire", protoLocation.getLine(),
+          protoLocation.getColumn());
 
       if (!result.add(profileLocation)) continue; // Already added.
       if (parentPath.isEmpty()) continue; // No more parents to enqueue.
-      queue.add(new Location(protoLocation.base, parentPath.substring(0, parentPath.length() - 1),
-          protoLocation.line, protoLocation.column)); // Drop trailing '/'.
+      queue.add(new Location(protoLocation.getBase(), parentPath.substring(0, parentPath.length() - 1),
+          protoLocation.getLine(), protoLocation.getColumn())); // Drop trailing '/'.
     }
     return result;
   }
 
   static String importPath(ProtoFile protoFile, Location location) {
-    return location.base.isEmpty()
+    return location.getBase().isEmpty()
         ? canonicalImportPath(protoFile, location)
-        : location.path;
+        : location.getPath();
   }
 
   private static String canonicalImportPath(ProtoFile protoFile, Location location) {
-    String filename = location.path.substring(location.path.lastIndexOf('/') + 1);
-    String packageName = protoFile.packageName();
+    String filename = location.getPath().substring(location.getPath().lastIndexOf('/') + 1);
+    String packageName = protoFile.getPackageName();
     return packageName == null
         ? filename
         : packageName.replace('.', '/') + "/" + filename;

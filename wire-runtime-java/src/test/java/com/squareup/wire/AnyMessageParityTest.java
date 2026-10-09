@@ -35,7 +35,7 @@ public class AnyMessageParityTest {
     AnyMessage decoded = AnyMessage.ADAPTER.decode(any.encodeByteString());
     assertEquals(any, decoded);
     FieldMask unpacked = decoded.unpack(ProtoAdapter.FIELD_MASK);
-    assertEquals(Arrays.asList("a.b", "c"), unpacked.paths());
+    assertEquals(Arrays.asList("a.b", "c"), unpacked.getPaths());
   }
 
   @Test public void structRoundTrip() throws IOException {
@@ -131,9 +131,9 @@ public class AnyMessageParityTest {
 
   @Test public void packMessageThroughAdapterAccessor() throws IOException {
     AnyMessage any = AnyMessage.pack(new PackedMessage("hello"));
-    assertEquals("type.googleapis.com/antiwire.PackedMessage", any.typeUrl);
+    assertEquals("type.googleapis.com/antiwire.PackedMessage", any.getTypeUrl());
     // The packed value is the message encoding: tag 1, length 5, "hello".
-    assertEquals("0a0568656c6c6f", any.value.hex());
+    assertEquals("0a0568656c6c6f", any.getValue().hex());
   }
 
   @Test public void oneOfStringValueSanitizes() {

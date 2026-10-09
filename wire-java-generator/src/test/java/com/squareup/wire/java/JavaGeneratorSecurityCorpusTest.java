@@ -173,9 +173,9 @@ public class JavaGeneratorSecurityCorpusTest {
         .build();
     ProtoFile pf = base.protoFile("escape.proto");
     Schema escapeSchema = new Schema(Collections.singletonList(pf.copy(
-        Location.get("../escape.proto"), pf.imports(), pf.publicImports(), pf.weakImports(),
-        pf.packageName(), pf.types(), pf.services(), pf.extendList(), pf.options(),
-        pf.syntax())));
+        Location.get("../escape.proto"), pf.getImports(), pf.getPublicImports(), pf.getWeakImports(),
+        pf.getPackageName(), pf.getTypes(), pf.getServices(), pf.getExtendList(), pf.getOptions(),
+        pf.getSyntax())));
     SchemaHandler handler = new ProtoTarget(out.toString()).newHandler();
     SchemaHandler.Context context = contextFor(out, escapeSchema);
 

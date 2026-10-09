@@ -20,14 +20,53 @@ import com.squareup.wire.schema.internal.SchemaUtil;
 import java.util.List;
 
 public final class RpcElement {
-  public final Location location;
-  public final String name;
-  public final String documentation;
-  public final String requestType;
-  public final String responseType;
-  public final boolean requestStreaming;
-  public final boolean responseStreaming;
-  public final List<OptionElement> options;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final String name;
+
+  public String getName() {
+    return name;
+  }
+
+  private final String documentation;
+
+  public String getDocumentation() {
+    return documentation;
+  }
+
+  private final String requestType;
+
+  public String getRequestType() {
+    return requestType;
+  }
+
+  private final String responseType;
+
+  public String getResponseType() {
+    return responseType;
+  }
+
+  private final boolean requestStreaming;
+
+  public boolean getRequestStreaming() {
+    return requestStreaming;
+  }
+
+  private final boolean responseStreaming;
+
+  public boolean getResponseStreaming() {
+    return responseStreaming;
+  }
+
+  private final List<OptionElement> options;
+
+  public List<OptionElement> getOptions() {
+    return options;
+  }
 
   public RpcElement(Location location, String name, String documentation, String requestType,
       String responseType, boolean requestStreaming, boolean responseStreaming,

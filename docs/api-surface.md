@@ -52,7 +52,7 @@ The consumer classes under the rule are `com.squareup.wire.ProtoAdapter`, `Messa
 | `Message.encode(BufferedSink)` | `encode(OutputStream)` (pre-existing) |
 | `Builder.addUnknownFields(ByteString)` | `Builder.addUnknownFields(Bytes)` |
 | `Builder.buildUnknownFields()` | `Builder.buildUnknownFieldsBytes()` |
-| `AnyMessage(String, ByteString)` ctor, `value` field, `copy(String, ByteString)` | `AnyMessage(String, Bytes)` ctor, `valueBytes()`, `copy(String, Bytes)` |
+| `AnyMessage(String, ByteString)` ctor, `getValue()` accessor (was the `value` field before 2026-10-09), `copy(String, ByteString)` | `AnyMessage(String, Bytes)` ctor, `valueBytes()`, `copy(String, Bytes)` |
 | `ProtoAdapter.BYTES`, `ProtoAdapter.BYTES_VALUE` constants | `ProtoAdapter.WIRE_BYTES`, `ProtoAdapter.WIRE_BYTES_VALUE` (phase 2) |
 | `ProtoAdapter.EMPTY` constant | `ProtoAdapter.WIRE_EMPTY` (TASK-26) |
 

@@ -47,18 +47,18 @@ public class ProtoParserTest {
         + "  optional string email = 3;\n"
         + "}\n";
     ProtoFileElement file = ProtoParser.parse(Location.get("person.proto"), source);
-    assertEquals(Syntax.PROTO_2, file.syntax);
-    assertEquals("squareup.protos.parser", file.packageName);
-    assertEquals(1, file.types.size());
-    MessageElement person = (MessageElement) file.types.get(0);
+    assertEquals(Syntax.PROTO_2, file.getSyntax());
+    assertEquals("squareup.protos.parser", file.getPackageName());
+    assertEquals(1, file.getTypes().size());
+    MessageElement person = (MessageElement) file.getTypes().get(0);
     assertEquals("Person", person.name);
-    assertEquals(3, person.fields.size());
-    FieldElement name = person.fields.get(0);
-    assertEquals(Label.REQUIRED, name.label);
-    assertEquals("string", name.type);
-    assertEquals("name", name.name);
-    assertEquals(1, name.tag);
-    assertNull(name.defaultValue);
+    assertEquals(3, person.getFields().size());
+    FieldElement name = person.getFields().get(0);
+    assertEquals(Label.REQUIRED, name.getLabel());
+    assertEquals("string", name.getType());
+    assertEquals("name", name.getName());
+    assertEquals(1, name.getTag());
+    assertNull(name.getDefaultValue());
   }
 
   @Test public void proto3DefaultsAndJsonName() {
@@ -69,11 +69,11 @@ public class ProtoParserTest {
         + "  int32 page = 2 [default = 10, json_name = \"page_number\"];\n"
         + "}\n";
     ProtoFileElement file = ProtoParser.parse(Location.get("msg.proto"), source);
-    MessageElement msg = (MessageElement) file.types.get(0);
-    FieldElement page = msg.fields.get(1);
-    assertNull(page.label);
-    assertEquals("10", page.defaultValue);
-    assertEquals("page_number", page.jsonName);
+    MessageElement msg = (MessageElement) file.getTypes().get(0);
+    FieldElement page = msg.getFields().get(1);
+    assertNull(page.getLabel());
+    assertEquals("10", page.getDefaultValue());
+    assertEquals("page_number", page.getJsonName());
   }
 
   @Test public void requiredForbiddenInProto3() {
@@ -90,10 +90,10 @@ public class ProtoParserTest {
         + "syntax = \"proto2\";\n"
         + "message M { map<string, int32> counts = 1; }\n";
     ProtoFileElement file = ProtoParser.parse(Location.get("m.proto"), source);
-    MessageElement m = (MessageElement) file.types.get(0);
-    FieldElement counts = m.fields.get(0);
-    assertEquals("map<string, int32>", counts.type);
-    assertNull(counts.label);
+    MessageElement m = (MessageElement) file.getTypes().get(0);
+    FieldElement counts = m.getFields().get(0);
+    assertEquals("map<string, int32>", counts.getType());
+    assertNull(counts.getLabel());
   }
 
   @Test public void enumWithReserved() {
@@ -106,10 +106,10 @@ public class ProtoParserTest {
         + "  reserved \"OLD\";\n"
         + "}\n";
     ProtoFileElement file = ProtoParser.parse(Location.get("e.proto"), source);
-    EnumElement e = (EnumElement) file.types.get(0);
-    assertEquals(2, e.constants.size());
-    assertEquals(2, e.reserveds.size());
-    assertEquals("reserved 5 to 8, 12;\n", e.reserveds.get(0).toSchema());
+    EnumElement e = (EnumElement) file.getTypes().get(0);
+    assertEquals(2, e.getConstants().size());
+    assertEquals(2, e.getReserveds().size());
+    assertEquals("reserved 5 to 8, 12;\n", e.getReserveds().get(0).toSchema());
   }
 
   @Test public void oneOf() {
@@ -119,10 +119,10 @@ public class ProtoParserTest {
         + "  oneof choice { string foo = 1; int32 bar = 2; }\n"
         + "}\n";
     ProtoFileElement file = ProtoParser.parse(Location.get("m.proto"), source);
-    MessageElement m = (MessageElement) file.types.get(0);
-    assertEquals(1, m.oneOfs.size());
-    assertEquals(2, m.oneOfs.get(0).fields.size());
-    assertEquals("foo", m.oneOfs.get(0).fields.get(0).name);
+    MessageElement m = (MessageElement) file.getTypes().get(0);
+    assertEquals(1, m.getOneOfs().size());
+    assertEquals(2, m.getOneOfs().get(0).getFields().size());
+    assertEquals("foo", m.getOneOfs().get(0).getFields().get(0).getName());
   }
 
   @Test public void optionsAndExtensions() {
@@ -136,14 +136,14 @@ public class ProtoParserTest {
         + "}\n"
         + "extend M { optional int32 ext = 100; }\n";
     ProtoFileElement file = ProtoParser.parse(Location.get("p.proto"), source);
-    assertEquals(1, file.options.size());
-    assertEquals("java_package", file.options.get(0).name);
-    MessageElement m = (MessageElement) file.types.get(0);
-    FieldElement s = m.fields.get(0);
-    assertEquals(2, s.options.size());
-    assertEquals(1, m.extensions.size());
-    assertEquals(1, file.extendDeclarations.size());
-    assertEquals("M", file.extendDeclarations.get(0).name);
+    assertEquals(1, file.getOptions().size());
+    assertEquals("java_package", file.getOptions().get(0).getName());
+    MessageElement m = (MessageElement) file.getTypes().get(0);
+    FieldElement s = m.getFields().get(0);
+    assertEquals(2, s.getOptions().size());
+    assertEquals(1, m.getExtensions().size());
+    assertEquals(1, file.getExtendDeclarations().size());
+    assertEquals("M", file.getExtendDeclarations().get(0).getName());
   }
 
   @Test public void service() {
@@ -153,10 +153,10 @@ public class ProtoParserTest {
         + "  rpc Get (Req) returns (stream Resp);\n"
         + "}\n";
     ProtoFileElement file = ProtoParser.parse(Location.get("s.proto"), source);
-    assertEquals(1, file.services.size());
-    assertEquals("S", file.services.get(0).name);
-    assertEquals("Req", file.services.get(0).rpcs.get(0).requestType);
-    assertTrue(file.services.get(0).rpcs.get(0).responseStreaming);
+    assertEquals(1, file.getServices().size());
+    assertEquals("S", file.getServices().get(0).getName());
+    assertEquals("Req", file.getServices().get(0).getRpcs().get(0).getRequestType());
+    assertTrue(file.getServices().get(0).getRpcs().get(0).getResponseStreaming());
   }
 
   @Test public void toSchemaRoundTrip() {
@@ -171,9 +171,9 @@ public class ProtoParserTest {
     ProtoFileElement file = ProtoParser.parse(Location.get("rt.proto"), source);
     String schema = file.toSchema();
     ProtoFileElement reparsed = ProtoParser.parse(Location.get("rt.proto"), schema);
-    assertEquals(file.types.size(), reparsed.types.size());
-    assertEquals(((MessageElement) file.types.get(0)).fields.size(),
-        ((MessageElement) reparsed.types.get(0)).fields.size());
+    assertEquals(file.getTypes().size(), reparsed.getTypes().size());
+    assertEquals(((MessageElement) file.getTypes().get(0)).getFields().size(),
+        ((MessageElement) reparsed.getTypes().get(0)).getFields().size());
   }
 
   @Test public void syntaxMustBeFirst() {

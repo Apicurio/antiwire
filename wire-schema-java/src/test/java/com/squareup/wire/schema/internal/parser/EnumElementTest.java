@@ -51,7 +51,7 @@ public class EnumElementTest {
     EnumConstantElement six = constant("SIX", 6);
     EnumElement element = new EnumElement(location, "Enum", "", Collections.emptyList(),
         Arrays.asList(one, two, six), Collections.emptyList());
-    assertEquals(3, element.constants.size());
+    assertEquals(3, element.getConstants().size());
   }
 
   @Test public void simpleWithOptionsToSchema() {

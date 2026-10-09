@@ -25,8 +25,17 @@ public final class EnumElement implements TypeElement {
   public final String name;
   public final String documentation;
   public final List<OptionElement> options;
-  public final List<EnumConstantElement> constants;
-  public final List<ReservedElement> reserveds;
+  private final List<EnumConstantElement> constants;
+
+  public List<EnumConstantElement> getConstants() {
+    return constants;
+  }
+
+  private final List<ReservedElement> reserveds;
+
+  public List<ReservedElement> getReserveds() {
+    return reserveds;
+  }
 
   public EnumElement(Location location, String name, String documentation,
       List<OptionElement> options, List<EnumConstantElement> constants,
@@ -40,23 +49,23 @@ public final class EnumElement implements TypeElement {
   }
 
   // Enums do not allow nested type declarations.
-  @Override public List<TypeElement> nestedTypes() {
+  @Override public List<TypeElement> getNestedTypes() {
     return Collections.emptyList();
   }
 
-  @Override public Location location() {
+  @Override public Location getLocation() {
     return location;
   }
 
-  @Override public String name() {
+  @Override public String getName() {
     return name;
   }
 
-  @Override public String documentation() {
+  @Override public String getDocumentation() {
     return documentation;
   }
 
-  @Override public List<OptionElement> options() {
+  @Override public List<OptionElement> getOptions() {
     return options;
   }
 

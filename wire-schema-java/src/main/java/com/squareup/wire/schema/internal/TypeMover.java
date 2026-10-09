@@ -61,8 +61,8 @@ public final class TypeMover {
     this.oldSchema = oldSchema;
     this.moves = moves;
     this.pathToFile = new LinkedHashMap<>();
-    for (ProtoFile protoFile : oldSchema.protoFiles()) {
-      pathToFile.put(protoFile.location().path, protoFile);
+    for (ProtoFile protoFile : oldSchema.getProtoFiles()) {
+      pathToFile.put(protoFile.getLocation().getPath(), protoFile);
     }
   }
 
@@ -84,10 +84,10 @@ public final class TypeMover {
       String targetPath = move.targetPath;
       ProtoFile oldSourceProtoFile = pathToFile.get(sourcePath);
 
-      List<Type> sourceTypes = new ArrayList<>(oldSourceProtoFile.types());
+      List<Type> sourceTypes = new ArrayList<>(oldSourceProtoFile.getTypes());
       int typeIndex = -1;
       for (int i = 0; i < sourceTypes.size(); i++) {
-        if (sourceTypes.get(i).type().equals(move.type)) {
+        if (sourceTypes.get(i).getType().equals(move.type)) {
           typeIndex = i;
           break;
         }
@@ -95,22 +95,22 @@ public final class TypeMover {
       Type movedType = sourceTypes.remove(typeIndex);
 
       pathToFile.put(sourcePath, oldSourceProtoFile.copy(
-          oldSourceProtoFile.location(), oldSourceProtoFile.imports(),
-          oldSourceProtoFile.publicImports(), oldSourceProtoFile.weakImports(),
-          oldSourceProtoFile.packageName(), sourceTypes, oldSourceProtoFile.services(),
-          oldSourceProtoFile.extendList(), oldSourceProtoFile.options(),
-          oldSourceProtoFile.syntax()));
+          oldSourceProtoFile.getLocation(), oldSourceProtoFile.getImports(),
+          oldSourceProtoFile.getPublicImports(), oldSourceProtoFile.getWeakImports(),
+          oldSourceProtoFile.getPackageName(), sourceTypes, oldSourceProtoFile.getServices(),
+          oldSourceProtoFile.getExtendList(), oldSourceProtoFile.getOptions(),
+          oldSourceProtoFile.getSyntax()));
 
       ProtoFile targetProtoFile = pathToFile.containsKey(targetPath)
           ? pathToFile.get(targetPath)
           : emptyCopy(oldSourceProtoFile, targetPath);
-      List<Type> targetTypes = new ArrayList<>(targetProtoFile.types());
+      List<Type> targetTypes = new ArrayList<>(targetProtoFile.getTypes());
       targetTypes.add(movedType);
       pathToFile.put(targetPath, targetProtoFile.copy(
-          targetProtoFile.location(), targetProtoFile.imports(),
-          targetProtoFile.publicImports(), targetProtoFile.weakImports(),
-          targetProtoFile.packageName(), targetTypes, targetProtoFile.services(),
-          targetProtoFile.extendList(), targetProtoFile.options(), targetProtoFile.syntax()));
+          targetProtoFile.getLocation(), targetProtoFile.getImports(),
+          targetProtoFile.getPublicImports(), targetProtoFile.getWeakImports(),
+          targetProtoFile.getPackageName(), targetTypes, targetProtoFile.getServices(),
+          targetProtoFile.getExtendList(), targetProtoFile.getOptions(), targetProtoFile.getSyntax()));
 
       sourceAndTargetPaths.add(sourcePath);
       sourceAndTargetPaths.add(targetPath);
@@ -146,10 +146,10 @@ public final class TypeMover {
   }
 
   private ProtoFile fixImports(ProtoFile protoFile) {
-    boolean impacted = sourceAndTargetPaths.contains(protoFile.location().path);
+    boolean impacted = sourceAndTargetPaths.contains(protoFile.getLocation().getPath());
     if (!impacted) {
       for (String path : sourceAndTargetPaths) {
-        if (protoFile.imports().contains(path) || protoFile.publicImports().contains(path)) {
+        if (protoFile.getImports().contains(path) || protoFile.getPublicImports().contains(path)) {
           impacted = true;
           break;
         }
@@ -175,12 +175,12 @@ public final class TypeMover {
       if (oldSchemaFile == null) {
         throw new IllegalStateException("no source file for " + move.type);
       }
-      if (oldSchemaFile.location().path.equals(protoFile.location().path)) {
+      if (oldSchemaFile.getLocation().getPath().equals(protoFile.getLocation().getPath())) {
         collectReferencedTypes(getType(move), possiblyDrop);
       }
 
       // If this file is where the type moved to, we'll need imports for the type's use.
-      if (protoFile.location().path.equals(move.targetPath)) {
+      if (protoFile.getLocation().getPath().equals(move.targetPath)) {
         collectReferencedTypes(getType(move), definitelyNeed);
       }
     }
@@ -203,12 +203,12 @@ public final class TypeMover {
     }
 
     // Rewrite the imports.
-    List<String> newImports = new ArrayList<>(protoFile.imports());
-    List<String> newPublicImports = new ArrayList<>(protoFile.publicImports());
+    List<String> newImports = new ArrayList<>(protoFile.getImports());
+    List<String> newPublicImports = new ArrayList<>(protoFile.getPublicImports());
     for (ProtoType requiredType : definitelyNeed) {
       String path = typeToPath.get(requiredType);
       if (path == null) continue; // Built-in type like string or int32.
-      if (path.equals(protoFile.location().path)) continue; // Don't import self!
+      if (path.equals(protoFile.getLocation().getPath())) continue; // Don't import self!
       if (newImports.contains(path) || newPublicImports.contains(path)) continue; // Already imported.
       newImports.add(path);
     }
@@ -216,34 +216,34 @@ public final class TypeMover {
     newPublicImports.removeAll(obsoleteImports);
 
     return protoFile.copy(
-        protoFile.location(), newImports, newPublicImports, protoFile.weakImports(),
-        protoFile.packageName(), protoFile.types(), protoFile.services(),
-        protoFile.extendList(), protoFile.options(), protoFile.syntax());
+        protoFile.getLocation(), newImports, newPublicImports, protoFile.getWeakImports(),
+        protoFile.getPackageName(), protoFile.getTypes(), protoFile.getServices(),
+        protoFile.getExtendList(), protoFile.getOptions(), protoFile.getSyntax());
   }
 
   /** Returns the type that moved. */
   private Type getType(Move move) {
-    for (Type type : pathToFile.get(move.targetPath).types()) {
-      if (type.type().equals(move.type)) return type;
+    for (Type type : pathToFile.get(move.targetPath).getTypes()) {
+      if (type.getType().equals(move.type)) return type;
     }
     throw new NoSuchElementException();
   }
 
   private static void collectReferencedTypes(ProtoFile protoFile, Set<ProtoType> sink) {
-    for (Type type : protoFile.types()) {
+    for (Type type : protoFile.getTypes()) {
       collectReferencedTypes(type, sink);
     }
-    for (Service service : protoFile.services()) {
+    for (Service service : protoFile.getServices()) {
       collectReferencedTypes(service, sink);
     }
   }
 
   private static void collectReferencedTypes(Type type, Set<ProtoType> sink) {
-    for (Type nestedType : type.nestedTypes()) {
+    for (Type nestedType : type.getNestedTypes()) {
       collectReferencedTypes(nestedType, sink);
     }
     if (type instanceof MessageType) {
-      for (Field field : ((MessageType) type).fieldsAndOneOfFields()) {
+      for (Field field : ((MessageType) type).getFieldsAndOneOfFields()) {
         collectReferencedTypes(field, sink);
       }
     }
@@ -256,34 +256,34 @@ public final class TypeMover {
   }
 
   private static void collectReferencedTypes(Rpc rpc, Set<ProtoType> sink) {
-    sink.add(rpc.requestType());
-    sink.add(rpc.responseType());
+    sink.add(rpc.getRequestType());
+    sink.add(rpc.getResponseType());
   }
 
   private static void collectReferencedTypes(Field field, Set<ProtoType> sink) {
-    sink.add(field.type());
+    sink.add(field.getType());
   }
 
   private static void collectDeclaredTypes(ProtoFile protoFile, Set<ProtoType> sink) {
-    for (Type type : protoFile.types()) {
+    for (Type type : protoFile.getTypes()) {
       collectDeclaredTypes(type, sink);
     }
   }
 
   private static void collectDeclaredTypes(Type type, Set<ProtoType> sink) {
-    sink.add(type.type());
-    for (Type nestedType : type.nestedTypes()) {
+    sink.add(type.getType());
+    for (Type nestedType : type.getNestedTypes()) {
       collectDeclaredTypes(nestedType, sink);
     }
   }
 
   private static ProtoFile emptyCopy(ProtoFile protoFile, String path) {
-    Location location = protoFile.location();
+    Location location = protoFile.getLocation();
     return protoFile.copy(
-        new Location(location.base, path, location.line, location.column),
-        Collections.emptyList(), Collections.emptyList(), protoFile.weakImports(),
-        protoFile.packageName(), Collections.emptyList(), Collections.emptyList(),
-        Collections.emptyList(), protoFile.options(), protoFile.syntax());
+        new Location(location.getBase(), path, location.getLine(), location.getColumn()),
+        Collections.emptyList(), Collections.emptyList(), protoFile.getWeakImports(),
+        protoFile.getPackageName(), Collections.emptyList(), Collections.emptyList(),
+        Collections.emptyList(), protoFile.getOptions(), protoFile.getSyntax());
   }
 
   private void checkForErrors() {
@@ -293,8 +293,17 @@ public final class TypeMover {
   }
 
   public static final class Move {
-    public final ProtoType type;
-    public final String targetPath;
+    private final ProtoType type;
+
+    public ProtoType getType() {
+      return type;
+    }
+
+    private final String targetPath;
+
+    public String getTargetPath() {
+      return targetPath;
+    }
 
     public Move(ProtoType type, String targetPath) {
       this.type = type;

@@ -53,7 +53,7 @@ public final class Pruner {
 
   private List<ProtoFile> retainAll(Schema schema, MarkSet marks) {
     List<ProtoFile> result = new ArrayList<>();
-    for (ProtoFile protoFile : schema.protoFiles()) {
+    for (ProtoFile protoFile : schema.getProtoFiles()) {
       result.add(protoFile.retainAll(schema, marks));
     }
     return result;
@@ -69,24 +69,24 @@ public final class Pruner {
   }
 
   private void markRoots() {
-    for (ProtoFile protoFile : schema.protoFiles()) {
+    for (ProtoFile protoFile : schema.getProtoFiles()) {
       markRoots(protoFile);
     }
   }
 
   private void markRoots(ProtoFile protoFile) {
-    for (Type type : protoFile.types()) {
+    for (Type type : protoFile.getTypes()) {
       markRootsIncludingNested(type);
     }
-    for (Service service : protoFile.services()) {
+    for (Service service : protoFile.getServices()) {
       markRoots(service.type());
     }
   }
 
   private void markRootsIncludingNested(Type type) {
-    markRoots(type.type());
+    markRoots(type.getType());
 
-    for (Type nested : type.nestedTypes()) {
+    for (Type nested : type.getNestedTypes()) {
       markRootsIncludingNested(nested);
     }
   }
@@ -104,7 +104,7 @@ public final class Pruner {
       if (!isRetainedVersion((ProtoMember) reachable)) continue;
       if (pruningRules.isRoot((ProtoMember) reachable)) {
         marks.root((ProtoMember) reachable);
-        marks.mark(((ProtoMember) reachable).type); // Consider this type as visited.
+        marks.mark(((ProtoMember) reachable).getType()); // Consider this type as visited.
         queue.add(reachable);
       }
     }
@@ -112,20 +112,20 @@ public final class Pruner {
 
   /** Returns true if this member survives {@code since} and {@code until} pruning. */
   private boolean isRetainedVersion(ProtoMember protoMember) {
-    String member = protoMember.member;
-    Type type = schema.getType(protoMember.type);
+    String member = protoMember.getMember();
+    Type type = schema.getType(protoMember.getType());
     if (type instanceof MessageType) {
       MessageType messageType = (MessageType) type;
       Field field = messageType.field(member);
       if (field == null) field = messageType.extensionField(member);
       if (field != null) {
-        return pruningRules.isFieldRetainedVersion(field.options());
+        return pruningRules.isFieldRetainedVersion(field.getOptions());
       }
-      return pruningRules.isFieldRetainedVersion(messageType.oneOf(member).options());
+      return pruningRules.isFieldRetainedVersion(messageType.oneOf(member).getOptions());
     }
     if (type instanceof EnumType) {
       EnumConstant enumConstant = ((EnumType) type).constant(member);
-      return pruningRules.isEnumConstantRetainedVersion(enumConstant.options());
+      return pruningRules.isEnumConstantRetainedVersion(enumConstant.getOptions());
     }
     return true;
   }
@@ -186,38 +186,38 @@ public final class Pruner {
     List<Object> result = new ArrayList<>();
     Options options;
 
-    String member = root.member;
-    Type type = schema.getType(root.type);
-    Service service = schema.getService(root.type);
+    String member = root.getMember();
+    Type type = schema.getType(root.getType());
+    Service service = schema.getService(root.getType());
 
     if (type instanceof MessageType) {
       MessageType messageType = (MessageType) type;
       Field field = messageType.field(member);
       if (field == null) field = messageType.extensionField(member);
       if (field != null) {
-        result.add(field.type());
-        options = field.options();
+        result.add(field.getType());
+        options = field.getOptions();
       } else {
         OneOf oneOf = messageType.oneOf(member);
         if (oneOf == null) {
           throw new IllegalStateException("unexpected member: " + member);
         }
-        options = oneOf.options();
+        options = oneOf.getOptions();
       }
     } else if (type instanceof EnumType) {
       EnumConstant constant = ((EnumType) type).constant(member);
       if (constant == null) {
         throw new IllegalStateException("unexpected member: " + member);
       }
-      options = constant.options();
+      options = constant.getOptions();
     } else if (service != null) {
       Rpc rpc = service.rpc(member);
       if (rpc == null) {
         throw new IllegalStateException("unexpected rpc: " + member);
       }
-      result.add(rpc.requestType());
-      result.add(rpc.responseType());
-      options = rpc.options();
+      result.add(rpc.getRequestType());
+      result.add(rpc.getResponseType());
+      options = rpc.getOptions();
     } else {
       throw new IllegalStateException("unexpected member: " + member);
     }
@@ -229,47 +229,47 @@ public final class Pruner {
   private List<Object> reachableFromType(ProtoType root) {
     List<Object> result = new ArrayList<>();
 
-    if (root.isMap) {
-      result.add(root.keyType);
-      result.add(root.valueType);
+    if (root.isMap()) {
+      result.add(root.getKeyType());
+      result.add(root.getValueType());
       return result;
     }
 
-    if (root.isScalar) {
+    if (root.isScalar()) {
       return result; // Skip scalar types.
     }
 
     Type type = schema.getType(root);
     Service service = schema.getService(root);
-    Options fileOptions = schema.protoFile(root).options();
+    Options fileOptions = schema.protoFile(root).getOptions();
     Options options;
 
     if (type instanceof MessageType) {
       MessageType messageType = (MessageType) type;
-      options = messageType.options();
-      for (Field field : messageType.declaredFields()) {
-        result.add(ProtoMember.get(root, field.name()));
+      options = messageType.getOptions();
+      for (Field field : messageType.getDeclaredFields()) {
+        result.add(ProtoMember.get(root, field.getName()));
       }
-      for (Field field : messageType.extensionFields()) {
-        result.add(ProtoMember.get(root, field.qualifiedName()));
+      for (Field field : messageType.getExtensionFields()) {
+        result.add(ProtoMember.get(root, field.getQualifiedName()));
       }
-      for (OneOf oneOf : messageType.oneOfs()) {
-        result.add(ProtoMember.get(root, oneOf.name()));
-        for (Field field : oneOf.fields()) {
-          result.add(ProtoMember.get(root, field.name()));
+      for (OneOf oneOf : messageType.getOneOfs()) {
+        result.add(ProtoMember.get(root, oneOf.getName()));
+        for (Field field : oneOf.getFields()) {
+          result.add(ProtoMember.get(root, field.getName()));
         }
       }
     } else if (type instanceof EnumType) {
-      options = type.options();
-      for (EnumConstant constant : ((EnumType) type).constants()) {
-        result.add(ProtoMember.get(type.type(), constant.name()));
+      options = type.getOptions();
+      for (EnumConstant constant : ((EnumType) type).getConstants()) {
+        result.add(ProtoMember.get(type.getType(), constant.getName()));
       }
     } else if (type instanceof EnclosingType) {
-      options = type.options();
+      options = type.getOptions();
     } else if (service != null) {
       options = service.options();
       for (Rpc rpc : service.rpcs()) {
-        result.add(ProtoMember.get(service.type(), rpc.name()));
+        result.add(ProtoMember.get(service.type(), rpc.getName()));
       }
     } else {
       throw new IllegalStateException("unexpected type: " + root);
@@ -284,7 +284,7 @@ public final class Pruner {
     for (ProtoMember member : options) {
       // If it's an extension, don't consider the entire enclosing type to be reachable.
       if (!schema.isExtensionField(member)) {
-        result.add(member.type);
+        result.add(member.getType());
       }
       result.add(member);
     }

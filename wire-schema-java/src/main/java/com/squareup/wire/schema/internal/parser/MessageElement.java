@@ -29,12 +29,41 @@ public final class MessageElement implements TypeElement {
   public final String documentation;
   public final List<TypeElement> nestedTypes;
   public final List<OptionElement> options;
-  public final List<ReservedElement> reserveds;
-  public final List<FieldElement> fields;
-  public final List<OneOfElement> oneOfs;
-  public final List<ExtensionsElement> extensions;
-  public final List<GroupElement> groups;
-  public final List<ExtendElement> extendDeclarations;
+  private final List<ReservedElement> reserveds;
+
+  public List<ReservedElement> getReserveds() {
+    return reserveds;
+  }
+
+  private final List<FieldElement> fields;
+
+  public List<FieldElement> getFields() {
+    return fields;
+  }
+
+  private final List<OneOfElement> oneOfs;
+
+  public List<OneOfElement> getOneOfs() {
+    return oneOfs;
+  }
+
+  private final List<ExtensionsElement> extensions;
+
+  public List<ExtensionsElement> getExtensions() {
+    return extensions;
+  }
+
+  private final List<GroupElement> groups;
+
+  public List<GroupElement> getGroups() {
+    return groups;
+  }
+
+  private final List<ExtendElement> extendDeclarations;
+
+  public List<ExtendElement> getExtendDeclarations() {
+    return extendDeclarations;
+  }
 
   public MessageElement(Location location, String name, String documentation,
       List<TypeElement> nestedTypes, List<OptionElement> options,
@@ -54,23 +83,23 @@ public final class MessageElement implements TypeElement {
     this.extendDeclarations = extendDeclarations;
   }
 
-  @Override public Location location() {
+  @Override public Location getLocation() {
     return location;
   }
 
-  @Override public String name() {
+  @Override public String getName() {
     return name;
   }
 
-  @Override public String documentation() {
+  @Override public String getDocumentation() {
     return documentation;
   }
 
-  @Override public List<OptionElement> options() {
+  @Override public List<OptionElement> getOptions() {
     return options;
   }
 
-  @Override public List<TypeElement> nestedTypes() {
+  @Override public List<TypeElement> getNestedTypes() {
     return nestedTypes;
   }
 
@@ -94,7 +123,7 @@ public final class MessageElement implements TypeElement {
 
     List<FieldElement> allFieldsSorted = new ArrayList<>(fields);
     for (OneOfElement oneOf : oneOfs) {
-      allFieldsSorted.addAll(oneOf.fields);
+      allFieldsSorted.addAll(oneOf.getFields());
     }
     allFieldsSorted.sort(Comparator.comparingInt(FieldElement::getLine)
         .thenComparingInt(FieldElement::getColumn));
@@ -147,7 +176,7 @@ public final class MessageElement implements TypeElement {
 
   private OneOfElement getOneOfForField(FieldElement field) {
     for (OneOfElement oneOf : oneOfs) {
-      if (oneOf.fields.contains(field)) {
+      if (oneOf.getFields().contains(field)) {
         return oneOf;
       }
     }

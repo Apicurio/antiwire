@@ -28,7 +28,11 @@ import okio.ByteString;
  * Upstream declares this Kotlin-internal; it is public here per the translation conventions.
  */
 public final class ProtoReader32AsProtoReader extends ProtoReader {
-  public final ProtoReader32 delegate;
+  private final ProtoReader32 delegate;
+
+  public ProtoReader32 getDelegate() {
+    return delegate;
+  }
 
   public ProtoReader32AsProtoReader(ProtoReader32 delegate) {
     super(new Buffer());

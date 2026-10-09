@@ -191,8 +191,8 @@ public class ProtoParserFullTest {
         + "// Test all the things!\n"
         + "message Test {}\n";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    TypeElement type = parsed.types.get(0);
-    assertEquals("Test all the things!", type.documentation());
+    TypeElement type = parsed.getTypes().get(0);
+    assertEquals("Test all the things!", type.getDocumentation());
   }
 
   @Test public void multipleSingleLineComments() {
@@ -205,8 +205,8 @@ public class ProtoParserFullTest {
         + "the things!";
 
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    TypeElement type = parsed.types.get(0);
-    assertEquals(expected, type.documentation());
+    TypeElement type = parsed.getTypes().get(0);
+    assertEquals(expected, type.getDocumentation());
   }
 
   @Test public void singleLineJavadocComment() {
@@ -214,8 +214,8 @@ public class ProtoParserFullTest {
         + "/** Test */\n"
         + "message Test {}\n";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    TypeElement type = parsed.types.get(0);
-    assertEquals("Test", type.documentation());
+    TypeElement type = parsed.getTypes().get(0);
+    assertEquals("Test", type.getDocumentation());
   }
 
   @Test public void multilineJavadocComment() {
@@ -231,8 +231,8 @@ public class ProtoParserFullTest {
         + "\n"
         + "Foo";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    TypeElement type = parsed.types.get(0);
-    assertEquals(expected, type.documentation());
+    TypeElement type = parsed.getTypes().get(0);
+    assertEquals(expected, type.getDocumentation());
   }
 
   @Test public void multipleSingleLineCommentsWithLeadingWhitespace() {
@@ -248,8 +248,8 @@ public class ProtoParserFullTest {
         + "    The\n"
         + "      Things!";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    TypeElement type = parsed.types.get(0);
-    assertEquals(expected, type.documentation());
+    TypeElement type = parsed.getTypes().get(0);
+    assertEquals(expected, type.getDocumentation());
   }
 
   @Test public void multilineJavadocCommentWithLeadingWhitespace() {
@@ -267,8 +267,8 @@ public class ProtoParserFullTest {
         + "    The\n"
         + "      Things!";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    TypeElement type = parsed.types.get(0);
-    assertEquals(expected, type.documentation());
+    TypeElement type = parsed.getTypes().get(0);
+    assertEquals(expected, type.getDocumentation());
   }
 
   @Test public void multilineJavadocCommentWithoutLeadingAsterisks() {
@@ -287,8 +287,8 @@ public class ProtoParserFullTest {
         + "The\n"
         + "Things!";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    TypeElement type = parsed.types.get(0);
-    assertEquals(expected, type.documentation());
+    TypeElement type = parsed.getTypes().get(0);
+    assertEquals(expected, type.getDocumentation());
   }
 
   @Test public void messageFieldTrailingCommentWithCarriageReturn() {
@@ -298,9 +298,9 @@ public class ProtoParserFullTest {
         + "  optional string name = 1; // Test all the things!\n"
         + "}\n").replace("\n", "\r\n");
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    MessageElement message = (MessageElement) parsed.types.get(0);
-    FieldElement field = message.fields.get(0);
-    assertEquals("Test all the things!", field.documentation);
+    MessageElement message = (MessageElement) parsed.getTypes().get(0);
+    FieldElement field = message.getFields().get(0);
+    assertEquals("Test all the things!", field.getDocumentation());
   }
 
   @Test public void messageFieldLeadingAndTrailingCommentAreCombined() {
@@ -310,9 +310,9 @@ public class ProtoParserFullTest {
         + "  optional string name = 1; // ...the things!\n"
         + "}\n";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    MessageElement message = (MessageElement) parsed.types.get(0);
-    FieldElement field = message.fields.get(0);
-    assertEquals("Test all...\n...the things!", field.documentation);
+    MessageElement message = (MessageElement) parsed.getTypes().get(0);
+    FieldElement field = message.getFields().get(0);
+    assertEquals("Test all...\n...the things!", field.getDocumentation());
   }
 
   @Test public void trailingCommentNotAssignedToFollowingField() {
@@ -322,11 +322,11 @@ public class ProtoParserFullTest {
         + "  optional string last_name = 2;\n"
         + "}\n";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    MessageElement message = (MessageElement) parsed.types.get(0);
-    FieldElement field1 = message.fields.get(0);
-    assertEquals("Testing!", field1.documentation);
-    FieldElement field2 = message.fields.get(1);
-    assertEquals("", field2.documentation);
+    MessageElement message = (MessageElement) parsed.getTypes().get(0);
+    FieldElement field1 = message.getFields().get(0);
+    assertEquals("Testing!", field1.getDocumentation());
+    FieldElement field2 = message.getFields().get(1);
+    assertEquals("", field2.getDocumentation());
   }
 
   @Test public void enumValueTrailingComment() {
@@ -335,9 +335,9 @@ public class ProtoParserFullTest {
         + "  FOO = 1; // Test all the things!\n"
         + "}\n";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    EnumElement enumElement = (EnumElement) parsed.types.get(0);
-    EnumConstantElement value = enumElement.constants.get(0);
-    assertEquals("Test all the things!", value.documentation);
+    EnumElement enumElement = (EnumElement) parsed.getTypes().get(0);
+    EnumConstantElement value = enumElement.getConstants().get(0);
+    assertEquals("Test all the things!", value.getDocumentation());
   }
 
   @Test public void trailingSinglelineComment() {
@@ -347,11 +347,11 @@ public class ProtoParserFullTest {
         + "  BAR = 2;/*Test all the things!*/\n"
         + "}\n";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    EnumElement enumElement = (EnumElement) parsed.types.get(0);
-    EnumConstantElement foo = enumElement.constants.get(0);
-    assertEquals("Test all the things!", foo.documentation);
-    EnumConstantElement bar = enumElement.constants.get(1);
-    assertEquals("Test all the things!", bar.documentation);
+    EnumElement enumElement = (EnumElement) parsed.getTypes().get(0);
+    EnumConstantElement foo = enumElement.getConstants().get(0);
+    assertEquals("Test all the things!", foo.getDocumentation());
+    EnumConstantElement bar = enumElement.getConstants().get(1);
+    assertEquals("Test all the things!", bar.getDocumentation());
   }
 
   @Test public void trailingMultilineComment() {
@@ -361,9 +361,9 @@ public class ProtoParserFullTest {
         + "things! */\n"
         + "}\n";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    EnumElement enumElement = (EnumElement) parsed.types.get(0);
-    EnumConstantElement value = enumElement.constants.get(0);
-    assertEquals("Test all the\nthings!", value.documentation);
+    EnumElement enumElement = (EnumElement) parsed.getTypes().get(0);
+    EnumConstantElement value = enumElement.getConstants().get(0);
+    assertEquals("Test all the\nthings!", value.getDocumentation());
   }
 
   @Test public void trailingMultilineCommentMustBeLastOnLineThrows() {
@@ -431,9 +431,9 @@ public class ProtoParserFullTest {
         + "  FOO = 1; // ...the things!\n"
         + "}\n";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    EnumElement enumElement = (EnumElement) parsed.types.get(0);
-    EnumConstantElement value = enumElement.constants.get(0);
-    assertEquals("Test all...\n...the things!", value.documentation);
+    EnumElement enumElement = (EnumElement) parsed.getTypes().get(0);
+    EnumConstantElement value = enumElement.getConstants().get(0);
+    assertEquals("Test all...\n...the things!", value.getDocumentation());
   }
 
   @Test public void trailingCommentNotCombinedWhenEmpty() {
@@ -443,15 +443,15 @@ public class ProtoParserFullTest {
         + "  FOO = 1; //       \n"
         + "}";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    EnumElement enumElement = (EnumElement) parsed.types.get(0);
-    EnumConstantElement value = enumElement.constants.get(0);
-    assertEquals("Test all...", value.documentation);
+    EnumElement enumElement = (EnumElement) parsed.getTypes().get(0);
+    EnumConstantElement value = enumElement.getConstants().get(0);
+    assertEquals("Test all...", value.getDocumentation());
   }
 
   @Test public void syntaxNotRequired() {
     String proto = "message Foo {}";
     ProtoFileElement parsed = ProtoParser.parse(location, proto);
-    assertNull(parsed.syntax);
+    assertNull(parsed.getSyntax());
   }
 
   @Test public void syntaxSpecified() {
@@ -824,7 +824,7 @@ public class ProtoParserFullTest {
         Arrays.asList(
             OptionElement.create("old_default", ENUM, "STRING"),
             OptionElement.create("deprecated", BOOLEAN, "true")),
-        field.options);
+        field.getOptions());
 
     MessageElement messageElement = message(location.at(1, 1), "FieldOptions", "",
         Collections.singletonList(enumElement), NO_OPTIONS, NO_RESERVEDS,
@@ -1019,7 +1019,7 @@ public class ProtoParserFullTest {
     assertEquals(
         Collections.singletonList(
             OptionElement.create("squareup.redacted", BOOLEAN, "true", true)),
-        field.options);
+        field.getOptions());
 
     MessageElement messageElement = message(location.at(1, 1), "Foo", "", NO_TYPES, NO_OPTIONS,
         NO_RESERVEDS, Collections.singletonList(field), NO_ONEOFS, NO_EXTENSIONS, NO_GROUPS,
@@ -1046,7 +1046,7 @@ public class ProtoParserFullTest {
             OptionElement.create("x", STRING,
                 "\u0007\b\u000C\n\r\t\u000b\u0001f\u0001\u0001\u0009\u0009I\u000e\u000e\u000e"
                     + "\u000eAA")),
-        field.options);
+        field.getOptions());
 
     MessageElement messageElement = message(location.at(1, 1), "Foo", "", NO_TYPES, NO_OPTIONS,
         NO_RESERVEDS, Collections.singletonList(field), NO_ONEOFS, NO_EXTENSIONS, NO_GROUPS,
@@ -1249,7 +1249,7 @@ public class ProtoParserFullTest {
             OptionElement.create("option_map", MAP, optionMapValue, true),
             OptionElement.create("option_string", LIST,
                 Arrays.asList("string1", "string2"), true)),
-        field.options);
+        field.getOptions());
 
     MessageElement expected = message(location.at(1, 1), "StructuredOption", "", NO_TYPES,
         NO_OPTIONS, NO_RESERVEDS, Collections.singletonList(field), NO_ONEOFS, NO_EXTENSIONS,
@@ -1361,7 +1361,7 @@ public class ProtoParserFullTest {
             OptionElement.create("validation.range", OPTION,
                 OptionElement.create("max", NUMBER, "100"), true),
             OptionElement.create("old_default", NUMBER, "20")),
-        field.options);
+        field.getOptions());
 
     MessageElement expected = message(location.at(1, 1), "Foo", "", NO_TYPES, NO_OPTIONS,
         NO_RESERVEDS, Collections.singletonList(field), NO_ONEOFS, NO_EXTENSIONS, NO_GROUPS,
@@ -1969,38 +1969,38 @@ public class ProtoParserFullTest {
    * reserved and extensions elements, whose ranges are compared structurally instead.
    */
   private static void assertFilesEqual(ProtoFileElement expected, ProtoFileElement actual) {
-    assertEquals(expected.location, actual.location);
-    assertEquals(expected.packageName, actual.packageName);
-    assertEquals(expected.syntax, actual.syntax);
-    assertEquals(expected.imports, actual.imports);
-    assertEquals(expected.publicImports, actual.publicImports);
-    assertEquals(expected.weakImports, actual.weakImports);
-    assertEquals(expected.services, actual.services);
-    assertEquals(expected.extendDeclarations, actual.extendDeclarations);
-    assertEquals(expected.options, actual.options);
-    assertEquals(expected.types.size(), actual.types.size());
-    for (int i = 0; i < expected.types.size(); i++) {
-      TypeElement expectedType = expected.types.get(i);
-      TypeElement actualType = actual.types.get(i);
-      assertEquals(expectedType.location(), actualType.location());
-      assertEquals(expectedType.name(), actualType.name());
-      assertEquals(expectedType.documentation(), actualType.documentation());
-      assertEquals(expectedType.options(), actualType.options());
+    assertEquals(expected.getLocation(), actual.getLocation());
+    assertEquals(expected.getPackageName(), actual.getPackageName());
+    assertEquals(expected.getSyntax(), actual.getSyntax());
+    assertEquals(expected.getImports(), actual.getImports());
+    assertEquals(expected.getPublicImports(), actual.getPublicImports());
+    assertEquals(expected.getWeakImports(), actual.getWeakImports());
+    assertEquals(expected.getServices(), actual.getServices());
+    assertEquals(expected.getExtendDeclarations(), actual.getExtendDeclarations());
+    assertEquals(expected.getOptions(), actual.getOptions());
+    assertEquals(expected.getTypes().size(), actual.getTypes().size());
+    for (int i = 0; i < expected.getTypes().size(); i++) {
+      TypeElement expectedType = expected.getTypes().get(i);
+      TypeElement actualType = actual.getTypes().get(i);
+      assertEquals(expectedType.getLocation(), actualType.getLocation());
+      assertEquals(expectedType.getName(), actualType.getName());
+      assertEquals(expectedType.getDocumentation(), actualType.getDocumentation());
+      assertEquals(expectedType.getOptions(), actualType.getOptions());
       if (expectedType instanceof MessageElement) {
         MessageElement expectedMessage = (MessageElement) expectedType;
         MessageElement actualMessage = (MessageElement) actualType;
         assertEquals(expectedMessage.nestedTypes, actualMessage.nestedTypes);
-        assertEquals(expectedMessage.fields, actualMessage.fields);
-        assertEquals(expectedMessage.oneOfs, actualMessage.oneOfs);
-        assertEquals(expectedMessage.groups, actualMessage.groups);
-        assertEquals(expectedMessage.extendDeclarations, actualMessage.extendDeclarations);
-        assertReservedsEqual(expectedMessage.reserveds, actualMessage.reserveds);
-        assertExtensionsEqual(expectedMessage.extensions, actualMessage.extensions);
+        assertEquals(expectedMessage.getFields(), actualMessage.getFields());
+        assertEquals(expectedMessage.getOneOfs(), actualMessage.getOneOfs());
+        assertEquals(expectedMessage.getGroups(), actualMessage.getGroups());
+        assertEquals(expectedMessage.getExtendDeclarations(), actualMessage.getExtendDeclarations());
+        assertReservedsEqual(expectedMessage.getReserveds(), actualMessage.getReserveds());
+        assertExtensionsEqual(expectedMessage.getExtensions(), actualMessage.getExtensions());
       } else if (expectedType instanceof EnumElement) {
         EnumElement expectedEnum = (EnumElement) expectedType;
         EnumElement actualEnum = (EnumElement) actualType;
-        assertEquals(expectedEnum.constants, actualEnum.constants);
-        assertReservedsEqual(expectedEnum.reserveds, actualEnum.reserveds);
+        assertEquals(expectedEnum.getConstants(), actualEnum.getConstants());
+        assertReservedsEqual(expectedEnum.getReserveds(), actualEnum.getReserveds());
       } else {
         throw new AssertionError("unexpected type element " + expectedType.getClass());
       }
@@ -2013,9 +2013,9 @@ public class ProtoParserFullTest {
     for (int i = 0; i < expected.size(); i++) {
       ReservedElement expectedReserved = expected.get(i);
       ReservedElement actualReserved = actual.get(i);
-      assertEquals(expectedReserved.location, actualReserved.location);
-      assertEquals(expectedReserved.documentation, actualReserved.documentation);
-      assertValuesEqual(expectedReserved.values, actualReserved.values);
+      assertEquals(expectedReserved.getLocation(), actualReserved.getLocation());
+      assertEquals(expectedReserved.getDocumentation(), actualReserved.getDocumentation());
+      assertValuesEqual(expectedReserved.getValues(), actualReserved.getValues());
     }
   }
 
@@ -2025,10 +2025,10 @@ public class ProtoParserFullTest {
     for (int i = 0; i < expected.size(); i++) {
       ExtensionsElement expectedExtension = expected.get(i);
       ExtensionsElement actualExtension = actual.get(i);
-      assertEquals(expectedExtension.location, actualExtension.location);
-      assertEquals(expectedExtension.documentation, actualExtension.documentation);
-      assertEquals(expectedExtension.options, actualExtension.options);
-      assertValuesEqual(expectedExtension.values, actualExtension.values);
+      assertEquals(expectedExtension.getLocation(), actualExtension.getLocation());
+      assertEquals(expectedExtension.getDocumentation(), actualExtension.getDocumentation());
+      assertEquals(expectedExtension.getOptions(), actualExtension.getOptions());
+      assertValuesEqual(expectedExtension.getValues(), actualExtension.getValues());
     }
   }
 

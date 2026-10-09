@@ -94,74 +94,74 @@ public final class SchemaEncoder {
 
   private final Encoder<ProtoFile> fileEncoder = new Encoder<ProtoFile>() {
     @Override public void encode(ReverseProtoWriter writer, ProtoFile value) throws IOException {
-      if (value.syntax() != Syntax.PROTO_2) {
+      if (value.getSyntax() != Syntax.PROTO_2) {
         ProtoAdapter.STRING.encodeWithTag(writer, 12,
-            value.syntax() != null ? value.syntax().toString() : null);
+            value.getSyntax() != null ? value.getSyntax().toString() : null);
       }
 
       // SourceCodeInfo.ADAPTER.encodeWithTag(writer, 9, value.source_code_info)
-      fileOptionsProtoAdapter.encodeWithTag(writer, 8, toJsonOptions(value.options()));
+      fileOptionsProtoAdapter.encodeWithTag(writer, 8, toJsonOptions(value.getOptions()));
 
       // TODO(jwilson): can extension fields be maps?
-      List<Extend> reversed = new ArrayList<>(value.extendList());
+      List<Extend> reversed = new ArrayList<>(value.getExtendList());
       Collections.reverse(reversed);
       for (Extend extend : reversed) {
         List<EncodedField> encodedFields = new ArrayList<>();
-        for (Field field : extend.fields()) {
-          encodedFields.add(new EncodedField(value.syntax(), field, field.type(),
-              dotName(extend.type()), null));
+        for (Field field : extend.getFields()) {
+          encodedFields.add(new EncodedField(value.getSyntax(), field, field.getType(),
+              dotName(extend.getType()), null));
         }
         fieldEncoder.asRepeated().encodeWithTag(writer, 7, encodedFields);
       }
 
-      serviceEncoder.asRepeated().encodeWithTag(writer, 6, value.services());
-      enumEncoder.asRepeated().encodeWithTag(writer, 5, typesOf(value.types(), EnumType.class));
-      messageEncoder.asRepeated().encodeWithTag(writer, 4, typesOf(value.types(), MessageType.class));
-      enclosingEncoder.asRepeated().encodeWithTag(writer, 4, typesOf(value.types(), EnclosingType.class));
+      serviceEncoder.asRepeated().encodeWithTag(writer, 6, value.getServices());
+      enumEncoder.asRepeated().encodeWithTag(writer, 5, typesOf(value.getTypes(), EnumType.class));
+      messageEncoder.asRepeated().encodeWithTag(writer, 4, typesOf(value.getTypes(), MessageType.class));
+      enclosingEncoder.asRepeated().encodeWithTag(writer, 4, typesOf(value.getTypes(), EnclosingType.class));
       // INT32.asRepeated().encodeWithTag(writer, 11, value.weak_dependency)
-      List<String> allImports = new ArrayList<>(value.imports());
-      allImports.addAll(value.publicImports());
+      List<String> allImports = new ArrayList<>(value.getImports());
+      allImports.addAll(value.getPublicImports());
       List<Integer> publicImportIndexes = new ArrayList<>();
       for (int i = 0; i < allImports.size(); i++) {
-        if (value.publicImports().contains(allImports.get(i))) {
+        if (value.getPublicImports().contains(allImports.get(i))) {
           publicImportIndexes.add(i);
         }
       }
       ProtoAdapter.INT32.asRepeated().encodeWithTag(writer, 10, publicImportIndexes);
       ProtoAdapter.STRING.asRepeated().encodeWithTag(writer, 3, allImports);
-      ProtoAdapter.STRING.encodeWithTag(writer, 2, value.packageName());
-      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.location().path);
+      ProtoAdapter.STRING.encodeWithTag(writer, 2, value.getPackageName());
+      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.getLocation().getPath());
     }
   };
 
   private final Encoder<MessageType> messageEncoder = new Encoder<MessageType>() {
     @Override public void encode(ReverseProtoWriter writer, MessageType value) throws IOException {
-      Syntax syntax = schema.protoFile(value.type()).syntax();
+      Syntax syntax = schema.protoFile(value.getType()).getSyntax();
 
       Map<Field, SyntheticMapEntry> syntheticMaps =
-          collectSyntheticMapEntries(value.type().toString(), value.declaredFields());
+          collectSyntheticMapEntries(value.getType().toString(), value.getDeclaredFields());
 
       List<EncodedOneOf> encodedOneOfs = new ArrayList<>();
 
       // Collect the true oneofs.
-      for (OneOf oneOf : value.oneOfs()) {
+      for (OneOf oneOf : value.getOneOfs()) {
         List<EncodedField> oneOfFields = new ArrayList<>();
-        for (Field field : oneOf.fields()) {
-          oneOfFields.add(new EncodedField(syntax, field, field.type(), null,
+        for (Field field : oneOf.getFields()) {
+          oneOfFields.add(new EncodedField(syntax, field, field.getType(), null,
               encodedOneOfs.size()));
         }
-        encodedOneOfs.add(new EncodedOneOf(oneOf.name(), oneOfFields));
+        encodedOneOfs.add(new EncodedOneOf(oneOf.getName(), oneOfFields));
       }
 
       // Collect encoded fields, synthesizing map types and oneofs.
       List<EncodedField> encodedFields = new ArrayList<>();
-      for (Field field : value.declaredFields()) {
+      for (Field field : value.getDeclaredFields()) {
         SyntheticMapEntry syntheticMap = syntheticMaps.get(field);
-        ProtoType type = syntheticMap != null ? syntheticMap.fieldType : field.type();
+        ProtoType type = syntheticMap != null ? syntheticMap.fieldType : field.getType();
         EncodedField encodedField = new EncodedField(syntax, field, type, null, null);
         if (encodedField.isProto3Optional()) {
           encodedField = encodedField.withOneOfIndex(encodedOneOfs.size());
-          encodedOneOfs.add(new EncodedOneOf("_" + field.name(), Collections.emptyList()));
+          encodedOneOfs.add(new EncodedOneOf("_" + field.getName(), Collections.emptyList()));
         }
         encodedFields.add(encodedField);
       }
@@ -169,21 +169,21 @@ public final class SchemaEncoder {
       // STRING.asRepeated().encodeWithTag(writer, 10, value.reserved_name)
       // ReservedRange.ADAPTER.asRepeated().encodeWithTag(writer, 9, value.reserved_range)
 
-      messageOptionsProtoAdapter.encodeWithTag(writer, 7, toJsonOptions(value.options()));
+      messageOptionsProtoAdapter.encodeWithTag(writer, 7, toJsonOptions(value.getOptions()));
 
       // Real and synthetic oneofs.
       oneOfEncoder.asRepeated().encodeWithTag(writer, 8, encodedOneOfs);
 
       List<Object> extensionRanges = new ArrayList<>();
-      for (Extensions extensions : value.extensionsList()) {
-        extensionRanges.addAll(extensions.values());
+      for (Extensions extensions : value.getExtensionsList()) {
+        extensionRanges.addAll(extensions.getValues());
       }
       extensionRangeEncoder.asRepeated().encodeWithTag(writer, 5, extensionRanges);
 
       // Real and synthetic nested types.
       syntheticMapEntryEncoder.asRepeated()
           .encodeWithTag(writer, 3, new ArrayList<>(syntheticMaps.values()));
-      encodeNestedTypes(writer, value.nestedTypes());
+      encodeNestedTypes(writer, value.getNestedTypes());
 
       // FieldDescriptorProto.ADAPTER.asRepeated().encodeWithTag(writer, 6, value.extension)
 
@@ -192,11 +192,11 @@ public final class SchemaEncoder {
         fieldsAndOneOfFields.addAll(encodedOneOf.fields);
       }
       fieldsAndOneOfFields.sort(Comparator.<EncodedField>comparingInt(
-              encodedField -> encodedField.field.location().line)
-          .thenComparingInt(encodedField -> encodedField.field.location().column));
+              encodedField -> encodedField.field.getLocation().getLine())
+          .thenComparingInt(encodedField -> encodedField.field.getLocation().getColumn()));
       fieldEncoder.asRepeated().encodeWithTag(writer, 2, fieldsAndOneOfFields);
 
-      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.type().simpleName());
+      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.getType().getSimpleName());
     }
   };
 
@@ -208,9 +208,9 @@ public final class SchemaEncoder {
 
   private final Encoder<EnclosingType> enclosingEncoder = new Encoder<EnclosingType>() {
     @Override public void encode(ReverseProtoWriter writer, EnclosingType value) throws IOException {
-      messageOptionsProtoAdapter.encodeWithTag(writer, 7, toJsonOptions(value.options()));
-      encodeNestedTypes(writer, value.nestedTypes());
-      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.type().simpleName());
+      messageOptionsProtoAdapter.encodeWithTag(writer, 7, toJsonOptions(value.getOptions()));
+      encodeNestedTypes(writer, value.getNestedTypes());
+      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.getType().getSimpleName());
     }
   };
 
@@ -222,11 +222,11 @@ public final class SchemaEncoder {
       List<Field> fields) {
     Map<Field, SyntheticMapEntry> result = new LinkedHashMap<>();
     for (Field field : fields) {
-      ProtoType fieldType = field.type();
-      if (fieldType.isMap) {
-        String name = Internal.camelCase(field.name(), true) + "Entry";
+      ProtoType fieldType = field.getType();
+      if (fieldType.isMap()) {
+        String name = Internal.camelCase(field.getName(), true) + "Entry";
         result.put(field, new SyntheticMapEntry(enclosingTypeOrPackage, name,
-            fieldType.keyType, fieldType.valueType));
+            fieldType.getKeyType(), fieldType.getValueType()));
       }
     }
     return result;
@@ -253,7 +253,7 @@ public final class SchemaEncoder {
           @Override public void encode(ReverseProtoWriter writer, SyntheticMapEntry value)
               throws IOException {
             ProtoAdapter.STRING.encodeWithTag(writer, 10, "key");
-            if (!value.keyType.isScalar) {
+            if (!value.keyType.isScalar()) {
               ProtoAdapter.STRING.encodeWithTag(writer, 6, dotName(value.keyType));
             }
             ProtoAdapter.INT32.encodeWithTag(writer, 5, typeTag(value.keyType));
@@ -267,7 +267,7 @@ public final class SchemaEncoder {
           @Override public void encode(ReverseProtoWriter writer, SyntheticMapEntry value)
               throws IOException {
             ProtoAdapter.STRING.encodeWithTag(writer, 10, "value");
-            if (!value.valueType.isScalar) {
+            if (!value.valueType.isScalar()) {
               ProtoAdapter.STRING.encodeWithTag(writer, 6, dotName(value.valueType));
             }
             ProtoAdapter.INT32.encodeWithTag(writer, 5, typeTag(value.valueType));
@@ -310,7 +310,7 @@ public final class SchemaEncoder {
     }
 
     boolean isProto3Optional() {
-      return syntax == Syntax.PROTO_3 && field.label() == Field.Label.OPTIONAL;
+      return syntax == Syntax.PROTO_3 && field.getLabel() == Field.Label.OPTIONAL;
     }
   }
 
@@ -321,25 +321,25 @@ public final class SchemaEncoder {
       if (value.isProto3Optional()) {
         ProtoAdapter.BOOL.encodeWithTag(writer, 17, Boolean.TRUE);
       }
-      fieldOptionsProtoAdapter.encodeWithTag(writer, 8, toJsonOptions(value.field.options()));
+      fieldOptionsProtoAdapter.encodeWithTag(writer, 8, toJsonOptions(value.field.getOptions()));
       if (value.syntax == Syntax.PROTO_2
-          && !Objects.equals(value.field.jsonName(), value.field.name())) {
-        ProtoAdapter.STRING.encodeWithTag(writer, 10, value.field.jsonName());
+          && !Objects.equals(value.field.getJsonName(), value.field.getName())) {
+        ProtoAdapter.STRING.encodeWithTag(writer, 10, value.field.getJsonName());
       }
-      ProtoAdapter.STRING.encodeWithTag(writer, 7, value.field.defaultValue());
+      ProtoAdapter.STRING.encodeWithTag(writer, 7, value.field.getDefault());
       ProtoAdapter.STRING.encodeWithTag(writer, 2, value.extendee);
-      if (!value.type.isScalar) {
+      if (!value.type.isScalar()) {
         ProtoAdapter.STRING.encodeWithTag(writer, 6, dotName(value.type));
       }
-      ProtoAdapter.INT32.encodeWithTag(writer, 5, typeTag(value.field.type()));
+      ProtoAdapter.INT32.encodeWithTag(writer, 5, typeTag(value.field.getType()));
       ProtoAdapter.INT32.encodeWithTag(writer, 4, labelTag(value.field));
-      ProtoAdapter.INT32.encodeWithTag(writer, 3, value.field.tag());
-      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.field.name());
+      ProtoAdapter.INT32.encodeWithTag(writer, 3, value.field.getTag());
+      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.field.getName());
     }
   };
 
   private static int labelTag(Field field) {
-    Field.EncodeMode encodeMode = field.encodeMode();
+    Field.EncodeMode encodeMode = field.getEncodeMode();
     if (encodeMode == Field.EncodeMode.NULL_IF_ABSENT
         || encodeMode == Field.EncodeMode.OMIT_IDENTITY) {
       return 1;
@@ -377,7 +377,7 @@ public final class SchemaEncoder {
     if (type.equals(ProtoType.SFIXED64)) return 16;
     if (type.equals(ProtoType.SINT32)) return 17;
     if (type.equals(ProtoType.SINT64)) return 18;
-    if (type.isMap) return 11; // Maps are encoded as messages.
+    if (type.isMap()) return 11; // Maps are encoded as messages.
     throw new IllegalArgumentException("unexpected type: " + type);
   }
 
@@ -403,9 +403,9 @@ public final class SchemaEncoder {
     @Override public void encode(ReverseProtoWriter writer, EnumType value) throws IOException {
       // STRING.asRepeated().encodeWithTag(writer, 5, value.reserved_name)
       // EnumReservedRange.ADAPTER.asRepeated().encodeWithTag(writer, 4, value.reserved_range)
-      enumOptionsProtoAdapter.encodeWithTag(writer, 3, toJsonOptions(value.options()));
-      enumConstantEncoder.asRepeated().encodeWithTag(writer, 2, value.constants());
-      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.name());
+      enumOptionsProtoAdapter.encodeWithTag(writer, 3, toJsonOptions(value.getOptions()));
+      enumConstantEncoder.asRepeated().encodeWithTag(writer, 2, value.getConstants());
+      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.getName());
     }
   };
 
@@ -426,9 +426,9 @@ public final class SchemaEncoder {
 
   private final Encoder<EnumConstant> enumConstantEncoder = new Encoder<EnumConstant>() {
     @Override public void encode(ReverseProtoWriter writer, EnumConstant value) throws IOException {
-      enumValueOptionsProtoAdapter.encodeWithTag(writer, 3, toJsonOptions(value.options()));
-      ProtoAdapter.INT32.encodeWithTag(writer, 2, value.tag());
-      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.name());
+      enumValueOptionsProtoAdapter.encodeWithTag(writer, 3, toJsonOptions(value.getOptions()));
+      ProtoAdapter.INT32.encodeWithTag(writer, 2, value.getTag());
+      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.getName());
     }
   };
 
@@ -442,16 +442,16 @@ public final class SchemaEncoder {
 
   private final Encoder<Rpc> rpcEncoder = new Encoder<Rpc>() {
     @Override public void encode(ReverseProtoWriter writer, Rpc value) throws IOException {
-      if (value.responseStreaming()) {
+      if (value.getResponseStreaming()) {
         ProtoAdapter.BOOL.encodeWithTag(writer, 6, Boolean.TRUE);
       }
-      if (value.requestStreaming()) {
+      if (value.getRequestStreaming()) {
         ProtoAdapter.BOOL.encodeWithTag(writer, 5, Boolean.TRUE);
       }
-      rpcOptionsProtoAdapter.encodeWithTag(writer, 4, toJsonOptions(value.options()));
-      ProtoAdapter.STRING.encodeWithTag(writer, 3, dotName(value.responseType()));
-      ProtoAdapter.STRING.encodeWithTag(writer, 2, dotName(value.requestType()));
-      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.name());
+      rpcOptionsProtoAdapter.encodeWithTag(writer, 4, toJsonOptions(value.getOptions()));
+      ProtoAdapter.STRING.encodeWithTag(writer, 3, dotName(value.getResponseType()));
+      ProtoAdapter.STRING.encodeWithTag(writer, 2, dotName(value.getRequestType()));
+      ProtoAdapter.STRING.encodeWithTag(writer, 1, value.getName());
     }
   };
 
@@ -496,7 +496,7 @@ public final class SchemaEncoder {
    * so we don't need a clumsy conversion through JSON.
    */
   private Object toJsonOptions(Options options) {
-    Map<ProtoMember, Object> optionsMap = options.map();
+    Map<ProtoMember, Object> optionsMap = options.getMap();
     if (optionsMap.isEmpty()) return null;
 
     Map<String, Object> result = new LinkedHashMap<>();
@@ -505,7 +505,7 @@ public final class SchemaEncoder {
       if (field == null) {
         throw new IllegalStateException("unexpected options field: " + entry.getKey());
       }
-      result.put(field.name(), toJson(field, entry.getValue()));
+      result.put(field.getName(), toJson(field, entry.getValue()));
     }
 
     return result;
@@ -515,11 +515,11 @@ public final class SchemaEncoder {
     if (field.isRepeated()) {
       List<Object> result = new ArrayList<>();
       for (Object element : (List<?>) value) {
-        result.add(toJsonSingle(field.type(), element));
+        result.add(toJsonSingle(field.getType(), element));
       }
       return result;
     }
-    return toJsonSingle(field.type(), value);
+    return toJsonSingle(field.getType(), value);
   }
 
   /**
@@ -557,7 +557,7 @@ public final class SchemaEncoder {
     for (Map.Entry<ProtoMember, Object> entry : map.entrySet()) {
       Field field = schema.getField(entry.getKey());
       if (field == null) continue; // TODO: warn about this??
-      result.put(entry.getKey().simpleName(), toJson(field, entry.getValue()));
+      result.put(entry.getKey().getSimpleName(), toJson(field, entry.getValue()));
     }
     return result;
   }

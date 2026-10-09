@@ -56,7 +56,7 @@ public class ConsumerApiSurfaceTest {
   private static final Set<String> DOCUMENTED_OKIO_BRIDGE_MEMBERS = new TreeSet<>(Set.of(
       "com.squareup.wire.AnyMessage#<init>(java.lang.String,okio.ByteString)",
       "com.squareup.wire.AnyMessage#copy(java.lang.String,okio.ByteString)",
-      "com.squareup.wire.AnyMessage#value",
+      "com.squareup.wire.AnyMessage#getValue()",
       "com.squareup.wire.Message#<init>(com.squareup.wire.ProtoAdapter,okio.ByteString)",
       "com.squareup.wire.Message#encode(okio.BufferedSink)",
       "com.squareup.wire.Message#encodeByteString()",

@@ -51,35 +51,35 @@ public final class EnclosingType extends Type {
         syntax);
   }
 
-  @Override public Location location() {
+  @Override public Location getLocation() {
     return location;
   }
 
-  @Override public ProtoType type() {
+  @Override public ProtoType getType() {
     return type;
   }
 
-  @Override public String name() {
+  @Override public String getName() {
     return name;
   }
 
-  @Override public String documentation() {
+  @Override public String getDocumentation() {
     return documentation;
   }
 
-  @Override public Options options() {
+  @Override public Options getOptions() {
     return new Options(Options.MESSAGE_OPTIONS, Collections.emptyList());
   }
 
-  @Override public List<Type> nestedTypes() {
+  @Override public List<Type> getNestedTypes() {
     return nestedTypes;
   }
 
-  @Override public List<Extend> nestedExtendList() {
+  @Override public List<Extend> getNestedExtendList() {
     return nestedExtendList;
   }
 
-  @Override public Syntax syntax() {
+  @Override public Syntax getSyntax() {
     return syntax;
   }
 
@@ -141,7 +141,7 @@ public final class EnclosingType extends Type {
   }
 
   MessageElement toElement() {
-    return new MessageElement(location, type.simpleName(), "", Type.toElements(nestedTypes),
+    return new MessageElement(location, type.getSimpleName(), "", Type.toElements(nestedTypes),
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
         Collections.emptyList());

@@ -45,7 +45,7 @@ public final class Schema {
     for (ProtoFile protoFile : protoFiles) {
       sorted.add(protoFile);
     }
-    sorted.sort(Comparator.comparing(protoFile -> protoFile.location.path));
+    sorted.sort(Comparator.comparing(protoFile -> protoFile.location.getPath()));
     this.protoFiles = sorted;
 
     // Insertion-ordered like upstream's mutableMapOf: types() iterates protoFilesIndex.keySet()
@@ -56,18 +56,18 @@ public final class Schema {
     this.protoFilesIndex = index;
   }
 
-  public List<ProtoFile> protoFiles() {
+  public List<ProtoFile> getProtoFiles() {
     return protoFiles;
   }
 
-  public Set<ProtoType> types() {
+  public Set<ProtoType> getTypes() {
     return protoFilesIndex.keySet();
   }
 
   /** Returns the proto file at {@code path}, or null if this schema has no such file. */
   public ProtoFile protoFile(String path) {
     for (ProtoFile protoFile : protoFiles) {
-      if (protoFile.location.path.equals(path)) return protoFile;
+      if (protoFile.location.getPath().equals(path)) return protoFile;
     }
     return null;
   }
@@ -113,12 +113,12 @@ public final class Schema {
 
   /** Returns the field for {@code protoMember}, or null if this schema defines no such field. */
   public Field getField(ProtoMember protoMember) {
-    Type type = getType(protoMember.type);
+    Type type = getType(protoMember.getType());
     if (!(type instanceof MessageType)) return null;
     MessageType messageType = (MessageType) type;
-    Field field = messageType.field(protoMember.member);
+    Field field = messageType.field(protoMember.getMember());
     if (field != null) return field;
-    return messageType.extensionField(protoMember.member);
+    return messageType.extensionField(protoMember.getMember());
   }
 
   /**
@@ -161,13 +161,13 @@ public final class Schema {
     if (type == null) {
       throw new IllegalArgumentException("unexpected type " + typeName);
     }
-    return new SchemaProtoAdapterFactory(this, includeUnknown).get(type.type());
+    return new SchemaProtoAdapterFactory(this, includeUnknown).get(type.getType());
   }
 
   public boolean isExtensionField(ProtoMember protoMember) {
-    Type type = getType(protoMember.type);
+    Type type = getType(protoMember.getType());
     return type instanceof MessageType
-        && ((MessageType) type).extensionField(protoMember.member) != null;
+        && ((MessageType) type).extensionField(protoMember.getMember()) != null;
   }
 
   private static Map<String, Type> buildTypesIndex(List<ProtoFile> protoFiles,
@@ -184,12 +184,12 @@ public final class Schema {
 
   private static void index(Type type, ProtoFile protoFile,
       Map<ProtoType, ProtoFile> protoFilesIndex, Map<String, Type> typesByName) {
-    ProtoType protoType = type.type();
+    ProtoType protoType = type.getType();
     if (!protoFilesIndex.containsKey(protoType)) {
       protoFilesIndex.put(protoType, protoFile);
     }
     typesByName.put(protoType.toString(), type);
-    for (Type nested : type.nestedTypes()) {
+    for (Type nested : type.getNestedTypes()) {
       index(nested, protoFile, protoFilesIndex, typesByName);
     }
   }

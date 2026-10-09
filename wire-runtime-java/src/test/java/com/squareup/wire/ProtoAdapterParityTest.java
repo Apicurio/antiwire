@@ -226,7 +226,7 @@ public class ProtoAdapterParityTest {
       assertArrayEquals("FIELD_MASK bytes", p.FIELD_MASK.encode(theirValue), ourBytes);
       assertEquals("FIELD_MASK size", p.FIELD_MASK.encodedSize(theirValue),
           ProtoAdapter.FIELD_MASK.encodedSize(ourValue));
-      assertEquals(paths, ProtoAdapter.FIELD_MASK.decode(ourBytes).paths());
+      assertEquals(paths, ProtoAdapter.FIELD_MASK.decode(ourBytes).getPaths());
       assertEquals(paths, p.FIELD_MASK.decode(
           io.apicurio.antiwire.parity.okio.ByteString.of(ourBytes)).getPaths());
     }

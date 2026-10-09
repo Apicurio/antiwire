@@ -62,7 +62,10 @@ MathMethods, MutableOnWriteList, Util, and any Internal helpers TASK-6 did not n
 - StructListAdapter passes Map.class as its type, matching upstream's commonStructList which
   uses Map::class for a List adapter; a deliberate upstream quirk preserved so adapter.type
   is reflection-identical.
-- Kotlin property accessors with @JvmName (Label.isRepeated etc.) become plain methods.
+- Kotlin property accessors keep their upstream Java names: a property `x` is `getX()` (`isX()`
+  for booleans named `isX`), never `x()` (decision 2026-10-09, TASK-33.1). Only members that
+  upstream itself names with `@JvmName` stay plain methods (Label.isRepeated, Service.type(),
+  Message.adapter(), ...).
 - wire's internal Util.kt byte helpers (Byte.and/shl) are Kotlin compile-time sugar inlining to
   int operations; they have no Java surface and are not ported.
 - internal visibility becomes public per the translation conventions.

@@ -20,11 +20,35 @@ import com.squareup.wire.schema.internal.SchemaUtil;
 import java.util.List;
 
 public final class EnumConstantElement {
-  public final Location location;
-  public final String name;
-  public final int tag;
-  public final String documentation;
-  public final List<OptionElement> options;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final String name;
+
+  public String getName() {
+    return name;
+  }
+
+  private final int tag;
+
+  public int getTag() {
+    return tag;
+  }
+
+  private final String documentation;
+
+  public String getDocumentation() {
+    return documentation;
+  }
+
+  private final List<OptionElement> options;
+
+  public List<OptionElement> getOptions() {
+    return options;
+  }
 
   public EnumConstantElement(Location location, String name, int tag, String documentation,
       List<OptionElement> options) {

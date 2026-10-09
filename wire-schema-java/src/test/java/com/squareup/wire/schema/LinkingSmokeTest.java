@@ -76,24 +76,24 @@ public class LinkingSmokeTest {
     assertEquals(4, outer.fields().size());
 
     Field name = outer.field("name");
-    assertEquals(ProtoType.STRING, name.type());
-    assertEquals(Field.EncodeMode.OMIT_IDENTITY, name.encodeMode());
-    assertEquals("name", name.jsonName());
+    assertEquals(ProtoType.STRING, name.getType());
+    assertEquals(Field.EncodeMode.OMIT_IDENTITY, name.getEncodeMode());
+    assertEquals("name", name.getJsonName());
 
     Field count = outer.field("count");
-    assertEquals(ProtoType.INT32, count.type());
-    assertEquals(Field.EncodeMode.OMIT_IDENTITY, count.encodeMode());
+    assertEquals(ProtoType.INT32, count.getType());
+    assertEquals(Field.EncodeMode.OMIT_IDENTITY, count.getEncodeMode());
 
     Field inner = outer.field("inner");
-    assertEquals(schema.getType("squareup.protos.Outer.Inner").type(), inner.type());
-    assertEquals(Field.EncodeMode.OMIT_IDENTITY, inner.encodeMode());
+    assertEquals(schema.getType("squareup.protos.Outer.Inner").getType(), inner.getType());
+    assertEquals(Field.EncodeMode.OMIT_IDENTITY, inner.getEncodeMode());
 
     Field numbers = outer.field("numbers");
-    assertEquals(Field.EncodeMode.PACKED, numbers.encodeMode());
+    assertEquals(Field.EncodeMode.PACKED, numbers.getEncodeMode());
     assertTrue(numbers.isPacked());
 
     MessageType innerType = (MessageType) schema.getType("squareup.protos.Outer.Inner");
-    assertEquals(ProtoType.BOOL, innerType.field("ok").type());
+    assertEquals(ProtoType.BOOL, innerType.field("ok").getType());
   }
 
   @Test public void linkServiceResolvesRequestAndResponseTypes() {
@@ -112,8 +112,8 @@ public class LinkingSmokeTest {
     assertNotNull(service);
     Rpc call = service.rpc("Call");
     assertNotNull(call);
-    assertEquals(schema.getType("Request").type(), call.requestType());
-    assertEquals(schema.getType("Response").type(), call.responseType());
+    assertEquals(schema.getType("Request").getType(), call.getRequestType());
+    assertEquals(schema.getType("Response").getType(), call.getResponseType());
   }
 
   @Test public void linkImportsAcrossFiles() {
@@ -130,7 +130,7 @@ public class LinkingSmokeTest {
     Schema schema = link(loader, "a.proto");
 
     MessageType a = (MessageType) schema.getType("pkg.A");
-    assertEquals(schema.getType("pkg.B").type(), a.field("b").type());
+    assertEquals(schema.getType("pkg.B").getType(), a.field("b").getType());
 
     // b.proto is used by a source file, so it is retained in the schema.
     assertNotNull(schema.protoFile("b.proto"));
@@ -190,12 +190,12 @@ public class LinkingSmokeTest {
     Schema schema = link(loader, "a.proto");
 
     MessageType a = (MessageType) schema.getType("pkg.A");
-    assertEquals(1, a.declaredFields().size());
-    assertEquals(1, a.extensionFields().size());
-    Field extra = a.extensionFields().get(0);
-    assertEquals("extra", extra.name());
-    assertEquals("pkg.extra", extra.qualifiedName());
-    assertEquals(ProtoType.INT32, extra.type());
+    assertEquals(1, a.getDeclaredFields().size());
+    assertEquals(1, a.getExtensionFields().size());
+    Field extra = a.getExtensionFields().get(0);
+    assertEquals("extra", extra.getName());
+    assertEquals("pkg.extra", extra.getQualifiedName());
+    assertEquals(ProtoType.INT32, extra.getType());
     assertEquals(a.field(100), extra);
   }
 
@@ -240,7 +240,7 @@ public class LinkingSmokeTest {
     Schema schema = link(loader, "a.proto");
 
     MessageType a = (MessageType) schema.getType("pkg.A");
-    assertEquals("1.0", a.field("since_field").options()
+    assertEquals("1.0", a.field("since_field").getOptions()
         .get(ProtoMember.get(Options.FIELD_OPTIONS, "wire.since")));
   }
 
@@ -291,8 +291,8 @@ public class LinkingSmokeTest {
             + "message A { required string s = 1; }\n");
     Schema schema = link(proto2, "a.proto");
     MessageType a = (MessageType) schema.getType("A");
-    assertEquals(Field.EncodeMode.REQUIRED, a.field("s").encodeMode());
-    assertEquals(1, a.requiredFields().size());
+    assertEquals(Field.EncodeMode.REQUIRED, a.field("s").getEncodeMode());
+    assertEquals(1, a.getRequiredFields().size());
     // The invalid proto3 source never reaches the linker; the parser throws first.
     RuntimeException parserError = assertThrows(RuntimeException.class,
         () -> loader.load("a.proto"));
@@ -419,8 +419,8 @@ public class LinkingSmokeTest {
     ProtoFile a = pruned.protoFile("a.proto");
     assertNotNull(a);
     // Neither import is referenced after pruning B away.
-    assertFalse(a.imports().contains("b.proto"));
-    assertFalse(a.imports().contains("c.proto"));
+    assertFalse(a.getImports().contains("b.proto"));
+    assertFalse(a.getImports().contains("c.proto"));
     // Pruned-away B itself disappears from the schema.
     assertNull(pruned.getType("B"));
   }

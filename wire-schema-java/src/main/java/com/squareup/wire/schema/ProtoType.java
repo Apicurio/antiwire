@@ -25,17 +25,25 @@ import java.util.Map;
  * fully-qualified name using the protocol buffer package.
  */
 public final class ProtoType {
-  public final boolean isScalar;
+  private final boolean isScalar;
 
   private final String string;
 
-  public final boolean isMap;
+  private final boolean isMap;
 
-  /** The type of the map's keys. Only present when {@link #isMap} is true. */
-  public final ProtoType keyType;
+  /** The type of the map's keys. Only present when {@link #isMap()} is true. */
+  private final ProtoType keyType;
 
-  /** The type of the map's values. Only present when {@link #isMap} is true. */
-  public final ProtoType valueType;
+  public ProtoType getKeyType() {
+    return keyType;
+  }
+
+  /** The type of the map's values. Only present when {@link #isMap()} is true. */
+  private final ProtoType valueType;
+
+  public ProtoType getValueType() {
+    return valueType;
+  }
 
   /** Creates a scalar or message type. */
   private ProtoType(boolean isScalar, String string) {
@@ -59,13 +67,13 @@ public final class ProtoType {
     this.valueType = valueType;
   }
 
-  public String simpleName() {
+  public String getSimpleName() {
     int dot = string.lastIndexOf('.');
     return string.substring(dot + 1);
   }
 
   /** Returns the enclosing type, or null if this type is not nested in another type. */
-  public String enclosingTypeOrPackage() {
+  public String getEnclosingTypeOrPackage() {
     int dot = string.lastIndexOf('.');
     return dot == -1 ? null : string.substring(0, dot);
   }
@@ -75,7 +83,7 @@ public final class ProtoType {
    * a scalar or a map. Note that this returns a non-null string for enums because it doesn't know
    * if the named type is a message or an enum.
    */
-  public String typeUrl() {
+  public String getTypeUrl() {
     if (isScalar || isMap) return null;
     return "type.googleapis.com/" + string;
   }
@@ -198,5 +206,13 @@ public final class ProtoType {
 
   public static ProtoType get(ProtoType keyType, ProtoType valueType, String name) {
     return new ProtoType(keyType, valueType, name);
+  }
+
+  public boolean isScalar() {
+    return isScalar;
+  }
+
+  public boolean isMap() {
+    return isMap;
   }
 }

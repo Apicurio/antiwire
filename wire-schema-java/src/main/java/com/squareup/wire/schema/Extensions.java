@@ -32,16 +32,16 @@ public final class Extensions {
     this.values = values;
   }
 
-  public Location location() {
+  public Location getLocation() {
     return location;
   }
 
-  public String documentation() {
+  public String getDocumentation() {
     return documentation;
   }
 
   /** Integers are tags; int[] pairs are inclusive ranges. */
-  public List<Object> values() {
+  public List<Object> getValues() {
     return values;
   }
 
@@ -63,7 +63,7 @@ public final class Extensions {
       }
     }
     if (!outOfRangeTags.isEmpty()) {
-      scoped.errors.add("tags are out of range: " + String.join(", ", outOfRangeTags));
+      scoped.getErrors().add("tags are out of range: " + String.join(", ", outOfRangeTags));
     }
   }
 
@@ -89,7 +89,7 @@ public final class Extensions {
   }
 
   public static Extensions fromElement(ExtensionsElement element) {
-    return new Extensions(element.location, element.documentation, element.values);
+    return new Extensions(element.getLocation(), element.getDocumentation(), element.getValues());
   }
 
   public static ExtensionsElement toElement(Extensions extensions) {

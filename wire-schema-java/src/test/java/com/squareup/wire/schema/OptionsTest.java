@@ -62,13 +62,13 @@ public class OptionsTest {
     opt1Map.put(opt1, "123");
     opt1Map.put(opt2, "baz");
     expectedA.put(fooOptions, opt1Map);
-    assertEquals(expectedA, bar.field("a").options().map());
+    assertEquals(expectedA, bar.field("a").getOptions().getMap());
     Map<ProtoMember, Object> expectedB = new LinkedHashMap<>();
     Map<ProtoMember, Object> opt2Map = new LinkedHashMap<>();
     opt2Map.put(opt1, "456");
     opt2Map.put(opt2, "quux");
     expectedB.put(fooOptions, opt2Map);
-    assertEquals(expectedB, bar.field("b").options().map());
+    assertEquals(expectedB, bar.field("b").getOptions().getMap());
   }
 
   // https://github.com/square/wire/issues/3672
@@ -107,7 +107,7 @@ public class OptionsTest {
     datetimeMap.put(datetime, "true");
     stringMap.put(string, datetimeMap);
     expected.put(field, stringMap);
-    assertEquals(expected, bar.field("a").options().map());
+    assertEquals(expected, bar.field("a").getOptions().getMap());
   }
 
   @Test public void textFormatCanOmitMapValueSeparator() {
@@ -141,7 +141,7 @@ public class OptionsTest {
     Map<ProtoMember, Object> expected = new LinkedHashMap<>();
     expected.put(foo, barMap);
     MessageType message = (MessageType) schema.getType("Message");
-    assertEquals(expected, message.field("b").options().map());
+    assertEquals(expected, message.field("b").getOptions().getMap());
   }
 
   @Test public void testOptionsToSchema() {
@@ -187,10 +187,10 @@ public class OptionsTest {
 
     ProtoFile protoFile = schema.protoFile("foo.proto");
 
-    List<OptionElement> optionElements = protoFile.types().stream()
+    List<OptionElement> optionElements = protoFile.getTypes().stream()
         .filter(t -> t instanceof MessageType
-            && ((MessageType) t).toElement().name().equals("Message"))
-        .map(t -> ((MessageType) t).options().elements())
+            && ((MessageType) t).toElement().getName().equals("Message"))
+        .map(t -> ((MessageType) t).getOptions().getElements())
         .findFirst()
         .orElseThrow(NoSuchElementException::new);
 
@@ -210,7 +210,7 @@ public class OptionsTest {
     ProtoMember schemes = ProtoMember.get(ProtoType.get("FooOptions"), "schemes");
 
     MessageType message = (MessageType) schema.getType("Message");
-    message.toElement().name();
+    message.toElement().getName();
 
     Map<ProtoMember, Object> first = new LinkedHashMap<>();
     first.put(name, "test");
@@ -222,7 +222,7 @@ public class OptionsTest {
     second.put(schemes, Arrays.asList("HTTP", "HTTPS"));
     Map<ProtoMember, Object> expected = new LinkedHashMap<>();
     expected.put(foo, new ArrayList<>(Arrays.asList(first, second)));
-    assertEquals(expected, message.options().map());
+    assertEquals(expected, message.getOptions().getMap());
   }
 
   @Test public void fullyQualifiedOptionFields() {
@@ -279,7 +279,7 @@ public class OptionsTest {
     evenMoreOptionsMap.put(evenMoreOptions, stringOptionMap);
     Map<ProtoMember, Object> expected = new LinkedHashMap<>();
     expected.put(moreOptions, evenMoreOptionsMap);
-    assertEquals(expected, message.options().map());
+    assertEquals(expected, message.getOptions().getMap());
   }
 
   @Test public void resolveFieldPathMatchesLeadingDotFirstSegment() {
@@ -392,7 +392,7 @@ public class OptionsTest {
     entriesMap.put(entries, Arrays.asList(entry1, entry2, entry3, entry4, entry5));
     Map<ProtoMember, Object> expected = new LinkedHashMap<>();
     expected.put(myOption, entriesMap);
-    assertEquals(expected, enumType.constant(0).options().map());
+    assertEquals(expected, enumType.constant(0).getOptions().getMap());
   }
 
   @Test public void mapFieldEntriesWriting() {
@@ -437,7 +437,7 @@ public class OptionsTest {
         .build();
 
     EnumType enumType = (EnumType) schema.getType(ProtoType.get("my_package.SomeEnum"));
-    OptionElement optionElement = enumType.constant(0).options().elements().get(0);
+    OptionElement optionElement = enumType.constant(0).getOptions().getElements().get(0);
     // We do print "key" and "value" keys for map fields, even though the linked schema doesn't
     // know about them.
     String expected = "(my_package.my_option) = {\n"

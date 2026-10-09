@@ -36,23 +36,23 @@ public final class OneOf {
     this.options = options;
   }
 
-  public String name() {
+  public String getName() {
     return name;
   }
 
-  public String documentation() {
+  public String getDocumentation() {
     return documentation;
   }
 
-  public List<Field> fields() {
+  public List<Field> getFields() {
     return fields;
   }
 
-  public Location location() {
+  public Location getLocation() {
     return location;
   }
 
-  public Options options() {
+  public Options getOptions() {
     return options;
   }
 
@@ -111,12 +111,12 @@ public final class OneOf {
       List<OneOfElement> elements) {
     List<OneOf> result = new ArrayList<>();
     for (OneOfElement element : elements) {
-      if (!element.groups.isEmpty()) {
-        throw new IllegalStateException(element.groups.get(0).location + ": 'group' is not supported");
+      if (!element.getGroups().isEmpty()) {
+        throw new IllegalStateException(element.getGroups().get(0).getLocation() + ": 'group' is not supported");
       }
-      result.add(new OneOf(element.name, element.documentation,
-          Field.fromElements(namespaces, element.fields, false, true), element.location,
-          new Options(Options.ONEOF_OPTIONS, element.options)));
+      result.add(new OneOf(element.getName(), element.getDocumentation(),
+          Field.fromElements(namespaces, element.getFields(), false, true), element.getLocation(),
+          new Options(Options.ONEOF_OPTIONS, element.getOptions())));
     }
     return result;
   }
@@ -125,7 +125,7 @@ public final class OneOf {
     List<OneOfElement> result = new ArrayList<>();
     for (OneOf oneOf : oneOfs) {
       result.add(new OneOfElement(oneOf.name, oneOf.documentation,
-          Field.toElements(oneOf.fields), new ArrayList<>(), oneOf.options.elements(),
+          Field.toElements(oneOf.fields), new ArrayList<>(), oneOf.options.getElements(),
           oneOf.location));
     }
     return result;

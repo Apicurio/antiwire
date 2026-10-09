@@ -58,51 +58,51 @@ public final class ProtoFile {
     this.syntax = syntax;
   }
 
-  public Location location() {
+  public Location getLocation() {
     return location;
   }
 
-  public List<String> imports() {
+  public List<String> getImports() {
     return imports;
   }
 
-  public List<String> publicImports() {
+  public List<String> getPublicImports() {
     return publicImports;
   }
 
-  public List<String> weakImports() {
+  public List<String> getWeakImports() {
     return weakImports;
   }
 
-  public String packageName() {
+  public String getPackageName() {
     return packageName;
   }
 
-  public List<Type> types() {
+  public List<Type> getTypes() {
     return types;
   }
 
-  public List<Service> services() {
+  public List<Service> getServices() {
     return services;
   }
 
-  public List<Extend> extendList() {
+  public List<Extend> getExtendList() {
     return extendList;
   }
 
-  public Options options() {
+  public Options getOptions() {
     return options;
   }
 
   /** The syntax as declared in the source file; null means proto2. */
-  public Syntax syntax() {
+  public Syntax getSyntax() {
     return syntax;
   }
 
   public ProtoFileElement toElement() {
     return new ProtoFileElement(location, packageName, syntax, imports, publicImports,
         weakImports, Type.toElements(types), Service.toElements(services),
-        Extend.toElements(extendList), options.elements());
+        Extend.toElements(extendList), options.getElements());
   }
 
   /**
@@ -110,7 +110,7 @@ public final class ProtoFile {
    * {@code squareup/protos/person/simple_message.proto}.
    */
   public String name() {
-    String result = location.path;
+    String result = location.getPath();
 
     int slashIndex = result.lastIndexOf('/');
     if (slashIndex != -1) {
@@ -219,28 +219,28 @@ public final class ProtoFile {
 
     List<ProtoType> result = new ArrayList<>();
     for (MessageType message : messages) {
-      for (Field field : message.fieldsAndOneOfFields()) {
-        if (field.type() != null) result.add(field.type());
+      for (Field field : message.getFieldsAndOneOfFields()) {
+        if (field.getType() != null) result.add(field.getType());
       }
     }
 
     for (Service service : services) {
       for (Rpc rpc : service.rpcs()) {
-        if (rpc.requestType() != null) result.add(rpc.requestType());
-        if (rpc.responseType() != null) result.add(rpc.responseType());
+        if (rpc.getRequestType() != null) result.add(rpc.getRequestType());
+        if (rpc.getResponseType() != null) result.add(rpc.getResponseType());
       }
     }
 
     for (Extend extend : extendList) {
-      if (extend.type() != null) result.add(extend.type());
-      for (Field field : extend.fields()) {
-        if (field.type() != null) result.add(field.type());
+      if (extend.getType() != null) result.add(extend.getType());
+      for (Field field : extend.getFields()) {
+        if (field.getType() != null) result.add(field.getType());
       }
     }
     for (Type type : types) {
-      for (Extend extend : type.nestedExtendList()) {
-        for (Field field : extend.fields()) {
-          if (field.type() != null) result.add(field.type());
+      for (Extend extend : type.getNestedExtendList()) {
+        for (Field field : extend.getFields()) {
+          if (field.getType() != null) result.add(field.getType());
         }
       }
     }
@@ -248,27 +248,27 @@ public final class ProtoFile {
     List<Options> allOptions = new ArrayList<>();
     allOptions.add(options); // file options
     for (MessageType message : messages) {
-      allOptions.add(message.options()); // message options
+      allOptions.add(message.getOptions()); // message options
       for (Field field : message.fields()) {
-        allOptions.add(field.options()); // field options
+        allOptions.add(field.getOptions()); // field options
       }
-      for (OneOf oneOf : message.oneOfs()) {
-        for (Field field : oneOf.fields()) {
-          allOptions.add(field.options()); // one-of field options
+      for (OneOf oneOf : message.getOneOfs()) {
+        for (Field field : oneOf.getFields()) {
+          allOptions.add(field.getOptions()); // one-of field options
         }
-        allOptions.add(oneOf.options()); // one-of options
+        allOptions.add(oneOf.getOptions()); // one-of options
       }
     }
     for (EnumType enumType : enums) {
-      allOptions.add(enumType.options()); // enum options
-      for (EnumConstant constant : enumType.constants()) {
-        allOptions.add(constant.options()); // enum value options
+      allOptions.add(enumType.getOptions()); // enum options
+      for (EnumConstant constant : enumType.getConstants()) {
+        allOptions.add(constant.getOptions()); // enum value options
       }
     }
     for (Service service : services) {
       allOptions.add(service.options()); // service options
       for (Rpc rpc : service.rpcs()) {
-        allOptions.add(rpc.options()); // method options
+        allOptions.add(rpc.getOptions()); // method options
       }
     }
     for (Options opts : allOptions) {
@@ -283,9 +283,9 @@ public final class ProtoFile {
   ProtoFile retainImports(Schema schema) {
     List<Type> referenced = new ArrayList<>();
     for (ProtoType protoType : referencedTypes()) {
-      if (protoType.isMap) {
+      if (protoType.isMap()) {
         // We only need to retain the value type; map keys' types can only be scalar types.
-        Type type = schema.getType(protoType.valueType);
+        Type type = schema.getType(protoType.getValueType());
         if (type != null) referenced.add(type);
       } else {
         Type type = schema.getType(protoType);
@@ -295,21 +295,21 @@ public final class ProtoFile {
 
     List<Location> typeLocations = new ArrayList<>();
     for (Type type : referenced) {
-      typeLocations.add(type.location());
+      typeLocations.add(type.getLocation());
     }
 
     List<Location> extensionLocations = new ArrayList<>();
     for (Type type : referenced) {
       if (type instanceof MessageType) {
-        for (Field field : ((MessageType) type).extensionFields()) {
-          extensionLocations.add(field.location());
+        for (Field field : ((MessageType) type).getExtensionFields()) {
+          extensionLocations.add(field.getLocation());
         }
       }
     }
 
     Set<String> referencedImports = new LinkedHashSet<>();
-    for (Location typeLocation : typeLocations) referencedImports.add(typeLocation.path);
-    for (Location extensionLocation : extensionLocations) referencedImports.add(extensionLocation.path);
+    for (Location typeLocation : typeLocations) referencedImports.add(typeLocation.getPath());
+    for (Location extensionLocation : extensionLocations) referencedImports.add(extensionLocation.getPath());
 
     List<String> retainedImports = new ArrayList<>();
     for (String path : imports) {
@@ -317,10 +317,10 @@ public final class ProtoFile {
     }
 
     Set<String> nonEmptyProtoFilesInSchema = new LinkedHashSet<>();
-    for (ProtoFile protoFile : schema.protoFiles()) {
+    for (ProtoFile protoFile : schema.getProtoFiles()) {
       if (!protoFile.types.isEmpty() || !protoFile.services.isEmpty()
           || !protoFile.extendList.isEmpty()) {
-        nonEmptyProtoFilesInSchema.add(protoFile.location.path);
+        nonEmptyProtoFilesInSchema.add(protoFile.location.getPath());
       }
     }
 
@@ -353,7 +353,7 @@ public final class ProtoFile {
   }
 
   @Override public String toString() {
-    return location.path;
+    return location.getPath();
   }
 
   public String toSchema() {
@@ -361,23 +361,23 @@ public final class ProtoFile {
   }
 
   public static ProtoFile get(ProtoFileElement protoFileElement) {
-    String packageName = protoFileElement.packageName;
+    String packageName = protoFileElement.getPackageName();
 
-    Syntax syntax = protoFileElement.syntax == null ? Syntax.PROTO_2 : protoFileElement.syntax;
-    List<Type> types = Type.fromElements(packageName, protoFileElement.types, syntax);
+    Syntax syntax = protoFileElement.getSyntax() == null ? Syntax.PROTO_2 : protoFileElement.getSyntax();
+    List<Type> types = Type.fromElements(packageName, protoFileElement.getTypes(), syntax);
 
-    List<Service> services = Service.fromElements(packageName, protoFileElement.services);
+    List<Service> services = Service.fromElements(packageName, protoFileElement.getServices());
 
     List<String> namespaces = packageName == null
         ? Collections.emptyList()
         : Collections.singletonList(packageName);
     List<Extend> wireExtends = Extend.fromElements(namespaces,
-        protoFileElement.extendDeclarations);
+        protoFileElement.getExtendDeclarations());
 
-    Options options = new Options(Options.FILE_OPTIONS, protoFileElement.options);
+    Options options = new Options(Options.FILE_OPTIONS, protoFileElement.getOptions());
 
-    return new ProtoFile(protoFileElement.location, protoFileElement.imports,
-        protoFileElement.publicImports, protoFileElement.weakImports, packageName, types,
-        services, wireExtends, options, protoFileElement.syntax);
+    return new ProtoFile(protoFileElement.getLocation(), protoFileElement.getImports(),
+        protoFileElement.getPublicImports(), protoFileElement.getWeakImports(), packageName, types,
+        services, wireExtends, options, protoFileElement.getSyntax());
   }
 }

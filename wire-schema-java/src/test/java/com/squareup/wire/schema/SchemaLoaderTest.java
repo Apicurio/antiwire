@@ -120,13 +120,13 @@ public class SchemaLoaderTest {
           Location.get(sourceDir.toString(), "squareup/colors/red.proto")),
           locations(sourcePathFiles));
       assertEquals(Location.get("google/protobuf/descriptor.proto"),
-          loader.load("google/protobuf/descriptor.proto").location());
+          loader.load("google/protobuf/descriptor.proto").getLocation());
       assertEquals(Location.get(curvesZip.toString(), "squareup/curves/circle.proto"),
-          loader.load("squareup/curves/circle.proto").location());
+          loader.load("squareup/curves/circle.proto").getLocation());
       assertEquals(Location.get(curvesZip.toString(), "squareup/curves/oval.proto"),
-          loader.load("squareup/curves/oval.proto").location());
+          loader.load("squareup/curves/oval.proto").getLocation());
       assertEquals(Location.get(polygonsDir.toString(), "squareup/polygons/triangle.proto"),
-          loader.load("squareup/polygons/triangle.proto").location());
+          loader.load("squareup/polygons/triangle.proto").getLocation());
       loader.reportLoadingErrors();
     } finally {
       loader.close();
@@ -177,7 +177,7 @@ public class SchemaLoaderTest {
     });
     // TASK-13 adaptation: upstream's FakeFileSystem path "colors/src/main/proto/..." becomes the
     // absolute @TempDir path here; the message shape is upstream's.
-    assertEquals("expected " + Location.get(file.toString()).path
+    assertEquals("expected " + Location.get(file.toString()).getPath()
             + " to have a path ending with squareup/colors/blue.proto",
         e.getMessage());
   }
@@ -205,9 +205,9 @@ public class SchemaLoaderTest {
     List<ProtoFile> sourcePathFiles = loader.loadSourcePathFiles();
     assertContainsExactlyInAnyOrder(paths(sourcePathFiles), "squareup/colors/blue.proto");
     assertEquals(Location.get("google/protobuf/descriptor.proto"),
-        loader.load("google/protobuf/descriptor.proto").location());
+        loader.load("google/protobuf/descriptor.proto").getLocation());
     assertEquals(Location.get(protoDir.toString(), "squareup/curves/circle.proto"),
-        loader.load("squareup/curves/circle.proto").location());
+        loader.load("squareup/curves/circle.proto").getLocation());
   }
 
   @Test public void emptyPackagedProtoMessage() throws Exception {
@@ -559,13 +559,13 @@ public class SchemaLoaderTest {
     assertNotNull(redMessage);
     Field orangeField = redMessage.field("orange");
     assertNotNull(orangeField);
-    assertEquals(ProtoType.get("squareup.colors.Orange"), orangeField.type());
+    assertEquals(ProtoType.get("squareup.colors.Orange"), orangeField.getType());
 
     MessageType orangeMessage = (MessageType) schema.getType("squareup.colors.Orange");
     assertNotNull(orangeMessage);
     Field yellowField = orangeMessage.field("yellow");
     assertNotNull(yellowField);
-    assertEquals(ProtoType.get("squareup.colors.Yellow"), yellowField.type());
+    assertEquals(ProtoType.get("squareup.colors.Yellow"), yellowField.getType());
 
     MessageType yellowMessage = (MessageType) schema.getType("squareup.colors.Yellow");
     assertNotNull(yellowMessage);
@@ -617,7 +617,7 @@ public class SchemaLoaderTest {
   private static List<Location> locations(List<ProtoFile> protoFiles) {
     List<Location> result = new ArrayList<>();
     for (ProtoFile protoFile : protoFiles) {
-      result.add(protoFile.location());
+      result.add(protoFile.getLocation());
     }
     return result;
   }
@@ -625,7 +625,7 @@ public class SchemaLoaderTest {
   private static List<String> paths(List<ProtoFile> protoFiles) {
     List<String> result = new ArrayList<>();
     for (ProtoFile protoFile : protoFiles) {
-      result.add(protoFile.location().path);
+      result.add(protoFile.getLocation().getPath());
     }
     return result;
   }

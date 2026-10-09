@@ -38,10 +38,10 @@ public class BytesBridgeTest {
   @Test public void anyMessageBytesFormsMatchTheEngineForms() throws IOException {
     AnyMessage packed = AnyMessage.pack(TestMessages.Person.ADAPTER,
         new TestMessages.Person("Grace Hopper", 1906));
-    AnyMessage fromBytes = new AnyMessage(packed.typeUrl, packed.valueBytes());
+    AnyMessage fromBytes = new AnyMessage(packed.getTypeUrl(), packed.valueBytes());
     assertEquals(packed, fromBytes);
     assertEquals(packed.valueBytes(), fromBytes.valueBytes());
-    assertEquals(fromBytes, fromBytes.copy(fromBytes.typeUrl, fromBytes.valueBytes()));
+    assertEquals(fromBytes, fromBytes.copy(fromBytes.getTypeUrl(), fromBytes.valueBytes()));
     assertEquals(packed.unpack(TestMessages.Person.ADAPTER),
         fromBytes.unpack(TestMessages.Person.ADAPTER));
   }

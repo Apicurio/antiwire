@@ -40,7 +40,7 @@ public class ProtoTypeTest {
 
   @Test public void simpleName() {
     ProtoType person = ProtoType.get("squareup.protos.person.Person");
-    assertEquals("Person", person.simpleName());
+    assertEquals("Person", person.getSimpleName());
   }
 
   @Test public void scalarToString() {
@@ -86,17 +86,17 @@ public class ProtoTypeTest {
 
   @Test public void fieldMask() {
     assertEquals(ProtoType.get("google.protobuf.FieldMask"), ProtoType.FIELD_MASK);
-    assertEquals("type.googleapis.com/google.protobuf.FieldMask", ProtoType.FIELD_MASK.typeUrl());
+    assertEquals("type.googleapis.com/google.protobuf.FieldMask", ProtoType.FIELD_MASK.getTypeUrl());
   }
 
   @Test public void enclosingTypeOrPackage() {
-    assertNull(ProtoType.STRING.enclosingTypeOrPackage());
+    assertNull(ProtoType.STRING.getEnclosingTypeOrPackage());
 
     ProtoType person = ProtoType.get("squareup.protos.person.Person");
-    assertEquals("squareup.protos.person", person.enclosingTypeOrPackage());
+    assertEquals("squareup.protos.person", person.getEnclosingTypeOrPackage());
 
     ProtoType phoneType = person.nestedType("PhoneType");
-    assertEquals("squareup.protos.person.Person", phoneType.enclosingTypeOrPackage());
+    assertEquals("squareup.protos.person.Person", phoneType.getEnclosingTypeOrPackage());
   }
 
   /**
@@ -104,14 +104,14 @@ public class ProtoTypeTest {
    * restored after the partial-file merge; upstream has no equivalent case.
    */
   @Test public void lookalikeScalarNameIsNotScalar() {
-    assertFalse(ProtoType.get("fixed16").isScalar);
+    assertFalse(ProtoType.get("fixed16").isScalar());
   }
 
   @Test public void isScalar() {
-    assertTrue(ProtoType.INT32.isScalar);
-    assertTrue(ProtoType.STRING.isScalar);
-    assertTrue(ProtoType.BYTES.isScalar);
-    assertFalse(ProtoType.get("squareup.protos.person.Person").isScalar);
+    assertTrue(ProtoType.INT32.isScalar());
+    assertTrue(ProtoType.STRING.isScalar());
+    assertTrue(ProtoType.BYTES.isScalar());
+    assertFalse(ProtoType.get("squareup.protos.person.Person").isScalar());
   }
 
   // TASK-13 adaptation: the cases above are the full upstream file. The cases below are
@@ -120,23 +120,23 @@ public class ProtoTypeTest {
 
   @Test public void simpleNameEnclosingTypeOrPackageIsNotDecomposedWithMap() {
     ProtoType money = ProtoType.get("map<string, squareup.Cash.Money>");
-    assertTrue(money.isMap);
+    assertTrue(money.isMap());
     // Upstream: the raw string is kept whole; simpleName splits on the last dot of the raw
     // string, which for a map ends with the value type's simple name including '>'.
-    assertEquals("Money>", money.simpleName());
+    assertEquals("Money>", money.getSimpleName());
   }
 
   @Test public void protoTypeIsScalarOrMap() {
     ProtoType money = ProtoType.get("squareup.Cash.Money");
-    assertFalse(money.isScalar);
-    assertFalse(money.isMap);
-    assertNull(money.keyType);
-    assertNull(money.valueType);
+    assertFalse(money.isScalar());
+    assertFalse(money.isMap());
+    assertNull(money.getKeyType());
+    assertNull(money.getValueType());
   }
 
   @Test public void typeUrl() {
     assertEquals("type.googleapis.com/squareup.protos.simple.Person",
-        ProtoType.get("squareup.protos.simple.Person").typeUrl());
-    assertNull(ProtoType.get("int32").typeUrl());
+        ProtoType.get("squareup.protos.simple.Person").getTypeUrl());
+    assertNull(ProtoType.get("int32").getTypeUrl());
   }
 }

@@ -20,10 +20,23 @@ import com.squareup.wire.schema.internal.SchemaUtil;
 import java.util.List;
 
 public final class ReservedElement {
-  public final Location location;
-  public final String documentation;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final String documentation;
+
+  public String getDocumentation() {
+    return documentation;
+  }
   /** A String name or Integer or Integer range (int[]{first, last}) tag. */
-  public final List<Object> values;
+  private final List<Object> values;
+
+  public List<Object> getValues() {
+    return values;
+  }
 
   public ReservedElement(Location location, String documentation, List<Object> values) {
     this.location = location;

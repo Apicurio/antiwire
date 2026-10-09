@@ -26,12 +26,41 @@ import java.util.Objects;
  * {@code build.wire} file that is in the same directory as the configured type.
  */
 public final class TypeConfigElement {
-  public final Location location;
-  public final String type;
-  public final String documentation;
-  public final List<OptionElement> with;
-  public final String target;
-  public final String adapter;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final String type;
+
+  public String getType() {
+    return type;
+  }
+
+  private final String documentation;
+
+  public String getDocumentation() {
+    return documentation;
+  }
+
+  private final List<OptionElement> with;
+
+  public List<OptionElement> getWith() {
+    return with;
+  }
+
+  private final String target;
+
+  public String getTarget() {
+    return target;
+  }
+
+  private final String adapter;
+
+  public String getAdapter() {
+    return adapter;
+  }
 
   public TypeConfigElement(Location location, String type, String documentation,
       List<OptionElement> with, String target, String adapter) {

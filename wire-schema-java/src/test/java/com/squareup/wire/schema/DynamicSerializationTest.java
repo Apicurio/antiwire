@@ -150,7 +150,7 @@ public class DynamicSerializationTest {
     ByteString encoded = ByteString.decodeHex(hex.toString());
 
     Map<?, ?> decoded = (Map<?, ?>) adapter.decode(encoded);
-    assertEquals(10_000, ((FieldMask) decoded.get("field_mask_field")).paths().size());
+    assertEquals(10_000, ((FieldMask) decoded.get("field_mask_field")).getPaths().size());
   }
 
   @Test public void singularDurationOccurrencesAreMerged() throws Exception {

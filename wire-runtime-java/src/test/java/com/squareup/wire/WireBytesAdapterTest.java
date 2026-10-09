@@ -55,7 +55,7 @@ public class WireBytesAdapterTest {
   }
 
   @Test public void wireBytesIdentityIsEmpty() {
-    assertEquals(Bytes.EMPTY, ProtoAdapter.WIRE_BYTES.identity);
+    assertEquals(Bytes.EMPTY, ProtoAdapter.WIRE_BYTES.getIdentity());
   }
 
   @Test public void wireBytesRedactIsUnsupported() {

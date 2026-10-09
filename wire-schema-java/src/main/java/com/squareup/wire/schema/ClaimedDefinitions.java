@@ -45,7 +45,7 @@ public final class ClaimedDefinitions {
 
   /** Tracks that {@code type} has been handled. */
   public void claim(Type type) {
-    claim(type.type());
+    claim(type.getType());
   }
 
   /** Tracks that {@code service} has been handled. */
@@ -65,7 +65,7 @@ public final class ClaimedDefinitions {
 
   /** Returns true if {@code type} has already been handled. */
   public boolean contains(Type type) {
-    return contains(type.type());
+    return contains(type.getType());
   }
 
   /** Returns true if {@code service} has already been handled. */

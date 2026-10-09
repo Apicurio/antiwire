@@ -23,16 +23,32 @@ import java.util.Objects;
  */
 public final class Location {
   /** The base of this location; typically a directory or .jar file. */
-  public final String base;
+  private final String base;
 
-  /** The path to this location relative to {@link #base}. */
-  public final String path;
+  public String getBase() {
+    return base;
+  }
+
+  /** The path to this location relative to {@link #getBase()}. */
+  private final String path;
+
+  public String getPath() {
+    return path;
+  }
 
   /** The line number of this location, or -1 for no specific line number. */
-  public final int line;
+  private final int line;
+
+  public int getLine() {
+    return line;
+  }
 
   /** The column on the line of this location, or -1 for no specific column. */
-  public final int column;
+  private final int column;
+
+  public int getColumn() {
+    return column;
+  }
 
   public Location(String base, String path, int line, int column) {
     this.base = base;
