@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-10-09 15:01'
+updated_date: '2026-10-09 15:31'
 labels:
   - user-feedback
   - compatibility
@@ -38,6 +39,16 @@ Options for the maintainer (policy call under DEC-2): (a) keep the current API s
 - [ ] #3 If shims are chosen, a test proves a class compiled against the real Wire 7.1.0 jar for ProtoParser.Companion.parse (and the chosen getters) runs against the port, and docs/compatibility-matrix.md section G is updated.
 - [ ] #4 Run /code-review at high effort on the final diff
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-10-09 correction (from the apicurio-registry agent, checked against its clone): the Apicurio target jars I scanned are 3.3.4-SNAPSHOT builds dated 2026-09-24 14:27-14:29, built from ce003bf8e plus an unproven working tree. 48e2742ac has identical sources for the four protobuf modules but is not an ancestor of 3620f08c, and those modules changed in 9 files between them (MessageIndexesUtil, ProtobufFile, two poms among them). So the scan counts in the description (120 referenced members, 30 resolved, 84 getters) describe the 3.3.4-SNAPSHOT builds, not 3620f08c. The ProtoParser.Companion.parse call is confirmed at 3620f08c in two files: serdes/generic/serde-common-protobuf/.../ProtobufSchemaParser.java:46 and schema-validation/protobuf/.../ProtobufSchemaParser.java:34. Both poms pin wire-schema 6.4.0. A rescan against jars built at 3620f08c is pending (the apicurio-registry agent is building them in a worktree).
+
+Delivery gap is worse than stated: commits a11d7cfa and 6ce5582c are not valid objects in the Apicurio clones on bird or on the Mac, and no antiwire-integration branch exists in the Apicurio clone or in the antiwire repos on either host. The TASK-18 migration (23 files, ANTIWIRE_MIGRATION.md) may therefore be lost; it must be located or redone before AC#1 can be met.
+
+2026-10-09 rescan at the user's commit (supersedes the pending-rescan remark and the 3.3.4-SNAPSHOT counts above): jars built by the apicurio-registry agent from apicurio-registry 3620f08c2efa432dd93604bb413888337ce2321f (clean detached worktree /home/pantinor/data/repo/work/wt-protobuf-3620f08c, 3.4.0-SNAPSHOT, mvnw package -DskipTests, BUILD SUCCESS; not installed to ~/.m2): utils/protobuf-schema-utilities, schema-util/protobuf, serdes/generic/serde-common-protobuf, schema-validation/protobuf. 66 Apicurio classes reference 132 distinct com.squareup.wire members; 30 resolve in the port and 102 do not: 96 Kotlin property getters, 2 Companion form (ProtoParser.Companion field and ProtoParser$Companion.parse), 2 constructors (ProtoParser(Location, char[]) is private in the port, OneOf constructor descriptor differs), 2 other (MessageType.toElement(), Schema.protoFile(okio.Path)). Sanity check: all 132 referenced members exist in the upstream 7.1.0 model, so the scan itself is sound. Both ProtobufSchemaParser classes (serde-common-protobuf and schema-validation-protobuf) start with getstatic ProtoParser.Companion, which is exactly the user's NoSuchFieldError. The build pins wire-schema 6.4.0 (property wire-schema.version); I did not verify which Wire jar the build resolved, and I scanned references, not behavior, so a member-level match against 7.1.0 is the evidence, not a run against upstream 6.4.0.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->

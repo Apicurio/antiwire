@@ -4,7 +4,7 @@ title: Publish 0.1.0 with attribution and docs
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-07 05:59'
+updated_date: '2026-10-09 15:30'
 labels: []
 milestone: m-11
 dependencies:
@@ -67,6 +67,8 @@ GitHub tracking issue: https://github.com/Apicurio/antiwire/issues/3
 2026-10-06 maintainer confirmations, recorded in docs/decisions.md. (1) The io.apicurio namespace is confirmed for use (DEC-8 reconfirmed). This covers the namespace only: AC#1's explicit release approval for publishing artifacts remains open and is the maintainer's gate, so no publish, tag or deploy follows from this note. (2) The JDK-typed public API without okio is confirmed as the intended design (new DEC-14, backed by ConsumerApiSurfaceTest and JdkSchemaLoaderValidationTest).
 
 2026-10-07 audit note: the NOTICE discrepancy mentioned in the 2026-10-02 groundwork note (Apache attribution over BSD-only files) is now resolved: NOTICE reproduces the BSD notices verbatim without the Apache sentence and carries a JavaPoet 1.13.0 attribution (see docs/license-inventory.md, 2026-10-07). The 159-source count there was the a45b0f0 figure; HEAD has 161 (docs/license-inventory.md).
+
+2026-10-09 correction: open item 3 above says the integration branch existed only on the Mac. It is not on the Mac either (a11d7cfa and 6ce5582c are invalid objects in the Apicurio clones on both hosts, no antiwire-integration branch anywhere checked). Same-candidate Apicurio revalidation and the Apicurio footprint marginal now also require locating or redoing the TASK-18 migration; see TASK-33.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done

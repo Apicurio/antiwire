@@ -6,7 +6,7 @@ title: >-
 status: Done
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-06 19:06'
+updated_date: '2026-10-09 15:30'
 labels: []
 milestone: m-10
 dependencies:
@@ -36,6 +36,8 @@ Prepare a separate Apicurio integration branch at a recorded commit using the po
 
 <!-- SECTION:NOTES:BEGIN -->
 2026-10-06 audit note: the integration branch cited in the Final Summary (a11d7cfa, later 6ce5582c) is Mac-hosted and absent from this host's Apicurio clones and /tmp/apicurio (footprint.md 10.1 records the same). Same-candidate revalidation is owned by TASK-21.
+
+2026-10-09 correction to the 2026-10-06 note above: the claim that the integration branch (a11d7cfa, later 6ce5582c) is Mac-hosted was taken from the repo's own records and is not supported. The apicurio-registry agent found neither commit as a valid object in the Apicurio clone on bird or on the Mac, no antiwire-integration branch in either, and no Apicurio pom that references antiwire; antiwire 0.1.0-SNAPSHOT artifacts are installed in bird's ~/.m2 (2026-10-06) but nothing resolves them. The migration work (ANTIWIRE_MIGRATION.md, 23 migrated files, antiwire-parity/ drivers) is therefore not located. See TASK-33.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
