@@ -125,9 +125,13 @@ public abstract class Root {
    * These will be different if the file is loaded from a .zip archive.
    */
   public static final class ProtoFilePath extends Root {
-    public final Location location;
+    private final Location location;
     final FileSystem fileSystem;
     final Path path;
+
+    public Location getLocation() {
+      return location;
+    }
 
     ProtoFilePath(Location location, FileSystem fileSystem, Path path) {
       this.location = location;
@@ -175,7 +179,7 @@ public abstract class Root {
 
   public static final class DirectoryRoot extends Root {
     /** The location of either a directory or .zip file. */
-    public final String base;
+    private final String base;
 
     final FileSystem fileSystem;
 

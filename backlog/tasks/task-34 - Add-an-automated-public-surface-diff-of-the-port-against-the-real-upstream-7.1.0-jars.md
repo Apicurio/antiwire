@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-10-09 15:01'
-updated_date: '2026-10-09 15:35'
+updated_date: '2026-10-09 20:10'
 labels:
   - user-feedback
   - compatibility
@@ -29,6 +29,12 @@ Root cause of why the Companion, getter and constructor gaps (see TASK-33) were 
 - [ ] #3 The baseline and docs/compatibility-matrix.md record each accepted difference with its reason, so the suite doubles as the source-compatibility ledger.
 - [ ] #4 Run /code-review at high effort on the final diff
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-10-09 follow-up from the second /code-review of TASK-33.1: AccessorNameParityTest.noPlainNameNextToAPinnedGetter reads only EXPECTED rows with no parameters, so it cannot see nested classes that are top-level upstream (Root.ProtoFilePath, Root.DirectoryRoot were found by hand, now fixed) or the plain twins of GAP getters (MessageBinding.messageType() is allow-listed by hand). The surface-diff suite must cover nested public classes with their upstream names, GAP rows, and fields as well as methods, comparing by full signature.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->

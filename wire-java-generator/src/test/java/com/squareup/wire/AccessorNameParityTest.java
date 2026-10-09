@@ -135,7 +135,10 @@ public class AccessorNameParityTest {
     java.util.Set<String> allowed = new java.util.HashSet<>(java.util.Arrays.asList(
         "com.squareup.wire.ProtoAdapter.type",
         "com.squareup.wire.internal.ImmutableList.size",
-        "com.squareup.wire.internal.MutableOnWriteList.size"));
+        "com.squareup.wire.internal.MutableOnWriteList.size",
+        // MessageBinding.getMessageType() is a GAP row (upstream returns kotlin.reflect.KClass,
+        // the port returns Class), so messageType() stays and is recorded here deliberately.
+        "com.squareup.wire.internal.MessageBinding.messageType"));
     List<String> duplicates = new ArrayList<>();
     for (String[] row : rows()) {
       if (!row[0].equals("EXPECTED") || !row[3].isEmpty()) continue;

@@ -206,19 +206,19 @@ public final class CommonSchemaLoader implements Loader {
   }
 
   private ProtoFile load(Root.ProtoFilePath protoFilePath) throws IOException {
-    if (CoreLoader.isWireRuntimeProto(protoFilePath.location)) {
-      return CoreLoader.INSTANCE.load(protoFilePath.location.getPath());
+    if (CoreLoader.isWireRuntimeProto(protoFilePath.getLocation())) {
+      return CoreLoader.INSTANCE.load(protoFilePath.getLocation().getPath());
     }
 
     ProtoFile protoFile = protoFilePath.parse();
-    String importPath = importPath(protoFile, protoFilePath.location);
+    String importPath = importPath(protoFile, protoFilePath.getLocation());
 
     // If the .proto was specified as a full path without a separate base directory that it's
     // relative to, confirm that the import path and file system path agree.
-    if (protoFilePath.location.getBase().isEmpty()
-        && !protoFilePath.location.getPath().equals(importPath)
-        && !protoFilePath.location.getPath().endsWith("/" + importPath)) {
-      errors.add("expected " + protoFilePath.location.getPath()
+    if (protoFilePath.getLocation().getBase().isEmpty()
+        && !protoFilePath.getLocation().getPath().equals(importPath)
+        && !protoFilePath.getLocation().getPath().endsWith("/" + importPath)) {
+      errors.add("expected " + protoFilePath.getLocation().getPath()
           + " to have a path ending with " + importPath);
     }
 

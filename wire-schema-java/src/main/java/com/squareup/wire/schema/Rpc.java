@@ -61,11 +61,11 @@ public final class Rpc {
     return documentation;
   }
 
-  public String requestTypeElement() {
+  String requestTypeElement() {
     return requestTypeElement;
   }
 
-  public String responseTypeElement() {
+  String responseTypeElement() {
     return responseTypeElement;
   }
 

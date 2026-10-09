@@ -116,7 +116,7 @@ public final class Field {
     return defaultValue;
   }
 
-  public String elementType() {
+  String elementType() {
     return elementType;
   }
 

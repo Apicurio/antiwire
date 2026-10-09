@@ -79,7 +79,7 @@ public class RootTest {
         roots.get(0).resolve("squareup/dinosaurs/dinosaur.proto");
     assertNotNull(resolved);
     assertEquals(Location.get(sourceDir.toString(), "squareup/dinosaurs/dinosaur.proto"),
-        resolved.location);
+        resolved.getLocation());
 
     assertNull(roots.get(0).resolve("squareup/dinosaurs/unknown.proto"));
 
@@ -102,7 +102,7 @@ public class RootTest {
           roots.get(0).resolve("squareup/dinosaurs/dinosaur.proto");
       assertNotNull(resolved);
       assertEquals(Location.get(zip.toString(), "squareup/dinosaurs/dinosaur.proto"),
-          resolved.location);
+          resolved.getLocation());
 
       assertNull(roots.get(0).resolve("squareup/dinosaurs/unknown.proto"));
 
@@ -181,7 +181,7 @@ public class RootTest {
   private static List<Location> locations(List<Root.ProtoFilePath> protoFilePaths) {
     List<Location> result = new ArrayList<>();
     for (Root.ProtoFilePath protoFilePath : protoFilePaths) {
-      result.add(protoFilePath.location);
+      result.add(protoFilePath.getLocation());
     }
     return result;
   }
