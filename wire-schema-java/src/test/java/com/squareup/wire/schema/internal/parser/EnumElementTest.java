@@ -74,7 +74,7 @@ public class EnumElementTest {
         Arrays.asList(kitKat, fooBar),
         Collections.singletonList(constant("ONE", 1)),
         Collections.emptyList());
-    assertEquals(2, element.options.size());
+    assertEquals(2, element.getOptions().size());
   }
 
   @Test public void simpleWithDocumentationToSchema() {

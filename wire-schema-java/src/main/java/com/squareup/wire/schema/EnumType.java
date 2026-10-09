@@ -274,10 +274,10 @@ public final class EnumType extends Type {
   }
 
   static EnumType fromElement(ProtoType protoType, EnumElement enumElement, Syntax syntax) {
-    return new EnumType(protoType, enumElement.location, enumElement.documentation,
-        enumElement.name, EnumConstant.fromElements(enumElement.getConstants()),
+    return new EnumType(protoType, enumElement.getLocation(), enumElement.getDocumentation(),
+        enumElement.getName(), EnumConstant.fromElements(enumElement.getConstants()),
         Reserved.fromElements(enumElement.getReserveds()),
-        new Options(Options.ENUM_OPTIONS, enumElement.options), syntax);
+        new Options(Options.ENUM_OPTIONS, enumElement.getOptions()), syntax);
   }
 
   @Override public boolean equals(Object other) {

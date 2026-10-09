@@ -1989,7 +1989,7 @@ public class ProtoParserFullTest {
       if (expectedType instanceof MessageElement) {
         MessageElement expectedMessage = (MessageElement) expectedType;
         MessageElement actualMessage = (MessageElement) actualType;
-        assertEquals(expectedMessage.nestedTypes, actualMessage.nestedTypes);
+        assertEquals(expectedMessage.getNestedTypes(), actualMessage.getNestedTypes());
         assertEquals(expectedMessage.getFields(), actualMessage.getFields());
         assertEquals(expectedMessage.getOneOfs(), actualMessage.getOneOfs());
         assertEquals(expectedMessage.getGroups(), actualMessage.getGroups());

@@ -99,7 +99,7 @@ public class MessageElementTest {
         Collections.emptyList(), Arrays.asList(kitKat, fooBar), Collections.emptyList(),
         Collections.singletonList(field), Collections.emptyList(), Collections.emptyList(),
         Collections.emptyList(), Collections.emptyList());
-    assertEquals(2, element.options.size());
+    assertEquals(2, element.getOptions().size());
   }
 
   @Test public void simpleWithNestedElementsToSchema() {
@@ -139,7 +139,7 @@ public class MessageElementTest {
             null, null, 1, "", Collections.emptyList())),
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
         Collections.emptyList());
-    assertEquals(2, element.nestedTypes.size());
+    assertEquals(2, element.getNestedTypes().size());
   }
 
   @Test public void simpleWithExtensionsToSchema() {

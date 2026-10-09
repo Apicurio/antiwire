@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Set;
 
 public final class MessageElement implements TypeElement {
-  public final Location location;
-  public final String name;
-  public final String documentation;
-  public final List<TypeElement> nestedTypes;
-  public final List<OptionElement> options;
+  private final Location location;
+  private final String name;
+  private final String documentation;
+  private final List<TypeElement> nestedTypes;
+  private final List<OptionElement> options;
   private final List<ReservedElement> reserveds;
 
   public List<ReservedElement> getReserveds() {

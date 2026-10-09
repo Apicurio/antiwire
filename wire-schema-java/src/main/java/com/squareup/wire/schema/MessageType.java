@@ -359,21 +359,21 @@ public final class MessageType extends Type {
       // The first element must be the package name.
       childNamespaces = new ArrayList<>();
       childNamespaces.add("");
-      childNamespaces.add(messageElement.name);
+      childNamespaces.add(messageElement.getName());
     } else {
       childNamespaces = new ArrayList<>(namespaces);
-      childNamespaces.add(messageElement.name);
+      childNamespaces.add(messageElement.getName());
     }
     List<Type> nested = new ArrayList<>();
     for (com.squareup.wire.schema.internal.parser.TypeElement element
-        : messageElement.nestedTypes) {
+        : messageElement.getNestedTypes()) {
       nested.add(Type.get(childNamespaces, protoType.nestedType(element.getName()), element, syntax));
     }
     List<Extend> nestedExtends = Extend.fromElements(childNamespaces,
         messageElement.getExtendDeclarations());
 
-    return new MessageType(protoType, messageElement.location, messageElement.documentation,
-        messageElement.name,
+    return new MessageType(protoType, messageElement.getLocation(), messageElement.getDocumentation(),
+        messageElement.getName(),
         Field.fromElements(childNamespaces, messageElement.getFields(), false, false),
         // Extension fields are populated during linking.
         new ArrayList<>(),
@@ -381,7 +381,7 @@ public final class MessageType extends Type {
         nested, nestedExtends,
         Extensions.fromElements(messageElement.getExtensions()),
         Reserved.fromElements(messageElement.getReserveds()),
-        new Options(Options.MESSAGE_OPTIONS, messageElement.options),
+        new Options(Options.MESSAGE_OPTIONS, messageElement.getOptions()),
         syntax);
   }
 

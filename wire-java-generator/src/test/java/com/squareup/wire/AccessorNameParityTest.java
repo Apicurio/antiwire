@@ -119,6 +119,53 @@ public class AccessorNameParityTest {
     }
   }
 
+  /**
+   * The rule "no two names for one thing", applied to every pinned getter: for each EXPECTED row
+   * getX()/isX(), the port must not also expose a public instance field or a no-argument public
+   * method named x, unless the real upstream class itself has that plain member (a
+   * {@code @JvmName} or {@code @JvmField} in the Kotlin source) or the exception is listed here.
+   */
+  @Test
+  public void noPlainNameNextToAPinnedGetter() throws Exception {
+    // Members that legitimately keep a plain name although upstream has getX():
+    // - ProtoAdapter.type: the port's type differs from upstream's (Class instead of
+    //   kotlin.reflect.KClass), so the getter is not pinned and the field stays;
+    // - ImmutableList/MutableOnWriteList.size(): java.util.List requires size(), and upstream's
+    //   Kotlin collections additionally expose getSize().
+    java.util.Set<String> allowed = new java.util.HashSet<>(java.util.Arrays.asList(
+        "com.squareup.wire.ProtoAdapter.type",
+        "com.squareup.wire.internal.ImmutableList.size",
+        "com.squareup.wire.internal.MutableOnWriteList.size"));
+    List<String> duplicates = new ArrayList<>();
+    for (String[] row : rows()) {
+      if (!row[0].equals("EXPECTED") || !row[3].isEmpty()) continue;
+      String getter = row[2];
+      String plain;
+      if (getter.startsWith("get") && getter.length() > 3) {
+        plain = Character.toLowerCase(getter.charAt(3)) + getter.substring(4);
+      } else if (getter.startsWith("is") && getter.length() > 2) {
+        plain = Character.toLowerCase(getter.charAt(2)) + getter.substring(3);
+      } else {
+        continue;
+      }
+      if (allowed.contains(row[1] + "." + plain)) continue;
+      Class<?> type = tryLoad(row[1]);
+      if (type == null) continue;
+      boolean plainField = false;
+      for (java.lang.reflect.Field f : type.getFields()) {
+        if (f.getName().equals(plain) && !Modifier.isStatic(f.getModifiers())) plainField = true;
+      }
+      Method plainMethod = find(type, plain);
+      boolean plainMethodPublic = plainMethod != null && Modifier.isPublic(plainMethod.getModifiers())
+          && !Modifier.isStatic(plainMethod.getModifiers());
+      if (plainField || plainMethodPublic) {
+        duplicates.add(row[1] + " exposes " + plain + (plainField ? " (field)" : "()")
+            + " next to " + getter + "()");
+      }
+    }
+    assertTrue(duplicates.isEmpty(), duplicates.size() + " duplicated names: " + duplicates);
+  }
+
   private static Class<?> tryLoad(String name) {
     try {
       return Class.forName(name, false, AccessorNameParityTest.class.getClassLoader());

@@ -21,10 +21,10 @@ import java.util.Collections;
 import java.util.List;
 
 public final class EnumElement implements TypeElement {
-  public final Location location;
-  public final String name;
-  public final String documentation;
-  public final List<OptionElement> options;
+  private final Location location;
+  private final String name;
+  private final String documentation;
+  private final List<OptionElement> options;
   private final List<EnumConstantElement> constants;
 
   public List<EnumConstantElement> getConstants() {

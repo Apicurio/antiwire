@@ -51,7 +51,7 @@ public class ProtoParserTest {
     assertEquals("squareup.protos.parser", file.getPackageName());
     assertEquals(1, file.getTypes().size());
     MessageElement person = (MessageElement) file.getTypes().get(0);
-    assertEquals("Person", person.name);
+    assertEquals("Person", person.getName());
     assertEquals(3, person.getFields().size());
     FieldElement name = person.getFields().get(0);
     assertEquals(Label.REQUIRED, name.getLabel());
