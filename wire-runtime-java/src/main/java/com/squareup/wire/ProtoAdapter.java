@@ -89,6 +89,22 @@ public abstract class ProtoAdapter<E> {
         ? null : new RepeatedProtoAdapter<E>(this);
   }
 
+  /**
+   * Upstream's {@code (FieldEncoding, Class)} JVM constructor: no type URL, proto2 syntax, no
+   * identity and no source file. Kept for hand-written and older generated adapters.
+   */
+  public ProtoAdapter(FieldEncoding fieldEncoding, Class<?> type) {
+    this(fieldEncoding, type, null, Syntax.PROTO_2, null, null);
+  }
+
+  /**
+   * Upstream's {@code (FieldEncoding, Class, String)} JVM constructor: proto2 syntax, no
+   * identity and no source file.
+   */
+  public ProtoAdapter(FieldEncoding fieldEncoding, Class<?> type, String typeUrl) {
+    this(fieldEncoding, type, typeUrl, Syntax.PROTO_2, null, null);
+  }
+
   protected ProtoAdapter(FieldEncoding fieldEncoding, Class<?> type, String typeUrl,
       Syntax syntax) {
     this(fieldEncoding, type, typeUrl, syntax, null, null);
