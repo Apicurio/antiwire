@@ -10,5 +10,26 @@
   "fixtures": {
     "wire_compiler_jars": "7.1.0 from Maven Central (scripts/generate-java-fixtures.sh)",
     "protobuf_java_test_oracle": "4.36.1 (wire-schema-java pom, test scope)"
+  },
+  "upstream_jars": {
+    "comment": "Real Wire 7.1.0 jars used by CompiledAgainstUpstreamTest and scripts/gen-upstream-getter-baseline.py. Fetched from Maven Central and verified by SHA-256 before use.",
+    "files": {
+      "wire-schema-jvm.jar": {
+        "url": "https://repo1.maven.org/maven2/com/squareup/wire/wire-schema-jvm/7.1.0/wire-schema-jvm-7.1.0.jar",
+        "sha256": "29761694316c1fd8b3478dff36eac19b21c37d4e00fe670eb759f2473e124075"
+      },
+      "wire-runtime-jvm.jar": {
+        "url": "https://repo1.maven.org/maven2/com/squareup/wire/wire-runtime-jvm/7.1.0/wire-runtime-jvm-7.1.0.jar",
+        "sha256": "a26cef81c2f361cec68e37cfddaaa207df568f6a72661214f4856be70940e073"
+      },
+      "okio.jar": {
+        "url": "https://repo1.maven.org/maven2/com/squareup/okio/okio-jvm/3.18.2/okio-jvm-3.18.2.jar",
+        "sha256": "681fed549d1d2c63710f42c9eab433d642c71af778babd67035c50f8c425aaff"
+      },
+      "kotlin-stdlib.jar": {
+        "url": "https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.0.21/kotlin-stdlib-2.0.21.jar",
+        "sha256": "f31cc53f105a7e48c093683bbd5437561d1233920513774b470805641bedbc09"
+      }
+    }
   }
 }

@@ -62,9 +62,9 @@ public final class MarkSet {
     if (pruningRules.prunes(protoMember)) {
       throw new IllegalStateException("Check failed");
     }
-    types.add(protoMember.type);
+    types.add(protoMember.getType());
     rootMemberTypes.put(protoMember, UNKNOWN_TYPE);
-    Set<ProtoMember> memberSet = members.computeIfAbsent(protoMember.type, k -> new LinkedHashSet<>());
+    Set<ProtoMember> memberSet = members.computeIfAbsent(protoMember.getType(), k -> new LinkedHashSet<>());
     memberSet.add(protoMember);
   }
 
@@ -110,8 +110,8 @@ public final class MarkSet {
    */
   boolean mark(ProtoMember protoMember) {
     if (pruningRules.prunes(protoMember)) return false;
-    types.add(protoMember.type);
-    Set<ProtoMember> memberSet = members.computeIfAbsent(protoMember.type, k -> new LinkedHashSet<>());
+    types.add(protoMember.getType());
+    Set<ProtoMember> memberSet = members.computeIfAbsent(protoMember.getType(), k -> new LinkedHashSet<>());
     return memberSet.add(protoMember);
   }
 
@@ -133,13 +133,25 @@ public final class MarkSet {
 
     // A member cannot be included if its referencing type is excluded unless a root member of
     // this referenced type exists.
-    if (pruningRules.prunes(protoMember.type)
-        && rootMemberTypes.containsValue(protoMember.type)) {
+    if (pruningRules.prunes(protoMember.getType())
+        && rootMemberTypes.containsValue(protoMember.getType())) {
       return true;
     }
 
     if (pruningRules.prunes(protoMember)) return false;
-    Set<ProtoMember> memberSet = members.get(protoMember.type);
+    Set<ProtoMember> memberSet = members.get(protoMember.getType());
     return memberSet != null && memberSet.contains(protoMember);
+  }
+
+  public PruningRules getPruningRules() {
+    return pruningRules;
+  }
+
+  public Set<ProtoType> getTypes() {
+    return types;
+  }
+
+  public Map<ProtoType, Set<ProtoMember>> getMembers() {
+    return members;
   }
 }

@@ -53,7 +53,7 @@ final class PartitionedSchema {
     }
 
     Partition(Schema schema) {
-      this(schema, schema.types(), Collections.emptyMap());
+      this(schema, schema.getTypes(), Collections.emptyMap());
     }
   }
 
@@ -70,7 +70,7 @@ final class PartitionedSchema {
     Integer cached = memo.get(name);
     if (cached != null) return cached;
     int depth = 1;
-    for (String dependency : modules.get(name).dependencies()) {
+    for (String dependency : modules.get(name).getDependencies()) {
       depth = Math.max(depth, 1 + dfs(dependency, modules, memo));
     }
     memo.put(name, depth);
@@ -79,7 +79,7 @@ final class PartitionedSchema {
 
   static PartitionedSchema partition(Schema schema, Map<String, WireRun.Module> modules) {
     DirectedAcyclicGraph<String> moduleGraph = new DirectedAcyclicGraph<>(
-        modules.keySet(), moduleName -> modules.get(moduleName).dependencies());
+        modules.keySet(), moduleName -> modules.get(moduleName).getDependencies());
 
     List<String> errors = new ArrayList<>();
     Map<String, Partition> partitions = new LinkedHashMap<>();
@@ -123,16 +123,16 @@ final class PartitionedSchema {
       // are reachable from this module's types.
       Schema stubbedSchema = SchemaUtil.withStubs(schema, upstreamTypes.keySet());
 
-      Schema prunedSchema = module.pruningRules() != null
-          ? stubbedSchema.prune(module.pruningRules())
+      Schema prunedSchema = module.getPruningRules() != null
+          ? stubbedSchema.prune(module.getPruningRules())
           : stubbedSchema;
 
       Set<ProtoType> ownedTypes = new LinkedHashSet<>();
-      for (ProtoFile protoFile : prunedSchema.protoFiles()) {
+      for (ProtoFile protoFile : prunedSchema.getProtoFiles()) {
         for (Type type : protoFile.typesAndNestedTypes()) {
-          if (!upstreamTypes.containsKey(type.type())) ownedTypes.add(type.type());
+          if (!upstreamTypes.containsKey(type.getType())) ownedTypes.add(type.getType());
         }
-        for (Service service : protoFile.services()) {
+        for (Service service : protoFile.getServices()) {
           if (!upstreamTypes.containsKey(service.type())) ownedTypes.add(service.type());
         }
       }
@@ -157,12 +157,12 @@ final class PartitionedSchema {
             for (ProtoType duplicate : duplicates) {
               String duplicateName = duplicate.toString();
               Set<String> currentModuleRoots =
-                  currentModule.pruningRules() != null
-                      ? currentModule.pruningRules().roots()
+                  currentModule.getPruningRules() != null
+                      ? currentModule.getPruningRules().getRoots()
                       : Collections.emptySet();
               Set<String> otherModuleRoots =
-                  otherModule.pruningRules() != null
-                      ? otherModule.pruningRules().roots()
+                  otherModule.getPruningRules() != null
+                      ? otherModule.getPruningRules().getRoots()
                       : Collections.emptySet();
               if (!currentModuleRoots.contains(duplicateName)
                   || !otherModuleRoots.contains(duplicateName)) {

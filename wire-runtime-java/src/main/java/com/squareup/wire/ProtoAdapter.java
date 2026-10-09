@@ -45,10 +45,29 @@ import okio.Okio;
 public abstract class ProtoAdapter<E> {
   final FieldEncoding fieldEncoding;
   public final Class<?> type;
-  public final String typeUrl;
-  public final Syntax syntax;
-  public final E identity;
-  public final String sourceFile;
+  private final String typeUrl;
+
+  public String getTypeUrl() {
+    return typeUrl;
+  }
+
+  private final Syntax syntax;
+
+  public Syntax getSyntax() {
+    return syntax;
+  }
+
+  private final E identity;
+
+  public E getIdentity() {
+    return identity;
+  }
+
+  private final String sourceFile;
+
+  public String getSourceFile() {
+    return sourceFile;
+  }
 
   final ProtoAdapter<List<E>> packedAdapter;
   final ProtoAdapter<List<E>> repeatedAdapter;
@@ -125,9 +144,9 @@ public abstract class ProtoAdapter<E> {
   public void encodeWithTag(ReverseProtoWriter writer, int tag, E value) throws IOException {
     if (value == null) return;
     if (fieldEncoding == FieldEncoding.LENGTH_DELIMITED) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       encode(writer, value);
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
     } else {
       encode(writer, value);
     }
@@ -1560,20 +1579,20 @@ public abstract class ProtoAdapter<E> {
 
     @Override public int encodedSize(FieldMask value) {
       int result = 0;
-      for (String path : value.paths()) {
+      for (String path : value.getPaths()) {
         result += STRING.encodedSizeWithTag(1, path);
       }
       return result;
     }
 
     @Override public void encode(ProtoWriter writer, FieldMask value) throws IOException {
-      for (String path : value.paths()) {
+      for (String path : value.getPaths()) {
         STRING.encodeWithTag(writer, 1, path);
       }
     }
 
     @Override public void encode(ReverseProtoWriter writer, FieldMask value) throws IOException {
-      List<String> paths = value.paths();
+      List<String> paths = value.getPaths();
       for (int i = paths.size() - 1; i >= 0; i--) {
         STRING.encodeWithTag(writer, 1, paths.get(i));
       }
@@ -1636,10 +1655,10 @@ public abstract class ProtoAdapter<E> {
       List<Map.Entry<String, ?>> entries = new ArrayList<Map.Entry<String, ?>>(value.entrySet());
       java.util.Collections.reverse(entries);
       for (Map.Entry<String, ?> entry : entries) {
-        int byteCountBefore = writer.byteCount();
+        int byteCountBefore = writer.getByteCount();
         STRUCT_VALUE.encodeWithTag(writer, 2, entry.getValue());
         STRING.encodeWithTag(writer, 1, entry.getKey());
-        writer.writeVarint32(writer.byteCount() - byteCountBefore);
+        writer.writeVarint32(writer.getByteCount() - byteCountBefore);
         writer.writeTag(1, FieldEncoding.LENGTH_DELIMITED);
       }
     }
@@ -1885,9 +1904,9 @@ public abstract class ProtoAdapter<E> {
     @Override public void encodeWithTag(ReverseProtoWriter writer, int tag, Object value)
         throws IOException {
       if (value == null) {
-        int byteCountBefore = writer.byteCount();
+        int byteCountBefore = writer.getByteCount();
         encode(writer, value);
-        writer.writeVarint32(writer.byteCount() - byteCountBefore);
+        writer.writeVarint32(writer.getByteCount() - byteCountBefore);
         writer.writeTag(tag, fieldEncoding);
       } else {
         super.encodeWithTag(writer, tag, value);

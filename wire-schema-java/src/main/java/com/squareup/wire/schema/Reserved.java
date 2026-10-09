@@ -33,16 +33,16 @@ public final class Reserved {
     this.values = values;
   }
 
-  public Location location() {
+  public Location getLocation() {
     return location;
   }
 
-  public String documentation() {
+  public String getDocumentation() {
     return documentation;
   }
 
   /** Integers are tags; int[] pairs are inclusive ranges; strings are names. */
-  public List<Object> values() {
+  public List<Object> getValues() {
     return values;
   }
 
@@ -95,7 +95,7 @@ public final class Reserved {
   }
 
   public static Reserved fromElement(ReservedElement element) {
-    return new Reserved(element.location, element.documentation, element.values);
+    return new Reserved(element.getLocation(), element.getDocumentation(), element.getValues());
   }
 
   public static ReservedElement toElement(Reserved reserved) {

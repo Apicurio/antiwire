@@ -52,23 +52,23 @@ public final class CustomTarget extends Target {
     this.schemaHandlerFactory = schemaHandlerFactory;
   }
 
-  @Override public List<String> includes() {
+  @Override public List<String> getIncludes() {
     return includes;
   }
 
-  @Override public List<String> excludes() {
+  @Override public List<String> getExcludes() {
     return excludes;
   }
 
-  @Override public boolean exclusive() {
+  @Override public boolean getExclusive() {
     return exclusive;
   }
 
-  @Override public String outDirectory() {
+  @Override public String getOutDirectory() {
     return outDirectory;
   }
 
-  public Map<String, String> options() {
+  public Map<String, String> getOptions() {
     return options;
   }
 
@@ -150,5 +150,9 @@ public final class CustomTarget extends Target {
         Map<String, String> options) {
       return delegate().create(includes, excludes, exclusive, outDirectory, options);
     }
+  }
+
+  public SchemaHandler.Factory getSchemaHandlerFactory() {
+    return schemaHandlerFactory;
   }
 }

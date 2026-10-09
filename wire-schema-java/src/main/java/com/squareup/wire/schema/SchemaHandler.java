@@ -36,25 +36,25 @@ public abstract class SchemaHandler {
    * specific needs the default implementation doesn't address.
    */
   public void handle(Schema schema, Context context) {
-    Set<ProtoType> moduleTypes = context.module() != null ? context.module().types() : null;
-    for (ProtoFile protoFile : schema.protoFiles()) {
+    Set<ProtoType> moduleTypes = context.getModule() != null ? context.getModule().getTypes() : null;
+    for (ProtoFile protoFile : schema.getProtoFiles()) {
       if (!context.inSourcePath(protoFile)) continue;
 
       // Remove types from the file which are not owned by this partition.
       List<Type> filteredTypes = new ArrayList<>();
-      for (Type type : protoFile.types()) {
-        if (moduleTypes == null || moduleTypes.contains(type.type())) filteredTypes.add(type);
+      for (Type type : protoFile.getTypes()) {
+        if (moduleTypes == null || moduleTypes.contains(type.getType())) filteredTypes.add(type);
       }
       List<Service> filteredServices = new ArrayList<>();
-      for (Service service : protoFile.services()) {
+      for (Service service : protoFile.getServices()) {
         if (moduleTypes == null || moduleTypes.contains(service.type())) {
           filteredServices.add(service);
         }
       }
       ProtoFile filteredProtoFile = protoFile.copy(
-          protoFile.location(), protoFile.imports(), protoFile.publicImports(),
-          protoFile.weakImports(), protoFile.packageName(), filteredTypes, filteredServices,
-          protoFile.extendList(), protoFile.options(), protoFile.syntax());
+          protoFile.getLocation(), protoFile.getImports(), protoFile.getPublicImports(),
+          protoFile.getWeakImports(), protoFile.getPackageName(), filteredTypes, filteredServices,
+          protoFile.getExtendList(), protoFile.getOptions(), protoFile.getSyntax());
 
       handle(filteredProtoFile, context);
     }
@@ -169,70 +169,70 @@ public abstract class SchemaHandler {
     }
 
     /** To be used by the {@link SchemaHandler} for reading/writing operations on disk. */
-    public FileSystem fileSystem() {
+    public FileSystem getFileSystem() {
       return fileSystem;
     }
 
-    /** Location on {@link #fileSystem()} where the {@link SchemaHandler} is to write files, if
+    /** Location on {@link #getFileSystem()} where the {@link SchemaHandler} is to write files, if
      * it needs to. */
-    public Path outDirectory() {
+    public Path getOutDirectory() {
       return outDirectory;
     }
 
     /** Event-listener like logger with which {@link SchemaHandler} can notify handled
      * artifacts. */
-    public WireLogger logger() {
+    public WireLogger getLogger() {
       return logger;
     }
 
     /** Errors collected so far; see {@link ErrorCollector}. */
-    public ErrorCollector errorCollector() {
+    public ErrorCollector getErrorCollector() {
       return errorCollector;
     }
 
     /** Include/exclude rules; see {@link EmittingRules}. */
-    public EmittingRules emittingRules() {
+    public EmittingRules getEmittingRules() {
       return emittingRules;
     }
 
     /** Claims on already-handled definitions, or null when the handler handles everything. */
-    public ClaimedDefinitions claimedDefinitions() {
+    public ClaimedDefinitions getClaimedDefinitions() {
       return claimedDefinitions;
     }
 
     /** Claims on paths of generated files. */
-    public ClaimedPaths claimedPaths() {
+    public ClaimedPaths getClaimedPaths() {
       return claimedPaths;
     }
 
     /** The partition this handler is generating for, or null when there are no partitions. */
-    public Module module() {
+    public Module getModule() {
       return module;
     }
 
     /** Paths of the {@code sourcePath} roots, or null when everything is in scope. */
-    public Set<String> sourcePathPaths() {
+    public Set<String> getSourcePathPaths() {
       return sourcePathPaths;
     }
 
     /** Loader for {@link Profile} files, or null when unsupported. */
-    public ProfileLoader profileLoader() {
+    public ProfileLoader getProfileLoader() {
       return profileLoader;
     }
 
     /** The full refactored {@link Schema} prior partitioning. */
-    public Schema fullSchema() {
+    public Schema getFullSchema() {
       return fullSchema;
     }
 
     /** True if this {@code protoFile} ia part of a {@code sourcePath} root. */
     public boolean inSourcePath(ProtoFile protoFile) {
-      return inSourcePath(protoFile.location());
+      return inSourcePath(protoFile.getLocation());
     }
 
     /** True if this {@code location} ia part of a {@code sourcePath} root. */
     public boolean inSourcePath(Location location) {
-      return sourcePathPaths == null || sourcePathPaths.contains(location.path);
+      return sourcePathPaths == null || sourcePathPaths.contains(location.getPath());
     }
   }
 
@@ -258,17 +258,17 @@ public abstract class SchemaHandler {
     }
 
     /** The name of the {@link Module}. */
-    public String name() {
+    public String getName() {
       return name;
     }
 
     /** The types that this module is to handle. */
-    public Set<ProtoType> types() {
+    public Set<ProtoType> getTypes() {
       return types;
     }
 
     /** These are the types depended upon by {@link #types} associated with their module name. */
-    public Map<ProtoType, String> upstreamTypes() {
+    public Map<ProtoType, String> getUpstreamTypes() {
       return upstreamTypes;
     }
   }
@@ -282,13 +282,13 @@ public abstract class SchemaHandler {
   protected void handle(
       ProtoFile protoFile,
       Context context) {
-    ClaimedDefinitions claimedDefinitions = context.claimedDefinitions();
-    EmittingRules emittingRules = context.emittingRules();
-    ClaimedPaths claimedPaths = context.claimedPaths();
+    ClaimedDefinitions claimedDefinitions = context.getClaimedDefinitions();
+    EmittingRules emittingRules = context.getEmittingRules();
+    ClaimedPaths claimedPaths = context.getClaimedPaths();
     List<Type> types = new ArrayList<>();
-    for (Type type : protoFile.types()) {
+    for (Type type : protoFile.getTypes()) {
       if (claimedDefinitions != null && claimedDefinitions.contains(type)) continue;
-      if (!emittingRules.includes(type.type())) continue;
+      if (!emittingRules.includes(type.getType())) continue;
       types.add(type);
     }
 
@@ -303,7 +303,7 @@ public abstract class SchemaHandler {
     }
 
     List<Service> services = new ArrayList<>();
-    for (Service service : protoFile.services()) {
+    for (Service service : protoFile.getServices()) {
       if (claimedDefinitions != null && claimedDefinitions.contains(service)) continue;
       if (!emittingRules.includes(service.type())) continue;
       services.add(service);
@@ -321,15 +321,15 @@ public abstract class SchemaHandler {
       }
     }
 
-    for (Extend extend : protoFile.extendList()) {
-      for (Field field : extend.fields()) {
+    for (Extend extend : protoFile.getExtendList()) {
+      for (Field field : extend.getFields()) {
         if (claimedDefinitions != null
             && claimedDefinitions.contains(extend.member(field))) {
           continue;
         }
         // We append `.*` to the field's package name so that it matches rules defined as
         // `package.*`.
-        if (!emittingRules.includes(ProtoType.get(field.packageName() + ".*"))) {
+        if (!emittingRules.includes(ProtoType.get(field.getPackageName() + ".*"))) {
           continue;
         }
 
@@ -378,9 +378,9 @@ public abstract class SchemaHandler {
   /** Creates the context's output directory, mapping an {@link IOException} to unchecked. */
   protected static void createOutDirectory(Context context) {
     try {
-      context.fileSystem().createDirectories(context.outDirectory(), false);
+      context.getFileSystem().createDirectories(context.getOutDirectory(), false);
     } catch (IOException e) {
-      throw new RuntimeException("Error creating output directory " + context.outDirectory(), e);
+      throw new RuntimeException("Error creating output directory " + context.getOutDirectory(), e);
     }
   }
 

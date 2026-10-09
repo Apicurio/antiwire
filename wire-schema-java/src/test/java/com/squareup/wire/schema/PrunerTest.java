@@ -78,7 +78,7 @@ public class PrunerTest {
         .build());
     assertNotNull(pruned.getType("cafe.CafeDrink"));
     // The field should not be pruned, and is of the opaque type `bytes`.
-    assertEquals(ProtoType.BYTES, pruned.getField("cafe.CafeDrink", "shots").type());
+    assertEquals(ProtoType.BYTES, pruned.getField("cafe.CafeDrink", "shots").getType());
     // Types which were originally referred by `shots` are now pruned since the field is opaqued.
     assertNull(pruned.getType("cafe.EspressoShot"));
     assertNull(pruned.getType("cafe.Roast"));
@@ -724,9 +724,9 @@ public class PrunerTest {
     Schema pruned = schema.prune(new PruningRules.Builder()
         .addRoot("oneof.OneOfMessage")
         .build());
-    List<OneOf> oneOfs = ((MessageType) pruned.getType("oneof.OneOfMessage")).oneOfs();
+    List<OneOf> oneOfs = ((MessageType) pruned.getType("oneof.OneOfMessage")).getOneOfs();
     assertFalse(oneOfs.isEmpty());
-    assertEquals(3, oneOfs.get(0).fields().size());
+    assertEquals(3, oneOfs.get(0).getFields().size());
   }
 
   @Test public void retainFieldPrunesOneOf() {
@@ -743,7 +743,7 @@ public class PrunerTest {
     Schema pruned = schema.prune(new PruningRules.Builder()
         .addRoot("Message#c")
         .build());
-    assertTrue(((MessageType) pruned.getType("Message")).oneOfs().isEmpty());
+    assertTrue(((MessageType) pruned.getType("Message")).getOneOfs().isEmpty());
   }
 
   @Test public void retainFieldRetainsOneOf() {
@@ -761,11 +761,11 @@ public class PrunerTest {
         .addRoot("Message#b")
         .build());
     MessageType message = (MessageType) pruned.getType("Message");
-    assertEquals(1, message.oneOfs().size());
-    OneOf onlyOneOf = message.oneOfs().get(0);
-    assertEquals("selection", onlyOneOf.name());
-    assertEquals(1, onlyOneOf.fields().size());
-    assertEquals("b", onlyOneOf.fields().get(0).name());
+    assertEquals(1, message.getOneOfs().size());
+    OneOf onlyOneOf = message.getOneOfs().get(0);
+    assertEquals("selection", onlyOneOf.getName());
+    assertEquals(1, onlyOneOf.getFields().size());
+    assertEquals("b", onlyOneOf.getFields().get(0).getName());
     assertNull(message.field("a"));
     assertNull(message.field("c"));
   }
@@ -877,7 +877,7 @@ public class PrunerTest {
     assertNull(fieldOptions.extensionField("a"));
 
     ProtoFile service = pruned.protoFile("service.proto");
-    assertTrue(service.extendList().isEmpty());
+    assertTrue(service.getExtendList().isEmpty());
   }
 
   @Test public void optionRetainsField() {
@@ -1216,8 +1216,8 @@ public class PrunerTest {
         .prune("google.protobuf.FieldOptions#b")
         .build());
     Field field = ((MessageType) pruned.getType("Message")).field("f");
-    assertEquals("a", field.options().get(ProtoMember.get(Options.FIELD_OPTIONS, "a")));
-    assertNull(field.options().get(ProtoMember.get(Options.FIELD_OPTIONS, "b")));
+    assertEquals("a", field.getOptions().get(ProtoMember.get(Options.FIELD_OPTIONS, "a")));
+    assertNull(field.getOptions().get(ProtoMember.get(Options.FIELD_OPTIONS, "b")));
   }
 
   @Test public void excludedTypePrunesTopLevelOption() {
@@ -1239,10 +1239,10 @@ public class PrunerTest {
         .prune("SomeFieldOptions")
         .build());
     Field field = ((MessageType) pruned.getType("Message")).field("f");
-    Map<ProtoMember, Object> map = field.options().map();
+    Map<ProtoMember, Object> map = field.getOptions().getMap();
     assertEquals(1, map.size());
     Map.Entry<ProtoMember, Object> onlyOption = map.entrySet().iterator().next();
-    assertEquals("b", onlyOption.getKey().member);
+    assertEquals("b", onlyOption.getKey().getMember());
     assertEquals("b", onlyOption.getValue());
   }
 
@@ -1265,10 +1265,10 @@ public class PrunerTest {
         .prune("SomeFieldOptions#b")
         .build());
     Field field = ((MessageType) pruned.getType("Message")).field("f");
-    Map<?, ?> map = (Map<?, ?>) field.options().get(ProtoMember.get(Options.FIELD_OPTIONS, "some_field_options"));
+    Map<?, ?> map = (Map<?, ?>) field.getOptions().get(ProtoMember.get(Options.FIELD_OPTIONS, "some_field_options"));
     assertEquals(1, map.size());
     Map.Entry<?, ?> onlyOption = map.entrySet().iterator().next();
-    assertEquals("a", ((ProtoMember) onlyOption.getKey()).member);
+    assertEquals("a", ((ProtoMember) onlyOption.getKey()).getMember());
     assertEquals("a", onlyOption.getValue());
   }
 
@@ -1290,8 +1290,8 @@ public class PrunerTest {
     Schema pruned = schema.prune(new PruningRules.Builder().build());
 
     EnumType type = (EnumType) pruned.getType("Period");
-    assertEquals("This is A.", type.constant("A").documentation());
-    assertEquals("This is C.", type.constant("C").documentation());
+    assertEquals("This is A.", type.constant("A").getDocumentation());
+    assertEquals("This is C.", type.constant("C").getDocumentation());
   }
 
   @Test public void excludedTypePrunesNestedOption() {
@@ -1322,10 +1322,10 @@ public class PrunerTest {
         .prune("Dimensions")
         .build());
     Field field = ((MessageType) pruned.getType("Message")).field("f");
-    Map<ProtoMember, Object> map = field.options().map();
+    Map<ProtoMember, Object> map = field.getOptions().getMap();
     assertEquals(1, map.size());
     Map.Entry<ProtoMember, Object> onlyOption = map.entrySet().iterator().next();
-    assertEquals("b", onlyOption.getKey().member);
+    assertEquals("b", onlyOption.getKey().getMember());
     assertEquals("b", onlyOption.getValue());
   }
 
@@ -1345,7 +1345,7 @@ public class PrunerTest {
         .prune("google.protobuf.FieldOptions")
         .build());
     Field field = ((MessageType) pruned.getType("Message")).field("f");
-    assertTrue(field.options().map().isEmpty());
+    assertTrue(field.getOptions().getMap().isEmpty());
   }
 
   @Test public void excludeOneOfOptions() {
@@ -1368,8 +1368,8 @@ public class PrunerTest {
     Schema pruned = schema.prune(new PruningRules.Builder()
         .prune("google.protobuf.OneofOptions")
         .build());
-    OneOf oneOf = ((MessageType) pruned.getType("Message")).oneOfs().get(0);
-    assertTrue(oneOf.options().map().isEmpty());
+    OneOf oneOf = ((MessageType) pruned.getType("Message")).getOneOfs().get(0);
+    assertTrue(oneOf.getOptions().getMap().isEmpty());
   }
 
   @Test public void excludeRepeatedOptions() {
@@ -1392,8 +1392,8 @@ public class PrunerTest {
         .prune("google.protobuf.MessageOptions#a")
         .build());
     MessageType message = (MessageType) pruned.getType("Message");
-    assertNull(message.options().get(ProtoMember.get(Options.MESSAGE_OPTIONS, "a")));
-    assertEquals(Arrays.asList("b1", "b2"), message.options().get(ProtoMember.get(Options.MESSAGE_OPTIONS, "b")));
+    assertNull(message.getOptions().get(ProtoMember.get(Options.MESSAGE_OPTIONS, "a")));
+    assertEquals(Arrays.asList("b1", "b2"), message.getOptions().get(ProtoMember.get(Options.MESSAGE_OPTIONS, "b")));
   }
 
   @Test public void includePackage() {
@@ -1456,7 +1456,7 @@ public class PrunerTest {
 
     MessageType message = (MessageType) pruned.getType("Message");
     Field fieldA = message.field("a");
-    assertEquals("5", fieldA.defaultValue());
+    assertEquals("5", fieldA.getDefault());
     assertTrue(fieldA.isDeprecated());
     Field fieldB = message.field("b");
     assertTrue(fieldB.isDeprecated());
@@ -1489,11 +1489,11 @@ public class PrunerTest {
         .addRoot("Message")
         .build());
 
-    assertTrue(pruned.protoFile("footer.proto").types().isEmpty());
-    assertFalse(pruned.protoFile("title.proto").types().isEmpty());
+    assertTrue(pruned.protoFile("footer.proto").getTypes().isEmpty());
+    assertFalse(pruned.protoFile("title.proto").getTypes().isEmpty());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("title.proto"), message.imports());
+    assertEquals(Arrays.asList("title.proto"), message.getImports());
   }
 
   @Test public void excludeUnusedPublicImports() {
@@ -1518,11 +1518,11 @@ public class PrunerTest {
         .addRoot("Title")
         .build());
 
-    assertTrue(pruned.protoFile("footer.proto").types().isEmpty());
-    assertFalse(pruned.protoFile("title.proto").types().isEmpty());
+    assertTrue(pruned.protoFile("footer.proto").getTypes().isEmpty());
+    assertFalse(pruned.protoFile("title.proto").getTypes().isEmpty());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("title.proto"), message.publicImports());
+    assertEquals(Arrays.asList("title.proto"), message.getPublicImports());
   }
 
   /**
@@ -1556,10 +1556,10 @@ public class PrunerTest {
         .addRoot("Shoe")
         .build());
 
-    assertFalse(pruned.protoFile("footer.proto").types().isEmpty());
+    assertFalse(pruned.protoFile("footer.proto").getTypes().isEmpty());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertTrue(message.imports().isEmpty());
+    assertTrue(message.getImports().isEmpty());
   }
 
   @Test public void retainImportWhenUsedForMessageField() {
@@ -1589,7 +1589,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("title.proto"), message.imports());
+    assertEquals(Arrays.asList("title.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedForMessageOneOf() {
@@ -1625,7 +1625,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("title.proto"), message.imports());
+    assertEquals(Arrays.asList("title.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedForServiceRpc() {
@@ -1656,7 +1656,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile service = pruned.protoFile("service.proto");
-    assertEquals(Arrays.asList("call.proto"), service.imports());
+    assertEquals(Arrays.asList("call.proto"), service.getImports());
   }
 
   @Test public void retainImportWhenUsedForExtendedMessage() {
@@ -1695,7 +1695,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile extension = pruned.protoFile("extension.proto");
-    assertEquals(Arrays.asList("message.proto", "title.proto"), extension.imports());
+    assertEquals(Arrays.asList("message.proto", "title.proto"), extension.getImports());
   }
 
   @Test public void retainImportWhenUsedForExtendingOptions() {
@@ -1714,7 +1714,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile extension = pruned.protoFile("extension.proto");
-    assertEquals(Arrays.asList("google/protobuf/descriptor.proto"), extension.imports());
+    assertEquals(Arrays.asList("google/protobuf/descriptor.proto"), extension.getImports());
   }
 
   @Test public void retainImportWhenUsedInMaps() {
@@ -1744,7 +1744,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("title.proto"), message.imports());
+    assertEquals(Arrays.asList("title.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedInMapsWithinInnerTypes() {
@@ -1775,7 +1775,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("footer.proto"), message.imports());
+    assertEquals(Arrays.asList("footer.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedForNestedMessageField() {
@@ -1807,7 +1807,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("title.proto"), message.imports());
+    assertEquals(Arrays.asList("title.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedForNestedExtendedMessage() {
@@ -1848,7 +1848,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile extension = pruned.protoFile("extension.proto");
-    assertEquals(Arrays.asList("title.proto"), extension.imports());
+    assertEquals(Arrays.asList("title.proto"), extension.getImports());
   }
 
   @Test public void retainImportWhenUsedForFileOption() {
@@ -1872,7 +1872,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("option.proto"), message.imports());
+    assertEquals(Arrays.asList("option.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedForMessageOption() {
@@ -1906,7 +1906,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("option.proto"), message.imports());
+    assertEquals(Arrays.asList("option.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedForFieldOption() {
@@ -1940,7 +1940,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("option.proto"), message.imports());
+    assertEquals(Arrays.asList("option.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedForOneOfOption() {
@@ -1982,7 +1982,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("option.proto"), message.imports());
+    assertEquals(Arrays.asList("option.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedForOneOfFieldOption() {
@@ -2022,7 +2022,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile message = pruned.protoFile("message.proto");
-    assertEquals(Arrays.asList("option.proto"), message.imports());
+    assertEquals(Arrays.asList("option.proto"), message.getImports());
   }
 
   @Test public void retainImportWhenUsedForEnumOption() {
@@ -2060,7 +2060,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile enumType = pruned.protoFile("enum.proto");
-    assertEquals(Arrays.asList("option.proto"), enumType.imports());
+    assertEquals(Arrays.asList("option.proto"), enumType.getImports());
   }
 
   @Test public void retainImportWhenUsedForEnumValueOption() {
@@ -2096,7 +2096,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile enumType = pruned.protoFile("enum.proto");
-    assertEquals(Arrays.asList("option.proto"), enumType.imports());
+    assertEquals(Arrays.asList("option.proto"), enumType.getImports());
   }
 
   @Test public void retainImportWhenUsedForServiceOption() {
@@ -2138,7 +2138,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile service = pruned.protoFile("service.proto");
-    assertEquals(Arrays.asList("option.proto"), service.imports());
+    assertEquals(Arrays.asList("option.proto"), service.getImports());
   }
 
   @Test public void retainImportWhenUsedForMethodOption() {
@@ -2182,7 +2182,7 @@ public class PrunerTest {
         .build());
 
     ProtoFile service = pruned.protoFile("service.proto");
-    assertEquals(Arrays.asList("option.proto"), service.imports());
+    assertEquals(Arrays.asList("option.proto"), service.getImports());
   }
 
   @Test public void enumsAreKeptsIfUsed() {
@@ -2370,11 +2370,11 @@ public class PrunerTest {
     assertNotNull(pruned.getType("google.protobuf.EnumValueOptions"));
 
     EnumType authorType = (EnumType) pruned.getType("squareup.Author");
-    assertTrue(authorType.constant("ZEUS").options().fields().isEmpty());
-    assertTrue(authorType.constant("ARTEMIS").options().fields().isEmpty());
-    assertTrue(authorType.constant("APOLLO").options().fields().isEmpty());
+    assertTrue(authorType.constant("ZEUS").getOptions().fields().isEmpty());
+    assertTrue(authorType.constant("ARTEMIS").getOptions().fields().isEmpty());
+    assertTrue(authorType.constant("APOLLO").getOptions().fields().isEmpty());
     // Options defined in google.protobuf.descriptor.proto are not pruned.
-    assertEquals(1, authorType.constant("POSEIDON").options().fields().values().size());
+    assertEquals(1, authorType.constant("POSEIDON").getOptions().fields().values().size());
   }
 
   @Test public void excludingGoogleProtobufPrunesAllOptionsOnMessages() {
@@ -2421,17 +2421,17 @@ public class PrunerTest {
     assertNotNull(enumValueOptions.field("deprecated"));
 
     MessageType letterType = (MessageType) pruned.getType("squareup.Letter");
-    assertTrue(letterType.field("header").options().fields().isEmpty());
+    assertTrue(letterType.field("header").getOptions().fields().isEmpty());
 
     // Options defined in google.protobuf.descriptor.proto are not pruned.
-    assertEquals(1, letterType.field("add_margin").options().fields().values().size());
+    assertEquals(1, letterType.field("add_margin").getOptions().fields().values().size());
     assertTrue(letterType.field("add_margin").isDeprecated());
 
-    assertTrue(letterType.field("author").options().fields().isEmpty());
+    assertTrue(letterType.field("author").getOptions().fields().isEmpty());
 
     // Default are not options.
-    assertEquals("Sent from Wire", letterType.field("signature").defaultValue());
-    assertTrue(letterType.field("signature").options().fields().isEmpty());
+    assertEquals("Sent from Wire", letterType.field("signature").getDefault());
+    assertTrue(letterType.field("signature").getOptions().fields().isEmpty());
   }
 
   @Test public void sinceAndUntilRetainOlder() {
@@ -2819,9 +2819,9 @@ public class PrunerTest {
 
     MessageType messageType = (MessageType) pruned.getType("wire.Lecture");
     assertNotNull(messageType.field("title"));
-    assertEquals(1, messageType.field("title").options().elements().size());
+    assertEquals(1, messageType.field("title").getOptions().getElements().size());
     assertNotNull(messageType.field("content"));
-    assertTrue(messageType.field("content").options().elements().isEmpty());
+    assertTrue(messageType.field("content").getOptions().getElements().isEmpty());
   }
 
   @Test public void nestedInclusion() {

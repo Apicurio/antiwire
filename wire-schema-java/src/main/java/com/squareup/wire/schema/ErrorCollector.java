@@ -37,7 +37,7 @@ public final class ErrorCollector {
     this.contextStack = contextStack;
   }
 
-  public List<String> errors() {
+  public List<String> getErrors() {
     return new ArrayList<>(errorsBuilder);
   }
 
@@ -70,35 +70,35 @@ public final class ErrorCollector {
       String prefix = i == stack.size() - 1 ? "\n  for" : "\n  in";
 
       if (context instanceof Rpc) {
-        error.append(prefix).append(" rpc ").append(((Rpc) context).name())
-            .append(" (").append(((Rpc) context).location()).append(")");
+        error.append(prefix).append(" rpc ").append(((Rpc) context).getName())
+            .append(" (").append(((Rpc) context).getLocation()).append(")");
       } else if (context instanceof Field) {
-        error.append(prefix).append(" field ").append(((Field) context).name())
-            .append(" (").append(((Field) context).location()).append(")");
+        error.append(prefix).append(" field ").append(((Field) context).getName())
+            .append(" (").append(((Field) context).getLocation()).append(")");
       } else if (context instanceof MessageType) {
-        error.append(prefix).append(" message ").append(((MessageType) context).type())
-            .append(" (").append(((MessageType) context).location()).append(")");
+        error.append(prefix).append(" message ").append(((MessageType) context).getType())
+            .append(" (").append(((MessageType) context).getLocation()).append(")");
       } else if (context instanceof EnumConstant) {
-        error.append(prefix).append(" constant ").append(((EnumConstant) context).name())
-            .append(" (").append(((EnumConstant) context).location()).append(")");
+        error.append(prefix).append(" constant ").append(((EnumConstant) context).getName())
+            .append(" (").append(((EnumConstant) context).getLocation()).append(")");
       } else if (context instanceof EnumType) {
-        error.append(prefix).append(" enum ").append(((EnumType) context).type())
-            .append(" (").append(((EnumType) context).location()).append(")");
+        error.append(prefix).append(" enum ").append(((EnumType) context).getType())
+            .append(" (").append(((EnumType) context).getLocation()).append(")");
       } else if (context instanceof Service) {
         error.append(prefix).append(" service ").append(((Service) context).type())
             .append(" (").append(((Service) context).location()).append(")");
       } else if (context instanceof Extensions) {
         error.append(prefix).append(" extensions (")
-            .append(((Extensions) context).location()).append(")");
+            .append(((Extensions) context).getLocation()).append(")");
       } else if (context instanceof ProtoFile) {
-        error.append(prefix).append(" file ").append(((ProtoFile) context).location());
+        error.append(prefix).append(" file ").append(((ProtoFile) context).getLocation());
       } else if (context instanceof Extend) {
         Extend extend = (Extend) context;
-        if (extend.type() != null) {
-          error.append(prefix).append(" extend ").append(extend.type())
-              .append(" (").append(extend.location()).append(")");
+        if (extend.getType() != null) {
+          error.append(prefix).append(" extend ").append(extend.getType())
+              .append(" (").append(extend.getLocation()).append(")");
         } else {
-          error.append(prefix).append(" extend (").append(extend.location()).append(")");
+          error.append(prefix).append(" extend (").append(extend.getLocation()).append(")");
         }
       }
     }

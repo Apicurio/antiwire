@@ -80,32 +80,32 @@ public class WireCompilerTest {
   public void default_() throws Exception {
     WireCompiler wireCompiler = WireCompiler.forArgs("--java_out=out/");
     WireRun wireRun = wireCompiler.createRun();
-    assertTrue(wireRun.sourcePath().isEmpty());
-    assertTrue(wireRun.protoPath().isEmpty());
-    assertEquals(Collections.singletonList("*"), wireRun.treeShakingRoots());
-    assertTrue(wireRun.treeShakingRubbish().isEmpty());
-    assertTrue(wireRun.moves().isEmpty());
-    assertEquals(null, wireRun.sinceVersion());
-    assertEquals(null, wireRun.untilVersion());
-    assertEquals(null, wireRun.onlyVersion());
-    assertEquals(1, wireRun.targets().size());
-    assertDefaultJavaTarget(wireRun.targets().get(0), "out/");
-    assertTrue(wireRun.modules().isEmpty());
-    assertFalse(wireRun.permitPackageCycles());
-    assertFalse(wireRun.loadExhaustively());
-    assertFalse(wireRun.escapeKotlinKeywords());
-    assertTrue(wireRun.eventListeners().isEmpty());
-    assertTrue(wireRun.rejectUnusedRootsOrPrunes());
-    assertTrue(wireRun.opaqueTypes().isEmpty());
+    assertTrue(wireRun.getSourcePath().isEmpty());
+    assertTrue(wireRun.getProtoPath().isEmpty());
+    assertEquals(Collections.singletonList("*"), wireRun.getTreeShakingRoots());
+    assertTrue(wireRun.getTreeShakingRubbish().isEmpty());
+    assertTrue(wireRun.getMoves().isEmpty());
+    assertEquals(null, wireRun.getSinceVersion());
+    assertEquals(null, wireRun.getUntilVersion());
+    assertEquals(null, wireRun.getOnlyVersion());
+    assertEquals(1, wireRun.getTargets().size());
+    assertDefaultJavaTarget(wireRun.getTargets().get(0), "out/");
+    assertTrue(wireRun.getModules().isEmpty());
+    assertFalse(wireRun.getPermitPackageCycles());
+    assertFalse(wireRun.getLoadExhaustively());
+    assertFalse(wireRun.getEscapeKotlinKeywords());
+    assertTrue(wireRun.getEventListeners().isEmpty());
+    assertTrue(wireRun.getRejectUnusedRootsOrPrunes());
+    assertTrue(wireRun.getOpaqueTypes().isEmpty());
   }
 
   private static void assertDefaultJavaTarget(Target target, String outDirectory) {
     assertTrue(target instanceof JavaTarget, String.valueOf(target));
     JavaTarget javaTarget = (JavaTarget) target;
-    assertEquals(Collections.singletonList("*"), javaTarget.includes());
-    assertEquals(Collections.emptyList(), javaTarget.excludes());
-    assertTrue(javaTarget.exclusive());
-    assertEquals(outDirectory, javaTarget.outDirectory());
+    assertEquals(Collections.singletonList("*"), javaTarget.getIncludes());
+    assertEquals(Collections.emptyList(), javaTarget.getExcludes());
+    assertTrue(javaTarget.getExclusive());
+    assertEquals(outDirectory, javaTarget.getOutDirectory());
   }
 
   @Test
@@ -135,13 +135,13 @@ public class WireCompilerTest {
         Location.get(tempDir.toString(), "foo.proto"),
         Location.get(tempDir.toString(), "bar.proto"),
         Location.get(tempDir.toString(), "baz.proto")),
-        wireRun.sourcePath());
+        wireRun.getSourcePath());
     assertEquals(Collections.singletonList(Location.get(tempDir.toString())),
-        wireRun.protoPath());
-    assertEquals(Collections.singletonList("*"), wireRun.treeShakingRoots());
-    assertTrue(wireRun.treeShakingRubbish().isEmpty());
-    assertEquals(1, wireRun.targets().size());
-    assertDefaultJavaTarget(wireRun.targets().get(0), "java_out");
+        wireRun.getProtoPath());
+    assertEquals(Collections.singletonList("*"), wireRun.getTreeShakingRoots());
+    assertTrue(wireRun.getTreeShakingRubbish().isEmpty());
+    assertEquals(1, wireRun.getTargets().size());
+    assertDefaultJavaTarget(wireRun.getTargets().get(0), "java_out");
   }
 
   @Test
@@ -166,14 +166,14 @@ public class WireCompilerTest {
         "--java_out=java_out",
         "--experimental-module-manifest=" + manifest);
     WireRun wireRun = wireCompiler.createRun();
-    assertEquals(1, wireRun.targets().size());
-    assertDefaultJavaTarget(wireRun.targets().get(0), "java_out");
+    assertEquals(1, wireRun.getTargets().size());
+    assertDefaultJavaTarget(wireRun.getTargets().get(0), "java_out");
     Map<String, WireRun.Module> expected = new LinkedHashMap<>();
     expected.put("a", new WireRun.Module());
     expected.put("b", new WireRun.Module(Collections.singleton("a")));
-    assertEquals(expected.keySet(), wireRun.modules().keySet());
-    assertTrue(wireRun.modules().get("a").dependencies().isEmpty());
-    assertEquals(Collections.singleton("a"), wireRun.modules().get("b").dependencies());
+    assertEquals(expected.keySet(), wireRun.getModules().keySet());
+    assertTrue(wireRun.getModules().get("a").getDependencies().isEmpty());
+    assertEquals(Collections.singleton("a"), wireRun.getModules().get("b").getDependencies());
   }
 
   @Test
@@ -184,9 +184,9 @@ public class WireCompilerTest {
         "--java_out=java_out",
         "--load_exhaustively");
     WireRun wireRun = wireCompiler.createRun();
-    assertEquals(1, wireRun.targets().size());
-    assertDefaultJavaTarget(wireRun.targets().get(0), "java_out");
-    assertTrue(wireRun.loadExhaustively());
+    assertEquals(1, wireRun.getTargets().size());
+    assertDefaultJavaTarget(wireRun.getTargets().get(0), "java_out");
+    assertTrue(wireRun.getLoadExhaustively());
   }
 
   @Test
@@ -197,9 +197,9 @@ public class WireCompilerTest {
         "--java_out=java_out",
         "--permit_package_cycles");
     WireRun wireRun = wireCompiler.createRun();
-    assertEquals(1, wireRun.targets().size());
-    assertDefaultJavaTarget(wireRun.targets().get(0), "java_out");
-    assertTrue(wireRun.permitPackageCycles());
+    assertEquals(1, wireRun.getTargets().size());
+    assertDefaultJavaTarget(wireRun.getTargets().get(0), "java_out");
+    assertTrue(wireRun.getPermitPackageCycles());
   }
 
   @Test
@@ -233,9 +233,9 @@ public class WireCompilerTest {
         "--java_out=java_out",
         "--opaque_types=opaque_types");
     WireRun wireRun = wireCompiler.createRun();
-    assertEquals(1, wireRun.targets().size());
-    assertDefaultJavaTarget(wireRun.targets().get(0), "java_out");
-    assertEquals(Collections.singletonList("opaque_types"), wireRun.opaqueTypes());
+    assertEquals(1, wireRun.getTargets().size());
+    assertDefaultJavaTarget(wireRun.getTargets().get(0), "java_out");
+    assertEquals(Collections.singletonList("opaque_types"), wireRun.getOpaqueTypes());
   }
 
   @Test
@@ -246,9 +246,9 @@ public class WireCompilerTest {
         "--java_out=java_out",
         "--ignore_unused_roots_and_prunes");
     WireRun wireRun = wireCompiler.createRun();
-    assertEquals(1, wireRun.targets().size());
-    assertDefaultJavaTarget(wireRun.targets().get(0), "java_out");
-    assertFalse(wireRun.rejectUnusedRootsOrPrunes());
+    assertEquals(1, wireRun.getTargets().size());
+    assertDefaultJavaTarget(wireRun.getTargets().get(0), "java_out");
+    assertFalse(wireRun.getRejectUnusedRootsOrPrunes());
   }
 
   @Test
@@ -269,15 +269,15 @@ public class WireCompilerTest {
         "--custom_option=a,1",
         "--custom_option=b,2");
     WireRun wireRun = wireCompiler.createRun();
-    assertEquals(1, wireRun.targets().size());
-    CustomTarget target = (CustomTarget) wireRun.targets().get(0);
-    assertEquals(Collections.singletonList("*"), target.includes());
-    assertEquals(Collections.emptyList(), target.excludes());
-    assertTrue(target.exclusive());
+    assertEquals(1, wireRun.getTargets().size());
+    CustomTarget target = (CustomTarget) wireRun.getTargets().get(0);
+    assertEquals(Collections.singletonList("*"), target.getIncludes());
+    assertEquals(Collections.emptyList(), target.getExcludes());
+    assertTrue(target.getExclusive());
     Map<String, String> expectedOptions = new LinkedHashMap<>();
     expectedOptions.put("a", "1");
     expectedOptions.put("b", "2");
-    assertEquals(expectedOptions, target.options());
+    assertEquals(expectedOptions, target.getOptions());
     // Upstream asserts the data-class schemaHandlerFactory property is not null; the port keeps
     // the field private, so the adopted case reads it reflectively.
     java.lang.reflect.Field factoryField = CustomTarget.class.getDeclaredField("schemaHandlerFactory");

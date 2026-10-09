@@ -80,43 +80,43 @@ public final class MessageType extends Type {
         oneOfs, nestedTypes, nestedExtendList, extensionsList, reserveds, options, syntax);
   }
 
-  @Override public ProtoType type() {
+  @Override public ProtoType getType() {
     return type;
   }
 
-  @Override public Location location() {
+  @Override public Location getLocation() {
     return location;
   }
 
-  @Override public String documentation() {
+  @Override public String getDocumentation() {
     return documentation;
   }
 
-  @Override public String name() {
+  @Override public String getName() {
     return name;
   }
 
-  public List<Field> declaredFields() {
+  public List<Field> getDeclaredFields() {
     return declaredFields;
   }
 
-  public List<Field> extensionFields() {
+  public List<Field> getExtensionFields() {
     return extensionFields;
   }
 
-  public List<OneOf> oneOfs() {
+  public List<OneOf> getOneOfs() {
     return oneOfs;
   }
 
-  @Override public List<Type> nestedTypes() {
+  @Override public List<Type> getNestedTypes() {
     return nestedTypes;
   }
 
-  @Override public List<Extend> nestedExtendList() {
+  @Override public List<Extend> getNestedExtendList() {
     return nestedExtendList;
   }
 
-  public List<Extensions> extensionsList() {
+  public List<Extensions> getExtensionsList() {
     return extensionsList;
   }
 
@@ -124,11 +124,11 @@ public final class MessageType extends Type {
     return reserveds;
   }
 
-  @Override public Options options() {
+  @Override public Options getOptions() {
     return options;
   }
 
-  @Override public Syntax syntax() {
+  @Override public Syntax getSyntax() {
     return syntax;
   }
 
@@ -142,19 +142,19 @@ public final class MessageType extends Type {
     return result;
   }
 
-  public List<Field> requiredFields() {
+  public List<Field> getRequiredFields() {
     List<Field> result = new ArrayList<>();
-    for (Field field : fieldsAndOneOfFields()) {
+    for (Field field : getFieldsAndOneOfFields()) {
       if (field.isRequired()) result.add(field);
     }
     return result;
   }
 
-  public List<Field> fieldsAndOneOfFields() {
+  public List<Field> getFieldsAndOneOfFields() {
     List<Field> result = new ArrayList<>(declaredFields);
     result.addAll(extensionFields);
     for (OneOf oneOf : oneOfs) {
-      result.addAll(oneOf.fields());
+      result.addAll(oneOf.getFields());
     }
     return result;
   }
@@ -162,13 +162,13 @@ public final class MessageType extends Type {
   /** Returns the field named {@code name}, or null if this type has no such field. */
   public Field field(String name) {
     for (Field field : declaredFields) {
-      if (field.name().equals(name)) {
+      if (field.getName().equals(name)) {
         return field;
       }
     }
     for (OneOf oneOf : oneOfs) {
-      for (Field field : oneOf.fields()) {
-        if (field.name().equals(name)) {
+      for (Field field : oneOf.getFields()) {
+        if (field.getName().equals(name)) {
           return field;
         }
       }
@@ -182,7 +182,7 @@ public final class MessageType extends Type {
    */
   public Field extensionField(String qualifiedName) {
     for (Field field : extensionFields) {
-      if (field.qualifiedName().equals(qualifiedName)) {
+      if (field.getQualifiedName().equals(qualifiedName)) {
         return field;
       }
     }
@@ -192,7 +192,7 @@ public final class MessageType extends Type {
   /** Returns the oneOf named {@code name}, or null if this type has no such oneOf. */
   public OneOf oneOf(String name) {
     for (OneOf oneOf : oneOfs) {
-      if (oneOf.name().equals(name)) {
+      if (oneOf.getName().equals(name)) {
         return oneOf;
       }
     }
@@ -202,12 +202,12 @@ public final class MessageType extends Type {
   /** Returns the field tagged {@code tag}, or null if this type has no such field. */
   public Field field(int tag) {
     for (Field field : declaredFields) {
-      if (field.tag() == tag) {
+      if (field.getTag() == tag) {
         return field;
       }
     }
     for (Field field : extensionFields) {
-      if (field.tag() == tag) {
+      if (field.getTag() == tag) {
         return field;
       }
     }
@@ -218,7 +218,7 @@ public final class MessageType extends Type {
     // TODO(jwilson): simplify this to just resolve field values directly.
     Map<String, Field> extensionsForType = new HashMap<>();
     for (Field field : extensionFields) {
-      extensionsForType.put(field.qualifiedName(), field);
+      extensionsForType.put(field.getQualifiedName(), field);
     }
     return extensionsForType;
   }
@@ -255,9 +255,9 @@ public final class MessageType extends Type {
 
   @Override void validate(Linker linker, SyntaxRules syntaxRules) {
     Linker scoped = linker.withContext(this);
-    scoped.validateFields(fieldsAndOneOfFields(), reserveds, syntaxRules);
+    scoped.validateFields(getFieldsAndOneOfFields(), reserveds, syntaxRules);
     scoped.validateEnumConstantNameUniqueness(nestedTypes);
-    for (Field field : fieldsAndOneOfFields()) {
+    for (Field field : getFieldsAndOneOfFields()) {
       field.validate(scoped, syntaxRules);
     }
     for (Type nestedType : nestedTypes) {
@@ -342,16 +342,16 @@ public final class MessageType extends Type {
 
   MessageElement toElement() {
     return new MessageElement(location, name, documentation, Type.toElements(nestedTypes),
-        options.elements(), Reserved.toElements(reserveds), Field.toElements(declaredFields),
+        options.getElements(), Reserved.toElements(reserveds), Field.toElements(declaredFields),
         OneOf.toElements(oneOfs), Extensions.toElements(extensionsList),
         Collections.emptyList(), Extend.toElements(nestedExtendList));
   }
 
   static MessageType fromElement(List<String> namespaces, ProtoType protoType,
       MessageElement messageElement, Syntax syntax) {
-    if (!messageElement.groups.isEmpty()) {
+    if (!messageElement.getGroups().isEmpty()) {
       throw new IllegalStateException(
-          messageElement.groups.get(0).location + ": 'group' is not supported");
+          messageElement.getGroups().get(0).getLocation() + ": 'group' is not supported");
     }
     // Namespaces for all child elements include this message's name.
     List<String> childNamespaces;
@@ -367,20 +367,20 @@ public final class MessageType extends Type {
     List<Type> nested = new ArrayList<>();
     for (com.squareup.wire.schema.internal.parser.TypeElement element
         : messageElement.nestedTypes) {
-      nested.add(Type.get(childNamespaces, protoType.nestedType(element.name()), element, syntax));
+      nested.add(Type.get(childNamespaces, protoType.nestedType(element.getName()), element, syntax));
     }
     List<Extend> nestedExtends = Extend.fromElements(childNamespaces,
-        messageElement.extendDeclarations);
+        messageElement.getExtendDeclarations());
 
     return new MessageType(protoType, messageElement.location, messageElement.documentation,
         messageElement.name,
-        Field.fromElements(childNamespaces, messageElement.fields, false, false),
+        Field.fromElements(childNamespaces, messageElement.getFields(), false, false),
         // Extension fields are populated during linking.
         new ArrayList<>(),
-        OneOf.fromElements(childNamespaces, messageElement.oneOfs),
+        OneOf.fromElements(childNamespaces, messageElement.getOneOfs()),
         nested, nestedExtends,
-        Extensions.fromElements(messageElement.extensions),
-        Reserved.fromElements(messageElement.reserveds),
+        Extensions.fromElements(messageElement.getExtensions()),
+        Reserved.fromElements(messageElement.getReserveds()),
         new Options(Options.MESSAGE_OPTIONS, messageElement.options),
         syntax);
   }

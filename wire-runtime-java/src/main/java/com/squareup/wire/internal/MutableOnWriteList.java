@@ -37,6 +37,11 @@ public class MutableOnWriteList<T> extends AbstractList<T>
     return mutableList.get(index);
   }
 
+  /** The upstream-visible name of {@link #size()} (Kotlin collections expose {@code getSize()}). */
+  public int getSize() {
+    return size();
+  }
+
   @Override public int size() {
     return mutableList.size();
   }

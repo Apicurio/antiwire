@@ -87,32 +87,32 @@ public final class Field {
     this.declaredJsonName = declaredJsonName;
   }
 
-  public List<String> namespaces() {
+  public List<String> getNamespaces() {
     return namespaces;
   }
 
-  public Location location() {
+  public Location getLocation() {
     return location;
   }
 
   /** May be null for proto3 fields, one-of's, or maps. */
-  public Label label() {
+  public Label getLabel() {
     return label;
   }
 
-  public String name() {
+  public String getName() {
     return name;
   }
 
-  public String documentation() {
+  public String getDocumentation() {
     return documentation;
   }
 
-  public int tag() {
+  public int getTag() {
     return tag;
   }
 
-  public String defaultValue() {
+  public String getDefault() {
     return defaultValue;
   }
 
@@ -120,7 +120,7 @@ public final class Field {
     return elementType;
   }
 
-  public Options options() {
+  public Options getOptions() {
     return options;
   }
 
@@ -132,12 +132,12 @@ public final class Field {
     return isOneOf;
   }
 
-  public String declaredJsonName() {
+  public String getDeclaredJsonName() {
     return declaredJsonName;
   }
 
   /** Null until this field is linked. */
-  public ProtoType type() {
+  public ProtoType getType() {
     return type;
   }
 
@@ -150,7 +150,7 @@ public final class Field {
   }
 
   /** Null until this field is linked. */
-  public EncodeMode encodeMode() {
+  public EncodeMode getEncodeMode() {
     return encodeMode;
   }
 
@@ -158,7 +158,7 @@ public final class Field {
    * Returns this field's name, prefixed with its namespaces. Uniquely identifies extension
    * fields, such as in options.
    */
-  public String qualifiedName() {
+  public String getQualifiedName() {
     String joined = String.join(".", namespaces);
     String prefix = joined.startsWith(".") ? joined.substring(1) : joined;
     return prefix.isEmpty() ? name : prefix + "." + name;
@@ -168,7 +168,7 @@ public final class Field {
    * Returns the package in which this field is defined. If the file that defined this field has
    * no package declaration, returns the empty string.
    */
-  public String packageName() {
+  public String getPackageName() {
     return namespaces.isEmpty() ? "" : namespaces.get(0);
   }
 
@@ -185,12 +185,12 @@ public final class Field {
     return encodeMode == EncodeMode.PACKED;
   }
 
-  public boolean useArray() {
+  public boolean getUseArray() {
     return "true".equals(options.get(WIRE_USE_ARRAY));
   }
 
   /** Null until this field is linked. */
-  public String jsonName() {
+  public String getJsonName() {
     return jsonName;
   }
 
@@ -214,7 +214,7 @@ public final class Field {
     deprecated = options.get(DEPRECATED);
     Object packed = options.get(PACKED);
     if (packed == null && syntaxRules.isPackedByDefault(type, label)) {
-      packed = OptionElement.PACKED_OPTION_ELEMENT.value;
+      packed = OptionElement.PACKED_OPTION_ELEMENT.getValue();
     }
     // We allow any package name to be used as long as it ends with '.redacted'.
     isRedacted = options.optionMatches(".*\\.redacted", "true");
@@ -226,29 +226,29 @@ public final class Field {
   void validate(Linker linker, SyntaxRules syntaxRules) {
     Linker scoped = linker.withContext(this);
     if (isPacked() && !isPackable(scoped, type)) {
-      scoped.errors.add("packed=true not permitted on " + type);
+      scoped.getErrors().add("packed=true not permitted on " + type);
     }
-    if (useArray() && !isPacked()) {
-      scoped.errors.add("wire.use_array=true only permitted on packed fields");
+    if (getUseArray() && !isPacked()) {
+      scoped.getErrors().add("wire.use_array=true only permitted on packed fields");
     }
-    if (useArray() && (type == null || !type.isScalar)) {
-      scoped.errors.add("wire.use_array=true only permitted on scalar fields");
+    if (getUseArray() && (type == null || !type.isScalar())) {
+      scoped.getErrors().add("wire.use_array=true only permitted on scalar fields");
     }
     if (isExtension) {
       if (isRequired()) {
-        scoped.errors.add("extension fields cannot be required");
+        scoped.getErrors().add("extension fields cannot be required");
       }
-      if (type.isMap) {
-        scoped.errors.add("extension fields cannot be a map");
+      if (type.isMap()) {
+        scoped.getErrors().add("extension fields cannot be a map");
       }
     }
-    syntaxRules.validateDefaultValue(defaultValue != null, scoped.errors);
+    syntaxRules.validateDefaultValue(defaultValue != null, scoped.getErrors());
     validateDefaultValue(scoped);
-    if (type.isMap) {
-      Type valueType = scoped.get(type.valueType);
+    if (type.isMap()) {
+      Type valueType = scoped.get(type.getValueType());
       if (valueType instanceof EnumType
-          && ((EnumType) valueType).constants().get(0).tag() != 0) {
-        scoped.errors.add("enum value in map must define 0 as the first value");
+          && ((EnumType) valueType).getConstants().get(0).getTag() != 0) {
+        scoped.getErrors().add("enum value in map must define 0 as the first value");
       }
     }
     scoped.validateImportForType(location, type);
@@ -258,7 +258,7 @@ public final class Field {
     if (defaultValue == null) return;
 
     if (!LiteralValidation.isValidLiteral(linker, type, defaultValue)) {
-      linker.errors.add("invalid default value \"" + defaultValue + "\" for " + type);
+      linker.getErrors().add("invalid default value \"" + defaultValue + "\" for " + type);
     }
   }
 
@@ -268,11 +268,11 @@ public final class Field {
     if (type == null) return null;
 
     // For map types only the value can participate in pruning as the key will always be scalar.
-    if (type.isMap && !markSet.contains(type.valueType)) return null;
+    if (type.isMap() && !markSet.contains(type.getValueType())) return null;
 
     if (!markSet.contains(type)) return null;
 
-    String memberName = isExtension ? qualifiedName() : name;
+    String memberName = isExtension ? getQualifiedName() : name;
     ProtoMember protoMember = ProtoMember.get(enclosingType, memberName);
 
     if (!markSet.contains(protoMember)
@@ -371,10 +371,10 @@ public final class Field {
       List<FieldElement> fieldElements, boolean extension, boolean oneOf) {
     List<Field> result = new ArrayList<>();
     for (FieldElement element : fieldElements) {
-      result.add(new Field(namespaces, element.location, element.label, element.name,
-          element.documentation, element.tag, element.defaultValue, element.type,
-          new Options(Options.FIELD_OPTIONS, element.options), extension, oneOf,
-          element.jsonName));
+      result.add(new Field(namespaces, element.getLocation(), element.getLabel(), element.getName(),
+          element.getDocumentation(), element.getTag(), element.getDefaultValue(), element.getType(),
+          new Options(Options.FIELD_OPTIONS, element.getOptions()), extension, oneOf,
+          element.getJsonName()));
     }
     return result;
   }
@@ -384,7 +384,7 @@ public final class Field {
     for (Field field : fields) {
       result.add(new FieldElement(field.location, field.label, field.elementType, field.name,
           field.defaultValue, field.declaredJsonName, field.tag, field.documentation,
-          field.options.elements()));
+          field.options.getElements()));
     }
     return result;
   }

@@ -24,11 +24,11 @@ import okio.ByteString;
 public interface MessageBinding<M, B> {
   Class<?> messageType();
 
-  Map<Integer, FieldOrOneOfBinding<M, B>> fields();
+  Map<Integer, FieldOrOneOfBinding<M, B>> getFields();
 
-  String typeUrl();
+  String getTypeUrl();
 
-  Syntax syntax();
+  Syntax getSyntax();
 
   ByteString unknownFields(M message);
 

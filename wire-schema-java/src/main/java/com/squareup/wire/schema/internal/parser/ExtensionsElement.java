@@ -20,11 +20,29 @@ import com.squareup.wire.schema.internal.SchemaUtil;
 import java.util.List;
 
 public final class ExtensionsElement {
-  public final Location location;
-  public final String documentation;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final String documentation;
+
+  public String getDocumentation() {
+    return documentation;
+  }
   /** An Integer or Integer range (int[]{first, last}) tag. */
-  public final List<Object> values;
-  public final List<OptionElement> options;
+  private final List<Object> values;
+
+  public List<Object> getValues() {
+    return values;
+  }
+
+  private final List<OptionElement> options;
+
+  public List<OptionElement> getOptions() {
+    return options;
+  }
 
   public ExtensionsElement(Location location, String documentation, List<Object> values,
       List<OptionElement> options) {

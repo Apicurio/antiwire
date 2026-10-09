@@ -64,8 +64,8 @@ public class SchemaFullTest {
 
     Service service = schema.getService("Service");
     Rpc call = service.rpc("Call");
-    assertEquals(schema.getType("Request").type(), call.requestType());
-    assertEquals(schema.getType("Response").type(), call.responseType());
+    assertEquals(schema.getType("Request").getType(), call.getRequestType());
+    assertEquals(schema.getType("Response").getType(), call.getResponseType());
   }
 
   @Test public void linkMessage() {
@@ -86,10 +86,10 @@ public class SchemaFullTest {
 
     MessageType message = (MessageType) schema.getType("Message");
     Field field = message.field("field");
-    assertEquals(schema.getType("foo_package.Foo").type(), field.type());
-    ProtoType bars = message.field("bars").type();
-    assertEquals(ProtoType.STRING, bars.keyType);
-    assertEquals(schema.getType("foo_package.Bar").type(), bars.valueType);
+    assertEquals(schema.getType("foo_package.Foo").getType(), field.getType());
+    ProtoType bars = message.field("bars").getType();
+    assertEquals(ProtoType.STRING, bars.getKeyType());
+    assertEquals(schema.getType("foo_package.Bar").getType(), bars.getValueType());
   }
 
   // Resolution happens from the root not inside Outer and so this fails.
@@ -113,7 +113,7 @@ public class SchemaFullTest {
 
     MessageType message = (MessageType) schema.getType("Other");
     Field field = message.field("choice");
-    assertEquals(schema.getType("Outer.Choice").type(), field.type());
+    assertEquals(schema.getType("Outer.Choice").getType(), field.getType());
   }
 
   @Test public void isValidTag() {
@@ -305,11 +305,11 @@ public class SchemaFullTest {
         .build();
 
     MessageType message = (MessageType) schema.getType("Message");
-    assertNull(message.field("a").defaultValue());
-    assertEquals("5", message.field("b").defaultValue());
-    assertEquals("true", message.field("c").defaultValue());
-    assertEquals("foo", message.field("d").defaultValue());
-    assertEquals("PAPER", message.field("e").defaultValue());
+    assertNull(message.field("a").getDefault());
+    assertEquals("5", message.field("b").getDefault());
+    assertEquals("true", message.field("c").getDefault());
+    assertEquals("foo", message.field("d").getDefault());
+    assertEquals("PAPER", message.field("e").getDefault());
   }
 
   @Test public void fieldOptions() {
@@ -326,12 +326,12 @@ public class SchemaFullTest {
         .build();
     MessageType message = (MessageType) schema.getType("Message");
 
-    Options aOptions = message.field("a").options();
+    Options aOptions = message.field("a").getOptions();
     assertNull(aOptions.get(ProtoMember.get(Options.FIELD_OPTIONS, "color")));
     assertNull(aOptions.get(ProtoMember.get(Options.FIELD_OPTIONS, "deprecated")));
     assertNull(aOptions.get(ProtoMember.get(Options.FIELD_OPTIONS, "packed")));
 
-    Options bOptions = message.field("b").options();
+    Options bOptions = message.field("b").getOptions();
     assertEquals("red", bOptions.get(ProtoMember.get(Options.FIELD_OPTIONS, "color")));
     assertEquals("true", bOptions.get(ProtoMember.get(Options.FIELD_OPTIONS, "deprecated")));
     assertEquals("true", bOptions.get(ProtoMember.get(Options.FIELD_OPTIONS, "packed")));
@@ -590,8 +590,8 @@ public class SchemaFullTest {
         .build();
     MessageType messageType = (MessageType) schema.getType("Message");
 
-    assertEquals(1, messageType.field("a").tag());
-    assertEquals(2, messageType.extensionField("p.a").tag());
+    assertEquals(1, messageType.field("a").getTag());
+    assertEquals(2, messageType.extensionField("p.a").getTag());
   }
 
   @Test public void extendNameCollisionInSamePackageDisallowed() {
@@ -639,8 +639,8 @@ public class SchemaFullTest {
     MessageType messageType = (MessageType) schema.getType("Message");
 
     assertNull(messageType.field("a"));
-    assertEquals(Arrays.asList("p1"), messageType.extensionField("p1.a").namespaces());
-    assertEquals(Arrays.asList("p2"), messageType.extensionField("p2.a").namespaces());
+    assertEquals(Arrays.asList("p1"), messageType.extensionField("p1.a").getNamespaces());
+    assertEquals(Arrays.asList("p2"), messageType.extensionField("p2.a").getNamespaces());
   }
 
   @Test public void extendEnumDisallowed() {
@@ -753,8 +753,8 @@ public class SchemaFullTest {
             + "}\n")
         .build();
     EnumType enumType = (EnumType) schema.getType("Enum");
-    assertEquals(1, enumType.constant("A").tag());
-    assertEquals(1, enumType.constant("B").tag());
+    assertEquals(1, enumType.constant("A").getTag());
+    assertEquals(1, enumType.constant("B").getTag());
   }
 
   @Test public void fieldTypeImported() {
@@ -772,7 +772,7 @@ public class SchemaFullTest {
         .build();
     MessageType a = (MessageType) schema.getType("pa.A");
     MessageType b = (MessageType) schema.getType("pb.B");
-    assertEquals(b.type(), a.field("b").type());
+    assertEquals(b.getType(), a.field("b").getType());
   }
 
   @Test public void fieldMapTypeImported() {
@@ -790,7 +790,7 @@ public class SchemaFullTest {
         .build();
     MessageType a = (MessageType) schema.getType("pa.A");
     MessageType b = (MessageType) schema.getType("pb.B");
-    assertEquals(b.type(), a.field("b").type().valueType);
+    assertEquals(b.getType(), a.field("b").getType().getValueType());
   }
 
   @Test public void fieldTypeNotImported() {
@@ -846,8 +846,8 @@ public class SchemaFullTest {
         .build();
     Service service = schema.getService("pa.Service");
     MessageType b = (MessageType) schema.getType("pb.B");
-    assertEquals(b.type(), service.rpcs().get(0).requestType());
-    assertEquals(b.type(), service.rpcs().get(0).responseType());
+    assertEquals(b.getType(), service.rpcs().get(0).getRequestType());
+    assertEquals(b.getType(), service.rpcs().get(0).getResponseType());
   }
 
   @Test public void rpcTypeNotImported() {
@@ -886,9 +886,9 @@ public class SchemaFullTest {
             + "  extensions 1;\n"
             + "}\n")
         .build();
-    Extend extendB = schema.protoFiles().get(0).extendList().get(0);
+    Extend extendB = schema.getProtoFiles().get(0).getExtendList().get(0);
     MessageType b = (MessageType) schema.getType("pb.B");
-    assertEquals(b.type(), extendB.type());
+    assertEquals(b.getType(), extendB.getType());
   }
 
   @Test public void extendTypeNotImported() {
@@ -955,7 +955,7 @@ public class SchemaFullTest {
         .build();
     MessageType a = (MessageType) schema.getType("pa.A");
     MessageType c = (MessageType) schema.getType("pc.C");
-    assertEquals(c.type(), a.field("c").type());
+    assertEquals(c.getType(), a.field("c").getType());
   }
 
   @Test public void importSamePackageDifferentFile() {
@@ -978,10 +978,10 @@ public class SchemaFullTest {
             + "}\n")
         .build();
     MessageType messageC = (MessageType) schema.getType("a.b.MessageB");
-    assertEquals(ProtoType.get("a.b.MessageC"), messageC.field("c1").type());
-    assertEquals(ProtoType.get("a.b.MessageC"), messageC.field("c2").type());
-    assertEquals(ProtoType.get("a.b.MessageC"), messageC.field("c3").type());
-    assertEquals(ProtoType.get("a.b.MessageC"), messageC.field("c4").type());
+    assertEquals(ProtoType.get("a.b.MessageC"), messageC.field("c1").getType());
+    assertEquals(ProtoType.get("a.b.MessageC"), messageC.field("c2").getType());
+    assertEquals(ProtoType.get("a.b.MessageC"), messageC.field("c3").getType());
+    assertEquals(ProtoType.get("a.b.MessageC"), messageC.field("c4").getType());
   }
 
   @Test public void importResolvesEnclosingPackageSuffix() {
@@ -1001,7 +1001,7 @@ public class SchemaFullTest {
             + "}\n")
         .build();
     MessageType messageC = (MessageType) schema.getType("a.b.c.MessageC");
-    assertEquals(ProtoType.get("a.b.MessageB"), messageC.field("message_b").type());
+    assertEquals(ProtoType.get("a.b.MessageB"), messageC.field("message_b").getType());
   }
 
   @Test public void importResolvesNestedPackageSuffix() {
@@ -1021,7 +1021,7 @@ public class SchemaFullTest {
             + "}\n")
         .build();
     MessageType messageC = (MessageType) schema.getType("a.b.MessageB");
-    assertEquals(ProtoType.get("a.b.c.MessageC"), messageC.field("message_c").type());
+    assertEquals(ProtoType.get("a.b.c.MessageC"), messageC.field("message_c").getType());
   }
 
   @Test public void nestedPackagePreferredOverEnclosingPackage() {
@@ -1047,7 +1047,7 @@ public class SchemaFullTest {
             + "}\n")
         .build();
     MessageType messageC = (MessageType) schema.getType("a.b.MessageB");
-    assertEquals(ProtoType.get("a.b.a.MessageA"), messageC.field("message_a").type());
+    assertEquals(ProtoType.get("a.b.a.MessageA"), messageC.field("message_a").getType());
   }
 
   @Test public void dotPrefixRefersToRootPackage() {
@@ -1073,7 +1073,7 @@ public class SchemaFullTest {
             + "}\n")
         .build();
     MessageType messageC = (MessageType) schema.getType("a.b.MessageB");
-    assertEquals(ProtoType.get("a.MessageA"), messageC.field("message_a").type());
+    assertEquals(ProtoType.get("a.MessageA"), messageC.field("message_a").getType());
   }
 
   @Test public void dotPrefixMustBeRoot() {
@@ -1353,7 +1353,7 @@ public class SchemaFullTest {
             + "}\n")
         .build();
     MessageType fieldOptions = (MessageType) schema.getType("google.protobuf.FieldOptions");
-    assertEquals(ProtoType.get("string"), fieldOptions.extensionField("a").type());
+    assertEquals(ProtoType.get("string"), fieldOptions.extensionField("a").getType());
   }
 
   @Test public void proto3CanExtendCustomOptionWithLeadingDot() {
@@ -1370,7 +1370,7 @@ public class SchemaFullTest {
             + "}\n")
         .build();
     MessageType fieldOptions = (MessageType) schema.getType("google.protobuf.FieldOptions");
-    assertEquals(ProtoType.get("string"), fieldOptions.extensionField("a").type());
+    assertEquals(ProtoType.get("string"), fieldOptions.extensionField("a").getType());
   }
 
   @Test public void oneofOption() {
@@ -1393,11 +1393,11 @@ public class SchemaFullTest {
         .build();
     MessageType fieldOptions = (MessageType) schema.getType("google.protobuf.OneofOptions");
     assertEquals(ProtoType.get("string"),
-        fieldOptions.extensionField("my_oneof_option").type());
-    OneOf choiceOneOf = ((MessageType) schema.getType("Message")).oneOfs().get(0);
-    assertEquals("choice", choiceOneOf.name());
+        fieldOptions.extensionField("my_oneof_option").getType());
+    OneOf choiceOneOf = ((MessageType) schema.getType("Message")).getOneOfs().get(0);
+    assertEquals("choice", choiceOneOf.getName());
     assertEquals("Well done",
-        choiceOneOf.options().get(ProtoMember.get(Options.ONEOF_OPTIONS, "my_oneof_option")));
+        choiceOneOf.getOptions().get(ProtoMember.get(Options.ONEOF_OPTIONS, "my_oneof_option")));
   }
 
   @Test public void proto3CannotExtendNonCustomOption() {
@@ -1579,19 +1579,19 @@ public class SchemaFullTest {
             + "\n")
         .build();
 
-    assertTrue(schema.protoFile("message.proto").options().elements()
+    assertTrue(schema.protoFile("message.proto").getOptions().getElements()
         .contains(deprecatedOptionElement));
-    assertTrue(schema.getType("Message").options().elements()
+    assertTrue(schema.getType("Message").getOptions().getElements()
         .contains(deprecatedOptionElement));
-    assertTrue(((MessageType) schema.getType("Message")).field("s").options().elements()
+    assertTrue(((MessageType) schema.getType("Message")).field("s").getOptions().getElements()
         .contains(deprecatedOptionElement));
-    assertTrue(schema.getType("Enum").options().elements()
+    assertTrue(schema.getType("Enum").getOptions().getElements()
         .contains(deprecatedOptionElement));
-    assertTrue(((EnumType) schema.getType("Enum")).constant("A").options().elements()
+    assertTrue(((EnumType) schema.getType("Enum")).constant("A").getOptions().getElements()
         .contains(deprecatedOptionElement));
-    assertTrue(schema.getService("Service").options().elements()
+    assertTrue(schema.getService("Service").options().getElements()
         .contains(deprecatedOptionElement));
-    assertTrue(schema.getService("Service").rpc("Call").options().elements()
+    assertTrue(schema.getService("Service").rpc("Call").getOptions().getElements()
         .contains(deprecatedOptionElement));
   }
 
@@ -1797,8 +1797,8 @@ public class SchemaFullTest {
     List<Field> fields = ((MessageType) schema.getType("a.A")).fields();
     assertEquals(1, fields.size());
     Field field = fields.get(0);
-    assertEquals(Arrays.asList("a", "A"), field.namespaces());
-    assertEquals("one", field.name());
+    assertEquals(Arrays.asList("a", "A"), field.getNamespaces());
+    assertEquals("one", field.getName());
     assertFalse(field.isExtension());
   }
 
@@ -1821,8 +1821,8 @@ public class SchemaFullTest {
     List<Field> fields = ((MessageType) schema.getType("a.A")).fields();
     assertEquals(1, fields.size());
     Field field = fields.get(0);
-    assertEquals(Arrays.asList("b"), field.namespaces());
-    assertEquals("two", field.name());
+    assertEquals(Arrays.asList("b"), field.getNamespaces());
+    assertEquals("two", field.getName());
     assertTrue(field.isExtension());
   }
 
@@ -2119,8 +2119,8 @@ public class SchemaFullTest {
         .build();
 
     EnumType enumType = (EnumType) schema.getType("Foo");
-    assertEquals(0, enumType.constant("ZERO").tag());
-    assertEquals(0, enumType.constant("zero").tag());
+    assertEquals(0, enumType.constant("ZERO").getTag());
+    assertEquals(0, enumType.constant("zero").getTag());
   }
 
   @Test public void typeAliasDoesNotAllowAmbiguousEnumConstantsIfDifferentTag() {

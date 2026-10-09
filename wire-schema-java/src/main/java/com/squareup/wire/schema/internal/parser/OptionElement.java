@@ -32,8 +32,17 @@ public final class OptionElement {
 
   /** An internal representation of the Option primitive types. */
   public static final class OptionPrimitive {
-    public final Kind kind;
-    public final Object value;
+    private final Kind kind;
+
+    public Kind getKind() {
+      return kind;
+    }
+
+    private final Object value;
+
+    public Object getValue() {
+      return value;
+    }
 
     public OptionPrimitive(Kind kind, Object value) {
       this.kind = kind;
@@ -59,11 +68,25 @@ public final class OptionElement {
   public static final OptionElement PACKED_OPTION_ELEMENT =
       new OptionElement("packed", Kind.BOOLEAN, "true", false);
 
-  public final String name;
-  public final Kind kind;
-  public final Object value;
+  private final String name;
+
+  public String getName() {
+    return name;
+  }
+
+  private final Kind kind;
+
+  public Kind getKind() {
+    return kind;
+  }
+
+  private final Object value;
+
+  public Object getValue() {
+    return value;
+  }
   /** If true, this OptionElement is a custom option. */
-  public final boolean isParenthesized;
+  private final boolean isParenthesized;
 
   private final String formattedName;
 
@@ -209,5 +232,9 @@ public final class OptionElement {
     result = 31 * result + java.util.Objects.hashCode(value);
     result = 31 * result + (isParenthesized ? 1 : 0);
     return result;
+  }
+
+  public boolean isParenthesized() {
+    return isParenthesized;
   }
 }

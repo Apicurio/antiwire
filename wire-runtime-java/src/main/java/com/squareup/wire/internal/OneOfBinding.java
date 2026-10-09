@@ -41,28 +41,28 @@ public final class OneOfBinding<M extends Message<M, B>, B extends Message.Build
     }
   }
 
-  @Override public int tag() {
-    return key.tag;
+  @Override public int getTag() {
+    return key.getTag();
   }
 
-  @Override public WireField.Label label() {
+  @Override public WireField.Label getLabel() {
     return WireField.Label.OPTIONAL;
   }
 
-  @Override public boolean redacted() {
-    return key.redacted;
+  @Override public boolean getRedacted() {
+    return key.getRedacted();
   }
 
-  @Override public String wireFieldJsonName() {
-    return key.jsonName;
+  @Override public String getWireFieldJsonName() {
+    return key.getJsonName();
   }
 
-  @Override public String name() {
-    return key.declaredName;
+  @Override public String getName() {
+    return key.getDeclaredName();
   }
 
-  @Override public String declaredName() {
-    return key.declaredName;
+  @Override public String getDeclaredName() {
+    return key.getDeclaredName();
   }
 
   @Override public boolean isMap() {
@@ -70,19 +70,19 @@ public final class OneOfBinding<M extends Message<M, B>, B extends Message.Build
   }
 
   @Override public boolean isMessage() {
-    return Message.class.isAssignableFrom(singleAdapter().type);
+    return Message.class.isAssignableFrom(getSingleAdapter().type);
   }
 
-  @Override public ProtoAdapter<?> keyAdapter() {
+  @Override public ProtoAdapter<?> getKeyAdapter() {
     throw new IllegalStateException("not a map");
   }
 
   @SuppressWarnings("unchecked")
-  @Override public ProtoAdapter<?> singleAdapter() {
-    return (ProtoAdapter<Object>) key.adapter;
+  @Override public ProtoAdapter<?> getSingleAdapter() {
+    return (ProtoAdapter<Object>) key.getAdapter();
   }
 
-  @Override public boolean writeIdentityValues() {
+  @Override public boolean getWriteIdentityValues() {
     return writeIdentityValues;
   }
 

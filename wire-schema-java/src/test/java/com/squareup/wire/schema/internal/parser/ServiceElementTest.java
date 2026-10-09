@@ -47,7 +47,7 @@ public class ServiceElementTest {
     RpcElement lastName = rpc("LastName");
     ServiceElement service = new ServiceElement(location, "Service", "",
         Arrays.asList(firstName, lastName), Collections.emptyList());
-    assertEquals(2, service.rpcs.size());
+    assertEquals(2, service.getRpcs().size());
   }
 
   @Test public void singleWithOptionsToSchema() {
@@ -67,7 +67,7 @@ public class ServiceElementTest {
     ServiceElement service = new ServiceElement(location, "Service", "",
         Collections.singletonList(rpc("Name")),
         Arrays.asList(kitKat, fooBar));
-    assertEquals(2, service.options.size());
+    assertEquals(2, service.getOptions().size());
   }
 
   @Test public void singleWithDocumentationToSchema() {

@@ -21,11 +21,11 @@ import com.squareup.wire.WireField;
 
 /** Reads, writes, and describes a tag within a message (upstream commonMain). */
 public abstract class FieldOrOneOfBinding<M, B> {
-  public abstract int tag();
+  public abstract int getTag();
 
-  public abstract WireField.Label label();
+  public abstract WireField.Label getLabel();
 
-  public abstract boolean redacted();
+  public abstract boolean getRedacted();
 
   public abstract boolean isMap();
 
@@ -35,23 +35,23 @@ public abstract class FieldOrOneOfBinding<M, B> {
    * The name of the field in generated code. If the declared name is a keyword like {@code fun},
    * this will be a transformed name like {@code fun_}.
    */
-  public abstract String name();
+  public abstract String getName();
 
   /** The name of the field as declared in the proto file. */
-  public abstract String declaredName();
+  public abstract String getDeclaredName();
 
   /**
    * The JSON name as determined at code-generation time. This is usually camelCase even if the
    * field is declared in snake_case.
    */
-  public abstract String wireFieldJsonName();
+  public abstract String getWireFieldJsonName();
 
-  public abstract ProtoAdapter<?> keyAdapter();
+  public abstract ProtoAdapter<?> getKeyAdapter();
 
-  public abstract ProtoAdapter<?> singleAdapter();
+  public abstract ProtoAdapter<?> getSingleAdapter();
 
   /** If true, Wire will always write identity values. */
-  public abstract boolean writeIdentityValues();
+  public abstract boolean getWriteIdentityValues();
 
   private volatile ProtoAdapter<Object> adapterMemoized;
 
@@ -61,7 +61,7 @@ public abstract class FieldOrOneOfBinding<M, B> {
    * overflow.
    */
   @SuppressWarnings("unchecked")
-  public ProtoAdapter<Object> adapter() {
+  public ProtoAdapter<Object> getAdapter() {
     ProtoAdapter<Object> result = adapterMemoized;
     if (result == null) {
       synchronized (this) {
@@ -69,10 +69,10 @@ public abstract class FieldOrOneOfBinding<M, B> {
         if (result == null) {
           if (isMap()) {
             result = (ProtoAdapter<Object>) (ProtoAdapter<?>) ProtoAdapter.newMapAdapter(
-                (ProtoAdapter<Object>) (ProtoAdapter<?>) keyAdapter(),
-                (ProtoAdapter<Object>) (ProtoAdapter<?>) singleAdapter());
+                (ProtoAdapter<Object>) (ProtoAdapter<?>) getKeyAdapter(),
+                (ProtoAdapter<Object>) (ProtoAdapter<?>) getSingleAdapter());
           } else {
-            result = (ProtoAdapter<Object>) (ProtoAdapter<?>) singleAdapter().withLabel(label());
+            result = (ProtoAdapter<Object>) (ProtoAdapter<?>) getSingleAdapter().withLabel(getLabel());
           }
           adapterMemoized = result;
         }
@@ -93,13 +93,13 @@ public abstract class FieldOrOneOfBinding<M, B> {
 
   public final boolean omitFromJson(Syntax syntax, Object value) {
     if (value == null) return true;
-    return omitIdentity(syntax) && value.equals(adapter().identity);
+    return omitIdentity(syntax) && value.equals(getAdapter().getIdentity());
   }
 
   private boolean omitIdentity(Syntax syntax) {
-    if (writeIdentityValues()) return false;
-    if (label() == WireField.Label.OMIT_IDENTITY) return true;
-    if (label().isRepeated() && syntax == Syntax.PROTO_3) return true;
+    if (getWriteIdentityValues()) return false;
+    if (getLabel() == WireField.Label.OMIT_IDENTITY) return true;
+    if (getLabel().isRepeated() && syntax == Syntax.PROTO_3) return true;
     if (isMap() && syntax == Syntax.PROTO_3) return true;
     return false;
   }

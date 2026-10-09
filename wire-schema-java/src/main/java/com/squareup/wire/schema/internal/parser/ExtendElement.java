@@ -20,10 +20,29 @@ import com.squareup.wire.schema.internal.SchemaUtil;
 import java.util.List;
 
 public final class ExtendElement {
-  public final Location location;
-  public final String name;
-  public final String documentation;
-  public final List<FieldElement> fields;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final String name;
+
+  public String getName() {
+    return name;
+  }
+
+  private final String documentation;
+
+  public String getDocumentation() {
+    return documentation;
+  }
+
+  private final List<FieldElement> fields;
+
+  public List<FieldElement> getFields() {
+    return fields;
+  }
 
   public ExtendElement(Location location, String name, String documentation,
       List<FieldElement> fields) {

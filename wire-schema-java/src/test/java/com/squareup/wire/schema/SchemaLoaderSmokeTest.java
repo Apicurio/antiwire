@@ -69,7 +69,7 @@ public class SchemaLoaderSmokeTest {
     assertNotNull(schema.getType("squareup.protos.A"));
     assertNotNull(schema.getType("squareup.protos.B"));
     assertEquals("com.squareup.protos", schema.protoFile("squareup/protos/a.proto").javaPackage());
-    assertEquals(2, loader.sourcePathFiles().size());
+    assertEquals(2, loader.getSourcePathFiles().size());
   }
 
   @Test public void protoPathIsLinkedButNotASource() throws Exception {
@@ -91,8 +91,8 @@ public class SchemaLoaderSmokeTest {
 
     assertNotNull(schema.getType("A"));
     assertNotNull(schema.getType("Dep"));
-    assertEquals(1, loader.sourcePathFiles().size());
-    assertEquals("a.proto", loader.sourcePathFiles().get(0).location().path);
+    assertEquals(1, loader.getSourcePathFiles().size());
+    assertEquals("a.proto", loader.getSourcePathFiles().get(0).getLocation().getPath());
   }
 
   @Test public void loadSchemaFromZip() throws Exception {
@@ -112,9 +112,9 @@ public class SchemaLoaderSmokeTest {
     Schema schema = loader.loadSchema();
 
     assertNotNull(schema.getType("squareup.protos.Zipped"));
-    assertEquals(1, loader.sourcePathFiles().size());
+    assertEquals(1, loader.getSourcePathFiles().size());
     assertEquals("squareup/protos/zipped.proto",
-        loader.sourcePathFiles().get(0).location().path);
+        loader.getSourcePathFiles().get(0).getLocation().getPath());
   }
 
   @Test public void noSourcesFails() throws Exception {
@@ -204,7 +204,7 @@ public class SchemaLoaderSmokeTest {
 
     // c.proto is only reachable through b.proto's import, but loadExhaustively keeps it.
     assertNotNull(schema.getType("C"));
-    List<ProtoFile> sourceFiles = loader.sourcePathFiles();
+    List<ProtoFile> sourceFiles = loader.getSourcePathFiles();
     assertEquals(3, sourceFiles.size());
   }
 }

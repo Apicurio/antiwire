@@ -62,7 +62,7 @@ public interface SyntaxRules {
       if (label == Field.Label.OPTIONAL) return Field.EncodeMode.NULL_IF_ABSENT;
       if (label == Field.Label.REQUIRED) return Field.EncodeMode.REQUIRED;
       // Field.Label.ONE_OF, or null.
-      return protoType.isMap ? Field.EncodeMode.MAP : Field.EncodeMode.NULL_IF_ABSENT;
+      return protoType.isMap() ? Field.EncodeMode.MAP : Field.EncodeMode.NULL_IF_ABSENT;
     }
 
     @Override public String jsonName(String name, String declaredJsonName) {
@@ -85,7 +85,7 @@ public interface SyntaxRules {
 
     @Override public void validateEnumConstants(List<EnumConstant> constants,
         ErrorCollector errors) {
-      if (constants.isEmpty() || constants.get(0).tag() != 0) {
+      if (constants.isEmpty() || constants.get(0).getTag() != 0) {
         errors.add("missing a zero value at the first element in proto3");
       }
     }
@@ -93,7 +93,7 @@ public interface SyntaxRules {
     @Override public void validateTypeReference(Type type, ErrorCollector errors) {
       if (type == null) return;
       if (!(type instanceof EnumType)) return;
-      if (type.syntax() == Syntax.PROTO_3) return;
+      if (type.getSyntax() == Syntax.PROTO_3) return;
 
       errors.add("Proto2 enums cannot be referenced in a proto3 message");
     }
@@ -107,7 +107,7 @@ public interface SyntaxRules {
       if (label == Field.Label.REPEATED) {
         return isPacked ? Field.EncodeMode.PACKED : Field.EncodeMode.REPEATED;
       }
-      if (protoType.isMap) return Field.EncodeMode.MAP;
+      if (protoType.isMap()) return Field.EncodeMode.MAP;
       if (isOneOf) return Field.EncodeMode.NULL_IF_ABSENT;
       if (label == Field.Label.OPTIONAL) return Field.EncodeMode.NULL_IF_ABSENT;
 

@@ -21,16 +21,65 @@ import java.util.List;
 
 /** A single `.proto` file. */
 public final class ProtoFileElement {
-  public final Location location;
-  public final String packageName;
-  public final Syntax syntax;
-  public final List<String> imports;
-  public final List<String> publicImports;
-  public final List<String> weakImports;
-  public final List<TypeElement> types;
-  public final List<ServiceElement> services;
-  public final List<ExtendElement> extendDeclarations;
-  public final List<OptionElement> options;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final String packageName;
+
+  public String getPackageName() {
+    return packageName;
+  }
+
+  private final Syntax syntax;
+
+  public Syntax getSyntax() {
+    return syntax;
+  }
+
+  private final List<String> imports;
+
+  public List<String> getImports() {
+    return imports;
+  }
+
+  private final List<String> publicImports;
+
+  public List<String> getPublicImports() {
+    return publicImports;
+  }
+
+  private final List<String> weakImports;
+
+  public List<String> getWeakImports() {
+    return weakImports;
+  }
+
+  private final List<TypeElement> types;
+
+  public List<TypeElement> getTypes() {
+    return types;
+  }
+
+  private final List<ServiceElement> services;
+
+  public List<ServiceElement> getServices() {
+    return services;
+  }
+
+  private final List<ExtendElement> extendDeclarations;
+
+  public List<ExtendElement> getExtendDeclarations() {
+    return extendDeclarations;
+  }
+
+  private final List<OptionElement> options;
+
+  public List<OptionElement> getOptions() {
+    return options;
+  }
 
   public ProtoFileElement(Location location, String packageName, Syntax syntax,
       List<String> imports, List<String> publicImports, List<String> weakImports,

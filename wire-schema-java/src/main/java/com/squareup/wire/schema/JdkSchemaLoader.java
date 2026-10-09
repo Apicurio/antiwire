@@ -100,7 +100,7 @@ public final class JdkSchemaLoader implements AutoCloseable {
 
   /** Strict by default. Note that golang cannot build protos with package cycles. */
   public boolean permitPackageCycles() {
-    return delegate.permitPackageCycles();
+    return delegate.getPermitPackageCycles();
   }
 
   public JdkSchemaLoader setPermitPackageCycles(boolean permitPackageCycles) {
@@ -115,7 +115,7 @@ public final class JdkSchemaLoader implements AutoCloseable {
    * cannot be opaqued.
    */
   public List<ProtoType> opaqueTypes() {
-    return delegate.opaqueTypes();
+    return delegate.getOpaqueTypes();
   }
 
   public JdkSchemaLoader setOpaqueTypes(List<ProtoType> opaqueTypes) {
@@ -128,7 +128,7 @@ public final class JdkSchemaLoader implements AutoCloseable {
    * anything in the source path.
    */
   public boolean loadExhaustively() {
-    return delegate.loadExhaustively();
+    return delegate.getLoadExhaustively();
   }
 
   public JdkSchemaLoader setLoadExhaustively(boolean loadExhaustively) {
@@ -138,7 +138,7 @@ public final class JdkSchemaLoader implements AutoCloseable {
 
   /** Subset of the schema that was loaded from the source path. */
   public List<ProtoFile> sourcePathFiles() {
-    return delegate.sourcePathFiles();
+    return delegate.getSourcePathFiles();
   }
 
   /**

@@ -73,7 +73,7 @@ public class OptionsLinkingTest {
     MessageType typeA = (MessageType) schema.getType("A");
     assertEquals(
         optionMap(formattingOptionsField, optionMap(languageField, "English")),
-        typeA.field("s").options().map());
+        typeA.field("s").getOptions().getMap());
   }
 
   @Test
@@ -98,7 +98,7 @@ public class OptionsLinkingTest {
     MessageType typeA = (MessageType) schema.getType("A");
     assertEquals(
         optionMap(formattingOptionsField, optionMap(languageField, "English")),
-        typeA.field("s").options().map());
+        typeA.field("s").getOptions().getMap());
   }
 
   @Test
@@ -143,7 +143,7 @@ public class OptionsLinkingTest {
     assertEquals(
         optionMap(formattingOptionsField,
             optionMap(languageField, optionMap(nameField, "English"))),
-        typeA.field("s").options().map());
+        typeA.field("s").getOptions().getMap());
 
     MessageType typeLanguage = (MessageType) schema.getType("Language");
     assertNotNull(typeLanguage.field("name"));

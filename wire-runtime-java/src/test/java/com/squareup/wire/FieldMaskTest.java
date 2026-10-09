@@ -31,11 +31,11 @@ import org.junit.jupiter.api.Test;
 public class FieldMaskTest {
   @Test public void storesPaths() {
     FieldMask fieldMask = new FieldMask(Arrays.asList("user.display_name", "photo"));
-    assertEquals(Arrays.asList("user.display_name", "photo"), fieldMask.paths());
+    assertEquals(Arrays.asList("user.display_name", "photo"), fieldMask.getPaths());
   }
 
   @Test public void defaultPathsIsEmpty() {
-    assertEquals(new ArrayList<String>(), new FieldMask().paths());
+    assertEquals(new ArrayList<String>(), new FieldMask().getPaths());
   }
 
   @Test public void pathsAreImmutableCopy() {
@@ -45,7 +45,7 @@ public class FieldMaskTest {
 
     paths.add("photo");
 
-    assertEquals(Arrays.asList("user.display_name"), fieldMask.paths());
+    assertEquals(Arrays.asList("user.display_name"), fieldMask.getPaths());
   }
 
   @Test public void copy() {
@@ -67,7 +67,7 @@ public class FieldMaskTest {
 
   @Test public void protoAdapterHasTypeUrl() {
     assertEquals("type.googleapis.com/google.protobuf.FieldMask",
-        ProtoAdapter.FIELD_MASK.typeUrl);
+        ProtoAdapter.FIELD_MASK.getTypeUrl());
   }
 
   @Test public void protoAdapterDiscardsUnknownFields() throws java.io.IOException {

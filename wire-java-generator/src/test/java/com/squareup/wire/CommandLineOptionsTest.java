@@ -155,13 +155,13 @@ public class CommandLineOptionsTest {
     expected.put("a", new WireRun.Module());
     expected.put("b", new WireRun.Module(java.util.Collections.singleton("a")));
     assertEquals(expected.keySet(), compiler.modules.keySet());
-    assertTrue(compiler.modules.get("a").dependencies().isEmpty());
+    assertTrue(compiler.modules.get("a").getDependencies().isEmpty());
     assertNullModulePruningRules(compiler.modules.get("a"));
-    assertEquals(java.util.Collections.singleton("a"), compiler.modules.get("b").dependencies());
+    assertEquals(java.util.Collections.singleton("a"), compiler.modules.get("b").getDependencies());
   }
 
   private static void assertNullModulePruningRules(WireRun.Module module) {
-    assertTrue(module.pruningRules() == null, "expected default pruning rules to be null");
+    assertTrue(module.getPruningRules() == null, "expected default pruning rules to be null");
   }
 
   @Test

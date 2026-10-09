@@ -44,7 +44,7 @@ import okio.Path;
  *       {@link #treeShakingRoots} and not in {@link #treeShakingRubbish}. Types are moved to
  *       different files as specified by {@link #moves}.
  *   <li>Call each target. It will generate sources for protos in the {@link #sourcePath} that
- *       are in its {@link Target#includes}, that are not in its {@link Target#excludes}, and
+ *       are in its {@link Target#getIncludes}, that are not in its {@link Target#getExcludes}, and
  *       that haven't already been emitted by an earlier target.
  * </ol>
  *
@@ -70,8 +70,8 @@ import okio.Path;
  *
  * <h2>Matching Packages, Types, and Members</h2>
  *
- * <p>The {@link #treeShakingRoots}, {@link #treeShakingRubbish}, {@link Target#includes} and
- * {@link Target#excludes} lists contain strings that select proto types and members. Strings in
+ * <p>The {@link #treeShakingRoots}, {@link #treeShakingRubbish}, {@link Target#getIncludes} and
+ * {@link Target#getExcludes} lists contain strings that select proto types and members. Strings in
  * these lists are in one of these forms:
  *
  * <ul>
@@ -246,68 +246,68 @@ public final class WireRun {
   }
 
   /** Source {@code .proto} files for this task to generate from. */
-  public List<Location> sourcePath() {
+  public List<Location> getSourcePath() {
     return sourcePath;
   }
 
   /** Sources {@code .proto} files for this task to use when resolving references. */
-  public List<Location> protoPath() {
+  public List<Location> getProtoPath() {
     return protoPath;
   }
 
-  public List<String> treeShakingRoots() {
+  public List<String> getTreeShakingRoots() {
     return treeShakingRoots;
   }
 
-  public List<String> treeShakingRubbish() {
+  public List<String> getTreeShakingRubbish() {
     return treeShakingRubbish;
   }
 
-  public List<TypeMover.Move> moves() {
+  public List<TypeMover.Move> getMoves() {
     return moves;
   }
 
-  public String sinceVersion() {
+  public String getSinceVersion() {
     return sinceVersion;
   }
 
-  public String untilVersion() {
+  public String getUntilVersion() {
     return untilVersion;
   }
 
-  public String onlyVersion() {
+  public String getOnlyVersion() {
     return onlyVersion;
   }
 
-  public List<Target> targets() {
+  public List<Target> getTargets() {
     return targets;
   }
 
-  public Map<String, Module> modules() {
+  public Map<String, Module> getModules() {
     return modules;
   }
 
-  public boolean permitPackageCycles() {
+  public boolean getPermitPackageCycles() {
     return permitPackageCycles;
   }
 
-  public boolean loadExhaustively() {
+  public boolean getLoadExhaustively() {
     return loadExhaustively;
   }
 
-  public boolean escapeKotlinKeywords() {
+  public boolean getEscapeKotlinKeywords() {
     return escapeKotlinKeywords;
   }
 
-  public List<EventListener> eventListeners() {
+  public List<EventListener> getEventListeners() {
     return eventListeners;
   }
 
-  public boolean rejectUnusedRootsOrPrunes() {
+  public boolean getRejectUnusedRootsOrPrunes() {
     return rejectUnusedRootsOrPrunes;
   }
 
-  public List<String> opaqueTypes() {
+  public List<String> getOpaqueTypes() {
     return opaqueTypes;
   }
 
@@ -328,18 +328,18 @@ public final class WireRun {
       this(dependencies, null);
     }
 
-    public Set<String> dependencies() {
+    public Set<String> getDependencies() {
       return dependencies;
     }
 
-    public PruningRules pruningRules() {
+    public PruningRules getPruningRules() {
       return pruningRules;
     }
   }
 
   private void checkForModuleCycles() {
     DagChecker<String> dagChecker = new DagChecker<>(
-        modules.keySet(), moduleName -> modules.get(moduleName).dependencies());
+        modules.keySet(), moduleName -> modules.get(moduleName).getDependencies());
     Set<List<String>> cycles = dagChecker.check();
     if (cycles.isEmpty()) return;
     StringBuilder message = new StringBuilder();
@@ -389,13 +389,13 @@ public final class WireRun {
         rejectUnusedRootsOrPrunes);
 
     List<Target> targetsExclusiveLast = new ArrayList<>(targets);
-    targetsExclusiveLast.sort(Comparator.comparing(Target::exclusive));
+    targetsExclusiveLast.sort(Comparator.comparing(Target::getExclusive));
     Set<String> sourcePathPaths = new LinkedHashSet<>();
-    for (ProtoFile protoFile : schemaLoader.sourcePathFiles()) {
-      sourcePathPaths.add(protoFile.location().path);
+    for (ProtoFile protoFile : schemaLoader.getSourcePathFiles()) {
+      sourcePathPaths.add(protoFile.getLocation().getPath());
     }
     for (TypeMover.Move move : moves) {
-      sourcePathPaths.add(move.targetPath);
+      sourcePathPaths.add(move.getTargetPath());
     }
     ClaimedPaths claimedPaths = new ClaimedPaths();
     ErrorCollector errorCollector = new ErrorCollector();
@@ -403,8 +403,8 @@ public final class WireRun {
     Map<Target, EmittingRules> targetToEmittingRules = new LinkedHashMap<>();
     for (Target target : targets) {
       targetToEmittingRules.put(target, new EmittingRules.Builder()
-          .include(target.includes())
-          .exclude(target.excludes())
+          .include(target.getIncludes())
+          .exclude(target.getExcludes())
           .build());
     }
 
@@ -435,15 +435,15 @@ public final class WireRun {
             : new SchemaHandler.Module(moduleName, partition.types,
                 partition.transitiveUpstreamTypes);
         Path outDirectory = moduleName == null
-            ? Path.get(target.outDirectory())
-            : Path.get(target.outDirectory()).div(moduleName);
+            ? Path.get(target.getOutDirectory())
+            : Path.get(target.getOutDirectory()).div(moduleName);
         SchemaHandler.Context context = new SchemaHandler.Context(
             fs,
             outDirectory,
             logger,
             errorCollector,
             targetToEmittingRules.get(target),
-            target.exclusive() ? claimedDefinitions : null,
+            target.getExclusive() ? claimedDefinitions : null,
             claimedPaths,
             sourcePathPaths,
             module,
@@ -464,10 +464,10 @@ public final class WireRun {
       eventListener.schemaHandlersEnd();
     }
 
-    List<String> errors = errorCollector.errors();
+    List<String> errors = errorCollector.getErrors();
     if (!errors.isEmpty()) {
       for (EventListener eventListener : eventListeners) {
-        eventListener.runFailed(errorCollector.errors());
+        eventListener.runFailed(errorCollector.getErrors());
       }
       throw new SchemaException(errors);
     }

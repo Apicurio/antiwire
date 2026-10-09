@@ -881,11 +881,11 @@ public class WireRunTest {
         Map<String, String> options) {
       return new SchemaHandler() {
         @Override public Path handle(Type type, Context context) {
-          ErrorCollector errorCollector = context.errorCollector();
-          if (type.location().path.contains("descriptor.proto")) return null; // Don't report errors on built-in stuff.
+          ErrorCollector errorCollector = context.getErrorCollector();
+          if (type.getLocation().getPath().contains("descriptor.proto")) return null; // Don't report errors on built-in stuff.
           if (type instanceof MessageType) {
             for (Field field : ((MessageType) type).fields()) {
-              if (field.name().startsWith("a")) {
+              if (field.getName().startsWith("a")) {
                 errorCollector.at(field).add("field starts with 'a'");
               }
             }

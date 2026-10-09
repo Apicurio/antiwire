@@ -46,7 +46,7 @@ public final class FieldMask {
   /** Lazily-flattened paths; merging encoded occurrences appends chunks in constant time. */
   private volatile List<String> pathsMemoized;
 
-  public List<String> paths() {
+  public List<String> getPaths() {
     List<String> result = pathsMemoized;
     if (result == null) {
       synchronized (this) {
@@ -88,20 +88,20 @@ public final class FieldMask {
   }
 
   public FieldMask copy() {
-    return copy(paths());
+    return copy(getPaths());
   }
 
   @Override public boolean equals(Object other) {
     if (other == this) return true;
-    return other instanceof FieldMask && paths().equals(((FieldMask) other).paths());
+    return other instanceof FieldMask && getPaths().equals(((FieldMask) other).getPaths());
   }
 
   @Override public int hashCode() {
-    return paths().hashCode();
+    return getPaths().hashCode();
   }
 
   @Override public String toString() {
-    return "FieldMask{paths=" + paths() + "}";
+    return "FieldMask{paths=" + getPaths() + "}";
   }
 
   private static final class PathChunks {

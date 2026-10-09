@@ -20,18 +20,27 @@ package com.squareup.wire.schema;
  * a type name, a hash, and a member name, like {@code squareup.dinosaurs.Dinosaur#length_meters}.
  */
 public final class ProtoMember {
-  public final ProtoType type;
-  public final String member;
+  private final ProtoType type;
+
+  public ProtoType getType() {
+    return type;
+  }
+
+  private final String member;
+
+  public String getMember() {
+    return member;
+  }
 
   private ProtoMember(ProtoType type, String member) {
-    if (type.isScalar) {
+    if (type.isScalar()) {
       throw new IllegalArgumentException("scalars cannot have members");
     }
     this.type = type;
     this.member = member;
   }
 
-  public String simpleName() {
+  public String getSimpleName() {
     // Strip the package prefix for extension fields.
     return member.substring(member.lastIndexOf('.') + 1);
   }
@@ -65,7 +74,7 @@ public final class ProtoMember {
   }
 
   static ProtoMember get(ProtoType type, Field field) {
-    String member = field.isExtension() ? field.qualifiedName() : field.name();
+    String member = field.isExtension() ? field.getQualifiedName() : field.getName();
     return new ProtoMember(type, member);
   }
 }

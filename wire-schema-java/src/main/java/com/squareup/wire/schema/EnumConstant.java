@@ -38,23 +38,23 @@ public final class EnumConstant {
     this.options = options;
   }
 
-  public Location location() {
+  public Location getLocation() {
     return location;
   }
 
-  public String name() {
+  public String getName() {
     return name;
   }
 
-  public int tag() {
+  public int getTag() {
     return tag;
   }
 
-  public String documentation() {
+  public String getDocumentation() {
     return documentation;
   }
 
-  public Options options() {
+  public Options getOptions() {
     return options;
   }
 
@@ -63,7 +63,7 @@ public final class EnumConstant {
   }
 
   EnumConstantElement toElement() {
-    return new EnumConstantElement(location, name, tag, documentation, options.elements());
+    return new EnumConstantElement(location, name, tag, documentation, options.getElements());
   }
 
   void linkOptions(Linker linker, boolean validate) {
@@ -107,8 +107,8 @@ public final class EnumConstant {
   public static List<EnumConstant> fromElements(List<EnumConstantElement> elements) {
     List<EnumConstant> result = new ArrayList<>();
     for (EnumConstantElement element : elements) {
-      result.add(new EnumConstant(element.location, element.name, element.tag,
-          element.documentation, new Options(Options.ENUM_VALUE_OPTIONS, element.options)));
+      result.add(new EnumConstant(element.getLocation(), element.getName(), element.getTag(),
+          element.getDocumentation(), new Options(Options.ENUM_VALUE_OPTIONS, element.getOptions())));
     }
     return result;
   }

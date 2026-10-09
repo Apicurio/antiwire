@@ -1,5 +1,7 @@
 # Runtime and Apicurio schema performance comparison (TASK-20)
 
+> STALE (2026-10-09, in addition to the note below): the accessor rename of TASK-33.1 changed every shipped class after the last measured candidate; the hot paths are unchanged in logic but DEC-13 requires renewal on the final candidate. Dated note only; no measured value or acceptance record was edited.
+>
 > STALE (2026-10-07): the last valid measurement is session 5 at candidate 82c3624. Later commits changed measured modules (275dcc2 TASK-26, 84a6a9f TASK-16.1, ec15e18 TASK-16.2, 7297b66 TASK-21, 68823ba TASK-16.2.1), so under DEC-13 this record does not cover the current HEAD and must be renewed on the final candidate (TASK-21).
 
 

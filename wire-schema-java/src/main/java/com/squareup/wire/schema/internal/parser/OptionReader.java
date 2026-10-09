@@ -124,11 +124,11 @@ public final class OptionReader {
       }
 
       OptionElement option = readOption(keyValueSeparator);
-      String name = option.name;
-      Object value = option.kind == Kind.BOOLEAN || option.kind == Kind.ENUM
-          || option.kind == Kind.NUMBER
-          ? new OptionElement.OptionPrimitive(option.kind, option.value)
-          : option.value;
+      String name = option.getName();
+      Object value = option.getKind() == Kind.BOOLEAN || option.getKind() == Kind.ENUM
+          || option.getKind() == Kind.NUMBER
+          ? new OptionElement.OptionPrimitive(option.getKind(), option.getValue())
+          : option.getValue();
 
       if (value instanceof OptionElement) {
         OptionElement element = (OptionElement) value;
@@ -138,7 +138,7 @@ public final class OptionReader {
           nested = new LinkedHashMap<>();
           result.put(name, nested);
         }
-        nested.put(element.name, element.value);
+        nested.put(element.getName(), element.getValue());
       } else {
         // Add the value(s) to any previous values with the same key.
         Object previous = result.get(name);

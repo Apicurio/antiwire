@@ -48,7 +48,7 @@ public class ExtendElementTest {
         null, null, 2, "", Collections.emptyList());
     ExtendElement extend = new ExtendElement(location, "Name", "",
         java.util.Arrays.asList(firstName, lastName));
-    assertEquals(2, extend.fields.size());
+    assertEquals(2, extend.getFields().size());
   }
 
   @Test public void simpleWithDocumentationToSchema() {

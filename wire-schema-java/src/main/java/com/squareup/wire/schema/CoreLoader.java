@@ -82,7 +82,7 @@ public final class CoreLoader implements Loader {
   }
 
   public static boolean isWireRuntimeProto(Location location) {
-    return WIRE_RUNTIME_JAR.equals(location.base) && isWireRuntimeProto(location.path);
+    return WIRE_RUNTIME_JAR.equals(location.getBase()) && isWireRuntimeProto(location.getPath());
   }
 
   /** Returns true if {@code path} is bundled in the wire runtime. */

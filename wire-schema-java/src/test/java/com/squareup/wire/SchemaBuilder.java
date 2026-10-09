@@ -125,8 +125,8 @@ public final class SchemaBuilder {
    */
   public String normalizeLocations(String message) {
     return message
-        .replace(Location.get(sourcePath.toString()).path, "/sourcePath")
-        .replace(Location.get(protoPath.toString()).path, "/protoPath");
+        .replace(Location.get(sourcePath.toString()).getPath(), "/sourcePath")
+        .replace(Location.get(protoPath.toString()).getPath(), "/protoPath");
   }
 
   private static void deleteTempDirs() {

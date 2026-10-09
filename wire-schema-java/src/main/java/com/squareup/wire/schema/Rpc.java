@@ -49,15 +49,15 @@ public final class Rpc {
     this.options = options;
   }
 
-  public Location location() {
+  public Location getLocation() {
     return location;
   }
 
-  public String name() {
+  public String getName() {
     return name;
   }
 
-  public String documentation() {
+  public String getDocumentation() {
     return documentation;
   }
 
@@ -69,25 +69,25 @@ public final class Rpc {
     return responseTypeElement;
   }
 
-  public boolean requestStreaming() {
+  public boolean getRequestStreaming() {
     return requestStreaming;
   }
 
-  public boolean responseStreaming() {
+  public boolean getResponseStreaming() {
     return responseStreaming;
   }
 
-  public Options options() {
+  public Options getOptions() {
     return options;
   }
 
   /** Null until this RPC is linked. */
-  public ProtoType requestType() {
+  public ProtoType getRequestType() {
     return requestType;
   }
 
   /** Null until this RPC is linked. */
-  public ProtoType responseType() {
+  public ProtoType getResponseType() {
     return responseType;
   }
 
@@ -155,9 +155,9 @@ public final class Rpc {
   public static List<Rpc> fromElements(List<RpcElement> elements) {
     List<Rpc> result = new ArrayList<>();
     for (RpcElement element : elements) {
-      result.add(new Rpc(element.location, element.name, element.documentation,
-          element.requestType, element.responseType, element.requestStreaming,
-          element.responseStreaming, new Options(Options.METHOD_OPTIONS, element.options)));
+      result.add(new Rpc(element.getLocation(), element.getName(), element.getDocumentation(),
+          element.getRequestType(), element.getResponseType(), element.getRequestStreaming(),
+          element.getResponseStreaming(), new Options(Options.METHOD_OPTIONS, element.getOptions())));
     }
     return result;
   }
@@ -167,7 +167,7 @@ public final class Rpc {
     for (Rpc rpc : rpcs) {
       result.add(new RpcElement(rpc.location, rpc.name, rpc.documentation,
           rpc.requestTypeElement, rpc.responseTypeElement, rpc.requestStreaming,
-          rpc.responseStreaming, rpc.options.elements()));
+          rpc.responseStreaming, rpc.options.getElements()));
     }
     return result;
   }

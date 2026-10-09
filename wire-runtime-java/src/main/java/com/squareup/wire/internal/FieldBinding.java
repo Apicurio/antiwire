@@ -82,39 +82,39 @@ public final class FieldBinding<M extends Message<M, B>, B extends Message.Build
     this.instanceGetter = getInstanceGetter(messageType, messageField, name);
   }
 
-  @Override public int tag() {
+  @Override public int getTag() {
     return tag;
   }
 
-  @Override public WireField.Label label() {
+  @Override public WireField.Label getLabel() {
     return label;
   }
 
-  @Override public String name() {
+  @Override public String getName() {
     return name;
   }
 
-  @Override public String wireFieldJsonName() {
+  @Override public String getWireFieldJsonName() {
     return wireFieldJsonName;
   }
 
-  @Override public String declaredName() {
+  @Override public String getDeclaredName() {
     return declaredName;
   }
 
-  @Override public boolean redacted() {
+  @Override public boolean getRedacted() {
     return redacted;
   }
 
-  @Override public boolean writeIdentityValues() {
+  @Override public boolean getWriteIdentityValues() {
     return writeIdentityValues;
   }
 
-  @Override public ProtoAdapter<?> keyAdapter() {
+  @Override public ProtoAdapter<?> getKeyAdapter() {
     return ProtoAdapter.get(keyAdapterString, classLoader);
   }
 
-  @Override public ProtoAdapter<?> singleAdapter() {
+  @Override public ProtoAdapter<?> getSingleAdapter() {
     return ProtoAdapter.get(adapterString, classLoader);
   }
 
@@ -123,7 +123,7 @@ public final class FieldBinding<M extends Message<M, B>, B extends Message.Build
   }
 
   @Override public boolean isMessage() {
-    return Message.class.isAssignableFrom(box(singleAdapter().type));
+    return Message.class.isAssignableFrom(box(getSingleAdapter().type));
   }
 
   private static Class<?> box(Class<?> type) {
@@ -231,7 +231,7 @@ public final class FieldBinding<M extends Message<M, B>, B extends Message.Build
   /** Accept a single value, independent of whether this value is single or repeated. */
   @SuppressWarnings("unchecked")
   @Override public void value(B builder, Object value) {
-    if (label().isRepeated()) {
+    if (getLabel().isRepeated()) {
       Object list = getFromBuilder(builder);
       if (list instanceof List) {
         // Upstream branches on Kotlin MutableList versus read-only List (the copy-on-add

@@ -37,19 +37,19 @@ public final class ProtoTarget extends Target {
     this.outDirectory = outDirectory;
   }
 
-  @Override public List<String> includes() {
+  @Override public List<String> getIncludes() {
     return Collections.emptyList();
   }
 
-  @Override public List<String> excludes() {
+  @Override public List<String> getExcludes() {
     return Collections.emptyList();
   }
 
-  @Override public boolean exclusive() {
+  @Override public boolean getExclusive() {
     return false;
   }
 
-  @Override public String outDirectory() {
+  @Override public String getOutDirectory() {
     return outDirectory;
   }
 
@@ -64,32 +64,32 @@ public final class ProtoTarget extends Target {
 
   private static final class ProtoSchemaHandler extends SchemaHandler {
     @Override public void handle(Schema schema, Context context) {
-      Path outDirectory = context.outDirectory();
+      Path outDirectory = context.getOutDirectory();
       // The port's SchemaHandler.handle carries no checked IOException (upstream Kotlin has
       // none), so IO failures propagate unchecked like every other handler in the port.
       createOutDirectory(context);
 
-      for (ProtoFile protoFile : schema.protoFiles()) {
+      for (ProtoFile protoFile : schema.getProtoFiles()) {
         if (!context.inSourcePath(protoFile)
             || isEmpty(protoFile)
             // We never emit the `.proto` files we are embedded within Wire.
-            || CoreLoader.isWireRuntimeProto(protoFile.location().path)) {
+            || CoreLoader.isWireRuntimeProto(protoFile.getLocation().getPath())) {
           continue;
         }
 
         // Upstream: location.path.substringBeforeLast("/", missingDelimiterValue = ".").
-        String locationPath = protoFile.location().path;
+        String locationPath = protoFile.getLocation().getPath();
         int lastSlash = locationPath.lastIndexOf('/');
         String relativePath = lastSlash == -1 ? "." : locationPath.substring(0, lastSlash);
         Path outputDirectory = outDirectory.div(relativePath);
         Path outputFilePath = outputDirectory.div(protoFile.name() + ".proto");
         // Deliberate hardening: upstream applies no containment check here (compatibility-matrix).
         checkPathInOutDirectory(outputFilePath, outDirectory);
-        context.logger().artifactHandled(outputDirectory, locationPath, "Proto");
+        context.getLogger().artifactHandled(outputDirectory, locationPath, "Proto");
 
         try {
-          context.fileSystem().createDirectories(outputFilePath.parent(), false);
-          try (BufferedSink sink = Okio.buffer(context.fileSystem().sink(outputFilePath, false))) {
+          context.getFileSystem().createDirectories(outputFilePath.parent(), false);
+          try (BufferedSink sink = Okio.buffer(context.getFileSystem().sink(outputFilePath, false))) {
             sink.writeUtf8(protoFile.toSchema());
           }
         } catch (IOException e) {
@@ -100,9 +100,9 @@ public final class ProtoTarget extends Target {
     }
 
     private static boolean isEmpty(ProtoFile protoFile) {
-      return protoFile.types().isEmpty()
-          && protoFile.services().isEmpty()
-          && protoFile.extendList().isEmpty();
+      return protoFile.getTypes().isEmpty()
+          && protoFile.getServices().isEmpty()
+          && protoFile.getExtendList().isEmpty();
     }
 
     @Override public Path handle(Type type, Context context) {

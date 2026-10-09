@@ -23,15 +23,59 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class FieldElement {
-  public final Location location;
-  public final Label label;
-  public final String type;
-  public final String name;
-  public final String defaultValue;
-  public final String jsonName;
-  public final int tag;
-  public final String documentation;
-  public final List<OptionElement> options;
+  private final Location location;
+
+  public Location getLocation() {
+    return location;
+  }
+
+  private final Label label;
+
+  public Label getLabel() {
+    return label;
+  }
+
+  private final String type;
+
+  public String getType() {
+    return type;
+  }
+
+  private final String name;
+
+  public String getName() {
+    return name;
+  }
+
+  private final String defaultValue;
+
+  public String getDefaultValue() {
+    return defaultValue;
+  }
+
+  private final String jsonName;
+
+  public String getJsonName() {
+    return jsonName;
+  }
+
+  private final int tag;
+
+  public int getTag() {
+    return tag;
+  }
+
+  private final String documentation;
+
+  public String getDocumentation() {
+    return documentation;
+  }
+
+  private final List<OptionElement> options;
+
+  public List<OptionElement> getOptions() {
+    return options;
+  }
 
   public FieldElement(Location location, Label label, String type, String name,
       String defaultValue, String jsonName, int tag, String documentation,
@@ -48,11 +92,11 @@ public final class FieldElement {
   }
 
   int getLine() {
-    return location.line;
+    return location.getLine();
   }
 
   int getColumn() {
-    return location.column;
+    return location.getColumn();
   }
 
   public String toSchema() {
@@ -92,7 +136,7 @@ public final class FieldElement {
 
   // Only non-repeated scalar types and Enums support default values.
   private static OptionElement.Kind toKind(ProtoType protoType) {
-    String simpleName = protoType.simpleName();
+    String simpleName = protoType.getSimpleName();
     switch (simpleName) {
       case "bool":
         return OptionElement.Kind.BOOLEAN;

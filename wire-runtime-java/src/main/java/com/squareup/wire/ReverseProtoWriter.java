@@ -25,8 +25,8 @@ import okio.ByteString;
  * data in the opposite order that the data will be read.
  *
  * <p>One significant benefit of writing messages in reverse order is that length prefixes can be
- * computed in constant time. Get the length of a message by subtracting the {@link #byteCount()}
- * before writing it from {@link #byteCount()} after writing it.
+ * computed in constant time. Get the length of a message by subtracting the {@link #getByteCount()}
+ * before writing it from {@link #getByteCount()} after writing it.
  */
 public class ReverseProtoWriter {
   /*
@@ -64,7 +64,7 @@ public class ReverseProtoWriter {
   private final ProtoWriter forwardWriter = new ProtoWriter(forwardBuffer);
 
   /** The total number of bytes emitted thus far. */
-  public int byteCount() {
+  public int getByteCount() {
     return (int) tail.size() + (array.length - arrayLimit);
   }
 

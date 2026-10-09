@@ -79,8 +79,8 @@ class FileLinker {
   }
 
   private void addTypes(Type type) {
-    linker.addType(type.type(), type);
-    for (Type nestedType : type.nestedTypes()) {
+    linker.addType(type.getType(), type);
+    for (Type nestedType : type.getNestedTypes()) {
       addTypes(nestedType);
     }
   }
@@ -100,10 +100,10 @@ class FileLinker {
 
   private void linkNestedExtensions(Type type, Linker linker) {
     Linker typeLinker = linker.withContext(type);
-    for (Extend extend : type.nestedExtendList()) {
+    for (Extend extend : type.getNestedExtendList()) {
       extend.link(typeLinker);
     }
-    for (Type nested : type.nestedTypes()) {
+    for (Type nested : type.getNestedTypes()) {
       linkNestedExtensions(nested, typeLinker);
     }
   }
@@ -137,10 +137,10 @@ class FileLinker {
   private void linkNestedExtensionOptions(Type type, Linker linker, SyntaxRules syntaxRules,
       boolean validate) {
     Linker typeLinker = linker.withContext(type);
-    for (Extend extend : type.nestedExtendList()) {
+    for (Extend extend : type.getNestedExtendList()) {
       extend.linkOptions(typeLinker, syntaxRules, validate);
     }
-    for (Type nested : type.nestedTypes()) {
+    for (Type nested : type.getNestedTypes()) {
       linkNestedExtensionOptions(nested, typeLinker, syntaxRules, validate);
     }
   }
@@ -165,13 +165,13 @@ class FileLinker {
   private void linkMembersRecursive(java.util.List<Type> types) {
     for (Type type : types) {
       requireMembersLinked(type);
-      linkMembersRecursive(type.nestedTypes());
+      linkMembersRecursive(type.getNestedTypes());
     }
   }
 
   /** Link the members of [type] that haven't been linked already. */
   void requireMembersLinked(Type type) {
-    if (typesWithMembersLinked.add(type.type())) {
+    if (typesWithMembersLinked.add(type.getType())) {
       type.linkMembers(linker);
     }
   }

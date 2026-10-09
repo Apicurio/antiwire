@@ -50,7 +50,7 @@ public final class Options {
     this.optionElements = optionElements;
   }
 
-  public List<OptionElement> elements() {
+  public List<OptionElement> getElements() {
     if (entries != null) {
       List<OptionElement> result = new ArrayList<>();
       for (LinkedOptionEntry entry : entries) {
@@ -64,7 +64,7 @@ public final class Options {
     return optionElements;
   }
 
-  public Map<ProtoMember, Object> map() {
+  public Map<ProtoMember, Object> getMap() {
     if (entries != null) return entriesToMap(entries);
     return Collections.emptyMap();
   }
@@ -90,7 +90,7 @@ public final class Options {
     Pattern valueRegex = Pattern.compile(valuePattern);
 
     for (LinkedOptionEntry entry : entries) {
-      if (nameRegex.matcher(entry.protoMember.member).matches()
+      if (nameRegex.matcher(entry.protoMember.getMember()).matches()
           && valueRegex.matcher(entry.value.toString()).matches()) {
         return true;
       }
@@ -118,19 +118,19 @@ public final class Options {
 
     MessageType type = (MessageType) typeOrNull;
     String[] path;
-    Field field = type.field(option.name);
+    Field field = type.field(option.getName());
 
     if (field != null) {
       // This is an option declared by descriptor.proto.
-      path = new String[] {option.name};
+      path = new String[] {option.getName()};
     } else {
       // This is an option declared by an extension.
       Map<String, Field> extensionsForType = type.extensionFieldsMap();
-      path = resolveFieldPath(option.name, extensionsForType.keySet());
+      path = resolveFieldPath(option.getName(), extensionsForType.keySet());
       String namespace = linker.resolveContext();
       while (path == null && !namespace.trim().isEmpty()) {
         // If the path couldn't be resolved, attempt again by prefixing it with the package name.
-        path = resolveFieldPath(namespace + "." + option.name, extensionsForType.keySet());
+        path = resolveFieldPath(namespace + "." + option.getName(), extensionsForType.keySet());
         // Retry with one upper level package to resolve relative paths.
         if (path == null) {
           int dot = namespace.lastIndexOf('.');
@@ -139,24 +139,24 @@ public final class Options {
       }
       if (path == null) {
         if (validate) {
-          linker.errors.add("unable to resolve option " + option.name);
+          linker.getErrors().add("unable to resolve option " + option.getName());
         }
         return null; // Unable to find the root of this field path.
       }
       field = extensionsForType.get(path[0]);
       if (validate) {
-        linker.withContext(field).validateImportForPath(location, field.location().path);
+        linker.withContext(field).validateImportForPath(location, field.getLocation().getPath());
       }
     }
     linker.request(field);
 
     Map<ProtoMember, Object> result = new LinkedHashMap<>();
     Map<ProtoMember, Object> last = result;
-    ProtoType lastProtoType = type.type();
+    ProtoType lastProtoType = type.getType();
     for (int i = 1; i < path.length; i++) {
       Map<ProtoMember, Object> nested = new LinkedHashMap<>();
       last.put(ProtoMember.get(lastProtoType, field), nested);
-      lastProtoType = field.type();
+      lastProtoType = field.getType();
 
       // Force members linking.
       if (lastProtoType != null) {
@@ -164,13 +164,13 @@ public final class Options {
       }
 
       last = nested;
-      field = linker.dereference(field.type(), path[i]);
+      field = linker.dereference(field.getType(), path[i]);
       if (field == null) return null; // Unable to dereference segment.
       linker.request(field);
     }
 
     last.put(ProtoMember.get(lastProtoType, field),
-        canonicalizeValue(linker, field.type(), field.isRepeated(), option.value));
+        canonicalizeValue(linker, field.getType(), field.isRepeated(), option.getValue()));
 
     if (result.size() != 1) {
       throw new IllegalStateException("Check failed"); // TODO(benoit) might be safe to remove
@@ -185,27 +185,27 @@ public final class Options {
     if (value instanceof OptionElement) {
       OptionElement element = (OptionElement) value;
       Map<ProtoMember, Object> result = new LinkedHashMap<>();
-      Field field = linker.dereference(context, element.name);
+      Field field = linker.dereference(context, element.getName());
       if (field == null) {
-        linker.errors.add("unable to resolve option " + element.name + " on " + context);
+        linker.getErrors().add("unable to resolve option " + element.getName() + " on " + context);
       } else {
         ProtoMember protoMember = ProtoMember.get(context, field);
         result.put(protoMember,
-            canonicalizeValue(linker, field.type(), field.isRepeated(), element.value));
+            canonicalizeValue(linker, field.getType(), field.isRepeated(), element.getValue()));
       }
       return coerceValueForField(context, result, isRepeated);
     }
 
     if (value instanceof Map) {
       Map<?, ?> map = (Map<?, ?>) value;
-      if (context.isMap) {
+      if (context.isMap()) {
         // Map fields are defined with two optional entries: `key` and 'value'.
         Object mapFieldKeyAsString = map.get("key");
         Object mapFieldValueAsString = map.get("value");
         Object mapFieldKey = mapFieldKeyAsString == null ? null
-            : canonicalizeValue(linker, context.keyType, false, mapFieldKeyAsString);
+            : canonicalizeValue(linker, context.getKeyType(), false, mapFieldKeyAsString);
         Object mapFieldValue = mapFieldValueAsString == null ? null
-            : canonicalizeValue(linker, context.valueType, false, mapFieldValueAsString);
+            : canonicalizeValue(linker, context.getValueType(), false, mapFieldValueAsString);
         Map<Object, Object> mapResult = new LinkedHashMap<>();
         mapResult.put(mapFieldKey, mapFieldValue);
         return coerceValueForField(context, mapResult, isRepeated);
@@ -215,11 +215,11 @@ public final class Options {
           String name = (String) entry.getKey();
           Field field = linker.dereference(context, name);
           if (field == null) {
-            linker.errors.add("unable to resolve option " + name + " on " + context);
+            linker.getErrors().add("unable to resolve option " + name + " on " + context);
           } else {
             ProtoMember protoMember = ProtoMember.get(context, field);
             result.put(protoMember,
-                canonicalizeValue(linker, field.type(), field.isRepeated(), entry.getValue()));
+                canonicalizeValue(linker, field.getType(), field.isRepeated(), entry.getValue()));
           }
         }
         return coerceValueForField(context, result, isRepeated);
@@ -242,7 +242,7 @@ public final class Options {
 
     if (value instanceof OptionElement.OptionPrimitive) {
       return canonicalizeValue(linker, context, isRepeated,
-          ((OptionElement.OptionPrimitive) value).value);
+          ((OptionElement.OptionPrimitive) value).getValue());
     }
 
     throw new IllegalArgumentException("Unexpected option value: " + value);
@@ -250,12 +250,12 @@ public final class Options {
 
   private void validateOptionValue(Linker linker, ProtoType context, String value) {
     if (!LiteralValidation.isValidLiteral(linker, context, value)) {
-      linker.errors.add("invalid option value \"" + value + "\" for " + context);
+      linker.getErrors().add("invalid option value \"" + value + "\" for " + context);
     }
   }
 
   private Object coerceValueForField(ProtoType context, Object value, boolean isRepeated) {
-    if (isRepeated || context.isMap) {
+    if (isRepeated || context.isMap()) {
       return value instanceof List ? value : Collections.singletonList(value);
     }
     if (value instanceof List) {
@@ -282,7 +282,7 @@ public final class Options {
       return unionMaps(linker, (Map<ProtoMember, Object>) a, (Map<ProtoMember, Object>) b);
     }
 
-    linker.errors.add("conflicting options: " + a + ", " + b);
+    linker.getErrors().add("conflicting options: " + a + ", " + b);
     return a; // Just return any placeholder.
   }
 
@@ -339,7 +339,7 @@ public final class Options {
 
   public Multimap<ProtoType, ProtoMember> fields(PruningRules pruningRules) {
     Map<ProtoType, Collection<ProtoMember>> sink = new LinkedHashMap<>();
-    gatherFields(sink, optionType, map(), pruningRules);
+    gatherFields(sink, optionType, getMap(), pruningRules);
     return Multimap.toMultimap(sink);
   }
 
@@ -358,7 +358,7 @@ public final class Options {
         ProtoMember protoMember = (ProtoMember) key;
         if (pruningRules.prunes(protoMember)) continue;
         sink.computeIfAbsent(type, k -> new ArrayList<>()).add(protoMember);
-        gatherFields(sink, protoMember.type, entry.getValue(), pruningRules);
+        gatherFields(sink, protoMember.getType(), entry.getValue(), pruningRules);
       }
     } else if (o instanceof List) {
       for (Object e : (List<?>) o) {
@@ -373,7 +373,7 @@ public final class Options {
     Options result = new Options(optionType, optionElements);
 
     Map<ProtoMember, Object> map = (Map<ProtoMember, Object>) retainAll(schema, markSet,
-        optionType, map());
+        optionType, getMap());
     if (map == null) map = Collections.emptyMap();
 
     List<LinkedOptionEntry> retainedEntries = new ArrayList<>();
@@ -411,14 +411,14 @@ public final class Options {
         }
         ProtoMember protoMember = (ProtoMember) key;
         boolean isCoreMemberOfGoogleProtobuf =
-            Options.isGoogleProtobufOptionType(protoMember.type)
+            Options.isGoogleProtobufOptionType(protoMember.getType())
                 && !schema.isExtensionField(protoMember);
         if (!markSet.contains(protoMember) && !isCoreMemberOfGoogleProtobuf) {
           continue; // Prune this field.
         }
 
         Field field = schema.getField(protoMember);
-        Object retainedValue = retainAll(schema, markSet, field.type(), entry.getValue());
+        Object retainedValue = retainAll(schema, markSet, field.getType(), entry.getValue());
         if (retainedValue != null) {
           map.put(protoMember, retainedValue); // This retained field is non-empty.
         } else if (isCoreMemberOfGoogleProtobuf) {

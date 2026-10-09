@@ -54,15 +54,15 @@ public class ManifestParseTest {
     assertTrue(modules.containsKey("three"));
 
     WireRun.Module one = modules.get("one");
-    assertEquals(2, one.dependencies().size());
-    assertTrue(one.dependencies().contains("two"));
-    assertTrue(one.dependencies().contains("three"));
-    assertEquals(2, one.pruningRules().roots().size());
-    assertTrue(one.pruningRules().roots().contains("example.A"));
-    assertTrue(one.pruningRules().roots().contains("example.B"));
-    assertEquals(2, one.pruningRules().prunes().size());
-    assertTrue(one.pruningRules().prunes().contains("example.C"));
-    assertTrue(one.pruningRules().prunes().contains("example.D"));
+    assertEquals(2, one.getDependencies().size());
+    assertTrue(one.getDependencies().contains("two"));
+    assertTrue(one.getDependencies().contains("three"));
+    assertEquals(2, one.getPruningRules().getRoots().size());
+    assertTrue(one.getPruningRules().getRoots().contains("example.A"));
+    assertTrue(one.getPruningRules().getRoots().contains("example.B"));
+    assertEquals(2, one.getPruningRules().getPrunes().size());
+    assertTrue(one.getPruningRules().getPrunes().contains("example.C"));
+    assertTrue(one.getPruningRules().getPrunes().contains("example.D"));
   }
 
   @Test public void parseFormatFailsOnUnknownKey() {
@@ -90,6 +90,6 @@ public class ManifestParseTest {
     assertEquals(2, modules.size());
     assertTrue(modules.containsKey("one"));
     assertTrue(modules.containsKey("two"));
-    assertEquals(java.util.Collections.singleton("two"), modules.get("one").dependencies());
+    assertEquals(java.util.Collections.singleton("two"), modules.get("one").getDependencies());
   }
 }

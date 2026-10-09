@@ -25,8 +25,17 @@ import java.util.Objects;
  * inline in the message and at most one is non-null. Boxed suits oneofs with many choices.
  */
 public final class OneOf<K extends OneOf.Key<T>, T> {
-  public final K key;
-  public final T value;
+  private final K key;
+
+  public K getKey() {
+    return key;
+  }
+
+  private final T value;
+
+  public T getValue() {
+    return value;
+  }
 
   public OneOf(K key, T value) {
     this.key = key;
@@ -41,24 +50,24 @@ public final class OneOf<K extends OneOf.Key<T>, T> {
   @Override public String toString() {
     // TODO(Benoit) What if the field is redacted?
     String valueAsString;
-    if (key.adapter == ProtoAdapter.STRING || key.adapter == ProtoAdapter.STRING_VALUE) {
+    if (key.getAdapter() == ProtoAdapter.STRING || key.getAdapter() == ProtoAdapter.STRING_VALUE) {
       valueAsString = Internal.sanitize(String.valueOf(value));
     } else {
       valueAsString = String.valueOf(value);
     }
-    return key.declaredName + "=" + valueAsString;
+    return key.getDeclaredName() + "=" + valueAsString;
   }
 
   public int encodedSizeWithTag() {
-    return key.adapter.encodedSizeWithTag(key.tag, value);
+    return key.getAdapter().encodedSizeWithTag(key.getTag(), value);
   }
 
   public void encodeWithTag(ProtoWriter writer) throws IOException {
-    key.adapter.encodeWithTag(writer, key.tag, value);
+    key.getAdapter().encodeWithTag(writer, key.getTag(), value);
   }
 
   public void encodeWithTag(ReverseProtoWriter writer) throws IOException {
-    key.adapter.encodeWithTag(writer, key.tag, value);
+    key.getAdapter().encodeWithTag(writer, key.getTag(), value);
   }
 
   @Override public boolean equals(Object other) {
@@ -77,11 +86,35 @@ public final class OneOf<K extends OneOf.Key<T>, T> {
    * instances are declared as members of the referencing message class.
    */
   public abstract static class Key<T> {
-    public final int tag;
-    public final ProtoAdapter<T> adapter;
-    public final String declaredName;
-    public final boolean redacted;
-    public final String jsonName;
+    private final int tag;
+
+    public int getTag() {
+      return tag;
+    }
+
+    private final ProtoAdapter<T> adapter;
+
+    public ProtoAdapter<T> getAdapter() {
+      return adapter;
+    }
+
+    private final String declaredName;
+
+    public String getDeclaredName() {
+      return declaredName;
+    }
+
+    private final boolean redacted;
+
+    public boolean getRedacted() {
+      return redacted;
+    }
+
+    private final String jsonName;
+
+    public String getJsonName() {
+      return jsonName;
+    }
 
     protected Key(int tag, ProtoAdapter<T> adapter, String declaredName, boolean redacted,
         String jsonName) {

@@ -33,7 +33,11 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
 
   public static final ProtoAdapter<AnyMessage> ADAPTER = new AnyMessageAdapter();
 
-  public final String typeUrl;
+  private final String typeUrl;
+
+  public String getTypeUrl() {
+    return typeUrl;
+  }
 
   /**
    * The serialized form of the wrapped value.
@@ -41,7 +45,17 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
    * @deprecated Engine/compat layer: the okio-typed field. okio remains internal to the port
    *     (docs/api-surface.md); prefer {@link #valueBytes()}.
    */
-  @Deprecated public final ByteString value;
+  private final ByteString value;
+
+  /**
+   * The serialized form of the wrapped value.
+   *
+   * @deprecated Engine/compat layer: the okio-typed accessor. okio remains internal to the port
+   *     (docs/api-surface.md); prefer {@link #valueBytes()}.
+   */
+  @Deprecated public ByteString getValue() {
+    return value;
+  }
 
   /**
    * @deprecated Engine/compat layer: the okio-typed constructor. okio remains internal to the
@@ -71,25 +85,25 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
   }
 
   public <T> T unpack(ProtoAdapter<T> adapter) throws IOException {
-    if (!typeUrl.equals(adapter.typeUrl)) {
-      throw new IllegalStateException("type mismatch: " + typeUrl + " != " + adapter.typeUrl);
+    if (!typeUrl.equals(adapter.getTypeUrl())) {
+      throw new IllegalStateException("type mismatch: " + typeUrl + " != " + adapter.getTypeUrl());
     }
     return adapter.decode(value.toByteArray());
   }
 
   public <T> T unpackOrNull(ProtoAdapter<T> adapter) throws IOException {
-    return typeUrl.equals(adapter.typeUrl) ? adapter.decode(value.toByteArray()) : null;
+    return typeUrl.equals(adapter.getTypeUrl()) ? adapter.decode(value.toByteArray()) : null;
   }
 
   /** Packs a generated {@link Message} using its built-in adapter. */
   @SuppressWarnings("deprecation") // Engine layer: one-copy okio encode feeds the okio field.
   public static AnyMessage pack(Message<?, ?> message) throws IOException {
     ProtoAdapter<Object> adapter = (ProtoAdapter<Object>) message.adapter();
-    if (adapter.typeUrl == null) {
+    if (adapter.getTypeUrl() == null) {
       throw new IllegalStateException(
           "recompile " + adapter.type.getName() + " to use it with AnyMessage");
     }
-    return new AnyMessage(adapter.typeUrl, adapter.encodeByteString((Object) message));
+    return new AnyMessage(adapter.getTypeUrl(), adapter.encodeByteString((Object) message));
   }
 
   /**
@@ -98,12 +112,12 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
    */
   @SuppressWarnings("deprecation") // Engine layer: one-copy okio encode feeds the okio field.
   public static <T> AnyMessage pack(ProtoAdapter<T> adapter, T value) throws IOException {
-    if (adapter.typeUrl == null) {
+    if (adapter.getTypeUrl() == null) {
       throw new IllegalStateException(
           "cannot pack " + (adapter.type == null ? "value" : adapter.type.getName())
               + ": the adapter has no type URL");
     }
-    return new AnyMessage(adapter.typeUrl, adapter.encodeByteString(value));
+    return new AnyMessage(adapter.getTypeUrl(), adapter.encodeByteString(value));
   }
 
   @Override public NoBuilder newBuilder() {

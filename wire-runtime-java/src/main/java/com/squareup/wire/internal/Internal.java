@@ -325,7 +325,7 @@ public final class Internal {
       throws java.io.IOException {
     if (existing == null) return adapter.decode(reader);
     if (adapter == ProtoAdapter.FIELD_MASK) {
-      return (E) ((FieldMask) existing).append(ProtoAdapter.FIELD_MASK.decode(reader).paths());
+      return (E) ((FieldMask) existing).append(ProtoAdapter.FIELD_MASK.decode(reader).getPaths());
     }
     ByteString bytes = reader.readBytes();
     Buffer buffer = new Buffer();
@@ -385,11 +385,11 @@ public final class Internal {
   public static void encodeArray_int32(int[] array, ReverseProtoWriter writer, int tag)
       throws java.io.IOException {
     if (array.length != 0) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
         writer.writeSignedVarint32(array[i]);
       }
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
       writer.writeTag(tag, FieldEncoding.LENGTH_DELIMITED);
     }
   }
@@ -397,11 +397,11 @@ public final class Internal {
   public static void encodeArray_uint32(int[] array, ReverseProtoWriter writer, int tag)
       throws java.io.IOException {
     if (array.length != 0) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
         writer.writeVarint32(array[i]);
       }
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
       writer.writeTag(tag, FieldEncoding.LENGTH_DELIMITED);
     }
   }
@@ -409,11 +409,11 @@ public final class Internal {
   public static void encodeArray_sint32(int[] array, ReverseProtoWriter writer, int tag)
       throws java.io.IOException {
     if (array.length != 0) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
         writer.writeVarint32(ProtoWriter.encodeZigZag32(array[i]));
       }
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
       writer.writeTag(tag, FieldEncoding.LENGTH_DELIMITED);
     }
   }
@@ -421,11 +421,11 @@ public final class Internal {
   public static void encodeArray_fixed32(int[] array, ReverseProtoWriter writer, int tag)
       throws java.io.IOException {
     if (array.length != 0) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
         writer.writeFixed32(array[i]);
       }
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
       writer.writeTag(tag, FieldEncoding.LENGTH_DELIMITED);
     }
   }
@@ -438,11 +438,11 @@ public final class Internal {
   public static void encodeArray_int64(long[] array, ReverseProtoWriter writer, int tag)
       throws java.io.IOException {
     if (array.length != 0) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
         writer.writeVarint64(array[i]);
       }
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
       writer.writeTag(tag, FieldEncoding.LENGTH_DELIMITED);
     }
   }
@@ -455,11 +455,11 @@ public final class Internal {
   public static void encodeArray_sint64(long[] array, ReverseProtoWriter writer, int tag)
       throws java.io.IOException {
     if (array.length != 0) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
         writer.writeVarint64(ProtoWriter.encodeZigZag64(array[i]));
       }
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
       writer.writeTag(tag, FieldEncoding.LENGTH_DELIMITED);
     }
   }
@@ -467,11 +467,11 @@ public final class Internal {
   public static void encodeArray_fixed64(long[] array, ReverseProtoWriter writer, int tag)
       throws java.io.IOException {
     if (array.length != 0) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
         writer.writeFixed64(array[i]);
       }
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
       writer.writeTag(tag, FieldEncoding.LENGTH_DELIMITED);
     }
   }
@@ -484,11 +484,11 @@ public final class Internal {
   public static void encodeArray_float(float[] array, ReverseProtoWriter writer, int tag)
       throws java.io.IOException {
     if (array.length != 0) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
         writer.writeFixed32(Float.floatToIntBits(array[i]));
       }
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
       writer.writeTag(tag, FieldEncoding.LENGTH_DELIMITED);
     }
   }
@@ -496,11 +496,11 @@ public final class Internal {
   public static void encodeArray_double(double[] array, ReverseProtoWriter writer, int tag)
       throws java.io.IOException {
     if (array.length != 0) {
-      int byteCountBefore = writer.byteCount();
+      int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
         writer.writeFixed64(Double.doubleToLongBits(array[i]));
       }
-      writer.writeVarint32(writer.byteCount() - byteCountBefore);
+      writer.writeVarint32(writer.getByteCount() - byteCountBefore);
       writer.writeTag(tag, FieldEncoding.LENGTH_DELIMITED);
     }
   }

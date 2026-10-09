@@ -37,7 +37,7 @@ public class MarkdownHandlerFactory implements SchemaHandler.Factory {
 final class MarkdownHandler extends SchemaHandler {
   @Override public okio.Path handle(Type type, Context context) {
     try {
-      return writeMarkdownFile(type.type(), toMarkdown(type), context);
+      return writeMarkdownFile(type.getType(), toMarkdown(type), context);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -59,8 +59,8 @@ final class MarkdownHandler extends SchemaHandler {
 
   private okio.Path writeMarkdownFile(
       ProtoType protoType, String markdown, Context context) throws IOException {
-    okio.Path outDirectory = context.outDirectory();
-    okio.FileSystem fileSystem = context.fileSystem();
+    okio.Path outDirectory = context.getOutDirectory();
+    okio.FileSystem fileSystem = context.getFileSystem();
     okio.Path path = outDirectory;
     for (String part : toPath(protoType)) {
       path = path.div(part);
@@ -84,10 +84,10 @@ final class MarkdownHandler extends SchemaHandler {
   }
 
   private static String toMarkdown(Type type) {
-    return "#" + " " + type.type().simpleName() + "\n\n" + type.documentation() + "\n";
+    return "#" + " " + type.getType().getSimpleName() + "\n\n" + type.getDocumentation() + "\n";
   }
 
   private static String toMarkdown(Service service) {
-    return "#" + " " + service.type().simpleName() + "\n\n" + service.documentation() + "\n";
+    return "#" + " " + service.type().getSimpleName() + "\n\n" + service.documentation() + "\n";
   }
 }

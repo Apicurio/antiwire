@@ -58,28 +58,28 @@ public final class SealedOneOfBinding<M extends Message<M, B>, B extends Message
     }
   }
 
-  @Override public int tag() {
+  @Override public int getTag() {
     return annotation.tag();
   }
 
   /** Sealed oneof fields are always optional; equivalent to OPTIONAL. */
-  @Override public WireField.Label label() {
+  @Override public WireField.Label getLabel() {
     return WireField.Label.OPTIONAL;
   }
 
-  @Override public boolean redacted() {
+  @Override public boolean getRedacted() {
     return annotation.redacted();
   }
 
-  @Override public String wireFieldJsonName() {
+  @Override public String getWireFieldJsonName() {
     return annotation.jsonName();
   }
 
-  @Override public String name() {
+  @Override public String getName() {
     return annotation.declaredName();
   }
 
-  @Override public String declaredName() {
+  @Override public String getDeclaredName() {
     return annotation.declaredName();
   }
 
@@ -88,14 +88,14 @@ public final class SealedOneOfBinding<M extends Message<M, B>, B extends Message
   }
 
   @Override public boolean isMessage() {
-    return Message.class.isAssignableFrom(singleAdapter().type);
+    return Message.class.isAssignableFrom(getSingleAdapter().type);
   }
 
-  @Override public ProtoAdapter<?> keyAdapter() {
+  @Override public ProtoAdapter<?> getKeyAdapter() {
     throw new IllegalStateException("not a map");
   }
 
-  @Override public ProtoAdapter<?> singleAdapter() {
+  @Override public ProtoAdapter<?> getSingleAdapter() {
     // Upstream evaluates this once at construction (a stored val); the reflective lookup is
     // on the decode hot path, so memoize it.
     ProtoAdapter<?> result = singleAdapterMemoized;
@@ -111,7 +111,7 @@ public final class SealedOneOfBinding<M extends Message<M, B>, B extends Message
     return result;
   }
 
-  @Override public boolean writeIdentityValues() {
+  @Override public boolean getWriteIdentityValues() {
     return false;
   }
 

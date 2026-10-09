@@ -43,20 +43,20 @@ public final class Profile {
   /** Returns the configured Java type name for {@code type}, or null if it is not configured. */
   public String javaTarget(ProtoType type) {
     TypeConfigElement typeConfig = typeConfig(type);
-    return typeConfig != null ? typeConfig.target : null;
+    return typeConfig != null ? typeConfig.getTarget() : null;
   }
 
   /** Returns the adapter constant for {@code type}, or null if it is not configured. */
   public AdapterConstant getAdapter(ProtoType type) {
     TypeConfigElement typeConfig = typeConfig(type);
-    return typeConfig != null ? AdapterConstant.get(typeConfig.adapter) : null;
+    return typeConfig != null ? AdapterConstant.get(typeConfig.getAdapter()) : null;
   }
 
   /** Returns the config for {@code type}, or null if it is not configured. */
   private TypeConfigElement typeConfig(ProtoType type) {
     for (ProfileFileElement profileFile : profileFiles) {
-      for (TypeConfigElement typeConfig : profileFile.typeConfigs) {
-        if (type.toString().equals(typeConfig.type)) {
+      for (TypeConfigElement typeConfig : profileFile.getTypeConfigs()) {
+        if (type.toString().equals(typeConfig.getType())) {
           return typeConfig;
         }
       }

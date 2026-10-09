@@ -23,36 +23,36 @@ import org.junit.jupiter.api.Test;
 public class LocationTest {
   @Test public void getWithForwardSlashes() {
     Location location = Location.get("base/dir", "sub/file.proto");
-    assertEquals("base/dir", location.base);
-    assertEquals("sub/file.proto", location.path);
+    assertEquals("base/dir", location.getBase());
+    assertEquals("sub/file.proto", location.getPath());
   }
 
   @Test public void getTrimsTrailingSlashFromBase() {
     Location location = Location.get("base/dir/", "file.proto");
-    assertEquals("base/dir", location.base);
+    assertEquals("base/dir", location.getBase());
   }
 
   @Test public void getNormalizesWindowsBackslashesInBase() {
     Location location = Location.get("C:\\Users\\username\\protos", "language\\language.proto");
-    assertEquals("C:/Users/username/protos", location.base);
-    assertEquals("language/language.proto", location.path);
+    assertEquals("C:/Users/username/protos", location.getBase());
+    assertEquals("language/language.proto", location.getPath());
   }
 
   @Test public void getNormalizesWindowsBackslashesInPath() {
     Location location = Location.get("", "language\\language.proto");
-    assertEquals("language/language.proto", location.path);
+    assertEquals("language/language.proto", location.getPath());
   }
 
   @Test public void getWithMixedSeparatorsInBase() {
     Location location = Location.get("C:\\Users\\username\\protos/", "file.proto");
-    assertEquals("C:/Users/username/protos", location.base);
+    assertEquals("C:/Users/username/protos", location.getBase());
   }
 
   @Test public void getPreservesWindowsDriveRootBackslashInPath() {
     // okio requires 'C:\' (backslash) to recognize Windows absolute paths; 'C:/' is not supported
     // in older okio versions. Preserve the root backslash while converting internal separators.
     Location location = Location.get("", "C:\\Users\\protos");
-    assertEquals("C:\\Users/protos", location.path);
+    assertEquals("C:\\Users/protos", location.getPath());
   }
 
   // TASK-13 adaptation: the six cases above are the full upstream file. The cases below are

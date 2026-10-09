@@ -35,24 +35,24 @@ public final class Extend {
     this.fields = fields;
   }
 
-  public Location location() {
+  public Location getLocation() {
     return location;
   }
 
-  public String documentation() {
+  public String getDocumentation() {
     return documentation;
   }
 
-  public String name() {
+  public String getName() {
     return name;
   }
 
-  public List<Field> fields() {
+  public List<Field> getFields() {
     return fields;
   }
 
   /** Null until this extend is linked. */
-  public ProtoType type() {
+  public ProtoType getType() {
     return type;
   }
 
@@ -83,7 +83,7 @@ public final class Extend {
     Linker scoped = linker.withContext(this);
     scoped.validateImportForType(location, type);
 
-    syntaxRules.validateExtension(ProtoType.get(name), scoped.errors);
+    syntaxRules.validateExtension(ProtoType.get(name), scoped.getErrors());
   }
 
   Extend retainAll(Schema schema, MarkSet markSet) {
@@ -132,8 +132,8 @@ public final class Extend {
       List<ExtendElement> extendElements) {
     List<Extend> result = new ArrayList<>();
     for (ExtendElement element : extendElements) {
-      result.add(new Extend(element.location, element.documentation, element.name,
-          Field.fromElements(namespaces, element.fields, true, false)));
+      result.add(new Extend(element.getLocation(), element.getDocumentation(), element.getName(),
+          Field.fromElements(namespaces, element.getFields(), true, false)));
     }
     return result;
   }

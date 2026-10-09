@@ -46,8 +46,8 @@ public final class SchemaLoader implements Loader, ProfileLoader, AutoCloseable 
   }
 
   /** Strict by default. Note that golang cannot build protos with package cycles. */
-  public boolean permitPackageCycles() {
-    return delegate.permitPackageCycles();
+  public boolean getPermitPackageCycles() {
+    return delegate.getPermitPackageCycles();
   }
 
   public void setPermitPackageCycles(boolean permitPackageCycles) {
@@ -60,8 +60,8 @@ public final class SchemaLoader implements Loader, ProfileLoader, AutoCloseable 
    * equivalent of {@code bytes}, like {@link okio.ByteString} for the JVM. Note that scalar types
    * cannot be opaqued.
    */
-  public List<ProtoType> opaqueTypes() {
-    return delegate.opaqueTypes();
+  public List<ProtoType> getOpaqueTypes() {
+    return delegate.getOpaqueTypes();
   }
 
   public void setOpaqueTypes(List<ProtoType> opaqueTypes) {
@@ -72,8 +72,8 @@ public final class SchemaLoader implements Loader, ProfileLoader, AutoCloseable 
    * If true, the schema loader will load the whole graph, including files and types not used by
    * anything in the source path.
    */
-  public boolean loadExhaustively() {
-    return delegate.loadExhaustively();
+  public boolean getLoadExhaustively() {
+    return delegate.getLoadExhaustively();
   }
 
   public void setLoadExhaustively(boolean loadExhaustively) {
@@ -81,8 +81,8 @@ public final class SchemaLoader implements Loader, ProfileLoader, AutoCloseable 
   }
 
   /** Subset of the schema that was loaded from the source path. */
-  public List<ProtoFile> sourcePathFiles() {
-    return delegate.sourcePathFiles();
+  public List<ProtoFile> getSourcePathFiles() {
+    return delegate.getSourcePathFiles();
   }
 
   /** Initialize the source path and proto path from which files are loaded. */
