@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-10-09 15:01'
-updated_date: '2026-10-09 18:21'
+updated_date: '2026-10-10 09:01'
 labels:
   - user-feedback
   - compatibility
@@ -56,6 +56,8 @@ Delivery gap is worse than stated: commits a11d7cfa and 6ce5582c are not valid o
 2026-10-09: PR #4 (EricWittmann, open, unreviewed) adds the two missing ProtoAdapter(FieldEncoding, Class) and (FieldEncoding, Class, String) constructors, found by swapping Wire for antiwire in Retrofit; it is further evidence for option (b) and for TASK-34. My javap comparison missed this class (constructors with the same name and different signatures).
 
 2026-10-09 verified (supersedes 'may be lost'): the TASK-18 branch existed on the Mac at /tmp/apicurio and was erased (4058 directories, 0 files, empty .git/objects; Mac rebooted 2026-10-02 16:51; likely macOS /tmp cleanup, unconfirmed); it is not on bird. AC#1 therefore means redoing the migration, not locating it. Redo it on a new branch cut from apicurio-registry 3620f08c (the user's commit) in a persistent location, push it, and keep ANTIWIRE_MIGRATION.md and the parity drivers in a tracked path, never /tmp. With the 2026-10-09 getter rename (TASK-33.1) done, the migration no longer needs getter rewrites; what remains for the four protobuf modules at 3620f08c is the ProtoParser.Companion form, the ProtoParser constructor, the OneOf constructor, MessageType.toElement() and Schema.protoFile(okio.Path), plus the loader rewrite onto JdkSchemaLoader.
+
+2026-10-10 decision (maintainer): accept the kotlin.ranges.IntRange limit and document it, open to reconsideration: recorded as DEC-15 in docs/decisions.md (with the measured Confluent effect, the alternative of an optional hand-written kotlin.ranges.IntRange artifact and its costs, and the conditions to reconsider) and in docs/compatibility-matrix.md. TASK-33.2 (Companion form and absent members) is done on branch task-33-2-companion-and-members; the Confluent failure on parsing is fixed, the failure through IntRange is DEC-15. Next: ask the apicurio agent to rerun the three failing app tests against the new antiwire build to see whether they now fail only on this.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done

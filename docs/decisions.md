@@ -209,3 +209,36 @@ The compatibility target is source compatibility for every public upstream Wire 
 ### Companion binary shape and the public surface (decided 2026-10-10, TASK-33.2)
 
 Binary compatibility stays outside the promise of DEC-2 in general, with one exception recorded here: the Kotlin `Companion` form. A third-party jar compiled against Wire (Confluent kafka-schema-registry-client 8.0.0, `ProtobufSchema.toProtoFile`) reads the static field `ProtoParser.Companion` and calls `ProtoParser$Companion.parse`, so every upstream companion exists in the port as a `public static final Companion` field of a nested public `Companion` class whose public methods carry the upstream signatures and delegate to the existing statics. Everything else is source compatibility for members expressible without Kotlin (DEC-4) and without okio (DEC-14), enforced by the `surface-check` suite and its ledger `config/surface-baseline.tsv`. Poet-typed signatures (Palantir JavaPoet upstream, Square JavaPoet 1.13.0 here, DEC-3) and Guava-typed signatures are recorded as excluded. `scripts/scan-consumer-jars.py` scans compiled consumer jars for Wire references the port lacks; on 2026-10-10 Confluent kafka-protobuf-provider, kafka-schema-registry-client and kafka-protobuf-serializer 8.0.0 resolve 111 of 111 references, and Apicurio's protobuf modules at 3.3.4-SNAPSHOT 118 of 119 (the one miss is the okio-typed `Schema.protoFile(okio.Path)`).
+
+### DEC-15 Range elements are `int[]` pairs, not `kotlin.ranges.IntRange` (decided 2026-10-10, open to reconsideration)
+
+`ReservedElement.getValues()` and `ExtensionsElement.getValues()` return a `List<Object>` whose
+entries are `String` names, `Integer` tags, or `int[]` pairs `{start, endInclusive}`. Upstream Wire
+7.1.0 returns a `kotlin.ranges.IntRange` for a range. The port cannot do that without a Kotlin
+type in its public API, which DEC-4 forbids.
+
+**Consequence, measured on 2026-10-10 with the real Confluent jar.** Code compiled against Wire
+that tests `instanceof kotlin.ranges.IntRange` on those values does not recognise a range from
+the port. Confluent's `kafka-protobuf-provider` 8.0.0 does exactly that (18 references in
+`ProtobufSchema`, and `ProtobufSchemaUtils.toString`): parsing and printing a schema work, but
+`canonicalString()` on a proto2 schema with `extensions 100 to 199;` or `reserved 5 to 9;` throws
+`IllegalArgumentException` (`ProtobufSchemaUtils.java:726`). The same input prints correctly with
+real Wire 7.1.0. Source consumers (Apicurio's own code) adapt the `instanceof IntRange` branches
+to `int[]` and are unaffected; the migration is recorded on the Apicurio branch
+`antiwire-integration` (ANTIWIRE_MIGRATION.md).
+
+**Decision.** Accept and document. The port keeps the Kotlin-free `int[]` form.
+
+**What is not decided, and how to reconsider.** The alternative is an optional, separate
+artifact that ships a hand-written Java class named `kotlin.ranges.IntRange` (a pair of
+`Integer` accessors `getStart()` and `getEndInclusive()` and the `ClosedRange` members) so
+binary-compiled consumers resolve it. Its costs: it puts a class in a package the project does
+not own, it collides with the real `kotlin-stdlib` on any classpath that already has it
+(duplicate-class check, DEC-4 boundary), and `ReservedElement.getValues()` would have to return
+that type instead of `int[]`, a second public form to maintain. Reconsider when one of these
+holds: a real consumer reports a failure through this path and cannot change its code; the
+Apicurio Registry app tests that exercise Confluent's printer (`ProtobufSerdeTest.testSerdeMix`,
+`ConfluentClientTest.testSerdeProtobufSchema`) fail on it; or a stable way appears to have the
+shim and `kotlin-stdlib` coexist (for example a relocation-free marker interface both implement).
+Record any new decision as DEC-16 and update this section.
+
