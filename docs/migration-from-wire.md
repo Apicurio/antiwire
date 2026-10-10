@@ -1,13 +1,14 @@
 # Migrating from Square Wire 7.1.0 to antiwire
 
-Status: nothing is published. `io.apicurio:wire-schema-java:0.1.0-SNAPSHOT` exists only after you
-build and install antiwire yourself (see "Installing" below); the version is a moving snapshot.
+For a Java project that depends on `com.squareup.wire:wire-schema` (and `wire-runtime`) and wants
+`io.apicurio:wire-schema-java` (and `wire-runtime-java`) instead.
 
-Audience: a Java project that today depends on `com.squareup.wire:wire-schema` (and
-`wire-runtime`) and wants `io.apicurio:wire-schema-java` (and `wire-runtime-java`) instead.
-Everything here was observed on a real migration, not guessed: the Apicurio Registry protobuf
-modules, branch `antiwire-integration` of `paoloantinori/apicurio-registry` (log in its
-`ANTIWIRE_MIGRATION.md`), with the numbers re-measured on 2026-10-10.
+Status: nothing is published. `io.apicurio:wire-schema-java:0.1.0-SNAPSHOT` exists only after you
+build and install antiwire yourself (section 1), and the version is a moving snapshot.
+
+Everything here was observed on a real migration: the Apicurio Registry protobuf modules,
+branch `antiwire-integration` of `paoloantinori/apicurio-registry` (log in its
+`ANTIWIRE_MIGRATION.md`), re-measured on 2026-10-10.
 
 ## What stays the same
 
@@ -47,9 +48,7 @@ Exclude `com.squareup.wire:*`, `com.squareup.okio:*` and `org.jetbrains.kotlin:*
 dependencies that bring them transitively, so antiwire is the single provider of
 `com.squareup.wire.*`.
 
-#### Installing
-
-Build antiwire from a checkout with JDK 17 or newer (the artifacts target Java 11 bytecode) and
+To install, build antiwire from a checkout with JDK 17 or newer (the artifacts target Java 11 bytecode) and
 install it into your local repository: `mvn -DskipTests install -DskipITs`. Use `mvn verify`,
 not `mvn test`, for the full test run (see `BUILD.md`). CI jobs of your own project must run this
 install first, or resolve the artifacts from a repository you publish them to.
@@ -64,10 +63,10 @@ reason, is `config/surface-baseline.tsv` (status `EXCLUDED`). Typical rewrites:
 | Wire | antiwire |
 |---|---|
 | `new ProtoAdapter<>(FieldEncoding, KClass)` | `new ProtoAdapter<>(FieldEncoding, Class)` |
-| `okio.ByteString` in `Message`, `AnyMessage`, `ProtoAdapter` | `com.squareup.wire.Bytes` (see "Bytes" below) |
-| `SchemaLoader(FileSystem)` with an okio `FileSystem` | `JdkSchemaLoader` with `java.nio.file.Path` (section 4) |
+| `okio.ByteString` in `Message`, `AnyMessage`, `ProtoAdapter` | `com.squareup.wire.Bytes` (section 3) |
+| `SchemaLoader(FileSystem)` with an okio `FileSystem` | `JdkSchemaLoader` with `java.nio.file.Path` (section 5) |
 
-#### Bytes
+### 3. `okio.ByteString` becomes `Bytes`
 
 Wire exposes `okio.ByteString` in `Message.encodeByteString()`, `ProtoAdapter.decode(ByteString)`
 and similar members. antiwire keeps those okio forms only as `@Deprecated` bridges, for source that
@@ -79,10 +78,10 @@ Bytes bytes = message.encodeToBytes();      // replaces encodeByteString()
 Foo foo = Foo.ADAPTER.decode(bytes);        // decode(Bytes) or decode(byte[]); avoid decode(ByteString)
 ```
 
-`ProtoAdapter.decode` has `byte[]`, `okio.ByteString` and `Bytes` overloads, so passing `null`
-literally is ambiguous: cast it. okio types stay legal only inside the vendored engine (DEC-14).
+`ProtoAdapter.decode` has `byte[]`, `okio.ByteString` and `Bytes` overloads, so a literal `null`
+argument is ambiguous: cast it.
 
-### 3. Reserved and extension ranges are `int[]` pairs
+### 4. Reserved and extension ranges are `int[]` pairs
 
 `ReservedElement.getValues()` and `ExtensionsElement.getValues()` return `String` names,
 `Integer` tags and `int[] {start, endInclusive}` pairs. Wire returns `kotlin.ranges.IntRange`
@@ -101,7 +100,7 @@ Known limit (DEC-15, open to reconsideration): a library **compiled** against Wi
 `reserved 5 to 9;` or `extensions 100 to 199;`; proto3 schemas and single reserved tags print
 fine.
 
-### 4. Loading schemas: `JdkSchemaLoader`
+### 5. Loading schemas: `JdkSchemaLoader`
 
 `SchemaLoader` takes an okio `FileSystem`. The consumer API is `JdkSchemaLoader`:
 
@@ -121,9 +120,9 @@ wrong case resolves locally and fails on a case-sensitive CI host). TASK-33.5 tr
 in-memory option.
 
 `JdkSchemaLoader` itself still declares `throws IOException` (it does real file I/O); the rule
-in section 5 applies to the Wire-compatible classes.
+in section 6 applies to the Wire-compatible classes.
 
-### 5. Exceptions: unchecked where Wire has none
+### 6. Exceptions: unchecked where Wire has none
 
 Wire is Kotlin and has no checked exceptions; only functions annotated `@Throws` declare one.
 The port matches that: methods such as `Message.encode()`, `SchemaLoader.loadSchema()` and
@@ -139,11 +138,11 @@ branch's `ANTIWIRE_MIGRATION.md`, rerun section for antiwire 62c8646) no site ne
 because every `IOException` handler there guarded a call that still throws it (`JdkSchemaLoader`,
 `java.nio`, Guava, protobuf `writeTo`). Your code may differ.
 
-### 6. Constructors, `ProtoParser`
+### 7. Constructors and `ProtoParser`
 
-`ProtoParser.parse(Location, String)` is available both as the static method and through
-`ProtoParser.Companion.parse`. The `ProtoParser(Location, char[])` constructor is public. The
-`OneOf` constructor and `MessageType.toElement()` are public (Apicurio relied on both).
+Besides the `Companion` form, `ProtoParser.parse(Location, String)` is also a plain static
+method. The `ProtoParser(Location, char[])` and `OneOf` constructors and `MessageType.toElement()`
+are public (Apicurio relied on them).
 
 ## How to check your own migration
 
