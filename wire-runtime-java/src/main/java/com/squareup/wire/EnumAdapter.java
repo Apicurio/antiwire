@@ -51,6 +51,10 @@ public abstract class EnumAdapter<E extends WireEnum> extends ProtoAdapter<E> {
     writer.writeVarint32(value.getValue());
   }
 
+  @Override public E decode(ProtoReader32 reader) throws IOException {
+    return decode(reader.asProtoReader());
+  }
+
   @Override public E decode(ProtoReader reader) throws IOException {
     int value = reader.readVarint32();
     E result = fromValue(value);

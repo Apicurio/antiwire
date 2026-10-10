@@ -56,7 +56,31 @@ OUT_OF_SCOPE = re.compile(
 DATA_BRIDGE = re.compile(r'^(copy|component\d+)$')
 # Members of in-scope classes that belong to features DEC-6 leaves out: the Kotlin and Swift
 # generators and Android output (WireCompiler options, Target/handler plumbing).
-OUT_OF_SCOPE_MEMBER = re.compile(r'^(get|is|set)?(kotlin|swift|emitAndroid)', re.I)
+OUT_OF_SCOPE_MEMBER = re.compile(r'^(get|is|set)?(kotlin|swift|emitAndroid|javaInterop|emitProtoReader32)', re.I)
+
+# Deliberate port differences that are not gaps: a member Java source cannot meaningfully call, or
+# a type that exists upstream only as a Kotlin implementation detail. Keyed by "class" or
+# "class#member"; the value is the recorded reason. Owner: DEC-4 (no Kotlin in production).
+DELIBERATE = {
+    'com.squareup.wire.internal.RuntimeUtils':
+        'Kotlin extension infix functions on Byte (and, shl); Java cannot call them as extensions and '
+        'the port inlines the arithmetic where needed',
+    'com.squareup.wire.internal._PlatformKt':
+        'Kotlin expect/actual platform helpers (toUnmodifiableList, toUnmodifiableMap, camelCase); the '
+        'port keeps them as Internal.camelCase and uses the JDK collections directly',
+    'com.squareup.wire.ProtoAdapter$Companion$UnsupportedTypeProtoAdapter':
+        'stub adapter for Kotlin typealiases to java.time types on a classpath without them; the port '
+        'targets Java 11 where java.time always exists',
+    'com.squareup.wire.AnyMessage#newBuilder':
+        'upstream returns Void (Kotlin Nothing builder); the port declares a private NoBuilder, and '
+        'both always throw',
+    'com.squareup.wire.internal.Internal#commonEquals':
+        'extension functions on java.time.Instant/Duration used only by non-JVM platforms upstream '
+        '(Kotlin internal in practice)',
+    'com.squareup.wire.internal.Internal#commonHashCode':
+        'extension functions on java.time.Instant/Duration used only by non-JVM platforms upstream '
+        '(Kotlin internal in practice)',
+}
 
 OWNER_FIX = 'TASK-33.2'
 OWNER_THROWS = 'TASK-33.3'
@@ -455,6 +479,9 @@ class Checker:
                   'feature outside the port: JSON, Android, Kotlin or Swift generator, gRPC (DEC-6)', 'DEC-6')
             return
         jvm_name = ucls.rsplit('.', 1)[-1]
+        if ucls in DELIBERATE:
+            L.add('CLASS', ucls, '', '', 'EXCLUDED', DELIBERATE[ucls], 'DEC-4')
+            return
         if jvm_name in self.internal_classes.get(pkg_of(ucls), set()):
             L.add('CLASS', ucls, '', '', 'EXCLUDED',
                   'Kotlin internal class: public in bytecode, not documented API; ported only where '
@@ -555,7 +582,9 @@ class Checker:
             kind_name = {'C': 'CONSTRUCTOR', 'F': 'STATIC_FIELD' if static else 'FIELD',
                          'M': 'STATIC_METHOD' if static else 'METHOD'}[kind]
             jvm_name = ucls.rsplit('.', 1)[-1]
-            if kind == 'C' and jvm_name in self.internal_ctors.get(pkg_of(ucls), set()):
+            if (ucls + '#' + name) in DELIBERATE:
+                L.add(kind_name, ucls, label, shown, 'EXCLUDED', DELIBERATE[ucls + '#' + name], 'DEC-4')
+            elif kind == 'C' and jvm_name in self.internal_ctors.get(pkg_of(ucls), set()):
                 L.add(kind_name, ucls, label, shown, 'EXCLUDED',
                       'Kotlin internal constructor: public in bytecode, not callable from Kotlin '
                       'outside the module, not documented API', 'kotlin-internal')

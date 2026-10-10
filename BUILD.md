@@ -74,6 +74,10 @@ The ledger `config/surface-baseline.tsv` must equal the computed result: a new d
 gap that was fixed and is now stale, fails the suite. After a reviewed change, regenerate it with
 `scripts/surface-check.sh --update` (add `--allow-new` to accept new rows) and review the diff.
 
+`scripts/scan-consumer-jars.py --port-jar <module jar> ... <consumer jar> ...` reads the constant pool of compiled
+consumer jars (for example Confluent's kafka-protobuf-provider) and lists every `com.squareup.wire.*`
+member they reference that the port jars do not provide; it reports and does not fail.
+
 
 Stale build outputs: after switching revisions, deleted or renamed test classes can survive
 as stale `.class` files under a module's `target/test-classes`, and surefire runs them (or

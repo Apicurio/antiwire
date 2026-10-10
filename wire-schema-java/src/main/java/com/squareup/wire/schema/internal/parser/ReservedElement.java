@@ -34,6 +34,12 @@ public final class ReservedElement {
   /** A String name or Integer or Integer range (int[]{first, last}) tag. */
   private final List<Object> values;
 
+  /**
+   * The reserved entries in declaration order: an {@code Integer} is a single reserved tag, an
+   * {@code int[]} of length two is an inclusive range {@code [start, end]} ({@code max} is
+   * {@link com.squareup.wire.schema.internal.SchemaUtil#MAX_TAG_VALUE}), and a {@code String} is a
+   * reserved field name.
+   */
   public List<Object> getValues() {
     return values;
   }

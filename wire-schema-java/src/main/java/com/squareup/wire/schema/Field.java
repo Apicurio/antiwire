@@ -262,7 +262,7 @@ public final class Field {
     }
   }
 
-  Field retainAll(Schema schema, MarkSet markSet, ProtoType enclosingType) {
+  public Field retainAll(Schema schema, MarkSet markSet, ProtoType enclosingType) {
     // TODO(jwilson): perform this transformation in the Linker.
     ProtoType type = this.type;
     if (type == null) return null;

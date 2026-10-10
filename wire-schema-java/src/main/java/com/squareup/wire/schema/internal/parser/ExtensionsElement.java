@@ -34,6 +34,12 @@ public final class ExtensionsElement {
   /** An Integer or Integer range (int[]{first, last}) tag. */
   private final List<Object> values;
 
+  /**
+   * The extension ranges in declaration order: an {@code Integer} is a single extension tag and an
+   * {@code int[]} of length two is an inclusive range {@code [start, end]} ({@code max} is
+   * {@link com.squareup.wire.schema.internal.SchemaUtil#MAX_TAG_VALUE}). Unlike reserved
+   * statements, an extensions statement never contains strings.
+   */
   public List<Object> getValues() {
     return values;
   }
