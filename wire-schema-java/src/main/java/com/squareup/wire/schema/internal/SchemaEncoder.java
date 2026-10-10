@@ -88,7 +88,7 @@ public final class SchemaEncoder {
   }
 
   @SuppressWarnings("deprecation") // Engine layer: descriptor bytes stay on the okio form (docs/api-surface.md).
-  public ByteString encode(ProtoFile protoFile) throws IOException {
+  public ByteString encode(ProtoFile protoFile) {
     return fileEncoder.encodeByteString(protoFile);
   }
 

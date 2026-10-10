@@ -16,6 +16,7 @@
 package com.squareup.wire;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import okio.Buffer;
 import okio.ForwardingFileSystem;
 import okio.FileSystem;
@@ -35,17 +36,25 @@ public class DryRunFileSystem extends ForwardingFileSystem {
     super(delegate);
   }
 
-  @Override public Sink sink(Path file, boolean mustCreate) throws IOException {
-    if (mustCreate && getDelegate().exists(file)) {
-      throw new IOException("already exists: " + file);
+  @Override public Sink sink(Path file, boolean mustCreate) {
+    if (mustCreate && delegateExists(file)) {
+      throw new UncheckedIOException(new IOException("already exists: " + file));
     }
     return new Buffer();
   }
 
-  @Override public Sink appendingSink(Path file, boolean mustExist) throws IOException {
-    if (mustExist && !getDelegate().exists(file)) {
-      throw new IOException("doesn't exist: " + file);
+  @Override public Sink appendingSink(Path file, boolean mustExist) {
+    if (mustExist && !delegateExists(file)) {
+      throw new UncheckedIOException(new IOException("doesn't exist: " + file));
     }
     return new Buffer();
+  }
+
+  private boolean delegateExists(Path file) {
+    try {
+      return getDelegate().exists(file);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 }

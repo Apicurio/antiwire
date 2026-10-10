@@ -159,22 +159,30 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
     return size;
   }
 
-  @Override public void encode(ProtoWriter writer, M value) throws IOException {
-    for (FieldOrOneOfBinding<M, B> field : fields.values()) {
-      Object bound = field.get(value);
-      if (bound == null) continue;
-      field.getAdapter().encodeWithTag(writer, field.getTag(), bound);
+  @Override public void encode(ProtoWriter writer, M value) {
+    try {
+      for (FieldOrOneOfBinding<M, B> field : fields.values()) {
+        Object bound = field.get(value);
+        if (bound == null) continue;
+        field.getAdapter().encodeWithTag(writer, field.getTag(), bound);
+      }
+      writer.writeBytes(binding.unknownFields(value));
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
     }
-    writer.writeBytes(binding.unknownFields(value));
   }
 
-  @Override public void encode(ReverseProtoWriter writer, M value) throws IOException {
-    writer.writeBytes(binding.unknownFields(value));
-    for (int f = fieldBindingsArray.length - 1; f >= 0; f--) {
-      FieldOrOneOfBinding<M, B> field = fieldBindingsArray[f];
-      Object bound = field.get(value);
-      if (bound == null) continue;
-      field.getAdapter().encodeWithTag(writer, field.getTag(), bound);
+  @Override public void encode(ReverseProtoWriter writer, M value) {
+    try {
+      writer.writeBytes(binding.unknownFields(value));
+      for (int f = fieldBindingsArray.length - 1; f >= 0; f--) {
+        FieldOrOneOfBinding<M, B> field = fieldBindingsArray[f];
+        Object bound = field.get(value);
+        if (bound == null) continue;
+        field.getAdapter().encodeWithTag(writer, field.getTag(), bound);
+      }
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
     }
   }
 
@@ -231,7 +239,16 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
   }
 
   @SuppressWarnings("unchecked")
-  @Override public M decode(ProtoReader reader) throws IOException {
+  @Override public M decode(ProtoReader reader) {
+    try {
+      return decode0(reader);
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private M decode0(ProtoReader reader) throws IOException {
     B builder = newBuilder();
     long token = reader.beginMessage();
     while (true) {

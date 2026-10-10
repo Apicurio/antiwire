@@ -16,6 +16,7 @@
 package com.squareup.wire;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import okio.ByteString;
 
 /**
@@ -84,20 +85,29 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
     return Bytes.fromByteString(value);
   }
 
-  public <T> T unpack(ProtoAdapter<T> adapter) throws IOException {
+  public <T> T unpack(ProtoAdapter<T> adapter) {
     if (!typeUrl.equals(adapter.getTypeUrl())) {
       throw new IllegalStateException("type mismatch: " + typeUrl + " != " + adapter.getTypeUrl());
     }
-    return adapter.decode(value.toByteArray());
+    try {
+      return adapter.decode(value.toByteArray());
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
-  public <T> T unpackOrNull(ProtoAdapter<T> adapter) throws IOException {
-    return typeUrl.equals(adapter.getTypeUrl()) ? adapter.decode(value.toByteArray()) : null;
+  public <T> T unpackOrNull(ProtoAdapter<T> adapter) {
+    if (!typeUrl.equals(adapter.getTypeUrl())) return null;
+    try {
+      return adapter.decode(value.toByteArray());
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   /** Packs a generated {@link Message} using its built-in adapter. */
   @SuppressWarnings("deprecation") // Engine layer: one-copy okio encode feeds the okio field.
-  public static AnyMessage pack(Message<?, ?> message) throws IOException {
+  public static AnyMessage pack(Message<?, ?> message) {
     ProtoAdapter<Object> adapter = (ProtoAdapter<Object>) message.adapter();
     if (adapter.getTypeUrl() == null) {
       throw new IllegalStateException(
@@ -111,7 +121,7 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
    * subtypes, such as well-known types like FieldMask.
    */
   @SuppressWarnings("deprecation") // Engine layer: one-copy okio encode feeds the okio field.
-  public static <T> AnyMessage pack(ProtoAdapter<T> adapter, T value) throws IOException {
+  public static <T> AnyMessage pack(ProtoAdapter<T> adapter, T value) {
     if (adapter.getTypeUrl() == null) {
       throw new IllegalStateException(
           "cannot pack " + (adapter.type == null ? "value" : adapter.type.getName())
@@ -217,11 +227,11 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
     private Companion() {
     }
 
-    public AnyMessage pack(Message<?, ?> message) throws IOException {
+    public AnyMessage pack(Message<?, ?> message) {
       return AnyMessage.pack(message);
     }
 
-    public <T> AnyMessage pack(ProtoAdapter<T> adapter, T value) throws IOException {
+    public <T> AnyMessage pack(ProtoAdapter<T> adapter, T value) {
       return AnyMessage.pack(adapter, value);
     }
   }

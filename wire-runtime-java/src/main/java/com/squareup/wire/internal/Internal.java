@@ -24,6 +24,7 @@ import com.squareup.wire.ProtoWriter;
 import com.squareup.wire.ReverseProtoWriter;
 import okio.Buffer;
 import okio.ByteString;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -316,122 +317,171 @@ public final class Internal {
    * merged: repeated fields are concatenated, singular fields take the later value.
    */
   @SuppressWarnings("deprecation") // Engine layer: merge re-encodes through the okio buffer forms (docs/api-surface.md).
-  public static <E> E decodeMessageOrMerge(ProtoAdapter<E> adapter, ProtoReader32 reader, E existing)
-      throws java.io.IOException {
+  public static <E> E decodeMessageOrMerge(ProtoAdapter<E> adapter, ProtoReader32 reader, E existing) {
     return decodeMessageOrMerge(adapter, reader.asProtoReader(), existing);
   }
 
-  public static <E> E decodeMessageOrMerge(ProtoAdapter<E> adapter, ProtoReader reader, E existing)
-      throws java.io.IOException {
-    if (existing == null) return adapter.decode(reader);
-    if (adapter == ProtoAdapter.FIELD_MASK) {
-      return (E) ((FieldMask) existing).append(ProtoAdapter.FIELD_MASK.decode(reader).getPaths());
+  public static <E> E decodeMessageOrMerge(ProtoAdapter<E> adapter, ProtoReader reader, E existing) {
+    try {
+      if (existing == null) return adapter.decode(reader);
+      if (adapter == ProtoAdapter.FIELD_MASK) {
+        return (E) ((FieldMask) existing).append(ProtoAdapter.FIELD_MASK.decode(reader).getPaths());
+      }
+      ByteString bytes = reader.readBytes();
+      Buffer buffer = new Buffer();
+      adapter.encode(buffer, existing);
+      buffer.write(bytes);
+      return adapter.decode(buffer);
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
     }
-    ByteString bytes = reader.readBytes();
-    Buffer buffer = new Buffer();
-    adapter.encode(buffer, existing);
-    buffer.write(bytes);
-    return adapter.decode(buffer);
   }
 
-  public static double decodePrimitive_double(ProtoReader reader) throws java.io.IOException {
-    return Double.longBitsToDouble(reader.readFixed64());
+  public static double decodePrimitive_double(ProtoReader reader) {
+    try {
+      return Double.longBitsToDouble(reader.readFixed64());
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static int decodePrimitive_fixed32(ProtoReader reader) throws java.io.IOException {
-    return reader.readFixed32();
+  public static int decodePrimitive_fixed32(ProtoReader reader) {
+    try {
+      return reader.readFixed32();
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static long decodePrimitive_fixed64(ProtoReader reader) throws java.io.IOException {
-    return reader.readFixed64();
+  public static long decodePrimitive_fixed64(ProtoReader reader) {
+    try {
+      return reader.readFixed64();
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static float decodePrimitive_float(ProtoReader reader) throws java.io.IOException {
-    return Float.intBitsToFloat(reader.readFixed32());
+  public static float decodePrimitive_float(ProtoReader reader) {
+    try {
+      return Float.intBitsToFloat(reader.readFixed32());
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static int decodePrimitive_int32(ProtoReader reader) throws java.io.IOException {
-    return reader.readVarint32();
+  public static int decodePrimitive_int32(ProtoReader reader) {
+    try {
+      return reader.readVarint32();
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static long decodePrimitive_int64(ProtoReader reader) throws java.io.IOException {
-    return reader.readVarint64();
+  public static long decodePrimitive_int64(ProtoReader reader) {
+    try {
+      return reader.readVarint64();
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static int decodePrimitive_sfixed32(ProtoReader reader) throws java.io.IOException {
-    return reader.readFixed32();
+  public static int decodePrimitive_sfixed32(ProtoReader reader) {
+    try {
+      return reader.readFixed32();
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static long decodePrimitive_sfixed64(ProtoReader reader) throws java.io.IOException {
-    return reader.readFixed64();
+  public static long decodePrimitive_sfixed64(ProtoReader reader) {
+    try {
+      return reader.readFixed64();
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static int decodePrimitive_sint32(ProtoReader reader) throws java.io.IOException {
-    return ProtoWriter.decodeZigZag32(reader.readVarint32());
+  public static int decodePrimitive_sint32(ProtoReader reader) {
+    try {
+      return ProtoWriter.decodeZigZag32(reader.readVarint32());
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static long decodePrimitive_sint64(ProtoReader reader) throws java.io.IOException {
-    return ProtoWriter.decodeZigZag64(reader.readVarint64());
+  public static long decodePrimitive_sint64(ProtoReader reader) {
+    try {
+      return ProtoWriter.decodeZigZag64(reader.readVarint64());
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static int decodePrimitive_uint32(ProtoReader reader) throws java.io.IOException {
-    return reader.readVarint32();
+  public static int decodePrimitive_uint32(ProtoReader reader) {
+    try {
+      return reader.readVarint32();
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static long decodePrimitive_uint64(ProtoReader reader) throws java.io.IOException {
-    return reader.readVarint64();
+  public static long decodePrimitive_uint64(ProtoReader reader) {
+    try {
+      return reader.readVarint64();
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public static double decodePrimitive_double(ProtoReader32 reader) throws java.io.IOException {
+  public static double decodePrimitive_double(ProtoReader32 reader) {
     return decodePrimitive_double(reader.asProtoReader());
   }
 
-  public static int decodePrimitive_fixed32(ProtoReader32 reader) throws java.io.IOException {
+  public static int decodePrimitive_fixed32(ProtoReader32 reader) {
     return decodePrimitive_fixed32(reader.asProtoReader());
   }
 
-  public static long decodePrimitive_fixed64(ProtoReader32 reader) throws java.io.IOException {
+  public static long decodePrimitive_fixed64(ProtoReader32 reader) {
     return decodePrimitive_fixed64(reader.asProtoReader());
   }
 
-  public static float decodePrimitive_float(ProtoReader32 reader) throws java.io.IOException {
+  public static float decodePrimitive_float(ProtoReader32 reader) {
     return decodePrimitive_float(reader.asProtoReader());
   }
 
-  public static int decodePrimitive_int32(ProtoReader32 reader) throws java.io.IOException {
+  public static int decodePrimitive_int32(ProtoReader32 reader) {
     return decodePrimitive_int32(reader.asProtoReader());
   }
 
-  public static long decodePrimitive_int64(ProtoReader32 reader) throws java.io.IOException {
+  public static long decodePrimitive_int64(ProtoReader32 reader) {
     return decodePrimitive_int64(reader.asProtoReader());
   }
 
-  public static int decodePrimitive_sfixed32(ProtoReader32 reader) throws java.io.IOException {
+  public static int decodePrimitive_sfixed32(ProtoReader32 reader) {
     return decodePrimitive_sfixed32(reader.asProtoReader());
   }
 
-  public static long decodePrimitive_sfixed64(ProtoReader32 reader) throws java.io.IOException {
+  public static long decodePrimitive_sfixed64(ProtoReader32 reader) {
     return decodePrimitive_sfixed64(reader.asProtoReader());
   }
 
-  public static int decodePrimitive_sint32(ProtoReader32 reader) throws java.io.IOException {
+  public static int decodePrimitive_sint32(ProtoReader32 reader) {
     return decodePrimitive_sint32(reader.asProtoReader());
   }
 
-  public static long decodePrimitive_sint64(ProtoReader32 reader) throws java.io.IOException {
+  public static long decodePrimitive_sint64(ProtoReader32 reader) {
     return decodePrimitive_sint64(reader.asProtoReader());
   }
 
-  public static int decodePrimitive_uint32(ProtoReader32 reader) throws java.io.IOException {
+  public static int decodePrimitive_uint32(ProtoReader32 reader) {
     return decodePrimitive_uint32(reader.asProtoReader());
   }
 
-  public static long decodePrimitive_uint64(ProtoReader32 reader) throws java.io.IOException {
+  public static long decodePrimitive_uint64(ProtoReader32 reader) {
     return decodePrimitive_uint64(reader.asProtoReader());
   }
 
-  public static void encodeArray_int32(int[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_int32(int[] array, ReverseProtoWriter writer, int tag) {
     if (array.length != 0) {
       int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
@@ -442,8 +492,7 @@ public final class Internal {
     }
   }
 
-  public static void encodeArray_uint32(int[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_uint32(int[] array, ReverseProtoWriter writer, int tag) {
     if (array.length != 0) {
       int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
@@ -454,8 +503,7 @@ public final class Internal {
     }
   }
 
-  public static void encodeArray_sint32(int[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_sint32(int[] array, ReverseProtoWriter writer, int tag) {
     if (array.length != 0) {
       int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
@@ -466,8 +514,7 @@ public final class Internal {
     }
   }
 
-  public static void encodeArray_fixed32(int[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_fixed32(int[] array, ReverseProtoWriter writer, int tag) {
     if (array.length != 0) {
       int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
@@ -478,13 +525,11 @@ public final class Internal {
     }
   }
 
-  public static void encodeArray_sfixed32(int[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_sfixed32(int[] array, ReverseProtoWriter writer, int tag) {
     encodeArray_fixed32(array, writer, tag);
   }
 
-  public static void encodeArray_int64(long[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_int64(long[] array, ReverseProtoWriter writer, int tag) {
     if (array.length != 0) {
       int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
@@ -495,13 +540,11 @@ public final class Internal {
     }
   }
 
-  public static void encodeArray_uint64(long[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_uint64(long[] array, ReverseProtoWriter writer, int tag) {
     encodeArray_int64(array, writer, tag);
   }
 
-  public static void encodeArray_sint64(long[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_sint64(long[] array, ReverseProtoWriter writer, int tag) {
     if (array.length != 0) {
       int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
@@ -512,8 +555,7 @@ public final class Internal {
     }
   }
 
-  public static void encodeArray_fixed64(long[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_fixed64(long[] array, ReverseProtoWriter writer, int tag) {
     if (array.length != 0) {
       int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
@@ -524,13 +566,11 @@ public final class Internal {
     }
   }
 
-  public static void encodeArray_sfixed64(long[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_sfixed64(long[] array, ReverseProtoWriter writer, int tag) {
     encodeArray_fixed64(array, writer, tag);
   }
 
-  public static void encodeArray_float(float[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_float(float[] array, ReverseProtoWriter writer, int tag) {
     if (array.length != 0) {
       int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {
@@ -541,8 +581,7 @@ public final class Internal {
     }
   }
 
-  public static void encodeArray_double(double[] array, ReverseProtoWriter writer, int tag)
-      throws java.io.IOException {
+  public static void encodeArray_double(double[] array, ReverseProtoWriter writer, int tag) {
     if (array.length != 0) {
       int byteCountBefore = writer.getByteCount();
       for (int i = array.length - 1; i >= 0; i--) {

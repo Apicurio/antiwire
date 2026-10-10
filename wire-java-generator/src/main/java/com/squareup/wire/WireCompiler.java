@@ -395,11 +395,11 @@ public final class WireCompiler {
     return treeShakingRubbish;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     try {
       WireCompiler wireCompiler = forArgs(args);
       wireCompiler.compile();
-    } catch (WireException | IOException e) {
+    } catch (WireException e) {
       System.err.print("Fatal: ");
       e.printStackTrace(System.err);
       System.exit(1);
@@ -715,7 +715,7 @@ public final class WireCompiler {
       return WireCompiler.forArgs(fileSystem, logger, args);
     }
 
-    public void main(String[] args) {
+    public void main(String[] args) throws IOException {
       WireCompiler.main(args);
     }
   }

@@ -2,7 +2,7 @@
 
 Audited at revision `0f860ff` (2026-10-06), refreshing the first audit at `a45b0f0`
 (2026-10-02). Scope: every production source file of the three shipped modules,
-`wire-runtime-java`, `wire-schema-java`, `wire-java-generator` (`src/main/java`, 174 files after the 2026-10-10 additions of TASK-33.2; 161 at the 0f860ff audit)
+`wire-runtime-java`, `wire-schema-java`, `wire-java-generator` (`src/main/java`, 175 files after the 2026-10-10 additions of TASK-33.2 and TASK-33.3; 161 at the 0f860ff audit)
 plus every embedded resource (`src/main/resources`, 9 proto files). The test module
 `wire-tests-java`, the protoc-interop oracle module `wire-protoc-compat-java`, and the
 parity fixture `wire-upstream-shaded` are outside the shipped inventory. All three are
@@ -43,16 +43,17 @@ notice in the rows below, and the per-module totals count files):
 
 | Module | Square Apache 2.0 | antiwire Apache 2.0 | Google Nano BSD | Square + Nano | R8 BSD | JetBrains Apache 2.0 | ASF header | Total files |
 |---|---|---|---|---|---|---|---|---|
-| wire-runtime-java | 55 | 13 | 3 | 1 | 1 | 4 | 1 | 78 |
+| wire-runtime-java | 55 | 14 | 3 | 1 | 1 | 4 | 1 | 79 |
 | wire-schema-java | 81 | 4 | 0 | 0 | 0 | 0 | 0 | 85 |
 | wire-java-generator | 9 | 2 | 0 | 0 | 0 | 0 | 0 | 11 |
-| **Total** | **145** | **19** | **3** | **1** | **1** | **4** | **1** | **174** |
+| **Total** | **145** | **20** | **3** | **1** | **1** | **4** | **1** | **175** |
 
-Arithmetic check, recomputed mechanically by script on 2026-10-10: 55+13+3+1+1+4+1 = 78,
-81+4 = 85, 9+2 = 11, and the total row 145+19+3+1+1+4+1 = 174; every row's cells sum to
-its file total, and 78+85+11 = 174 files matches a `find -name '*.java'` over the three modules
-(the 13 new files are the Kotlin file facades, the Companion-adjacent interfaces and the two
-logger classes of TASK-33.2; each carries the header class listed in its row).
+Arithmetic check, recomputed mechanically by script on 2026-10-10: 55+14+3+1+1+4+1 = 79,
+81+4 = 85, 9+2 = 11, and the total row 145+20+3+1+1+4+1 = 175; every row's cells sum to
+its file total, and 79+85+11 = 175 files matches a `find -name '*.java'` over the three modules
+(the 13 new files of TASK-33.2 are the Kotlin file facades, the Companion-adjacent interfaces and
+the two logger classes; the 14th, `internal/Rethrow.java` of TASK-33.3, is antiwire-original; each
+carries the header class listed in its row).
 The columns count the notices the files carry. One translated file
 (`ProtoReader32AsProtoReader.java`) carried the antiwire header where translated material
 carries the Square header; the 2026-10-06 refresh corrected it to the upstream Square 2024
@@ -166,7 +167,7 @@ JavaPoet 1.13.0 attribution for the generator module's production dependency was
 
 ## Per-file listing
 
-### wire-runtime-java (78 Java files)
+### wire-runtime-java (79 Java files)
 
 | File | Notice |
 |---|---|
@@ -216,6 +217,7 @@ JavaPoet 1.13.0 attribution for the generator module's production dependency was
 | `wire-runtime-java/src/main/java/com/squareup/wire/internal/MutableOnWriteList.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/internal/OneOfBinding.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/internal/ProtocolException.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/Rethrow.java` | antiwire Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/internal/Reflection.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/internal/ReflectionKt.java` | antiwire Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/internal/RuntimeMessageAdapter.java` | Square Apache 2.0 |

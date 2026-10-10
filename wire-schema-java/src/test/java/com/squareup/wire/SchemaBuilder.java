@@ -112,8 +112,9 @@ public final class SchemaBuilder {
           java.util.Collections.singletonList(Location.get(sourcePath.toString())),
           java.util.Collections.singletonList(Location.get(protoPath.toString())));
       return schemaLoader.loadSchema();
-    } catch (IOException e) {
-      throw new AssertionError(e);
+    } catch (java.io.UncheckedIOException e) {
+      // The loader no longer declares IOException (TASK-33.3); keep this helper's contract.
+      throw new AssertionError(e.getCause());
     }
   }
 

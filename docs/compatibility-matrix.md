@@ -128,3 +128,11 @@ This matrix is a living record: every new keep-name exception, namespace decisio
 ## Source-compatibility ledger (2026-10-09)
 
 The compatibility target is source compatibility for every public upstream member that Java can express without Kotlin types (DEC-4) and without okio in the signature (DEC-14); binary compatibility is not promised (DEC-2). `config/surface-baseline.tsv` is the machine-checked ledger: one row per public or protected member of the real Wire 7.1.0 jars that the port does not match exactly, with status GAP (owner task) or EXCLUDED (reason: Kotlin type, okio type, Kotlin internal, out-of-scope feature, data-class bridge), plus the checked-exception differences. `scripts/surface-check.sh` (suite `surface-check`) fails when the computed result differs from the ledger. Sections B, F, G and H above are the original planning inventory; the ledger is the current state.
+
+2026-10-10 (TASK-33.3, DEC-16): checked exceptions now match upstream's `@Throws`. The 79 methods that
+declared `throws IOException` where upstream's Kotlin has none no longer do; failures surface as
+`UncheckedIOException` on top-level convenience methods and as the original exception on helpers
+inside `@Throws` paths. The consumer snippets `EncodeWithoutTryCatch`, `PackUnpackWithoutTryCatch`
+and `SchemaLoadWithoutTryCatch` (scripts/surface-consumer) compile against both the real upstream
+jars and the port.
+

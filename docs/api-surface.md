@@ -351,3 +351,12 @@ script still skips, and the Kotlin generator product itself (DEC-6).
 ## Port-only handler helper (TASK-16.2.1, 2026-10-06)
 
 `SchemaHandler.createOutDirectory(Context)` is a protected static helper with no upstream counterpart. It creates the context's output directory and maps an `IOException` to an unchecked `RuntimeException` with the message "Error creating output directory <dir>"; `JavaSchemaHandler` and `ProtoTarget` share it instead of duplicating the wrapping. It is outside the consumer-API enforcement of `ConsumerApiSurfaceTest` (which covers the four root classes).
+
+## Checked exceptions follow upstream (TASK-33.3, DEC-16)
+
+Public methods declare `throws IOException` only where upstream Wire does (`@Throws`). Elsewhere
+a failure is an `UncheckedIOException` (top-level convenience methods such as `Message.encode()`,
+`SchemaLoader.loadSchema()`, `AnyMessage.unpack`) or the original exception rethrown unchanged
+through `com.squareup.wire.internal.Rethrow` (helpers called from inside a declared-`@Throws` method,
+so that `decode` still reports a plain `IOException`). `Rethrow` is internal API.
+

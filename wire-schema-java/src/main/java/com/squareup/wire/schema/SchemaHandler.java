@@ -428,7 +428,7 @@ public abstract class SchemaHandler {
   protected static void createOutDirectory(Context context) {
     try {
       context.getFileSystem().createDirectories(context.getOutDirectory(), false);
-    } catch (IOException e) {
+    } catch (IOException | java.io.UncheckedIOException e) {
       throw new RuntimeException("Error creating output directory " + context.getOutDirectory(), e);
     }
   }

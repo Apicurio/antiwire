@@ -16,6 +16,7 @@
 package com.squareup.wire;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.ByteString;
@@ -73,7 +74,7 @@ public class ReverseProtoWriter {
     sink.writeAll(tail);
   }
 
-  private void require(int minByteCount) throws IOException {
+  private void require(int minByteCount) {
     if (arrayLimit >= minByteCount) return;
     emitCurrentSegment();
     head.readAndWriteUnsafe(cursor);
@@ -86,15 +87,21 @@ public class ReverseProtoWriter {
   }
 
   /** Make the current segment a prefix of {@code tail}. */
-  private void emitCurrentSegment() throws IOException {
+  private void emitCurrentSegment() {
     if (array == EMPTY_ARRAY) return; // No current segment.
     cursor.close();
 
-    // Advance the cursor to the first byte of data.
-    head.skip(arrayLimit);
+    try {
+      // Advance the cursor to the first byte of data.
+      head.skip(arrayLimit);
 
-    // Move 'head' data to the front of 'tail'. We first move 'tail' to the end of head, then swap.
-    head.writeAll(tail);
+      // Move 'head' data to the front of 'tail'. We first move 'tail' to the end of head, then swap.
+      head.writeAll(tail);
+    } catch (IOException e) {
+      // Both buffers are in memory, so this cannot happen; upstream's Kotlin has no checked
+      // exceptions here either.
+      throw new UncheckedIOException(e);
+    }
     Buffer swap = tail;
     tail = head;
     head = swap;
@@ -113,7 +120,7 @@ public class ReverseProtoWriter {
     writeBytes(forwardBuffer.readByteString());
   }
 
-  public void writeBytes(ByteString value) throws IOException {
+  public void writeBytes(ByteString value) {
     int valueLimit = value.size();
     while (valueLimit != 0) {
       require(1);
@@ -126,7 +133,7 @@ public class ReverseProtoWriter {
   }
 
   /** Writes {@code value} without copying: the tail of the payload is written first. */
-  public void writeBytes(Bytes value) throws IOException {
+  public void writeBytes(Bytes value) {
     byte[] data = value.internalBytes();
     int valueLimit = data.length;
     while (valueLimit != 0) {
@@ -139,7 +146,7 @@ public class ReverseProtoWriter {
     }
   }
 
-  public void writeString(String value) throws IOException {
+  public void writeString(String value) {
     // This is derived from Okio's Buffer.writeUtf8(), modified to write back-to-front. Like that
     // function, malformed UTF-16 surrogates are encoded as '?' in UTF-8.
     int i = value.length() - 1;
@@ -203,12 +210,12 @@ public class ReverseProtoWriter {
   }
 
   /** Encode and write a tag. */
-  public void writeTag(int fieldNumber, FieldEncoding fieldEncoding) throws IOException {
+  public void writeTag(int fieldNumber, FieldEncoding fieldEncoding) {
     writeVarint32(ProtoWriter.makeTag(fieldNumber, fieldEncoding));
   }
 
   /** Write an {@code int32} field to the stream. */
-  public void writeSignedVarint32(int value) throws IOException {
+  public void writeSignedVarint32(int value) {
     if (value >= 0) {
       writeVarint32(value);
     } else {
@@ -221,7 +228,7 @@ public class ReverseProtoWriter {
    * Encode and write a varint. {@code value} is treated as unsigned, so it won't be
    * sign-extended if negative.
    */
-  public void writeVarint32(int value) throws IOException {
+  public void writeVarint32(int value) {
     int varint32Size = ProtoWriter.varint32Size(value);
     require(varint32Size);
     arrayLimit -= varint32Size;
@@ -235,7 +242,7 @@ public class ReverseProtoWriter {
   }
 
   /** Encode and write a varint. */
-  public void writeVarint64(long value) throws IOException {
+  public void writeVarint64(long value) {
     int varint64Size = ProtoWriter.varint64Size(value);
     require(varint64Size);
     arrayLimit -= varint64Size;
@@ -249,7 +256,7 @@ public class ReverseProtoWriter {
   }
 
   /** Write a little-endian 32-bit integer. */
-  public void writeFixed32(int value) throws IOException {
+  public void writeFixed32(int value) {
     require(4);
     arrayLimit -= 4;
     int offset = arrayLimit;
@@ -260,7 +267,7 @@ public class ReverseProtoWriter {
   }
 
   /** Write a little-endian 64-bit integer. */
-  public void writeFixed64(long value) throws IOException {
+  public void writeFixed64(long value) {
     require(8);
     arrayLimit -= 8;
     int offset = arrayLimit;

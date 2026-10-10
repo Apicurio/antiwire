@@ -15,9 +15,8 @@
  */
 package com.squareup.wire.schema;
 
-import java.io.IOException;
 
 // TODO: merge this interface with Loader.
 public interface ProfileLoader {
-  Profile loadProfile(String name, Schema schema) throws IOException;
+  Profile loadProfile(String name, Schema schema);
 }

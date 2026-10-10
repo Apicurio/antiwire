@@ -17,6 +17,7 @@ package com.squareup.wire.schema;
 
 import com.squareup.wire.schema.internal.CommonSchemaLoader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 import okio.FileSystem;
@@ -86,24 +87,36 @@ public final class SchemaLoader implements Loader, ProfileLoader, AutoCloseable 
   }
 
   /** Initialize the source path and proto path from which files are loaded. */
-  public void initRoots(List<Location> sourcePath, List<Location> protoPath) throws IOException {
-    delegate.initRoots(sourcePath, protoPath);
+  public void initRoots(List<Location> sourcePath, List<Location> protoPath) {
+    try {
+      delegate.initRoots(sourcePath, protoPath);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
-  public void initRoots(List<Location> sourcePath) throws IOException {
-    delegate.initRoots(sourcePath, Collections.emptyList());
+  public void initRoots(List<Location> sourcePath) {
+    initRoots(sourcePath, Collections.emptyList());
   }
 
-  @Override public Profile loadProfile(String name, Schema schema) throws IOException {
-    return delegate.loadProfile(name, schema);
+  @Override public Profile loadProfile(String name, Schema schema) {
+    try {
+      return delegate.loadProfile(name, schema);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   @Override public ProtoFile load(String path) {
     return delegate.load(path);
   }
 
-  public Schema loadSchema() throws IOException {
-    return delegate.loadSchema();
+  public Schema loadSchema() {
+    try {
+      return delegate.loadSchema();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   @Override public void close() throws IOException {

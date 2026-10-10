@@ -17,6 +17,7 @@ package com.squareup.wire;
 
 import com.squareup.wire.internal.Internal;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -182,9 +183,14 @@ public abstract class ProtoAdapter<E> {
   }
 
   /** Encode {@code value} as a {@code byte[]}. */
-  public byte[] encode(E value) throws IOException {
+  public byte[] encode(E value) {
     Buffer buffer = new Buffer();
-    encode(buffer, value);
+    try {
+      encode(buffer, value);
+    } catch (IOException e) {
+      // An in-memory buffer does not fail; only an adapter that throws could land here.
+      throw new UncheckedIOException(e);
+    }
     return buffer.readByteArray();
   }
 
@@ -194,14 +200,18 @@ public abstract class ProtoAdapter<E> {
    * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
    *     (docs/api-surface.md); prefer {@link #encodeToBytes(Object)} or {@link #encode(Object)}.
    */
-  @Deprecated public ByteString encodeByteString(E value) throws IOException {
+  @Deprecated public ByteString encodeByteString(E value) {
     Buffer buffer = new Buffer();
-    encode(buffer, value);
+    try {
+      encode(buffer, value);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
     return buffer.readByteString();
   }
 
   /** Encode {@code value} as a {@link Bytes}. */
-  public Bytes encodeToBytes(E value) throws IOException {
+  public Bytes encodeToBytes(E value) {
     return Bytes.takeOwnership(encode(value));
   }
 

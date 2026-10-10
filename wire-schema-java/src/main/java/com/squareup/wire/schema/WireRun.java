@@ -18,7 +18,6 @@ package com.squareup.wire.schema;
 import com.squareup.wire.WireLogger;
 import com.squareup.wire.schema.internal.DagChecker;
 import com.squareup.wire.schema.internal.TypeMover;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -369,11 +368,11 @@ public final class WireRun {
     throw new IllegalArgumentException(message.toString());
   }
 
-  public void execute(FileSystem fs, WireLogger logger) throws IOException {
+  public void execute(FileSystem fs, WireLogger logger) {
     execute(fs, logger, new SchemaLoader(fs));
   }
 
-  void execute(FileSystem fs, WireLogger logger, SchemaLoader schemaLoader) throws IOException {
+  void execute(FileSystem fs, WireLogger logger, SchemaLoader schemaLoader) {
     for (EventListener eventListener : eventListeners) {
       eventListener.runStart(this);
     }

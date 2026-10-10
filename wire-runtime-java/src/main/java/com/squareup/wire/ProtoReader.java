@@ -34,6 +34,7 @@
 package com.squareup.wire;
 
 import com.squareup.wire.internal.ProtocolException;
+import com.squareup.wire.internal.Rethrow;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -505,10 +506,15 @@ public class ProtoReader {
    * Read an unknown field and store temporarily. Once the entire message is read, call
    * {@link #endMessageAndGetUnknownFields} to retrieve unknown fields.
    */
-  public void readUnknownField(int tag) throws IOException {
+  public void readUnknownField(int tag) {
     FieldEncoding fieldEncoding = peekFieldEncoding();
     ProtoAdapter<?> protoAdapter = fieldEncoding.rawProtoAdapter();
-    Object value = protoAdapter.decode(this);
+    Object value;
+    try {
+      value = protoAdapter.decode(this);
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
     addUnknownField(tag, fieldEncoding, value);
   }
 
@@ -518,12 +524,15 @@ public class ProtoReader {
    * {@link FieldEncoding#rawProtoAdapter} decodes for {@code fieldEncoding}; for
    * LENGTH_DELIMITED that is {@link Bytes} (docs/api-surface.md, phase 2).
    */
-  public void addUnknownField(int tag, FieldEncoding fieldEncoding, Object value)
-      throws IOException {
+  public void addUnknownField(int tag, FieldEncoding fieldEncoding, Object value) {
     ProtoWriter unknownFieldsWriter = new ProtoWriter(bufferStack.get(recursionDepth - 1));
     @SuppressWarnings("unchecked")
     ProtoAdapter<Object> protoAdapter = (ProtoAdapter<Object>) fieldEncoding.rawProtoAdapter();
-    protoAdapter.encodeWithTag(unknownFieldsWriter, tag, value);
+    try {
+      protoAdapter.encodeWithTag(unknownFieldsWriter, tag, value);
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
   /**
@@ -531,13 +540,17 @@ public class ProtoReader {
    * others have a variable length. LENGTH_DELIMITED fields have a known variable length, while
    * VARINT fields could be as small as a single byte.
    */
-  public long nextFieldMinLengthInBytes() throws EOFException {
+  public long nextFieldMinLengthInBytes() {
     if (nextFieldEncoding == null) {
       throw new IllegalStateException("nextFieldEncoding is not set");
     }
     switch (nextFieldEncoding) {
       case LENGTH_DELIMITED:
-        return remainingInLimit();
+        try {
+          return remainingInLimit();
+        } catch (EOFException e) {
+          throw Rethrow.unchecked(e);
+        }
       case FIXED32:
         return 4;
       case FIXED64:

@@ -28,6 +28,7 @@ import com.squareup.wire.schema.SchemaHandler;
 import com.squareup.wire.schema.Service;
 import com.squareup.wire.schema.Type;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 import okio.BufferedSink;
@@ -92,10 +93,10 @@ public class JavaSchemaHandler extends SchemaHandler {
     Profile profile;
     try {
       profile = profileLoader.loadProfile(profileName, schema);
-    } catch (IOException e) {
-      // The port's SchemaHandler.handle carries no checked IOException (upstream Kotlin has
-      // none), so the failure propagates unchecked like every other IO failure below.
-      throw new RuntimeException("Error loading profile " + profileName, e);
+    } catch (UncheckedIOException e) {
+      // loadProfile no longer declares IOException (upstream Kotlin has none); keep the message
+      // naming the profile, which callers and tests rely on.
+      throw new RuntimeException("Error loading profile " + profileName, e.getCause());
     }
     javaGenerator = JavaGenerator.get(schema)
         .withProfile(profile)
@@ -158,7 +159,7 @@ public class JavaSchemaHandler extends SchemaHandler {
       try (BufferedSink sink = Okio.buffer(context.getFileSystem().sink(filePath, false))) {
         sink.writeUtf8(javaFile.toString());
       }
-    } catch (IOException e) {
+    } catch (IOException | java.io.UncheckedIOException e) {
       throw new RuntimeException(
           "Error emitting " + javaFile.packageName + "." + javaFile.typeSpec.name
               + " to " + outDirectory,

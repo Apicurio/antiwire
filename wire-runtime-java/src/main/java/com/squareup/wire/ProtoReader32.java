@@ -118,18 +118,18 @@ public interface ProtoReader32 {
    * Read an unknown field and store temporarily. Once the entire message is read, call
    * [endMessageAndGetUnknownFields] to retrieve unknown fields.
    */
-  void readUnknownField(int tag) throws IOException;
+  void readUnknownField(int tag);
 
   /**
    * Store an already read field temporarily. Once the entire message is read, call
    * [endMessageAndGetUnknownFields] to retrieve unknown fields.
    */
-  void addUnknownField(int tag, FieldEncoding fieldEncoding, Object value) throws IOException;
+  void addUnknownField(int tag, FieldEncoding fieldEncoding, Object value);
 
   /**
    * Returns the min length of the next field in bytes. Some encodings have a fixed length,
    * while others have a variable length. LENGTH_DELIMITED fields have a known variable length,
    * while VARINT fields could be as small as a single byte.
    */
-  int nextFieldMinLengthInBytes() throws IOException;
+  int nextFieldMinLengthInBytes();
 }

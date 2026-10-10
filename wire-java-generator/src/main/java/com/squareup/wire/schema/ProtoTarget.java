@@ -93,7 +93,7 @@ public final class ProtoTarget extends Target {
           try (BufferedSink sink = Okio.buffer(context.getFileSystem().sink(outputFilePath, false))) {
             sink.writeUtf8(protoFile.toSchema());
           }
-        } catch (IOException e) {
+        } catch (IOException | java.io.UncheckedIOException e) {
           throw new RuntimeException(
               "Error emitting " + outputFilePath + " to " + outDirectory, e);
         }

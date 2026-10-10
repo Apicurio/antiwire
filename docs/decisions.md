@@ -242,3 +242,45 @@ Apicurio Registry app tests that exercise Confluent's printer (`ProtobufSerdeTes
 shim and `kotlin-stdlib` coexist (for example a relocation-free marker interface both implement).
 Record any new decision as DEC-16 and update this section.
 
+### DEC-16 Checked exceptions follow upstream's `@Throws`, with two forms of surfacing (decided 2026-10-09, implemented 2026-10-10)
+
+Wire is Kotlin and has no checked exceptions: a function declares `IOException` in bytecode only
+where it carries `@Throws(IOException::class)` (45 functions). The port had declared checked
+exceptions on 79 more methods, so Java code that compiles against Wire without a `try/catch`
+(`message.encode()`, `schemaLoader.loadSchema()`, `anyMessage.unpack(adapter)`) did not compile
+against the port. The maintainer decided on 2026-10-09 ("Unchecked") to remove them.
+
+**Rule.** Every public or protected method keeps `throws IOException` exactly where upstream
+declares it (verified member by member with `javap` on the 7.1.0 jars; the surface check pins it)
+and declares no checked exception where upstream does not.
+
+**Two ways a failure surfaces on a method that no longer declares it.**
+
+1. Top-level convenience methods a consumer calls from plain code (`Message.encode()`,
+   `Message.encodeByteString()`, `ProtoAdapter.encode(E)`, `encodeByteString(E)`,
+   `AnyMessage.pack`/`unpack`/`unpackOrNull`, `SchemaLoader.initRoots`/`loadSchema`/`loadProfile`,
+   `WireRun.execute`, `DryRunFileSystem.sink`/`appendingSink`, `ReverseProtoWriter.emitCurrentSegment`)
+   wrap the `IOException` in `java.io.UncheckedIOException` with the original as cause.
+2. Helpers that generated code and runtime adapters call from inside a method upstream does declare
+   with `@Throws` (`Internal.decodeMessageOrMerge`, `Internal.decodePrimitive_*`,
+   `ProtoReader.readUnknownField`/`addUnknownField`/`nextFieldMinLengthInBytes`,
+   `ByteArrayProtoReader32` and `ProtoReader32` equivalents, `OneOf.encodeWithTag`,
+   `RuntimeMessageAdapter.encode`/`decode`) rethrow the original exception unchanged through
+   `com.squareup.wire.internal.Rethrow`. This is what Kotlin does, and it is required: upstream's
+   own tests (`ParseTest.overRecursionLimitThrowsIOException`, `ProtoReaderTest`,
+   `ProtoReader32Test`) assert that a failing `decode` surfaces a plain `IOException` such as "Wire
+   recursion limit exceeded". Wrapping there would turn every generated message's `decode` failure
+   into an `UncheckedIOException` and break those tests.
+
+**Cost, accepted.** A Java caller that writes `catch (IOException e)` around one of these methods
+gets the compile error "exception IOException is never thrown in the body of the corresponding try
+statement". Real Wire has the same property, so code written against Wire already avoids it.
+
+**Not changed.** `WireCompiler.main` keeps `throws IOException` (upstream declares `@Throws` there);
+`EnumAdapter.encode`/`decode` and the whole reader/writer/adapter `encode(writer, value)` /
+`decode(reader)` family keep it too. Compiler-generated bridge methods (erased return type) are
+not compared: Kotlin emits them without a throws clause and javac copies the source method's.
+Enforcement: `config/surface-baseline.tsv` has no row owned by TASK-33.3 and the TASK-34 suite
+fails on a new one; `UncheckedExceptionContractTest` pins both halves by reflection and by
+behavior.
+

@@ -135,10 +135,11 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
   protected Object writeReplace() throws ObjectStreamException {
     try {
       return new MessageSerializedForm(encode(), (Class<M>) getClass());
-    } catch (java.io.IOException e) {
-      // Kotlin propagates IOException here unchecked; the closest Java form for a failing
-      // serialization substitute is InvalidObjectException.
-      throw new java.io.InvalidObjectException(e.getMessage());
+    } catch (java.io.UncheckedIOException e) {
+      // writeReplace declares ObjectStreamException, so a failing encode keeps surfacing as the
+      // checked serialization failure it was before encode() stopped declaring IOException.
+      throw (java.io.InvalidObjectException) new java.io.InvalidObjectException(e.getCause().getMessage())
+          .initCause(e.getCause());
     }
   }
 
@@ -153,7 +154,7 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
   }
 
   /** Encode this message as a {@code byte[]}. */
-  public byte[] encode() throws IOException {
+  public byte[] encode() {
     return adapter.encode((M) this);
   }
 
@@ -163,12 +164,12 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
    * @deprecated Engine/compat layer: the okio-typed form. okio remains internal to the port
    *     (docs/api-surface.md); prefer {@link #encodeToBytes()} or {@link #encode()}.
    */
-  @Deprecated public ByteString encodeByteString() throws IOException {
+  @Deprecated public ByteString encodeByteString() {
     return adapter.encodeByteString((M) this);
   }
 
   /** Encode this message as a {@link Bytes}. */
-  public Bytes encodeToBytes() throws IOException {
+  public Bytes encodeToBytes() {
     return adapter.encodeToBytes((M) this);
   }
 

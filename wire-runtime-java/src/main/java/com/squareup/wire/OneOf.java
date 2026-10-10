@@ -16,6 +16,7 @@
 package com.squareup.wire;
 
 import com.squareup.wire.internal.Internal;
+import com.squareup.wire.internal.Rethrow;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -62,12 +63,20 @@ public final class OneOf<K extends OneOf.Key<T>, T> {
     return key.getAdapter().encodedSizeWithTag(key.getTag(), value);
   }
 
-  public void encodeWithTag(ProtoWriter writer) throws IOException {
-    key.getAdapter().encodeWithTag(writer, key.getTag(), value);
+  public void encodeWithTag(ProtoWriter writer) {
+    try {
+      key.getAdapter().encodeWithTag(writer, key.getTag(), value);
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
-  public void encodeWithTag(ReverseProtoWriter writer) throws IOException {
-    key.getAdapter().encodeWithTag(writer, key.getTag(), value);
+  public void encodeWithTag(ReverseProtoWriter writer) {
+    try {
+      key.getAdapter().encodeWithTag(writer, key.getTag(), value);
+    } catch (IOException e) {
+      throw Rethrow.unchecked(e);
+    }
   }
 
   @Override public boolean equals(Object other) {

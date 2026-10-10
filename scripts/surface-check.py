@@ -416,7 +416,32 @@ class Checker:
         ancestors = self.exc_ancestors(exc)
         return any(o in ancestors for o in others)
 
+    def has_typed_twin(self, cls_info, key):
+        """True when `key` is a compiler bridge: an erased-signature method with a typed sibling.
+
+        Two shapes: an `Object` return with the same parameters as a typed method (decode), or a
+        `void` method whose last parameter is the erased `Object` with a typed last parameter
+        (encode(writer, value)). Kotlin writes bridges without a throws clause while javac copies
+        the source method's, so only the typed method carries the throws a Java caller can see."""
+        name, desc = key[1], key[2]
+        params, ret = desc.rsplit(')', 1)
+        erased = 'Ljava/lang/Object;'
+        if ret == erased:
+            twin_prefix = params + ')'
+        elif ret == 'V' and params.endswith(erased):
+            twin_prefix = params[:-len(erased)]
+        else:
+            return False
+        return any(k == 'M' and n == name and d != desc and d.startswith(twin_prefix)
+                   and d.count(';') == desc.count(';')
+                   for (k, n, d) in cls_info['members'])
+
     def throws_rows(self, ucls, key, uinfo, pinfo):
+        # Erased-return bridge methods are not API a Java caller can name (they are only visible
+        # to reflection), and Kotlin and javac disagree on their throws clause: compare the typed
+        # method that the bridge forwards to instead.
+        if self.has_typed_twin(self.up[ucls], key):
+            return
         ut = {t for t in uinfo['throws'] if self.checked(t)}
         pt = {t for t in pinfo['throws'] if self.checked(t)}
         name = key[1]

@@ -95,23 +95,15 @@ public final class ProtoReader32AsProtoReader extends ProtoReader {
     return delegate.readFixed64();
   }
 
-  @Override public void readUnknownField(int tag) throws IOException {
+  @Override public void readUnknownField(int tag) {
     delegate.readUnknownField(tag);
   }
 
-  @Override public void addUnknownField(int tag, FieldEncoding fieldEncoding, Object value)
-      throws IOException {
+  @Override public void addUnknownField(int tag, FieldEncoding fieldEncoding, Object value) {
     delegate.addUnknownField(tag, fieldEncoding, value);
   }
 
-  @Override public long nextFieldMinLengthInBytes() throws java.io.EOFException {
-    try {
-      return delegate.nextFieldMinLengthInBytes();
-    } catch (IOException e) {
-      // The interface declares the broader IOException; the supertype narrows to EOFException,
-      // which is the only failure remainingInLimit can raise here.
-      if (e instanceof java.io.EOFException) throw (java.io.EOFException) e;
-      throw new java.io.UncheckedIOException(e);
-    }
+  @Override public long nextFieldMinLengthInBytes() {
+    return delegate.nextFieldMinLengthInBytes();
   }
 }
