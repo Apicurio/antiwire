@@ -56,4 +56,20 @@ public final class LongArrayList {
     int minElements = minLengthInBytes / minimumElementByteSize;
     return new LongArrayList(minElements);
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code LongArrayList.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public LongArrayList forDecoding(int minLengthInBytes, int minimumElementByteSize) {
+      return LongArrayList.forDecoding(minLengthInBytes, minimumElementByteSize);
+    }
+
+    public LongArrayList forDecoding(long minLengthInBytes, long minimumElementByteSize) {
+      return LongArrayList.forDecoding(minLengthInBytes, minimumElementByteSize);
+    }
+  }
 }

@@ -56,4 +56,20 @@ public final class FloatArrayList {
     int minElements = minLengthInBytes / minimumElementByteSize;
     return new FloatArrayList(minElements);
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code FloatArrayList.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public FloatArrayList forDecoding(int minLengthInBytes, int minimumElementByteSize) {
+      return FloatArrayList.forDecoding(minLengthInBytes, minimumElementByteSize);
+    }
+
+    public FloatArrayList forDecoding(long minLengthInBytes, long minimumElementByteSize) {
+      return FloatArrayList.forDecoding(minLengthInBytes, minimumElementByteSize);
+    }
+  }
 }

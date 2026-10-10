@@ -296,4 +296,12 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
       encodeValue.encodeValue("__redacted_fields", redactedFields, redactedFieldsAdapter);
     }
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code RuntimeMessageAdapter.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+  }
 }

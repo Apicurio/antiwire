@@ -27,7 +27,7 @@ public final class OneOf {
   final Location location;
   final Options options;
 
-  OneOf(String name, String documentation, List<Field> fields, Location location,
+  public OneOf(String name, String documentation, List<Field> fields, Location location,
       Options options) {
     this.name = name;
     this.documentation = documentation;
@@ -129,5 +129,21 @@ public final class OneOf {
           oneOf.location));
     }
     return result;
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code OneOf.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public List<OneOf> fromElements(List<String> namespaces, List<OneOfElement> elements) {
+      return OneOf.fromElements(namespaces, elements);
+    }
+
+    public List<OneOfElement> toElements(List<OneOf> oneOfs) {
+      return OneOf.toElements(oneOfs);
+    }
   }
 }

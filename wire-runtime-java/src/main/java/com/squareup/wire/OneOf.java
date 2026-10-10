@@ -116,7 +116,7 @@ public final class OneOf<K extends OneOf.Key<T>, T> {
       return jsonName;
     }
 
-    protected Key(int tag, ProtoAdapter<T> adapter, String declaredName, boolean redacted,
+    public Key(int tag, ProtoAdapter<T> adapter, String declaredName, boolean redacted,
         String jsonName) {
       this.tag = tag;
       this.adapter = adapter;
@@ -125,11 +125,11 @@ public final class OneOf<K extends OneOf.Key<T>, T> {
       this.jsonName = jsonName;
     }
 
-    protected Key(int tag, ProtoAdapter<T> adapter, String declaredName, boolean redacted) {
+    public Key(int tag, ProtoAdapter<T> adapter, String declaredName, boolean redacted) {
       this(tag, adapter, declaredName, redacted, "");
     }
 
-    protected Key(int tag, ProtoAdapter<T> adapter, String declaredName) {
+    public Key(int tag, ProtoAdapter<T> adapter, String declaredName) {
       this(tag, adapter, declaredName, false, "");
     }
 

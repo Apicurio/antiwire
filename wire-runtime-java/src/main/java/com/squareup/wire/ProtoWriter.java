@@ -217,4 +217,12 @@ public class ProtoWriter {
   public static long decodeZigZag64(long n) {
     return (n >>> 1) ^ -(n & 1L);
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoWriter.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+  }
 }

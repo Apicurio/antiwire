@@ -73,8 +73,28 @@ public final class ProtoMember {
     return new ProtoMember(type, member);
   }
 
-  static ProtoMember get(ProtoType type, Field field) {
+  public static ProtoMember get(ProtoType type, Field field) {
     String member = field.isExtension() ? field.getQualifiedName() : field.getName();
     return new ProtoMember(type, member);
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoMember.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public ProtoMember get(ProtoType type, Field field) {
+      return ProtoMember.get(type, field);
+    }
+
+    public ProtoMember get(ProtoType type, String member) {
+      return ProtoMember.get(type, member);
+    }
+
+    public ProtoMember get(String typeAndMember) {
+      return ProtoMember.get(typeAndMember);
+    }
   }
 }

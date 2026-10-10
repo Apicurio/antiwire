@@ -52,6 +52,10 @@ public final class EmittingRules {
   private final Set<String> usedIncludes = new LinkedHashSet<>();
   private final Set<String> usedExcludes = new LinkedHashSet<>();
 
+  public EmittingRules() {
+    this(new Builder());
+  }
+
   private EmittingRules(Builder builder) {
     this.includes = new LinkedHashSet<>(builder.includes);
     this.excludes = new LinkedHashSet<>(builder.excludes);
@@ -195,5 +199,13 @@ public final class EmittingRules {
 
     if (!identifier.equals("*")) return "*";
     return null;
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code EmittingRules.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
   }
 }

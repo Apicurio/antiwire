@@ -36,7 +36,7 @@ public final class Rpc {
   // Null until this RPC is linked.
   private ProtoType responseType;
 
-  Rpc(Location location, String name, String documentation, String requestTypeElement,
+  public Rpc(Location location, String name, String documentation, String requestTypeElement,
       String responseTypeElement, boolean requestStreaming, boolean responseStreaming,
       Options options) {
     this.location = location;
@@ -170,5 +170,21 @@ public final class Rpc {
           rpc.responseStreaming, rpc.options.getElements()));
     }
     return result;
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code Rpc.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public List<Rpc> fromElements(List<RpcElement> elements) {
+      return Rpc.fromElements(elements);
+    }
+
+    public List<RpcElement> toElements(List<Rpc> rpcs) {
+      return Rpc.toElements(rpcs);
+    }
   }
 }

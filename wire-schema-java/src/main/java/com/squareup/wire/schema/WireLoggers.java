@@ -34,33 +34,6 @@ public final class WireLoggers {
     return new ClassNameLoggerFactory(loggerFactoryClass);
   }
 
-  public static final class EmptyWireLoggerFactory implements WireLogger.Factory {
-    @Override public WireLogger create() {
-      return new EmptyWireLogger();
-    }
-  }
-
-  public static final class EmptyWireLogger implements WireLogger {
-    @Override public void artifactHandled(
-        Path outputPath, String qualifiedName, String targetName) {
-    }
-
-    @Override public void artifactSkipped(ProtoType type, String targetName) {
-    }
-
-    @Override public void unusedRoots(Set<String> unusedRoots) {
-    }
-
-    @Override public void unusedPrunes(Set<String> unusedPrunes) {
-    }
-
-    @Override public void unusedIncludesInTarget(Set<String> unusedIncludes) {
-    }
-
-    @Override public void unusedExcludesInTarget(Set<String> unusedExcludes) {
-    }
-  }
-
   /**
    * This logger factory works even if the delegate logger class is itself not serializable.
    */

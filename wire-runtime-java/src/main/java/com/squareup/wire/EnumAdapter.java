@@ -25,17 +25,17 @@ import java.io.IOException;
  * are kept.
  */
 public abstract class EnumAdapter<E extends WireEnum> extends ProtoAdapter<E> {
-  protected EnumAdapter(Class<E> type, Syntax syntax, E identity) {
+  public EnumAdapter(Class<E> type, Syntax syntax, E identity) {
     super(FieldEncoding.VARINT, type, null, syntax, identity, null);
   }
 
   /** Obsolete; for Java classes generated before identity was added. */
-  protected EnumAdapter(Class<E> type, Syntax syntax) {
+  public EnumAdapter(Class<E> type, Syntax syntax) {
     this(type, syntax, Internal.identityOrNull(type));
   }
 
   /** Obsolete; for Java classes generated before syntax was added. */
-  protected EnumAdapter(Class<E> type) {
+  public EnumAdapter(Class<E> type) {
     this(type, Syntax.PROTO_2, Internal.identityOrNull(type));
   }
 

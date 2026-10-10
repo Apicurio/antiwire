@@ -26,7 +26,7 @@ public final class Extensions {
   final String documentation;
   final List<Object> values;
 
-  Extensions(Location location, String documentation, List<Object> values) {
+  public Extensions(Location location, String documentation, List<Object> values) {
     this.location = location;
     this.documentation = documentation;
     this.values = values;
@@ -112,5 +112,21 @@ public final class Extensions {
       result.add(toElement(extensions));
     }
     return result;
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code Extensions.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public List<Extensions> fromElements(List<ExtensionsElement> elements) {
+      return Extensions.fromElements(elements);
+    }
+
+    public List<ExtensionsElement> toElements(List<Extensions> extensionsList) {
+      return Extensions.toElements(extensionsList);
+    }
   }
 }

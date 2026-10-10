@@ -237,4 +237,20 @@ public final class OptionElement {
   public boolean isParenthesized() {
     return isParenthesized;
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code OptionElement.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public OptionElement create(String name, Kind kind, Object value) {
+      return OptionElement.create(name, kind, value);
+    }
+
+    public OptionElement create(String name, Kind kind, Object value, boolean isParenthesized) {
+      return OptionElement.create(name, kind, value, isParenthesized);
+    }
+  }
 }

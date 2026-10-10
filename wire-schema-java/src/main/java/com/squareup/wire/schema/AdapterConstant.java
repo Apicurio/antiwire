@@ -64,4 +64,16 @@ public final class AdapterConstant {
   @Override public String toString() {
     return "AdapterConstant(javaClassName=" + javaClassName + ", memberName=" + memberName + ")";
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code AdapterConstant.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public AdapterConstant invoke(String adapter) {
+      return AdapterConstant.get(adapter);
+    }
+  }
 }

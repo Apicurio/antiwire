@@ -554,4 +554,20 @@ public final class Options {
     }
     return null;
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code Options.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public ProtoType[] getGOOGLE_PROTOBUF_OPTION_TYPES() {
+      return Options.GOOGLE_PROTOBUF_OPTION_TYPES;
+    }
+
+    public String[] resolveFieldPath(String name, Set<String> fullyQualifiedNames) {
+      return Options.resolveFieldPath(name, fullyQualifiedNames);
+    }
+  }
 }

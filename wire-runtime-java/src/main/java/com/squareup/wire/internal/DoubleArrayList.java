@@ -56,4 +56,20 @@ public final class DoubleArrayList {
     int minElements = minLengthInBytes / minimumElementByteSize;
     return new DoubleArrayList(minElements);
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code DoubleArrayList.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public DoubleArrayList forDecoding(int minLengthInBytes, int minimumElementByteSize) {
+      return DoubleArrayList.forDecoding(minLengthInBytes, minimumElementByteSize);
+    }
+
+    public DoubleArrayList forDecoding(long minLengthInBytes, long minimumElementByteSize) {
+      return DoubleArrayList.forDecoding(minLengthInBytes, minimumElementByteSize);
+    }
+  }
 }

@@ -209,4 +209,20 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
       return new AnyMessage("square.github.io/wire/redacted", ByteString.EMPTY);
     }
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code AnyMessage.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public AnyMessage pack(Message<?, ?> message) throws IOException {
+      return AnyMessage.pack(message);
+    }
+
+    public <T> AnyMessage pack(ProtoAdapter<T> adapter, T value) throws IOException {
+      return AnyMessage.pack(adapter, value);
+    }
+  }
 }

@@ -68,4 +68,16 @@ public final class RuntimeEnumAdapter<E extends WireEnum> extends EnumAdapter<E>
     ProtoAdapter<?> defaultAdapter = ProtoAdapter.get(enumType);
     return new RuntimeEnumAdapter<>(enumType, defaultAdapter.getSyntax());
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code RuntimeEnumAdapter.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public <E extends WireEnum> RuntimeEnumAdapter<E> create(Class<E> enumType) {
+      return RuntimeEnumAdapter.create(enumType);
+    }
+  }
 }

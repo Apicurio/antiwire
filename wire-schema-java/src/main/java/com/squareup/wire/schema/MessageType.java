@@ -48,7 +48,7 @@ public final class MessageType extends Type {
 
   private Object deprecated;
 
-  MessageType(ProtoType type, Location location, String documentation, String name,
+  public MessageType(ProtoType type, Location location, String documentation, String name,
       List<Field> declaredFields, List<Field> extensionFields, List<OneOf> oneOfs,
       List<Type> nestedTypes, List<Extend> nestedExtendList, List<Extensions> extensionsList,
       List<Reserved> reserveds, Options options, Syntax syntax) {
@@ -340,14 +340,14 @@ public final class MessageType extends Type {
         Collections.emptyList(), Collections.emptyList(), options.retainLinked(), syntax);
   }
 
-  MessageElement toElement() {
+  public MessageElement toElement() {
     return new MessageElement(location, name, documentation, Type.toElements(nestedTypes),
         options.getElements(), Reserved.toElements(reserveds), Field.toElements(declaredFields),
         OneOf.toElements(oneOfs), Extensions.toElements(extensionsList),
         Collections.emptyList(), Extend.toElements(nestedExtendList));
   }
 
-  static MessageType fromElement(List<String> namespaces, ProtoType protoType,
+  public static MessageType fromElement(List<String> namespaces, ProtoType protoType,
       MessageElement messageElement, Syntax syntax) {
     if (!messageElement.getGroups().isEmpty()) {
       throw new IllegalStateException(
@@ -428,5 +428,17 @@ public final class MessageType extends Type {
         + nestedTypes + ", nestedExtendList=" + nestedExtendList + ", extensionsList="
         + extensionsList + ", reserveds=" + reserveds + ", options=" + options + ", syntax="
         + syntax + ")";
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code MessageType.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public MessageType fromElement(List<String> namespaces, ProtoType protoType, MessageElement messageElement, Syntax syntax) {
+      return MessageType.fromElement(namespaces, protoType, messageElement, syntax);
+    }
   }
 }

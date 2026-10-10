@@ -629,4 +629,16 @@ public final class ProtoParser {
     char[] chars = data.toCharArray();
     return new ProtoParser(location, chars).readProtoFile();
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoParser.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public ProtoFileElement parse(Location location, String data) {
+      return ProtoParser.parse(location, data);
+    }
+  }
 }

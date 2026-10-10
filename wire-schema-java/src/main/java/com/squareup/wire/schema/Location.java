@@ -122,4 +122,20 @@ public final class Location {
     }
     return new Location(normalizedBase, normalizedPath, -1, -1);
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code Location.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public Location get(String path) {
+      return Location.get(path);
+    }
+
+    public Location get(String base, String path) {
+      return Location.get(base, path);
+    }
+  }
 }

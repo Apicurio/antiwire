@@ -72,7 +72,7 @@ public abstract class ProtoAdapter<E> {
   final ProtoAdapter<List<E>> packedAdapter;
   final ProtoAdapter<List<E>> repeatedAdapter;
 
-  protected ProtoAdapter(FieldEncoding fieldEncoding, Class<?> type, String typeUrl,
+  public ProtoAdapter(FieldEncoding fieldEncoding, Class<?> type, String typeUrl,
       Syntax syntax, E identity, String sourceFile) {
     this.fieldEncoding = fieldEncoding;
     this.type = type;
@@ -105,12 +105,12 @@ public abstract class ProtoAdapter<E> {
     this(fieldEncoding, type, typeUrl, Syntax.PROTO_2, null, null);
   }
 
-  protected ProtoAdapter(FieldEncoding fieldEncoding, Class<?> type, String typeUrl,
+  public ProtoAdapter(FieldEncoding fieldEncoding, Class<?> type, String typeUrl,
       Syntax syntax) {
     this(fieldEncoding, type, typeUrl, syntax, null, null);
   }
 
-  protected ProtoAdapter(FieldEncoding fieldEncoding, Class<?> type, String typeUrl,
+  public ProtoAdapter(FieldEncoding fieldEncoding, Class<?> type, String typeUrl,
       Syntax syntax, E identity) {
     this(fieldEncoding, type, typeUrl, syntax, identity, null);
   }
@@ -2026,6 +2026,54 @@ public abstract class ProtoAdapter<E> {
     @Override public T redact(T value) {
       if (value == null) return null;
       return delegate.redact(value);
+    }
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoAdapter.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public <M extends Message<?, ?>> ProtoAdapter<M> get(M message) {
+      return ProtoAdapter.get(message);
+    }
+
+    public <M> ProtoAdapter<M> get(Class<M> type) {
+      return ProtoAdapter.get(type);
+    }
+
+    public ProtoAdapter<?> get(String adapterString) {
+      return ProtoAdapter.get(adapterString);
+    }
+
+    public ProtoAdapter<?> get(String adapterString, ClassLoader classLoader) {
+      return ProtoAdapter.get(adapterString, classLoader);
+    }
+
+    public <E extends WireEnum> EnumAdapter<E> newEnumAdapter(Class<E> type) {
+      return ProtoAdapter.newEnumAdapter(type);
+    }
+
+    public <K, V> ProtoAdapter<Map<K, V>> newMapAdapter(ProtoAdapter<K> keyAdapter, ProtoAdapter<V> valueAdapter) {
+      return ProtoAdapter.newMapAdapter(keyAdapter, valueAdapter);
+    }
+
+    public <M extends Message<M, B>, B extends Message.Builder<M, B>> ProtoAdapter<M> newMessageAdapter(Class<M> type) {
+      return ProtoAdapter.newMessageAdapter(type);
+    }
+
+    public <M extends Message<M, B>, B extends Message.Builder<M, B>> ProtoAdapter<M> newMessageAdapter(Class<M> type, String typeUrl) {
+      return ProtoAdapter.newMessageAdapter(type, typeUrl);
+    }
+
+    public <M extends Message<M, B>, B extends Message.Builder<M, B>> ProtoAdapter<M> newMessageAdapter(Class<M> type, String typeUrl, Syntax syntax) {
+      return ProtoAdapter.newMessageAdapter(type, typeUrl, syntax);
+    }
+
+    public <M extends Message<M, B>, B extends Message.Builder<M, B>> ProtoAdapter<M> newMessageAdapter(Class<M> type, String typeUrl, Syntax syntax, ClassLoader classLoader) {
+      return ProtoAdapter.newMessageAdapter(type, typeUrl, syntax, classLoader);
     }
   }
 }

@@ -44,7 +44,7 @@ public final class EnumType extends Type {
 
   private Object deprecated;
 
-  EnumType(ProtoType type, Location location, String documentation, String name,
+  public EnumType(ProtoType type, Location location, String documentation, String name,
       List<EnumConstant> constants, List<Reserved> reserveds, Options options, Syntax syntax) {
     this.type = type;
     this.location = location;
@@ -273,7 +273,7 @@ public final class EnumType extends Type {
         EnumConstant.toElements(constants), Reserved.toElements(reserveds));
   }
 
-  static EnumType fromElement(ProtoType protoType, EnumElement enumElement, Syntax syntax) {
+  public static EnumType fromElement(ProtoType protoType, EnumElement enumElement, Syntax syntax) {
     return new EnumType(protoType, enumElement.getLocation(), enumElement.getDocumentation(),
         enumElement.getName(), EnumConstant.fromElements(enumElement.getConstants()),
         Reserved.fromElements(enumElement.getReserveds()),
@@ -310,5 +310,17 @@ public final class EnumType extends Type {
     return "EnumType(type=" + type + ", location=" + location + ", documentation="
         + documentation + ", name=" + name + ", constants=" + constants + ", reserveds="
         + reserveds + ", options=" + options + ", syntax=" + syntax + ")";
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code EnumType.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public EnumType fromElement(ProtoType protoType, EnumElement enumElement, Syntax syntax) {
+      return EnumType.fromElement(protoType, enumElement, syntax);
+    }
   }
 }

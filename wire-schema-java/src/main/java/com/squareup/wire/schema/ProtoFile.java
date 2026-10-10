@@ -43,7 +43,7 @@ public final class ProtoFile {
 
   private Object wirePackage;
 
-  ProtoFile(Location location, List<String> imports, List<String> publicImports,
+  public ProtoFile(Location location, List<String> imports, List<String> publicImports,
       List<String> weakImports, String packageName, List<Type> types, List<Service> services,
       List<Extend> extendList, Options options, Syntax syntax) {
     this.location = location;
@@ -379,5 +379,25 @@ public final class ProtoFile {
     return new ProtoFile(protoFileElement.getLocation(), protoFileElement.getImports(),
         protoFileElement.getPublicImports(), protoFileElement.getWeakImports(), packageName, types,
         services, wireExtends, options, protoFileElement.getSyntax());
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoFile.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public ProtoFile get(ProtoFileElement protoFileElement) {
+      return ProtoFile.get(protoFileElement);
+    }
+
+    public ProtoMember getJAVA_PACKAGE() {
+      return ProtoFile.JAVA_PACKAGE;
+    }
+
+    public ProtoMember getWIRE_PACKAGE() {
+      return ProtoFile.WIRE_PACKAGE;
+    }
   }
 }

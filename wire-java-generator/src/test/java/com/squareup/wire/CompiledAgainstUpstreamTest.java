@@ -84,6 +84,73 @@ public class CompiledAgainstUpstreamTest {
     }
   }
 
+  /**
+   * The Companion form is a binary contract: a jar compiled against Wire reads the static field
+   * {@code X.Companion} and calls {@code X$Companion.m(...)}. Confluent's kafka-schema-registry
+   * client does exactly that for {@code ProtoParser.Companion.parse} (ProtobufSchema.toProtoFile),
+   * so the already compiled class is run against the port with no recompilation, and its bytecode
+   * is checked to really reference the Companion field and class.
+   */
+  private static final String COMPANION_CONSUMER = ""
+      + "import com.squareup.wire.ProtoAdapter;\n"
+      + "import com.squareup.wire.schema.Location;\n"
+      + "import com.squareup.wire.schema.internal.parser.ProtoFileElement;\n"
+      + "import com.squareup.wire.schema.internal.parser.ProtoParser;\n"
+      + "import com.squareup.wire.schema.ProtoType;\n"
+      + "import com.squareup.wire.schema.ProtoMember;\n"
+      + "public class CompanionConsumer {\n"
+      + "  public static String run() {\n"
+      + "    ProtoFileElement e = ProtoParser.Companion.parse(Location.get(\"x.proto\"),\n"
+      + "        \"syntax = \\\"proto3\\\"; message M { string a = 1; }\");\n"
+      + "    Location l = Location.Companion.get(\"base\", \"p.proto\");\n"
+      + "    ProtoType t = ProtoType.Companion.get(\"a.b.C\");\n"
+      + "    ProtoMember m = ProtoMember.Companion.get(\"a.b.C#d\");\n"
+      + "    ProtoAdapter<?> a = ProtoAdapter.Companion.get(\"com.squareup.wire.ProtoAdapter#STRING\");\n"
+      + "    return e.getTypes().size() + \"|\" + l.getPath() + \"|\" + t + \"|\" + m + \"|\" + (a != null);\n"
+      + "  }\n"
+      + "}\n";
+
+  @Test
+  public void companionFormCompiledAgainstUpstreamRunsAgainstThePort(@TempDir Path dir)
+      throws Exception {
+    File[] upstream = upstreamJars();
+    Assumptions.assumeTrue(upstream != null,
+        "upstream 7.1.0 jars unavailable (offline and never fetched); see config/parity-pins.json");
+    StringBuilder cp = new StringBuilder();
+    for (File f : upstream) cp.append(f.getAbsolutePath()).append(File.pathSeparator);
+    Path src = dir.resolve("CompanionConsumer.java");
+    Files.writeString(src, COMPANION_CONSUMER);
+    Path out = Files.createDirectories(dir.resolve("out"));
+    int rc = ToolProvider.getSystemJavaCompiler().run(null, null, null, "-classpath", cp.toString(),
+        "-d", out.toString(), src.toString());
+    assertEquals(0, rc, "the consumer must compile against the real upstream jars");
+
+    // Bytecode check: the compiled class must read the static fields and call the nested classes.
+    String bytecode = javapConstants(out.resolve("CompanionConsumer.class"));
+    for (String needed : new String[] {
+        "com/squareup/wire/schema/internal/parser/ProtoParser.Companion:Lcom/squareup/wire/schema/internal/parser/ProtoParser$Companion;",
+        "com/squareup/wire/schema/internal/parser/ProtoParser$Companion.parse:(Lcom/squareup/wire/schema/Location;Ljava/lang/String;)Lcom/squareup/wire/schema/internal/parser/ProtoFileElement;",
+        "com/squareup/wire/schema/Location$Companion.get:(Ljava/lang/String;Ljava/lang/String;)Lcom/squareup/wire/schema/Location;",
+        "com/squareup/wire/ProtoAdapter$Companion.get:(Ljava/lang/String;)Lcom/squareup/wire/ProtoAdapter;"}) {
+      org.junit.jupiter.api.Assertions.assertTrue(bytecode.contains(needed),
+          "compiled consumer lacks the expected binary reference " + needed);
+    }
+
+    try (URLClassLoader loader = new URLClassLoader(new URL[] {out.toUri().toURL()},
+        getClass().getClassLoader())) {
+      Object result = loader.loadClass("CompanionConsumer").getMethod("run").invoke(null);
+      assertEquals("1|p.proto|a.b.C|a.b.C#d|true", result);
+    }
+  }
+
+  private static String javapConstants(Path classFile) throws Exception {
+    Process p = new ProcessBuilder("javap", "-v", "-cp", classFile.getParent().toString(),
+        classFile.getFileName().toString().replace(".class", "")).redirectErrorStream(true).start();
+    String text = new String(p.getInputStream().readAllBytes());
+    assertEquals(0, p.waitFor(), "javap must run");
+    return text.replaceAll("\\s+", " ");
+  }
+
   private static File[] upstreamJars() throws Exception {
     File pins = new File("../config/parity-pins.json");
     String json = Files.readString(pins.toPath());

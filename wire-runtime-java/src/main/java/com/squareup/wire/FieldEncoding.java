@@ -66,4 +66,12 @@ public enum FieldEncoding {
       default: throw new ProtocolException("Unexpected FieldEncoding: " + value);
     }
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code FieldEncoding.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+  }
 }

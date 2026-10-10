@@ -27,7 +27,7 @@ public final class Reserved {
   final String documentation;
   final List<Object> values;
 
-  Reserved(Location location, String documentation, List<Object> values) {
+  public Reserved(Location location, String documentation, List<Object> values) {
     this.location = location;
     this.documentation = documentation;
     this.values = values;
@@ -116,5 +116,21 @@ public final class Reserved {
       result.add(toElement(reserved));
     }
     return result;
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code Reserved.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public List<Reserved> fromElements(List<ReservedElement> elements) {
+      return Reserved.fromElements(elements);
+    }
+
+    public List<ReservedElement> toElements(List<Reserved> reserveds) {
+      return Reserved.toElements(reserveds);
+    }
   }
 }

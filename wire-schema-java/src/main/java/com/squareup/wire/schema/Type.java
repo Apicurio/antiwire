@@ -107,4 +107,24 @@ public abstract class Type {
     }
     return result;
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code Type.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public List<Type> fromElements(String packageName, List<TypeElement> elements, Syntax syntax) {
+      return Type.fromElements(packageName, elements, syntax);
+    }
+
+    public Type get(List<String> namespaces, ProtoType protoType, TypeElement type, Syntax syntax) {
+      return Type.get(namespaces, protoType, type, syntax);
+    }
+
+    public List<TypeElement> toElements(List<Type> types) {
+      return Type.toElements(types);
+    }
+  }
 }

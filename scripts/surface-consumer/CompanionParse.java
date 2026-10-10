@@ -1,4 +1,4 @@
-// surface-expect: port=fail owner=TASK-33.2 symbol=Companion reason=ProtoParser has no static Companion field and nested Companion class; Java callers write ProtoParser.Companion.parse(...) (the reported NoSuchFieldError)
+// surface-expect: port=pass
 import com.squareup.wire.schema.Location;
 import com.squareup.wire.schema.internal.parser.ProtoFileElement;
 import com.squareup.wire.schema.internal.parser.ProtoParser;

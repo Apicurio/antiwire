@@ -70,7 +70,7 @@ public final class Field {
   // Null until this field is linked.
   private String jsonName;
 
-  Field(List<String> namespaces, Location location, Label label, String name,
+  public Field(List<String> namespaces, Location location, Label label, String name,
       String documentation, int tag, String defaultValue, String elementType, Options options,
       boolean isExtension, boolean isOneOf, String declaredJsonName) {
     this.namespaces = namespaces;
@@ -408,5 +408,29 @@ public final class Field {
       if (retained != null) result.add(retained);
     }
     return result;
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code Field.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public List<Field> fromElements(List<String> namespaces, List<FieldElement> fieldElements, boolean extension, boolean oneOf) {
+      return Field.fromElements(namespaces, fieldElements, extension, oneOf);
+    }
+
+    public List<Field> retainAll(Schema schema, MarkSet markSet, ProtoType enclosingType, Collection<Field> fields) {
+      return Field.retainAll(schema, markSet, enclosingType, fields);
+    }
+
+    public List<Field> retainLinked(List<Field> fields) {
+      return Field.retainLinked(fields);
+    }
+
+    public List<FieldElement> toElements(List<Field> fields) {
+      return Field.toElements(fields);
+    }
   }
 }

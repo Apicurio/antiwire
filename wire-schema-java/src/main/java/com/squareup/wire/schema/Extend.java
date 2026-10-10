@@ -28,7 +28,7 @@ public final class Extend {
   // Null until this extend is linked.
   private ProtoType type;
 
-  Extend(Location location, String documentation, String name, List<Field> fields) {
+  public Extend(Location location, String documentation, String name, List<Field> fields) {
     this.location = location;
     this.documentation = documentation;
     this.name = name;
@@ -145,5 +145,21 @@ public final class Extend {
           Field.toElements(extend.fields)));
     }
     return result;
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code Extend.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public List<Extend> fromElements(List<String> namespaces, List<ExtendElement> extendElements) {
+      return Extend.fromElements(namespaces, extendElements);
+    }
+
+    public List<ExtendElement> toElements(List<Extend> extendList) {
+      return Extend.toElements(extendList);
+    }
   }
 }

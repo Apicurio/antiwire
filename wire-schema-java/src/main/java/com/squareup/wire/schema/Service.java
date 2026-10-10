@@ -30,7 +30,7 @@ public final class Service {
   final List<Rpc> rpcs;
   final Options options;
 
-  Service(ProtoType type, Location location, String documentation, String name, List<Rpc> rpcs,
+  public Service(ProtoType type, Location location, String documentation, String name, List<Rpc> rpcs,
       Options options) {
     this.type = type;
     this.location = location;
@@ -195,5 +195,13 @@ public final class Service {
   @Override public String toString() {
     return "Service(type=" + type + ", location=" + location + ", documentation=" + documentation
         + ", name=" + name + ", rpcs=" + rpcs + ", options=" + options + ")";
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code Service.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
   }
 }

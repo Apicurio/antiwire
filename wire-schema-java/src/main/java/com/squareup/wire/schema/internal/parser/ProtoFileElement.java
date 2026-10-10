@@ -178,4 +178,16 @@ public final class ProtoFileElement {
     int result = java.util.Objects.hashCode(location);
     result = 31 * result + java.util.Objects.hashCode(packageName);result = 31 * result + java.util.Objects.hashCode(syntax);result = 31 * result + java.util.Objects.hashCode(imports);result = 31 * result + java.util.Objects.hashCode(publicImports);result = 31 * result + java.util.Objects.hashCode(weakImports);result = 31 * result + java.util.Objects.hashCode(types);result = 31 * result + java.util.Objects.hashCode(services);result = 31 * result + java.util.Objects.hashCode(extendDeclarations);result = 31 * result + java.util.Objects.hashCode(options);    return result;
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoFileElement.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public ProtoFileElement empty(String path) {
+      return ProtoFileElement.empty(path);
+    }
+  }
 }

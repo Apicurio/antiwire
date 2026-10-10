@@ -114,4 +114,16 @@ public interface WireLogger {
     @Override public void unusedExcludesInTarget(Set<String> unusedExcludes) {
     }
   };
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code WireLogger.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public WireLogger getNONE() {
+      return NONE;
+    }
+  }
 }

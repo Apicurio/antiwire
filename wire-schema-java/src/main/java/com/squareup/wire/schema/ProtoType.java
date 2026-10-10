@@ -215,4 +215,24 @@ public final class ProtoType {
   public boolean isMap() {
     return isMap;
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoType.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+
+    public ProtoType get(ProtoType keyType, ProtoType valueType, String name) {
+      return ProtoType.get(keyType, valueType, name);
+    }
+
+    public ProtoType get(String name) {
+      return ProtoType.get(name);
+    }
+
+    public ProtoType get(String enclosingTypeOrPackage, String typeName) {
+      return ProtoType.get(enclosingTypeOrPackage, typeName);
+    }
+  }
 }

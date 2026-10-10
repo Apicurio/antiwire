@@ -154,4 +154,12 @@ public final class MarkSet {
   public Map<ProtoType, Set<ProtoMember>> getMembers() {
     return members;
   }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code MarkSet.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
+  }
 }

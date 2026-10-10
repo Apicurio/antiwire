@@ -30,7 +30,7 @@ public final class EnumConstant {
   final String documentation;
   final Options options;
 
-  EnumConstant(Location location, String name, int tag, String documentation, Options options) {
+  public EnumConstant(Location location, String name, int tag, String documentation, Options options) {
     this.location = location;
     this.name = name;
     this.tag = tag;
@@ -119,5 +119,13 @@ public final class EnumConstant {
       result.add(constant.toElement());
     }
     return result;
+  }
+
+  /** Mirror of the Kotlin companion object: lets Java callers write {@code EnumConstant.Companion.m(...)}. */
+  public static final Companion Companion = new Companion();
+
+  public static final class Companion {
+    private Companion() {
+    }
   }
 }
