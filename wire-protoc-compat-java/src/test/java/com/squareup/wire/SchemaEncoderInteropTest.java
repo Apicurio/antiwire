@@ -56,13 +56,9 @@ public class SchemaEncoderInteropTest {
   private final Schema schema = loadSchema();
 
   private static Schema loadSchema() {
-    try {
-      SchemaLoader loader = new SchemaLoader(FileSystems.getDefault());
-      loader.initRoots(Collections.singletonList(Location.get(PROTO_ROOT.toString())));
-      return loader.loadSchema();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    SchemaLoader loader = new SchemaLoader(FileSystems.getDefault());
+    loader.initRoots(Collections.singletonList(Location.get(PROTO_ROOT.toString())));
+    return loader.loadSchema();
   }
 
   private final ExtensionRegistry extensionRegistry = createExtensionRegistry();
