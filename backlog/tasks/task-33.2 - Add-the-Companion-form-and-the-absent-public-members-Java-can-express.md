@@ -4,6 +4,7 @@ title: Add the Companion form and the absent public members Java can express
 status: To Do
 assignee: []
 created_date: '2026-10-09 20:54'
+updated_date: '2026-10-09 23:13'
 labels:
   - user-feedback
   - compatibility
@@ -28,6 +29,12 @@ Maintainer decision 2026-10-09: close the source-compatibility gaps found by TAS
 - [ ] #3 Each remaining difference is in the TASK-34 baseline with its reason (Kotlin type, okio type, Kotlin internal, deliberate); scripts/verify.sh passes with the check active.
 - [ ] #4 Run /code-review at high effort on the final diff
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-10-10 decision note: the Apicurio integration found that a third-party jar compiled against Wire (Confluent kafka-schema-registry-client 8.0.0, ProtobufSchema.toProtoFile) reads the ProtoParser$Companion static field at runtime, so for the Companion form the target is BINARY compatibility with the Kotlin descriptor (static field named Companion of type <Outer>$Companion, nested class <Outer>$Companion with the upstream member descriptors), not only source. The source-compatibility rule stays the general target (DEC-2, no ABI promise for everything else), but the 45 upstream Companion classes get the exact binary shape, and a test must prove it with a class compiled against the real 7.1.0 jar (the TASK-34 snippet CompanionParse flips to a required pass; extend it to a bytecode-level check: getstatic <Outer>.Companion plus invokevirtual <Outer>$Companion.m with the upstream descriptor). Also needed from the Apicurio findings: public OneOf constructor or factory (String, String, List<Field>, Location, Options), public MessageType.toElement(), javadoc on ReservedElement/ExtensionsElement.getValues(). Check which other binary consumers exist among Apicurio's dependencies (kafka-protobuf-serializer, confluent-schema-registry, Debezium converters) by scanning their jars for com/squareup/wire references with the same scanner used for the 3620f08c classes, so the shim set is driven by real consumers.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
