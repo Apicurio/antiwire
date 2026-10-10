@@ -216,7 +216,7 @@ public final class ProtoType {
     return isMap;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoType.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code ProtoType.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

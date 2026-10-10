@@ -218,7 +218,7 @@ public class ProtoWriter {
     return (n >>> 1) ^ -(n & 1L);
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoWriter.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code ProtoWriter.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

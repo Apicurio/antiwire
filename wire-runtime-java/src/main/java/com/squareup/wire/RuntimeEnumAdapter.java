@@ -69,7 +69,7 @@ public final class RuntimeEnumAdapter<E extends WireEnum> extends EnumAdapter<E>
     return new RuntimeEnumAdapter<>(enumType, defaultAdapter.getSyntax());
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code RuntimeEnumAdapter.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code RuntimeEnumAdapter.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

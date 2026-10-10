@@ -57,7 +57,7 @@ public final class DoubleArrayList {
     return new DoubleArrayList(minElements);
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code DoubleArrayList.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code DoubleArrayList.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

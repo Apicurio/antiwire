@@ -2,7 +2,7 @@
 
 Audited at revision `0f860ff` (2026-10-06), refreshing the first audit at `a45b0f0`
 (2026-10-02). Scope: every production source file of the three shipped modules,
-`wire-runtime-java`, `wire-schema-java`, `wire-java-generator` (`src/main/java`, 161 files)
+`wire-runtime-java`, `wire-schema-java`, `wire-java-generator` (`src/main/java`, 174 files after the 2026-10-10 additions of TASK-33.2; 161 at the 0f860ff audit)
 plus every embedded resource (`src/main/resources`, 9 proto files). The test module
 `wire-tests-java`, the protoc-interop oracle module `wire-protoc-compat-java`, and the
 parity fixture `wire-upstream-shaded` are outside the shipped inventory. All three are
@@ -43,14 +43,16 @@ notice in the rows below, and the per-module totals count files):
 
 | Module | Square Apache 2.0 | antiwire Apache 2.0 | Google Nano BSD | Square + Nano | R8 BSD | JetBrains Apache 2.0 | ASF header | Total files |
 |---|---|---|---|---|---|---|---|---|
-| wire-runtime-java | 55 | 5 | 3 | 1 | 1 | 4 | 1 | 70 |
-| wire-schema-java | 79 | 2 | 0 | 0 | 0 | 0 | 0 | 81 |
-| wire-java-generator | 9 | 1 | 0 | 0 | 0 | 0 | 0 | 10 |
-| **Total** | **143** | **8** | **3** | **1** | **1** | **4** | **1** | **161** |
+| wire-runtime-java | 55 | 13 | 3 | 1 | 1 | 4 | 1 | 78 |
+| wire-schema-java | 81 | 4 | 0 | 0 | 0 | 0 | 0 | 85 |
+| wire-java-generator | 9 | 2 | 0 | 0 | 0 | 0 | 0 | 11 |
+| **Total** | **145** | **19** | **3** | **1** | **1** | **4** | **1** | **174** |
 
-Arithmetic check, recomputed mechanically by script: 55+5+3+1+1+4+1 = 70,
-79+2 = 81, 9+1 = 10, and the total row 143+8+3+1+1+4+1 = 161; every row's cells sum to
-its file total, and 70+81+10 = 161 files matches `git ls-files` over the three modules.
+Arithmetic check, recomputed mechanically by script on 2026-10-10: 55+13+3+1+1+4+1 = 78,
+81+4 = 85, 9+2 = 11, and the total row 145+19+3+1+1+4+1 = 174; every row's cells sum to
+its file total, and 78+85+11 = 174 files matches a `find -name '*.java'` over the three modules
+(the 13 new files are the Kotlin file facades, the Companion-adjacent interfaces and the two
+logger classes of TASK-33.2; each carries the header class listed in its row).
 The columns count the notices the files carry. One translated file
 (`ProtoReader32AsProtoReader.java`) carried the antiwire header where translated material
 carries the Square header; the 2026-10-06 refresh corrected it to the upstream Square 2024
@@ -164,45 +166,33 @@ JavaPoet 1.13.0 attribution for the generator module's production dependency was
 
 ## Per-file listing
 
-### wire-runtime-java (70 Java files)
+### wire-runtime-java (78 Java files)
 
 | File | Notice |
 |---|---|
 | `wire-runtime-java/src/main/java/com/squareup/wire/AnyMessage.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ByteArrayProtoReader32.java` | Google Nano BSD |
 | `wire-runtime-java/src/main/java/com/squareup/wire/Bytes.java` | antiwire Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/DurationKt.java` | antiwire Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/EnumAdapter.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/FieldEncoding.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/FieldMask.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/DoubleArrayList.java` | JetBrains Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/FieldBinding.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/FieldOrOneOfBinding.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/FloatArrayList.java` | JetBrains Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/ImmutableList.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/IntArrayList.java` | JetBrains Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/Internal.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/LongArrayList.java` | JetBrains Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/MathMethods.java` | R8 BSD |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/MessageBinding.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/MutableOnWriteList.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/OneOfBinding.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/ProtocolException.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/Reflection.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/RuntimeMessageAdapter.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/SealedOneOfBinding.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/internal/Serializable.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/InstantKt.java` | antiwire Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/KotlinConstructorBuilder.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/Message.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/MessageSerializedForm.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/MessageSink.java` | antiwire Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/MessageSource.java` | antiwire Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/OneOf.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/com/squareup/wire/package-info.java` | antiwire Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ProtoAdapter.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader.java` | Google Nano BSD |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader32.java` | Google Nano BSD |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader32AsProtoReader.java` | Square Apache 2.0 (translated file; header corrected 2026-10-06) |
+| `wire-runtime-java/src/main/java/com/squareup/wire/ProtoReader32Kt.java` | antiwire Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ProtoWriter.java` | Square Apache 2.0 + Google Nano BSD (in body) |
 | `wire-runtime-java/src/main/java/com/squareup/wire/ReverseProtoWriter.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/RuntimeEnumAdapter.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/Service.java` | antiwire Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/Syntax.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/Wire.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/WireEnclosingType.java` | Square Apache 2.0 |
@@ -212,6 +202,26 @@ JavaPoet 1.13.0 attribution for the generator module's production dependency was
 | `wire-runtime-java/src/main/java/com/squareup/wire/WireOneofField.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/WireRpc.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/com/squareup/wire/WireSealedOneof.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/DoubleArrayList.java` | JetBrains Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/FieldBinding.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/FieldOrOneOfBinding.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/FloatArrayList.java` | JetBrains Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/ImmutableList.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/IntArrayList.java` | JetBrains Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/Internal.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/LongArrayList.java` | JetBrains Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/MathMethods.java` | R8 BSD |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/MathMethodsKt.java` | antiwire Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/MessageBinding.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/MutableOnWriteList.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/OneOfBinding.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/ProtocolException.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/Reflection.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/ReflectionKt.java` | antiwire Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/RuntimeMessageAdapter.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/SealedOneOfBinding.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/internal/Serializable.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/com/squareup/wire/package-info.java` | antiwire Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/AsyncTimeout.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/Base64.java` | ASF header, no copyright line |
 | `wire-runtime-java/src/main/java/okio/Buffer.java` | Square Apache 2.0 |
@@ -231,63 +241,39 @@ JavaPoet 1.13.0 attribution for the generator module's production dependency was
 | `wire-runtime-java/src/main/java/okio/RealBufferedSink.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/RealBufferedSource.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/Segment.java` | Square Apache 2.0 |
-| `wire-runtime-java/src/main/java/okio/SegmentedByteString.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/SegmentPool.java` | Square Apache 2.0 |
+| `wire-runtime-java/src/main/java/okio/SegmentedByteString.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/Sink.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/Source.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/Timeout.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/Utf8.java` | Square Apache 2.0 |
 | `wire-runtime-java/src/main/java/okio/Util.java` | Square Apache 2.0 |
 
-### wire-schema-java (81 Java files)
+### wire-schema-java (85 Java files)
 
 | File | Notice |
 |---|---|
+| `wire-schema-java/src/main/java/com/squareup/wire/WireLogger.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/AdapterConstant.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/ClaimedDefinitions.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/ClaimedPaths.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/CoreLoader.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/CoreLoaderKt.java` | antiwire Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/CycleChecker.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/DirectedAcyclicGraph.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/EmittingRules.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/EmptyWireLogger.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/EmptyWireLoggerFactory.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/EnclosingType.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/EnumConstant.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/EnumType.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/ErrorCollector.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/EventListener.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/EventListeners.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/EventListenersKt.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/Extend.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/Extensions.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/Field.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/FileLinker.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/CommonSchemaLoader.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/DagChecker.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/FileSystems.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/JvmLanguages.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/NameFactory.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/EnumConstantElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/EnumElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ExtendElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ExtensionsElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/FieldElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/GroupElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/MessageElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/OneOfElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/OptionElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/OptionReader.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ProtoFileElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ProtoParser.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ReservedElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/RpcElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ServiceElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/SyntaxReader.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/TypeElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/ProfileFileElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/ProfileParser.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/SchemaEncoder.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/SchemaUtil.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/TypeConfigElement.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/TypeMover.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/JdkSchemaLoader.java` | antiwire Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/LinkedOptionEntry.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/Linker.java` | Square Apache 2.0 |
@@ -299,7 +285,6 @@ JavaPoet 1.13.0 attribution for the generator module's production dependency was
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/Multimap.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/OneOf.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/Options.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/package-info.java` | antiwire Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/PartitionedSchema.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/Profile.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/ProfileLoader.java` | Square Apache 2.0 |
@@ -321,24 +306,54 @@ JavaPoet 1.13.0 attribution for the generator module's production dependency was
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/SyntaxRules.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/Target.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/Type.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/schema/WireLoggers.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/WireLoggersKt.java` | Square Apache 2.0 |
 | `wire-schema-java/src/main/java/com/squareup/wire/schema/WireRun.java` | Square Apache 2.0 |
-| `wire-schema-java/src/main/java/com/squareup/wire/WireLogger.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/CommonSchemaLoader.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/DagChecker.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/FileSystems.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/JvmLanguages.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/NameFactory.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/ProfileFileElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/ProfileParser.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/SchemaEncoder.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/SchemaUtil.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/TypeConfigElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/TypeMover.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/UtilKt.java` | antiwire Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/EnumConstantElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/EnumElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ExtendElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ExtensionsElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/FieldElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/GroupElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/MessageElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/OneOfElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/OptionElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/OptionReader.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ProtoFileElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ProtoParser.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ReservedElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/RpcElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/ServiceElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/SyntaxReader.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/internal/parser/TypeElement.java` | Square Apache 2.0 |
+| `wire-schema-java/src/main/java/com/squareup/wire/schema/package-info.java` | antiwire Apache 2.0 |
 
-### wire-java-generator (10 Java files)
+### wire-java-generator (11 Java files)
 
 | File | Notice |
 |---|---|
 | `wire-java-generator/src/main/java/com/squareup/wire/ConsoleWireLogger.java` | Square Apache 2.0 |
 | `wire-java-generator/src/main/java/com/squareup/wire/DryRunFileSystem.java` | Square Apache 2.0 |
+| `wire-java-generator/src/main/java/com/squareup/wire/WireCompiler.java` | Square Apache 2.0 |
+| `wire-java-generator/src/main/java/com/squareup/wire/WireException.java` | Square Apache 2.0 |
 | `wire-java-generator/src/main/java/com/squareup/wire/java/JavaGenerator.java` | Square Apache 2.0 |
 | `wire-java-generator/src/main/java/com/squareup/wire/java/JavaSchemaHandler.java` | Square Apache 2.0 |
 | `wire-java-generator/src/main/java/com/squareup/wire/java/package-info.java` | antiwire Apache 2.0 |
 | `wire-java-generator/src/main/java/com/squareup/wire/schema/CustomTarget.java` | Square Apache 2.0 |
 | `wire-java-generator/src/main/java/com/squareup/wire/schema/JavaTarget.java` | Square Apache 2.0 |
 | `wire-java-generator/src/main/java/com/squareup/wire/schema/ProtoTarget.java` | Square Apache 2.0 |
-| `wire-java-generator/src/main/java/com/squareup/wire/WireCompiler.java` | Square Apache 2.0 |
-| `wire-java-generator/src/main/java/com/squareup/wire/WireException.java` | Square Apache 2.0 |
+| `wire-java-generator/src/main/java/com/squareup/wire/schema/TargetKt.java` | antiwire Apache 2.0 |
 
 ### wire-schema-java resources (9 files)
 

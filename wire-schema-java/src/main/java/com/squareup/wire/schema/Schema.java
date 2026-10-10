@@ -206,7 +206,7 @@ public final class Schema {
     return result;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code Schema.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code Schema.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

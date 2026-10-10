@@ -399,21 +399,21 @@ public class WireRunTest {
   @Test
   public void noSuchClassEventListener() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> EventListeners.newEventListenerFactory("foo").create());
+        () -> EventListenersKt.newEventListenerFactory("foo").create());
     assertEquals("Couldn't find EventListenerClass 'foo'", e.getMessage());
   }
 
   @Test
   public void noPublicConstructorEventListener() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> EventListeners.newEventListenerFactory("java.lang.Void").create());
+        () -> EventListenersKt.newEventListenerFactory("java.lang.Void").create());
     assertEquals("No public constructor on java.lang.Void", e.getMessage());
   }
 
   @Test
   public void classDoesNotImplementEventListenerInterface() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> EventListeners.newEventListenerFactory("java.lang.Object").create());
+        () -> EventListenersKt.newEventListenerFactory("java.lang.Object").create());
     assertEquals("java.lang.Object does not implement EventListener.Factory", e.getMessage());
   }
 
@@ -1462,19 +1462,19 @@ public class WireRunTest {
 
   @Test public void noSuchClassLogger() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> WireLoggers.newLoggerFactory("foo").create());
+        () -> WireLoggersKt.newLoggerFactory("foo").create());
     assertEquals("Couldn't find LoggerClass 'foo'", e.getMessage());
   }
 
   @Test public void noPublicConstructorLogger() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> WireLoggers.newLoggerFactory("java.lang.Void").create());
+        () -> WireLoggersKt.newLoggerFactory("java.lang.Void").create());
     assertEquals("No public constructor on java.lang.Void", e.getMessage());
   }
 
   @Test public void classDoesNotImplementWireLoggerInterface() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> WireLoggers.newLoggerFactory("java.lang.Object").create());
+        () -> WireLoggersKt.newLoggerFactory("java.lang.Object").create());
     assertEquals("java.lang.Object does not implement WireLogger.Factory", e.getMessage());
   }
 

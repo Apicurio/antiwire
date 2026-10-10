@@ -147,7 +147,7 @@ public final class Extend {
     return result;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code Extend.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code Extend.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

@@ -374,7 +374,7 @@ public final class PruningRules {
     return null;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code PruningRules.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code PruningRules.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

@@ -57,7 +57,7 @@ public final class IntArrayList {
     return new IntArrayList(minElements);
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code IntArrayList.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code IntArrayList.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

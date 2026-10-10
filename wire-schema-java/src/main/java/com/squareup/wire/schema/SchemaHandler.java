@@ -239,15 +239,32 @@ public abstract class SchemaHandler {
       if (this == other) return true;
       if (!(other instanceof Context)) return false;
       Context that = (Context) other;
-      return Objects.equals(fileSystem, that.fileSystem) && Objects.equals(outDirectory, that.outDirectory) && Objects.equals(logger, that.logger) && Objects.equals(errorCollector, that.errorCollector) && Objects.equals(emittingRules, that.emittingRules) && Objects.equals(claimedDefinitions, that.claimedDefinitions) && Objects.equals(claimedPaths, that.claimedPaths) && Objects.equals(module, that.module) && Objects.equals(sourcePathPaths, that.sourcePathPaths) && Objects.equals(profileLoader, that.profileLoader) && Objects.equals(fullSchema, that.fullSchema);
+      return Objects.equals(fileSystem, that.fileSystem)
+          && Objects.equals(outDirectory, that.outDirectory)
+          && Objects.equals(logger, that.logger)
+          && Objects.equals(errorCollector, that.errorCollector)
+          && Objects.equals(emittingRules, that.emittingRules)
+          && Objects.equals(claimedDefinitions, that.claimedDefinitions)
+          && Objects.equals(claimedPaths, that.claimedPaths)
+          && Objects.equals(module, that.module)
+          && Objects.equals(sourcePathPaths, that.sourcePathPaths)
+          && Objects.equals(profileLoader, that.profileLoader)
+          && Objects.equals(fullSchema, that.fullSchema);
     }
 
     @Override public int hashCode() {
-      return Objects.hash(fileSystem, outDirectory, logger, errorCollector, emittingRules, claimedDefinitions, claimedPaths, module, sourcePathPaths, profileLoader, fullSchema);
+      return Objects.hash(
+          fileSystem, outDirectory, logger, errorCollector, emittingRules,
+          claimedDefinitions, claimedPaths, module, sourcePathPaths, profileLoader,
+          fullSchema);
     }
 
     @Override public String toString() {
-      return "Context(" + "fileSystem=" + fileSystem + ", " + "outDirectory=" + outDirectory + ", " + "logger=" + logger + ", " + "errorCollector=" + errorCollector + ", " + "emittingRules=" + emittingRules + ", " + "claimedDefinitions=" + claimedDefinitions + ", " + "claimedPaths=" + claimedPaths + ", " + "module=" + module + ", " + "sourcePathPaths=" + sourcePathPaths + ", " + "profileLoader=" + profileLoader + ", " + "fullSchema=" + fullSchema + ")";
+      return "Context(fileSystem=" + fileSystem + ", outDirectory=" + outDirectory + ", logger="
+          + logger + ", errorCollector=" + errorCollector + ", emittingRules=" + emittingRules
+          + ", claimedDefinitions=" + claimedDefinitions + ", claimedPaths=" + claimedPaths
+          + ", module=" + module + ", sourcePathPaths=" + sourcePathPaths + ", profileLoader="
+          + profileLoader + ", fullSchema=" + fullSchema + ")";
     }
   }
 
@@ -291,7 +308,9 @@ public abstract class SchemaHandler {
       if (this == other) return true;
       if (!(other instanceof Module)) return false;
       Module that = (Module) other;
-      return Objects.equals(name, that.name) && Objects.equals(types, that.types) && Objects.equals(upstreamTypes, that.upstreamTypes);
+      return Objects.equals(name, that.name)
+          && Objects.equals(types, that.types)
+          && Objects.equals(upstreamTypes, that.upstreamTypes);
     }
 
     @Override public int hashCode() {
@@ -299,7 +318,7 @@ public abstract class SchemaHandler {
     }
 
     @Override public String toString() {
-      return "Module(" + "name=" + name + ", " + "types=" + types + ", " + "upstreamTypes=" + upstreamTypes + ")";
+      return "Module(name=" + name + ", types=" + types + ", upstreamTypes=" + upstreamTypes + ")";
     }
   }
 

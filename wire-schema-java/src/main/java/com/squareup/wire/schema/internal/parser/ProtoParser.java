@@ -47,7 +47,7 @@ public final class ProtoParser {
   /** The current package name + nested type names, separated by dots. */
   private String prefix = "";
 
-  private ProtoParser(Location location, char[] data) {
+  public ProtoParser(Location location, char[] data) {
     this.location = location;
     this.reader = new SyntaxReader(data, location);
   }
@@ -630,7 +630,7 @@ public final class ProtoParser {
     return new ProtoParser(location, chars).readProtoFile();
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoParser.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code ProtoParser.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

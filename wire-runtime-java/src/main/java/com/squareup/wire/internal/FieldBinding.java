@@ -278,7 +278,7 @@ public final class FieldBinding<M extends Message<M, B>, B extends Message.Build
     return builderGetter.get(builder);
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code FieldBinding.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code FieldBinding.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

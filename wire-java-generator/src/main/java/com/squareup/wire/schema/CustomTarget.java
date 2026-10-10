@@ -161,7 +161,12 @@ public final class CustomTarget extends Target {
     if (this == other) return true;
     if (!(other instanceof CustomTarget)) return false;
     CustomTarget that = (CustomTarget) other;
-    return Objects.equals(includes, that.includes) && Objects.equals(excludes, that.excludes) && exclusive == that.exclusive && Objects.equals(outDirectory, that.outDirectory) && Objects.equals(options, that.options) && Objects.equals(schemaHandlerFactory, that.schemaHandlerFactory);
+    return Objects.equals(includes, that.includes)
+        && Objects.equals(excludes, that.excludes)
+        && exclusive == that.exclusive
+        && Objects.equals(outDirectory, that.outDirectory)
+        && Objects.equals(options, that.options)
+        && Objects.equals(schemaHandlerFactory, that.schemaHandlerFactory);
   }
 
   @Override public int hashCode() {
@@ -169,6 +174,8 @@ public final class CustomTarget extends Target {
   }
 
   @Override public String toString() {
-    return "CustomTarget(" + "includes=" + includes + ", " + "excludes=" + excludes + ", " + "exclusive=" + exclusive + ", " + "outDirectory=" + outDirectory + ", " + "options=" + options + ", " + "schemaHandlerFactory=" + schemaHandlerFactory + ")";
+    return "CustomTarget(includes=" + includes + ", excludes=" + excludes + ", exclusive="
+        + exclusive + ", outDirectory=" + outDirectory + ", options=" + options
+        + ", schemaHandlerFactory=" + schemaHandlerFactory + ")";
   }
 }

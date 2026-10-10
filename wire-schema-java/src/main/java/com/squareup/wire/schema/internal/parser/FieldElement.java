@@ -183,6 +183,8 @@ public final class FieldElement {
   }
 
   @Override public String toString() {
-    return "FieldElement(" + "location=" + location + ", " + "label=" + label + ", " + "type=" + type + ", " + "name=" + name + ", " + "defaultValue=" + defaultValue + ", " + "jsonName=" + jsonName + ", " + "tag=" + tag + ", " + "documentation=" + documentation + ", " + "options=" + options + ")";
+    return "FieldElement(location=" + location + ", label=" + label + ", type=" + type + ", name="
+        + name + ", defaultValue=" + defaultValue + ", jsonName=" + jsonName + ", tag=" + tag
+        + ", documentation=" + documentation + ", options=" + options + ")";
   }
 }

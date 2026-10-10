@@ -12,6 +12,7 @@ Exit codes: 0 always when it ran (it reports, it does not judge), 3 when javap o
 """
 import argparse
 import collections
+import importlib.util
 import os
 import re
 import subprocess
@@ -19,57 +20,18 @@ import sys
 import tempfile
 import zipfile
 
+
+def _surface_check():
+    """The javap parser and member lookup of surface-check.py are reused, not copied."""
+    spec = importlib.util.spec_from_file_location(
+        'surface_check', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'surface-check.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
 REF = re.compile(r'^\s+#\d+ = (Methodref|InterfaceMethodref|Fieldref)\s+#\d+\.#\d+\s+// +(.*)$', re.M)
 SPLIT = re.compile(r'^([\w/$]+)\.(.+?):(.*)$')
-ENUM_AND_OBJECT_METHODS = {'name', 'ordinal', 'values', 'valueOf', 'compareTo', 'getDeclaringClass'}
-
-
-def javap_members(jars, wanted):
-    """{binary class name: (set of (name, descriptor, kind), [supertypes])} for the port classes."""
-    cp = os.pathsep.join(jars)
-    members, supers = {}, {}
-    names = sorted(wanted)
-    for i in range(0, len(names), 80):
-        out = subprocess.run(['javap', '-p', '-s', '-cp', cp] + names[i:i + 80],
-                             capture_output=True, text=True).stdout.split('\n')
-        cur = None
-        j = 0
-        while j < len(out):
-            line = out[j]
-            m = re.search(r'(?:class|interface|enum) ([\w.$]+)', line) if line and not line.startswith(' ') \
-                and '{' in line else None
-            if m:
-                cur = m.group(1)
-                members[cur] = set()
-                supers[cur] = [re.sub(r'<.*>', '', s).strip()
-                               for part in re.findall(r'(?:extends|implements) ([\w.$<>, ?]+)', line)
-                               for s in re.split(r',\s*(?![^<]*>)', part) if s.strip()]
-            elif cur and line.startswith('  ') and not line.startswith('   ') and j + 1 < len(out) \
-                    and 'descriptor:' in out[j + 1]:
-                decl = line.strip().rstrip(';').split(' throws ')[0]
-                desc = out[j + 1].split('descriptor:')[1].strip()
-                if '(' in decl:
-                    name = decl.split('(')[0].split()[-1]
-                    if name == cur or name.split('.')[-1] == cur.split('.')[-1].split('$')[-1]:
-                        name = '<init>'
-                    members[cur].add((name, desc))
-                else:
-                    members[cur].add((decl.split()[-1], desc))
-                j += 1
-            j += 1
-    return members, supers
-
-
-def resolves(members, supers, owner, name, desc, seen=None):
-    if (name, desc) in members.get(owner, ()):
-        return True
-    seen = seen or set()
-    for s in supers.get(owner, ()):
-        if s not in seen:
-            seen.add(s)
-            if resolves(members, supers, s, name, desc, seen):
-                return True
-    return False
+ENUM_METHODS = {'name', 'ordinal', 'values', 'valueOf', 'compareTo', 'getDeclaringClass'}
 
 
 def main():
@@ -101,18 +63,20 @@ def main():
     for jar in a.port_jar:
         with zipfile.ZipFile(jar) as z:
             port_classes |= {n[:-6].replace('/', '.') for n in z.namelist() if n.endswith('.class')}
-    members, supers = javap_members(a.port_jar, sorted(owners & port_classes))
-    # java.lang.Enum members are inherited by every enum: a port enum resolves them by construction.
-    enum_owners = {c for c, sup in supers.items() if 'java.lang.Enum' in sup}
+    sc = _surface_check()
+    table = sc.parse_javap(os.pathsep.join(a.port_jar), sorted(owners & port_classes))
     missing = []
     for (owner, name, desc), jars in sorted(refs.items()):
         if name in ('equals', 'hashCode', 'toString'):
             continue
-        if name in ENUM_AND_OBJECT_METHODS and owner in enum_owners:
-            continue
         if owner not in port_classes:
             missing.append((owner, name, desc, jars, 'class absent in the port'))
-        elif not resolves(members, supers, owner, name, desc):
+            continue
+        # java.lang.Enum members are inherited by every enum: a port enum resolves them by construction.
+        if name in ENUM_METHODS and 'java.lang.Enum' in table.get(owner, {}).get('supers', []):
+            continue
+        kind = 'F' if not desc.startswith('(') else ('C' if name == '<init>' else 'M')
+        if sc.find_member(table, owner, (kind, name, desc)) is None:
             missing.append((owner, name, desc, jars, 'member absent'))
     total = len([k for k in refs if k[1] not in ('equals', 'hashCode', 'toString')])
     print('SCAN consumers=%d distinct wire references=%d resolved=%d unresolved=%d'

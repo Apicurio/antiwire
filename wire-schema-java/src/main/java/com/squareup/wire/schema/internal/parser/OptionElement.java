@@ -242,7 +242,7 @@ public final class OptionElement {
     return isParenthesized;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code OptionElement.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code OptionElement.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

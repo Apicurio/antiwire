@@ -123,7 +123,7 @@ public final class Location {
     return new Location(normalizedBase, normalizedPath, -1, -1);
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code Location.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code Location.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

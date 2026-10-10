@@ -57,7 +57,7 @@ public final class FloatArrayList {
     return new FloatArrayList(minElements);
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code FloatArrayList.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code FloatArrayList.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

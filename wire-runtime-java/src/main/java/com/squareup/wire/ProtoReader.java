@@ -598,7 +598,7 @@ public class ProtoReader {
   public static final int STATE_TAG = 6; // Note: not a field encoding.
   public static final int STATE_PACKED_TAG = 7; // Note: not a field encoding.
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoReader.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code ProtoReader.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

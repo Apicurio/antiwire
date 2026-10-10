@@ -85,6 +85,7 @@ public final class ExtendElement {
   }
 
   @Override public String toString() {
-    return "ExtendElement(" + "location=" + location + ", " + "name=" + name + ", " + "documentation=" + documentation + ", " + "fields=" + fields + ")";
+    return "ExtendElement(location=" + location + ", name=" + name + ", documentation="
+        + documentation + ", fields=" + fields + ")";
   }
 }

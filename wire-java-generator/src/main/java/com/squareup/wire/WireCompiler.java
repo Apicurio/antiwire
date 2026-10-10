@@ -17,12 +17,12 @@ package com.squareup.wire;
 
 import com.squareup.wire.schema.CoreLoader;
 import com.squareup.wire.schema.CustomTarget;
-import com.squareup.wire.schema.EventListeners;
+import com.squareup.wire.schema.EventListenersKt;
 import com.squareup.wire.schema.JavaTarget;
 import com.squareup.wire.schema.Location;
 import com.squareup.wire.schema.PruningRules;
 import com.squareup.wire.schema.Target;
-import com.squareup.wire.schema.WireLoggers;
+import com.squareup.wire.schema.WireLoggersKt;
 import com.squareup.wire.schema.WireRun;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -234,7 +234,7 @@ public final class WireCompiler {
     List<com.squareup.wire.schema.EventListener> eventListeners = new ArrayList<>();
     for (String eventListenerFactoryClass : eventListenerFactoryClasses) {
       eventListeners.add(
-          EventListeners.newEventListenerFactory(eventListenerFactoryClass).create());
+          EventListenersKt.newEventListenerFactory(eventListenerFactoryClass).create());
     }
 
     return new WireRun(
@@ -550,7 +550,7 @@ public final class WireCompiler {
     return new WireCompiler(
         dryRun ? new DryRunFileSystem(fileSystem) : fileSystem,
         loggerFactoryClass != null
-            ? WireLoggers.newLoggerFactory(loggerFactoryClass).create()
+            ? WireLoggersKt.newLoggerFactory(loggerFactoryClass).create()
             : logger,
         protoPaths,
         javaOut,
@@ -699,7 +699,7 @@ public final class WireCompiler {
         "Invalid module manifest at line " + (lineNumber + 1) + ": " + message);
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code WireCompiler.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code WireCompiler.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

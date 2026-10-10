@@ -97,6 +97,7 @@ public final class ReservedElement {
   }
 
   @Override public String toString() {
-    return "ReservedElement(" + "location=" + location + ", " + "documentation=" + documentation + ", " + "values=" + values + ")";
+    return "ReservedElement(location=" + location + ", documentation=" + documentation + ", values="
+        + values + ")";
   }
 }

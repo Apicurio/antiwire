@@ -103,6 +103,7 @@ public final class GroupElement {
   }
 
   @Override public String toString() {
-    return "GroupElement(" + "label=" + label + ", " + "location=" + location + ", " + "name=" + name + ", " + "tag=" + tag + ", " + "documentation=" + documentation + ", " + "fields=" + fields + ")";
+    return "GroupElement(label=" + label + ", location=" + location + ", name=" + name + ", tag="
+        + tag + ", documentation=" + documentation + ", fields=" + fields + ")";
   }
 }

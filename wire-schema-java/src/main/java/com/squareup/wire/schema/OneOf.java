@@ -131,7 +131,7 @@ public final class OneOf {
     return result;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code OneOf.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code OneOf.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

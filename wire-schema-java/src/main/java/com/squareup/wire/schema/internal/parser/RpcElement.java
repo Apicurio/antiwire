@@ -129,6 +129,9 @@ public final class RpcElement {
   }
 
   @Override public String toString() {
-    return "RpcElement(" + "location=" + location + ", " + "name=" + name + ", " + "documentation=" + documentation + ", " + "requestType=" + requestType + ", " + "responseType=" + responseType + ", " + "requestStreaming=" + requestStreaming + ", " + "responseStreaming=" + responseStreaming + ", " + "options=" + options + ")";
+    return "RpcElement(location=" + location + ", name=" + name + ", documentation=" + documentation
+        + ", requestType=" + requestType + ", responseType=" + responseType + ", requestStreaming="
+        + requestStreaming + ", responseStreaming=" + responseStreaming + ", options=" + options
+        + ")";
   }
 }

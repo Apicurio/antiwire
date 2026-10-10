@@ -131,6 +131,6 @@ public final class ProtoTarget extends Target {
   }
 
   @Override public String toString() {
-    return "ProtoTarget(" + "outDirectory=" + outDirectory + ")";
+    return "ProtoTarget(outDirectory=" + outDirectory + ")";
   }
 }

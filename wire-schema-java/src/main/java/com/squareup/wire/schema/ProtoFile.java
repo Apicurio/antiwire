@@ -387,7 +387,7 @@ public final class ProtoFile {
         services, wireExtends, options, protoFileElement.getSyntax());
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code ProtoFile.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code ProtoFile.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {
@@ -411,10 +411,21 @@ public final class ProtoFile {
     if (this == other) return true;
     if (!(other instanceof ProtoFile)) return false;
     ProtoFile that = (ProtoFile) other;
-    return Objects.equals(location, that.location) && Objects.equals(imports, that.imports) && Objects.equals(publicImports, that.publicImports) && Objects.equals(weakImports, that.weakImports) && Objects.equals(packageName, that.packageName) && Objects.equals(types, that.types) && Objects.equals(services, that.services) && Objects.equals(extendList, that.extendList) && Objects.equals(options, that.options) && Objects.equals(syntax, that.syntax);
+    return Objects.equals(location, that.location)
+        && Objects.equals(imports, that.imports)
+        && Objects.equals(publicImports, that.publicImports)
+        && Objects.equals(weakImports, that.weakImports)
+        && Objects.equals(packageName, that.packageName)
+        && Objects.equals(types, that.types)
+        && Objects.equals(services, that.services)
+        && Objects.equals(extendList, that.extendList)
+        && Objects.equals(options, that.options)
+        && Objects.equals(syntax, that.syntax);
   }
 
   @Override public int hashCode() {
-    return Objects.hash(location, imports, publicImports, weakImports, packageName, types, services, extendList, options, syntax);
+    return Objects.hash(
+        location, imports, publicImports, weakImports, packageName, types, services,
+        extendList, options, syntax);
   }
 }

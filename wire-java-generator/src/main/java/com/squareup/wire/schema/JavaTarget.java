@@ -155,14 +155,29 @@ public final class JavaTarget extends Target {
     if (this == other) return true;
     if (!(other instanceof JavaTarget)) return false;
     JavaTarget that = (JavaTarget) other;
-    return Objects.equals(includes, that.includes) && Objects.equals(excludes, that.excludes) && exclusive == that.exclusive && Objects.equals(outDirectory, that.outDirectory) && android == that.android && androidAnnotations == that.androidAnnotations && compact == that.compact && emitDeclaredOptions == that.emitDeclaredOptions && emitAppliedOptions == that.emitAppliedOptions && buildersOnly == that.buildersOnly;
+    return Objects.equals(includes, that.includes)
+        && Objects.equals(excludes, that.excludes)
+        && exclusive == that.exclusive
+        && Objects.equals(outDirectory, that.outDirectory)
+        && android == that.android
+        && androidAnnotations == that.androidAnnotations
+        && compact == that.compact
+        && emitDeclaredOptions == that.emitDeclaredOptions
+        && emitAppliedOptions == that.emitAppliedOptions
+        && buildersOnly == that.buildersOnly;
   }
 
   @Override public int hashCode() {
-    return Objects.hash(includes, excludes, exclusive, outDirectory, android, androidAnnotations, compact, emitDeclaredOptions, emitAppliedOptions, buildersOnly);
+    return Objects.hash(
+        includes, excludes, exclusive, outDirectory, android, androidAnnotations, compact,
+        emitDeclaredOptions, emitAppliedOptions, buildersOnly);
   }
 
   @Override public String toString() {
-    return "JavaTarget(" + "includes=" + includes + ", " + "excludes=" + excludes + ", " + "exclusive=" + exclusive + ", " + "outDirectory=" + outDirectory + ", " + "android=" + android + ", " + "androidAnnotations=" + androidAnnotations + ", " + "compact=" + compact + ", " + "emitDeclaredOptions=" + emitDeclaredOptions + ", " + "emitAppliedOptions=" + emitAppliedOptions + ", " + "buildersOnly=" + buildersOnly + ")";
+    return "JavaTarget(includes=" + includes + ", excludes=" + excludes + ", exclusive=" + exclusive
+        + ", outDirectory=" + outDirectory + ", android=" + android + ", androidAnnotations="
+        + androidAnnotations + ", compact=" + compact + ", emitDeclaredOptions="
+        + emitDeclaredOptions + ", emitAppliedOptions=" + emitAppliedOptions + ", buildersOnly="
+        + buildersOnly + ")";
   }
 }

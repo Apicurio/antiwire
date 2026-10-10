@@ -297,7 +297,7 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
     }
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code RuntimeMessageAdapter.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code RuntimeMessageAdapter.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

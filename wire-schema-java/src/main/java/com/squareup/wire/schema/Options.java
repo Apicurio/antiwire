@@ -555,7 +555,7 @@ public final class Options {
     return null;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code Options.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code Options.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

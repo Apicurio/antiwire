@@ -207,6 +207,9 @@ public final class MessageElement implements TypeElement {
   }
 
   @Override public String toString() {
-    return "MessageElement(" + "location=" + location + ", " + "name=" + name + ", " + "documentation=" + documentation + ", " + "nestedTypes=" + nestedTypes + ", " + "options=" + options + ", " + "reserveds=" + reserveds + ", " + "fields=" + fields + ", " + "oneOfs=" + oneOfs + ", " + "extensions=" + extensions + ", " + "groups=" + groups + ", " + "extendDeclarations=" + extendDeclarations + ")";
+    return "MessageElement(location=" + location + ", name=" + name + ", documentation="
+        + documentation + ", nestedTypes=" + nestedTypes + ", options=" + options + ", reserveds="
+        + reserveds + ", fields=" + fields + ", oneOfs=" + oneOfs + ", extensions=" + extensions
+        + ", groups=" + groups + ", extendDeclarations=" + extendDeclarations + ")";
   }
 }

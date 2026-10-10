@@ -341,7 +341,8 @@ public final class WireRun {
       if (this == other) return true;
       if (!(other instanceof Module)) return false;
       Module that = (Module) other;
-      return Objects.equals(dependencies, that.dependencies) && Objects.equals(pruningRules, that.pruningRules);
+      return Objects.equals(dependencies, that.dependencies)
+          && Objects.equals(pruningRules, that.pruningRules);
     }
 
     @Override public int hashCode() {
@@ -349,7 +350,7 @@ public final class WireRun {
     }
 
     @Override public String toString() {
-      return "Module(" + "dependencies=" + dependencies + ", " + "pruningRules=" + pruningRules + ")";
+      return "Module(dependencies=" + dependencies + ", pruningRules=" + pruningRules + ")";
     }
   }
 

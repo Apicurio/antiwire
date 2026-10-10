@@ -125,7 +125,7 @@ public interface SyntaxRules {
     return PROTO_2_SYNTAX_RULES;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code SyntaxRules.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code SyntaxRules.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

@@ -121,7 +121,7 @@ public final class EnumConstant {
     return result;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code EnumConstant.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code EnumConstant.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

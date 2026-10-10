@@ -112,6 +112,7 @@ public final class OneOfElement {
   }
 
   @Override public String toString() {
-    return "OneOfElement(" + "name=" + name + ", " + "documentation=" + documentation + ", " + "fields=" + fields + ", " + "groups=" + groups + ", " + "options=" + options + ", " + "location=" + location + ")";
+    return "OneOfElement(name=" + name + ", documentation=" + documentation + ", fields=" + fields
+        + ", groups=" + groups + ", options=" + options + ", location=" + location + ")";
   }
 }

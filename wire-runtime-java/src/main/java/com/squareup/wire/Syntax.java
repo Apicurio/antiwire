@@ -39,7 +39,7 @@ public enum Syntax {
     throw new IllegalArgumentException("unexpected syntax: " + string);
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code Syntax.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code Syntax.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

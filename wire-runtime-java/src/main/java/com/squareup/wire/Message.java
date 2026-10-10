@@ -292,7 +292,7 @@ public abstract class Message<M extends Message<M, B>, B extends Message.Builder
     }
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code Message.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code Message.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 the antiwire authors
+ * Copyright (C) 2023 Square, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,75 @@
  */
 package com.squareup.wire.schema;
 
-/** Java name of upstream's {@code EventListeners.kt} file facade (TASK-33.2). */
+/**
+ * Create and return an instance of {@link EventListener.Factory}.
+ *
+ * <p>Java name of upstream's {@code EventListeners.kt} file facade.
+ */
 public final class EventListenersKt {
   private EventListenersKt() {
   }
 
+  /**
+   * Creates an {@link EventListener.Factory} for the given class name.
+   *
+   * @param eventListenerFactoryClass a fully qualified class name for a class that implements
+   *     {@link EventListener.Factory}. The class must have a no-arguments public constructor.
+   */
   public static EventListener.Factory newEventListenerFactory(String eventListenerFactoryClass) {
-    return EventListeners.newEventListenerFactory(eventListenerFactoryClass);
+    return new ClassNameEventListenerFactory(eventListenerFactoryClass);
+  }
+
+  /**
+   * This event listener factory is serializable (so Gradle can cache targets that use it). It
+   * works even if the delegate event listener class is itself not serializable.
+   */
+  private static final class ClassNameEventListenerFactory implements EventListener.Factory {
+    private final String eventListenerFactoryClass;
+
+    private transient EventListener.Factory cachedDelegate;
+
+    ClassNameEventListenerFactory(String eventListenerFactoryClass) {
+      this.eventListenerFactoryClass = eventListenerFactoryClass;
+    }
+
+    private EventListener.Factory delegate() {
+      EventListener.Factory cachedResult = cachedDelegate;
+      if (cachedResult != null) return cachedResult;
+
+      Class<?> eventListenerType;
+      try {
+        eventListenerType = Class.forName(eventListenerFactoryClass);
+      } catch (ClassNotFoundException exception) {
+        throw new IllegalArgumentException(
+            "Couldn't find EventListenerClass '" + eventListenerFactoryClass + "'");
+      }
+
+      java.lang.reflect.Constructor<?> constructor;
+      try {
+        constructor = eventListenerType.getConstructor();
+      } catch (NoSuchMethodException exception) {
+        throw new IllegalArgumentException(
+            "No public constructor on " + eventListenerFactoryClass);
+      }
+
+      Object newInstance;
+      try {
+        newInstance = constructor.newInstance();
+      } catch (ReflectiveOperationException exception) {
+        throw new RuntimeException(exception);
+      }
+      if (!(newInstance instanceof EventListener.Factory)) {
+        throw new IllegalArgumentException(
+            eventListenerFactoryClass + " does not implement EventListener.Factory");
+      }
+      EventListener.Factory result = (EventListener.Factory) newInstance;
+      this.cachedDelegate = result;
+      return result;
+    }
+
+    @Override public EventListener create() {
+      return delegate().create();
+    }
   }
 }

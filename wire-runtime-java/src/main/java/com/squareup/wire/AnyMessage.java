@@ -210,7 +210,7 @@ public final class AnyMessage extends Message<AnyMessage, AnyMessage.NoBuilder> 
     }
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code AnyMessage.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code AnyMessage.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

@@ -90,6 +90,7 @@ public final class EnumConstantElement {
   }
 
   @Override public String toString() {
-    return "EnumConstantElement(" + "location=" + location + ", " + "name=" + name + ", " + "tag=" + tag + ", " + "documentation=" + documentation + ", " + "options=" + options + ")";
+    return "EnumConstantElement(location=" + location + ", name=" + name + ", tag=" + tag
+        + ", documentation=" + documentation + ", options=" + options + ")";
   }
 }

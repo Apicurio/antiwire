@@ -111,6 +111,7 @@ public final class ExtensionsElement {
   }
 
   @Override public String toString() {
-    return "ExtensionsElement(" + "location=" + location + ", " + "documentation=" + documentation + ", " + "values=" + values + ", " + "options=" + options + ")";
+    return "ExtensionsElement(location=" + location + ", documentation=" + documentation
+        + ", values=" + values + ", options=" + options + ")";
   }
 }

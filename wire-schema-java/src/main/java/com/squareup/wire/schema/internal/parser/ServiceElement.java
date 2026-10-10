@@ -97,6 +97,7 @@ public final class ServiceElement {
   }
 
   @Override public String toString() {
-    return "ServiceElement(" + "location=" + location + ", " + "name=" + name + ", " + "documentation=" + documentation + ", " + "rpcs=" + rpcs + ", " + "options=" + options + ")";
+    return "ServiceElement(location=" + location + ", name=" + name + ", documentation="
+        + documentation + ", rpcs=" + rpcs + ", options=" + options + ")";
   }
 }

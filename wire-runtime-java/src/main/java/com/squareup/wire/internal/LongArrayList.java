@@ -57,7 +57,7 @@ public final class LongArrayList {
     return new LongArrayList(minElements);
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code LongArrayList.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code LongArrayList.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

@@ -201,7 +201,7 @@ public final class EmittingRules {
     return null;
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code EmittingRules.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code EmittingRules.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {

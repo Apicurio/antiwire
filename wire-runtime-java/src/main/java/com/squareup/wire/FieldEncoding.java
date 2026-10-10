@@ -67,7 +67,7 @@ public enum FieldEncoding {
     }
   }
 
-  /** Mirror of the Kotlin companion object: lets Java callers write {@code FieldEncoding.Companion.m(...)}. */
+  /** Kotlin companion mirror: Java may write {@code FieldEncoding.Companion.m(...)}. */
   public static final Companion Companion = new Companion();
 
   public static final class Companion {
