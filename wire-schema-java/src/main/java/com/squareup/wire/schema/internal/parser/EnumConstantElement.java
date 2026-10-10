@@ -88,4 +88,8 @@ public final class EnumConstantElement {
     int result = java.util.Objects.hashCode(location);
     result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + tag;result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(options);    return result;
   }
+
+  @Override public String toString() {
+    return "EnumConstantElement(" + "location=" + location + ", " + "name=" + name + ", " + "tag=" + tag + ", " + "documentation=" + documentation + ", " + "options=" + options + ")";
+  }
 }

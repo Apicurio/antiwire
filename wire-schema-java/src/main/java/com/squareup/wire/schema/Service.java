@@ -79,14 +79,14 @@ public final class Service {
     return null;
   }
 
-  void link(Linker linker) {
+  public void link(Linker linker) {
     Linker scoped = linker.withContext(this);
     for (Rpc rpc : rpcs) {
       rpc.link(scoped);
     }
   }
 
-  void linkOptions(Linker linker, boolean validate) {
+  public void linkOptions(Linker linker, boolean validate) {
     Linker scoped = linker.withContext(this);
     for (Rpc rpc : rpcs) {
       rpc.linkOptions(scoped, validate);
@@ -94,7 +94,7 @@ public final class Service {
     options.link(scoped, location, validate);
   }
 
-  void validate(Linker linker) {
+  public void validate(Linker linker) {
     Linker scoped = linker.withContext(this);
     validateRpcUniqueness(scoped, rpcs);
     for (Rpc rpc : rpcs) {
@@ -126,7 +126,7 @@ public final class Service {
     }
   }
 
-  Service retainAll(Schema schema, MarkSet markSet) {
+  public Service retainAll(Schema schema, MarkSet markSet) {
     // If this service is not retained, prune it.
     if (!markSet.contains(type)) {
       return null;

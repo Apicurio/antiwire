@@ -578,6 +578,15 @@ class Checker:
             elif 'Lokio/' in desc:
                 L.add(kind_name, ucls, label, shown, 'EXCLUDED',
                       'okio type in the signature; the consumer API is JDK-typed (DEC-14)', 'DEC-14')
+            elif 'Lcom/palantir/javapoet/' in desc or 'Lcom/squareup/kotlinpoet/' in desc:
+                L.add(kind_name, ucls, label, shown, 'EXCLUDED',
+                      'poet type in the signature: upstream uses the Palantir fork of JavaPoet (Java 17 '
+                      'class files); the port uses Square JavaPoet 1.13.0 for the Java 11 floor (DEC-3, '
+                      'parent pom javapoet.version)', 'DEC-3')
+            elif 'Lcom/google/common/' in desc:
+                L.add(kind_name, ucls, label, shown, 'EXCLUDED',
+                      'Guava type in the signature; the port has no Guava (pure-Java dependency '
+                      'policy, DEC-4)', 'DEC-4')
             elif OUT_OF_SCOPE_MEMBER.match(name):
                 L.add(kind_name, ucls, label, shown, 'EXCLUDED',
                       'member of a feature outside the port: Kotlin or Swift generator, Android output '

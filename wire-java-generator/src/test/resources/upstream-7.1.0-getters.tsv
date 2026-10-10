@@ -19,19 +19,19 @@ GAP	com.squareup.wire.ProtoAdapter	getType		kotlin.reflect.KClass	Kotlin type in
 EXPECTED	com.squareup.wire.ProtoAdapter	getTypeUrl		java.lang.String	
 EXPECTED	com.squareup.wire.ProtoReader32AsProtoReader	getDelegate		com.squareup.wire.ProtoReader32	
 EXPECTED	com.squareup.wire.ReverseProtoWriter	getByteCount		int	
-GAP	com.squareup.wire.WireCompiler	getCustomOptions		java.util.Map	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getCustomOut		java.lang.String	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
+EXPECTED	com.squareup.wire.WireCompiler	getCustomOptions		java.util.Map	
+EXPECTED	com.squareup.wire.WireCompiler	getCustomOut		java.lang.String	
 GAP	com.squareup.wire.WireCompiler	getEmitAndroid		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
 GAP	com.squareup.wire.WireCompiler	getEmitAndroidAnnotations		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getEmitAppliedOptions		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getEmitCompact		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getEmitDeclaredOptions		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
+EXPECTED	com.squareup.wire.WireCompiler	getEmitAppliedOptions		boolean	
+EXPECTED	com.squareup.wire.WireCompiler	getEmitCompact		boolean	
+EXPECTED	com.squareup.wire.WireCompiler	getEmitDeclaredOptions		boolean	
 GAP	com.squareup.wire.WireCompiler	getEmitProtoReader32		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getEventListenerFactoryClasses		java.util.List	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
+EXPECTED	com.squareup.wire.WireCompiler	getEventListenerFactoryClasses		java.util.List	
 GAP	com.squareup.wire.WireCompiler	getFs		okio.FileSystem	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getJavaExclusive		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
+EXPECTED	com.squareup.wire.WireCompiler	getJavaExclusive		boolean	
 GAP	com.squareup.wire.WireCompiler	getJavaInterop		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getJavaOut		java.lang.String	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
+EXPECTED	com.squareup.wire.WireCompiler	getJavaOut		java.lang.String	
 GAP	com.squareup.wire.WireCompiler	getKotlinBoxOneOfsMinSize		int	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
 GAP	com.squareup.wire.WireCompiler	getKotlinBuildersOnly		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
 GAP	com.squareup.wire.WireCompiler	getKotlinEnumMode		com.squareup.wire.kotlin.EnumMode	Kotlin type in the descriptor (no Java equivalent in the port)
@@ -44,19 +44,19 @@ GAP	com.squareup.wire.WireCompiler	getKotlinOut		java.lang.String	WireCompiler o
 GAP	com.squareup.wire.WireCompiler	getKotlinRpcCallStyle		com.squareup.wire.kotlin.RpcCallStyle	Kotlin type in the descriptor (no Java equivalent in the port)
 GAP	com.squareup.wire.WireCompiler	getKotlinRpcRole		com.squareup.wire.kotlin.RpcRole	Kotlin type in the descriptor (no Java equivalent in the port)
 GAP	com.squareup.wire.WireCompiler	getKotlinSingleMethodServices		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getLoadExhaustively		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getLog		com.squareup.wire.WireLogger	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getModules		java.util.Map	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getOpaqueTypes		java.util.List	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getPermitPackageCycles		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getProtoPaths		java.util.List	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getRejectUnusedRootsOrPrunes		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getSchemaHandlerFactoryClass		java.lang.String	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getSourceFileNames		java.util.List	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
+EXPECTED	com.squareup.wire.WireCompiler	getLoadExhaustively		boolean	
+EXPECTED	com.squareup.wire.WireCompiler	getLog		com.squareup.wire.WireLogger	
+EXPECTED	com.squareup.wire.WireCompiler	getModules		java.util.Map	
+EXPECTED	com.squareup.wire.WireCompiler	getOpaqueTypes		java.util.List	
+EXPECTED	com.squareup.wire.WireCompiler	getPermitPackageCycles		boolean	
+EXPECTED	com.squareup.wire.WireCompiler	getProtoPaths		java.util.List	
+EXPECTED	com.squareup.wire.WireCompiler	getRejectUnusedRootsOrPrunes		boolean	
+EXPECTED	com.squareup.wire.WireCompiler	getSchemaHandlerFactoryClass		java.lang.String	
+EXPECTED	com.squareup.wire.WireCompiler	getSourceFileNames		java.util.List	
 GAP	com.squareup.wire.WireCompiler	getSwiftExclusive		boolean	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
 GAP	com.squareup.wire.WireCompiler	getSwiftOut		java.lang.String	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getTreeShakingRoots		java.util.List	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
-GAP	com.squareup.wire.WireCompiler	getTreeShakingRubbish		java.util.List	WireCompiler option of a feature outside the port (Kotlin and Swift generators, DEC-6) or state the port keeps package-private
+EXPECTED	com.squareup.wire.WireCompiler	getTreeShakingRoots		java.util.List	
+EXPECTED	com.squareup.wire.WireCompiler	getTreeShakingRubbish		java.util.List	
 EXPECTED	com.squareup.wire.WireEnum	getValue		int	
 EXPECTED	com.squareup.wire.WireField$Label	isOneOf		boolean	
 EXPECTED	com.squareup.wire.WireField$Label	isPacked		boolean	
@@ -115,7 +115,7 @@ EXPECTED	com.squareup.wire.internal.OneOfBinding	isMessage		boolean
 EXPECTED	com.squareup.wire.internal.RuntimeMessageAdapter	getFieldBindingsArray		com.squareup.wire.internal.FieldOrOneOfBinding[]	
 EXPECTED	com.squareup.wire.internal.RuntimeMessageAdapter	getFields		java.util.Map	
 EXPECTED	com.squareup.wire.internal.RuntimeMessageAdapter	getJsonAlternateNames		java.util.List	
-GAP	com.squareup.wire.internal.RuntimeMessageAdapter	getJsonName	com.squareup.wire.internal.FieldOrOneOfBinding	java.lang.String	Kotlin extension-style helper taking a binding, no port member
+EXPECTED	com.squareup.wire.internal.RuntimeMessageAdapter	getJsonName	com.squareup.wire.internal.FieldOrOneOfBinding	java.lang.String	
 EXPECTED	com.squareup.wire.internal.RuntimeMessageAdapter	getJsonNames		java.util.List	
 EXPECTED	com.squareup.wire.internal.SealedOneOfBinding	getDeclaredName		java.lang.String	
 EXPECTED	com.squareup.wire.internal.SealedOneOfBinding	getFromBuilder	com.squareup.wire.Message$Builder	java.lang.Object	

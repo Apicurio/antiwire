@@ -110,4 +110,8 @@ public final class OneOfElement {
     int result = java.util.Objects.hashCode(name);
     result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(fields);result = 31 * result + java.util.Objects.hashCode(groups);result = 31 * result + java.util.Objects.hashCode(options);result = 31 * result + java.util.Objects.hashCode(location);    return result;
   }
+
+  @Override public String toString() {
+    return "OneOfElement(" + "name=" + name + ", " + "documentation=" + documentation + ", " + "fields=" + fields + ", " + "groups=" + groups + ", " + "options=" + options + ", " + "location=" + location + ")";
+  }
 }

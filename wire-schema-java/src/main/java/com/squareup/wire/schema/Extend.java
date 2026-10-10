@@ -60,7 +60,7 @@ public final class Extend {
     return ProtoMember.get(type, field);
   }
 
-  void link(Linker linker) {
+  public void link(Linker linker) {
     Linker scoped = linker.withContext(this);
     type = scoped.resolveMessageType(name);
     Type resolved = scoped.get(type);
@@ -72,21 +72,21 @@ public final class Extend {
     }
   }
 
-  void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
+  public void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
     Linker scoped = linker.withContext(this);
     for (Field field : fields) {
       field.linkOptions(scoped, syntaxRules, validate);
     }
   }
 
-  void validate(Linker linker, SyntaxRules syntaxRules) {
+  public void validate(Linker linker, SyntaxRules syntaxRules) {
     Linker scoped = linker.withContext(this);
     scoped.validateImportForType(location, type);
 
     syntaxRules.validateExtension(ProtoType.get(name), scoped.getErrors());
   }
 
-  Extend retainAll(Schema schema, MarkSet markSet) {
+  public Extend retainAll(Schema schema, MarkSet markSet) {
     List<Field> retainedFields = Field.retainAll(schema, markSet, type, fields);
     if (retainedFields.isEmpty()) return null;
     Extend result = new Extend(location, documentation, name, retainedFields);
@@ -94,7 +94,7 @@ public final class Extend {
     return result;
   }
 
-  Extend retainLinked(java.util.Set<Field> linkedFields) {
+  public Extend retainLinked(java.util.Set<Field> linkedFields) {
     List<Field> retainedFields = new ArrayList<>();
     for (Field field : fields) {
       if (linkedFields.contains(field)) retainedFields.add(field);

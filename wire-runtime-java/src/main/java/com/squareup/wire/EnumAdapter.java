@@ -31,12 +31,12 @@ public abstract class EnumAdapter<E extends WireEnum> extends ProtoAdapter<E> {
 
   /** Obsolete; for Java classes generated before identity was added. */
   public EnumAdapter(Class<E> type, Syntax syntax) {
-    this(type, syntax, Internal.identityOrNull(type));
+    this(type, syntax, Internal.getIdentityOrNull(type));
   }
 
   /** Obsolete; for Java classes generated before syntax was added. */
   public EnumAdapter(Class<E> type) {
-    this(type, Syntax.PROTO_2, Internal.identityOrNull(type));
+    this(type, Syntax.PROTO_2, Internal.getIdentityOrNull(type));
   }
 
   @Override public int encodedSize(E value) {

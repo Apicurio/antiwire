@@ -69,7 +69,7 @@ public final class Options {
     return Collections.emptyMap();
   }
 
-  Options retainLinked() {
+  public Options retainLinked() {
     return new Options(optionType, Collections.emptyList());
   }
 
@@ -98,7 +98,7 @@ public final class Options {
     return false;
   }
 
-  void link(Linker linker, Location location, boolean validate) {
+  public void link(Linker linker, Location location, boolean validate) {
     List<LinkedOptionEntry> entries = Collections.emptyList();
 
     for (OptionElement option : optionElements) {
@@ -367,7 +367,7 @@ public final class Options {
     }
   }
 
-  Options retainAll(Schema schema, MarkSet markSet) {
+  public Options retainAll(Schema schema, MarkSet markSet) {
     if (entries == null || entries.isEmpty()) return this; // Nothing to prune.
 
     Options result = new Options(optionType, optionElements);

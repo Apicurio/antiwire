@@ -17,6 +17,7 @@ package com.squareup.wire.schema;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Map;
 
 public final class CustomTarget extends Target {
@@ -154,5 +155,20 @@ public final class CustomTarget extends Target {
 
   public SchemaHandler.Factory getSchemaHandlerFactory() {
     return schemaHandlerFactory;
+  }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof CustomTarget)) return false;
+    CustomTarget that = (CustomTarget) other;
+    return Objects.equals(includes, that.includes) && Objects.equals(excludes, that.excludes) && exclusive == that.exclusive && Objects.equals(outDirectory, that.outDirectory) && Objects.equals(options, that.options) && Objects.equals(schemaHandlerFactory, that.schemaHandlerFactory);
+  }
+
+  @Override public int hashCode() {
+    return Objects.hash(includes, excludes, exclusive, outDirectory, options, schemaHandlerFactory);
+  }
+
+  @Override public String toString() {
+    return "CustomTarget(" + "includes=" + includes + ", " + "excludes=" + excludes + ", " + "exclusive=" + exclusive + ", " + "outDirectory=" + outDirectory + ", " + "options=" + options + ", " + "schemaHandlerFactory=" + schemaHandlerFactory + ")";
   }
 }

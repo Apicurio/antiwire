@@ -56,27 +56,27 @@ public final class OneOf {
     return options;
   }
 
-  void link(Linker linker) {
+  public void link(Linker linker) {
     for (Field field : fields) {
       field.link(linker);
     }
   }
 
-  void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
+  public void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
     for (Field field : fields) {
       field.linkOptions(linker, syntaxRules, validate);
     }
     options.link(linker, location, validate);
   }
 
-  OneOf retainAll(Schema schema, MarkSet markSet, ProtoType enclosingType) {
+  public OneOf retainAll(Schema schema, MarkSet markSet, ProtoType enclosingType) {
     List<Field> retainedFields = Field.retainAll(schema, markSet, enclosingType, fields);
     if (retainedFields.isEmpty()) return null;
     return new OneOf(name, documentation, retainedFields, location,
         options.retainAll(schema, markSet));
   }
 
-  OneOf retainLinked() {
+  public OneOf retainLinked() {
     List<Field> retainedFields = Field.retainLinked(fields);
     if (retainedFields.isEmpty()) return null;
     return new OneOf(name, documentation, retainedFields, location, options.retainLinked());

@@ -53,6 +53,11 @@ public final class ErrorCollector {
   }
 
   /** Add {@code message} as an error to this collector. */
+  /** Kotlin spells {@code errors += message}; Java callers of upstream call this name. */
+  public void plusAssign(String message) {
+    add(message);
+  }
+
   public void add(String message) {
     StringBuilder error = new StringBuilder();
     error.append(message);

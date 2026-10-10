@@ -42,8 +42,8 @@ import org.junit.jupiter.api.Test;
  * and when the generated file no longer matches the number of rows it was built with.
  */
 public class AccessorNameParityTest {
-  private static final int EXPECTED_ROWS = 406;
-  private static final int GAP_ROWS = 55;
+  private static final int EXPECTED_ROWS = 426;
+  private static final int GAP_ROWS = 35;
 
   @Test
   public void everyUpstreamGetterExistsWithTheSameSignature() throws Exception {

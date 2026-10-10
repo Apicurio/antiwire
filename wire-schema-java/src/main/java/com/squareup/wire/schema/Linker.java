@@ -350,7 +350,7 @@ public class Linker {
   }
 
   /** Adds {@code type}. */
-  void addType(ProtoType protoType, Type type) {
+  public void addType(ProtoType protoType, Type type) {
     protoTypeNames.put(protoType.toString(), type);
   }
 
@@ -387,7 +387,7 @@ public class Linker {
   }
 
   /** Mark a field as used in an option so its file is retained in the schema. */
-  void request(Field field) {
+  public void request(Field field) {
     requestedFields.add(field);
   }
 
@@ -415,7 +415,7 @@ public class Linker {
    * Validate that the tags of {@code fields} are unique and in range, that proto3 message cannot
    * reference proto2 enums.
    */
-  void validateFields(Iterable<Field> fields, List<Reserved> reserveds,
+  public void validateFields(Iterable<Field> fields, List<Reserved> reserveds,
       SyntaxRules syntaxRules) {
     Map<Integer, Set<Field>> tagToField = new LinkedHashMap<>();
     Map<String, Set<Field>> nameToField = new LinkedHashMap<>();
@@ -543,7 +543,7 @@ public class Linker {
     }
   }
 
-  void validateEnumConstantNameUniqueness(Iterable<Type> nestedTypes) {
+  public void validateEnumConstantNameUniqueness(Iterable<Type> nestedTypes) {
     Map<String, Set<EnumType>> nameToType = new LinkedHashMap<>();
     for (Type type : nestedTypes) {
       if (type instanceof EnumType) {

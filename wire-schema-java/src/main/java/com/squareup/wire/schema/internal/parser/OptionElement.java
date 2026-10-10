@@ -49,6 +49,10 @@ public final class OptionElement {
       this.value = value;
     }
 
+    @Override public String toString() {
+      return "OptionPrimitive(kind=" + kind + ", value=" + value + ")";
+    }
+
     public OptionPrimitive copy(Kind kind, Object value) {
       return new OptionPrimitive(kind, value);
     }

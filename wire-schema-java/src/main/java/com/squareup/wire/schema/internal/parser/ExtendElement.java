@@ -83,4 +83,8 @@ public final class ExtendElement {
     int result = java.util.Objects.hashCode(location);
     result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(fields);    return result;
   }
+
+  @Override public String toString() {
+    return "ExtendElement(" + "location=" + location + ", " + "name=" + name + ", " + "documentation=" + documentation + ", " + "fields=" + fields + ")";
+  }
 }

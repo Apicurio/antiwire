@@ -101,4 +101,8 @@ public final class GroupElement {
     int result = java.util.Objects.hashCode(label);
     result = 31 * result + java.util.Objects.hashCode(location);result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + tag;result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(fields);    return result;
   }
+
+  @Override public String toString() {
+    return "GroupElement(" + "label=" + label + ", " + "location=" + location + ", " + "name=" + name + ", " + "tag=" + tag + ", " + "documentation=" + documentation + ", " + "fields=" + fields + ")";
+  }
 }

@@ -227,7 +227,7 @@ public final class MessageType extends Type {
     extensionFields.addAll(fields);
   }
 
-  @Override void linkMembers(Linker linker) {
+  @Override public void linkMembers(Linker linker) {
     Linker scoped = linker.withContext(this);
     for (Field field : declaredFields) {
       field.link(scoped);
@@ -237,7 +237,7 @@ public final class MessageType extends Type {
     }
   }
 
-  @Override void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
+  @Override public void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
     Linker scoped = linker.withContext(this);
     for (Type nestedType : nestedTypes) {
       nestedType.linkOptions(scoped, syntaxRules, validate);
@@ -253,7 +253,7 @@ public final class MessageType extends Type {
     deprecated = options.get(DEPRECATED);
   }
 
-  @Override void validate(Linker linker, SyntaxRules syntaxRules) {
+  @Override public void validate(Linker linker, SyntaxRules syntaxRules) {
     Linker scoped = linker.withContext(this);
     scoped.validateFields(getFieldsAndOneOfFields(), reserveds, syntaxRules);
     scoped.validateEnumConstantNameUniqueness(nestedTypes);
@@ -268,7 +268,7 @@ public final class MessageType extends Type {
     }
   }
 
-  @Override Type retainAll(Schema schema, MarkSet markSet) {
+  @Override public Type retainAll(Schema schema, MarkSet markSet) {
     List<Type> retainedNestedTypes = new ArrayList<>();
     for (Type nested : nestedTypes) {
       Type retained = nested.retainAll(schema, markSet);
@@ -304,7 +304,7 @@ public final class MessageType extends Type {
     return result;
   }
 
-  @Override Type retainLinked(Set<ProtoType> linkedTypes, Set<Field> linkedFields) {
+  @Override public Type retainLinked(Set<ProtoType> linkedTypes, Set<Field> linkedFields) {
     List<Type> retainedNestedTypes = new ArrayList<>();
     for (Type nested : nestedTypes) {
       Type retained = nested.retainLinked(linkedTypes, linkedFields);

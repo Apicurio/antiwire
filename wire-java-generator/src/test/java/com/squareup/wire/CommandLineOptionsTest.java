@@ -53,18 +53,18 @@ public class CommandLineOptionsTest {
   @Test
   public void protoPaths() throws Exception {
     WireCompiler compiler = parseArgs("--java_out=.");
-    assertTrue(compiler.protoPaths.isEmpty());
+    assertTrue(compiler.getProtoPaths().isEmpty());
 
     compiler = parseArgs("--java_out=.", "--proto_path=foo/bar");
-    assertEquals(1, compiler.protoPaths.size());
-    assertTrue(compiler.protoPaths.contains("foo/bar"));
+    assertEquals(1, compiler.getProtoPaths().size());
+    assertTrue(compiler.getProtoPaths().contains("foo/bar"));
 
     compiler = parseArgs(
         "--java_out=.",
         "--proto_path=foo/bar",
         "--proto_path=one/two",
         "--proto_path=three/four");
-    assertEquals(Arrays.asList("foo/bar", "one/two", "three/four"), compiler.protoPaths);
+    assertEquals(Arrays.asList("foo/bar", "one/two", "three/four"), compiler.getProtoPaths());
   }
 
   @Test
@@ -72,16 +72,16 @@ public class CommandLineOptionsTest {
     assertThrows(WireException.class, () -> WireCompiler.forArgs());
 
     WireCompiler compiler = parseArgs("--java_out=baz/qux");
-    assertEquals("baz/qux", compiler.javaOut);
+    assertEquals("baz/qux", compiler.getJavaOut());
   }
 
   @Test
   public void sourceFileNames() throws Exception {
     WireCompiler compiler = parseArgs("--java_out=.");
-    assertTrue(compiler.sourceFileNames.isEmpty());
+    assertTrue(compiler.getSourceFileNames().isEmpty());
 
     compiler = parseArgs("--java_out=.", "baz", "qux");
-    assertEquals(Arrays.asList("baz", "qux"), compiler.sourceFileNames);
+    assertEquals(Arrays.asList("baz", "qux"), compiler.getSourceFileNames());
   }
 
   @Test
@@ -94,11 +94,11 @@ public class CommandLineOptionsTest {
       out.close();
 
       WireCompiler compiler = parseArgs("--java_out=.", "--files=" + tmpFile.getAbsolutePath());
-      assertEquals(Arrays.asList("foo", "bar"), compiler.sourceFileNames);
+      assertEquals(Arrays.asList("foo", "bar"), compiler.getSourceFileNames());
 
       // Test both --files and bare filenames together
       compiler = parseArgs("--java_out=.", "--files=" + tmpFile.getAbsolutePath(), "baz");
-      assertEquals(Arrays.asList("foo", "bar", "baz"), compiler.sourceFileNames);
+      assertEquals(Arrays.asList("foo", "bar", "baz"), compiler.getSourceFileNames());
     } finally {
       tmpFile.delete();
     }
@@ -107,17 +107,17 @@ public class CommandLineOptionsTest {
   @Test
   public void roots() throws Exception {
     WireCompiler compiler = parseArgs("--java_out=.");
-    assertEquals(Arrays.asList("*"), compiler.treeShakingRoots);
-    assertTrue(compiler.treeShakingRubbish.isEmpty());
+    assertEquals(Arrays.asList("*"), compiler.getTreeShakingRoots());
+    assertTrue(compiler.getTreeShakingRubbish().isEmpty());
 
     compiler = parseArgs("--java_out=.", "--includes=com.example.Foo");
-    assertEquals(Arrays.asList("com.example.Foo"), compiler.treeShakingRoots);
+    assertEquals(Arrays.asList("com.example.Foo"), compiler.getTreeShakingRoots());
 
     compiler = parseArgs("--java_out=.", "--includes=com.example.Foo,com.example.Bar");
-    assertEquals(Arrays.asList("com.example.Foo", "com.example.Bar"), compiler.treeShakingRoots);
+    assertEquals(Arrays.asList("com.example.Foo", "com.example.Bar"), compiler.getTreeShakingRoots());
 
     compiler = parseArgs("--java_out=.", "--ignore_unused_roots_and_prunes");
-    assertFalse(compiler.rejectUnusedRootsOrPrunes);
+    assertFalse(compiler.getRejectUnusedRootsOrPrunes());
   }
 
   @Test
@@ -129,13 +129,13 @@ public class CommandLineOptionsTest {
         "--custom_option=key2,value1,value2",
         "--custom_option=key3,three",
         "--custom_option=key1,override");
-    assertEquals("src/custom/out", compiler.customOut);
-    assertEquals("com.squareup.wire.MyCustomHandlerFactory", compiler.schemaHandlerFactoryClass);
+    assertEquals("src/custom/out", compiler.getCustomOut());
+    assertEquals("com.squareup.wire.MyCustomHandlerFactory", compiler.getSchemaHandlerFactoryClass());
     Map<String, String> expected = new LinkedHashMap<>();
     expected.put("key1", "override");
     expected.put("key2", "value1,value2");
     expected.put("key3", "three");
-    assertEquals(expected, compiler.customOptions);
+    assertEquals(expected, compiler.getCustomOptions());
   }
 
   @Test
@@ -154,10 +154,10 @@ public class CommandLineOptionsTest {
     Map<String, WireRun.Module> expected = new LinkedHashMap<>();
     expected.put("a", new WireRun.Module());
     expected.put("b", new WireRun.Module(java.util.Collections.singleton("a")));
-    assertEquals(expected.keySet(), compiler.modules.keySet());
-    assertTrue(compiler.modules.get("a").getDependencies().isEmpty());
-    assertNullModulePruningRules(compiler.modules.get("a"));
-    assertEquals(java.util.Collections.singleton("a"), compiler.modules.get("b").getDependencies());
+    assertEquals(expected.keySet(), compiler.getModules().keySet());
+    assertTrue(compiler.getModules().get("a").getDependencies().isEmpty());
+    assertNullModulePruningRules(compiler.getModules().get("a"));
+    assertEquals(java.util.Collections.singleton("a"), compiler.getModules().get("b").getDependencies());
   }
 
   private static void assertNullModulePruningRules(WireRun.Module module) {

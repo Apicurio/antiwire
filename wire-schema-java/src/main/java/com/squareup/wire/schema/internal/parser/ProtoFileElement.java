@@ -190,4 +190,8 @@ public final class ProtoFileElement {
       return ProtoFileElement.empty(path);
     }
   }
+
+  @Override public String toString() {
+    return "ProtoFileElement(" + "location=" + location + ", " + "packageName=" + packageName + ", " + "syntax=" + syntax + ", " + "imports=" + imports + ", " + "publicImports=" + publicImports + ", " + "weakImports=" + weakImports + ", " + "types=" + types + ", " + "services=" + services + ", " + "extendDeclarations=" + extendDeclarations + ", " + "options=" + options + ")";
+  }
 }

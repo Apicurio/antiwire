@@ -45,7 +45,7 @@ public final class Extensions {
     return values;
   }
 
-  void validate(Linker linker) {
+  public void validate(Linker linker) {
     Linker scoped = linker.withContext(this);
     List<String> outOfRangeTags = new ArrayList<>();
     for (Object value : values) {

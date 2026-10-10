@@ -95,4 +95,8 @@ public final class ServiceElement {
     int result = java.util.Objects.hashCode(location);
     result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(rpcs);result = 31 * result + java.util.Objects.hashCode(options);    return result;
   }
+
+  @Override public String toString() {
+    return "ServiceElement(" + "location=" + location + ", " + "name=" + name + ", " + "documentation=" + documentation + ", " + "rpcs=" + rpcs + ", " + "options=" + options + ")";
+  }
 }

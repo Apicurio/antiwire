@@ -24,7 +24,7 @@ public final class RuntimeEnumAdapter<E extends WireEnum> extends EnumAdapter<E>
   private volatile Method fromValueMethod; // Lazy to avoid reflection during class loading.
 
   public RuntimeEnumAdapter(Class<E> javaType, Syntax syntax) {
-    super(javaType, syntax, Internal.identityOrNull(javaType));
+    super(javaType, syntax, Internal.getIdentityOrNull(javaType));
     this.javaType = javaType;
   }
 

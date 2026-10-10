@@ -91,24 +91,24 @@ public final class Rpc {
     return responseType;
   }
 
-  void link(Linker linker) {
+  public void link(Linker linker) {
     Linker scoped = linker.withContext(this);
     requestType = scoped.resolveMessageType(requestTypeElement);
     responseType = scoped.resolveMessageType(responseTypeElement);
   }
 
-  void linkOptions(Linker linker, boolean validate) {
+  public void linkOptions(Linker linker, boolean validate) {
     Linker scoped = linker.withContext(this);
     options.link(scoped, location, validate);
   }
 
-  void validate(Linker linker) {
+  public void validate(Linker linker) {
     Linker scoped = linker.withContext(this);
     scoped.validateImportForType(location, requestType);
     scoped.validateImportForType(location, responseType);
   }
 
-  Rpc retainAll(Schema schema, MarkSet markSet) {
+  public Rpc retainAll(Schema schema, MarkSet markSet) {
     if (!markSet.contains(requestType) || !markSet.contains(responseType)) return null;
     Rpc result = new Rpc(location, name, documentation, requestTypeElement, responseTypeElement,
         requestStreaming, responseStreaming, options.retainAll(schema, markSet));

@@ -200,7 +200,7 @@ public final class Field {
         && !(linker.get(type) instanceof MessageType);
   }
 
-  void link(Linker linker) {
+  public void link(Linker linker) {
     type = linker.withContext(this).resolveType(elementType);
     if (ProtoType.BYTES.equals(type) && !elementType.equals("bytes")) {
       // The type has been opaqued, we update its proto definition as well.
@@ -208,7 +208,7 @@ public final class Field {
     }
   }
 
-  void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
+  public void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
     Linker scoped = linker.withContext(this);
     options.link(scoped, location, validate);
     deprecated = options.get(DEPRECATED);
@@ -223,7 +223,7 @@ public final class Field {
     jsonName = syntaxRules.jsonName(name, declaredJsonName);
   }
 
-  void validate(Linker linker, SyntaxRules syntaxRules) {
+  public void validate(Linker linker, SyntaxRules syntaxRules) {
     Linker scoped = linker.withContext(this);
     if (isPacked() && !isPackable(scoped, type)) {
       scoped.getErrors().add("packed=true not permitted on " + type);

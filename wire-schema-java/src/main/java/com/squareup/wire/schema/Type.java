@@ -40,13 +40,13 @@ public abstract class Type {
 
   public abstract Syntax getSyntax();
 
-  abstract void linkMembers(Linker linker);
+  public abstract void linkMembers(Linker linker);
 
-  abstract void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate);
+  public abstract void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate);
 
-  abstract void validate(Linker linker, SyntaxRules syntaxRules);
+  public abstract void validate(Linker linker, SyntaxRules syntaxRules);
 
-  abstract Type retainAll(Schema schema, MarkSet markSet);
+  public abstract Type retainAll(Schema schema, MarkSet markSet);
 
   /**
    * Returns a copy of this containing only the types in {@code linkedTypes} and extensions in
@@ -56,7 +56,7 @@ public abstract class Type {
    * <p>The returned type is a shadow of its former self. It is useful for linking against, but
    * lacks most of the members of the original type.
    */
-  abstract Type retainLinked(java.util.Set<ProtoType> linkedTypes,
+  public abstract Type retainLinked(java.util.Set<ProtoType> linkedTypes,
       java.util.Set<Field> linkedFields);
 
   /** Returns all types and subtypes which are linked to the type. */

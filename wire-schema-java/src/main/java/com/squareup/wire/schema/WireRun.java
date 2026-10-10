@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import okio.FileSystem;
 import okio.Path;
@@ -334,6 +335,21 @@ public final class WireRun {
 
     public PruningRules getPruningRules() {
       return pruningRules;
+    }
+
+    @Override public boolean equals(Object other) {
+      if (this == other) return true;
+      if (!(other instanceof Module)) return false;
+      Module that = (Module) other;
+      return Objects.equals(dependencies, that.dependencies) && Objects.equals(pruningRules, that.pruningRules);
+    }
+
+    @Override public int hashCode() {
+      return Objects.hash(dependencies, pruningRules);
+    }
+
+    @Override public String toString() {
+      return "Module(" + "dependencies=" + dependencies + ", " + "pruningRules=" + pruningRules + ")";
     }
   }
 

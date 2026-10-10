@@ -205,4 +205,8 @@ public final class MessageElement implements TypeElement {
     int result = java.util.Objects.hashCode(location);
     result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(nestedTypes);result = 31 * result + java.util.Objects.hashCode(options);result = 31 * result + java.util.Objects.hashCode(reserveds);result = 31 * result + java.util.Objects.hashCode(fields);result = 31 * result + java.util.Objects.hashCode(oneOfs);result = 31 * result + java.util.Objects.hashCode(extensions);result = 31 * result + java.util.Objects.hashCode(groups);result = 31 * result + java.util.Objects.hashCode(extendDeclarations);    return result;
   }
+
+  @Override public String toString() {
+    return "MessageElement(" + "location=" + location + ", " + "name=" + name + ", " + "documentation=" + documentation + ", " + "nestedTypes=" + nestedTypes + ", " + "options=" + options + ", " + "reserveds=" + reserveds + ", " + "fields=" + fields + ", " + "oneOfs=" + oneOfs + ", " + "extensions=" + extensions + ", " + "groups=" + groups + ", " + "extendDeclarations=" + extendDeclarations + ")";
+  }
 }

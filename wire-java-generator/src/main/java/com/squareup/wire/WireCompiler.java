@@ -105,27 +105,27 @@ import okio.Path;
  */
 public final class WireCompiler {
   final FileSystem fs;
-  final WireLogger log;
-  final List<String> protoPaths;
-  final String javaOut;
-  final String customOut;
-  final String schemaHandlerFactoryClass;
-  final List<String> sourceFileNames;
-  final List<String> treeShakingRoots;
-  final List<String> treeShakingRubbish;
-  final boolean rejectUnusedRootsOrPrunes;
-  final Map<String, WireRun.Module> modules;
+  private final WireLogger log;
+  private final List<String> protoPaths;
+  private final String javaOut;
+  private final String customOut;
+  private final String schemaHandlerFactoryClass;
+  private final List<String> sourceFileNames;
+  private final List<String> treeShakingRoots;
+  private final List<String> treeShakingRubbish;
+  private final boolean rejectUnusedRootsOrPrunes;
+  private final Map<String, WireRun.Module> modules;
   final boolean emitAndroid;
   final boolean emitAndroidAnnotations;
-  final boolean emitCompact;
-  final boolean emitDeclaredOptions;
-  final boolean emitAppliedOptions;
-  final boolean permitPackageCycles;
-  final boolean loadExhaustively;
-  final boolean javaExclusive;
-  final List<String> eventListenerFactoryClasses;
-  final Map<String, String> customOptions;
-  final List<String> opaqueTypes;
+  private final boolean emitCompact;
+  private final boolean emitDeclaredOptions;
+  private final boolean emitAppliedOptions;
+  private final boolean permitPackageCycles;
+  private final boolean loadExhaustively;
+  private final boolean javaExclusive;
+  private final List<String> eventListenerFactoryClasses;
+  private final Map<String, String> customOptions;
+  private final List<String> opaqueTypes;
 
   WireCompiler(
       FileSystem fs,
@@ -318,6 +318,82 @@ public final class WireCompiler {
   private static final String CUSTOM_OPTION_FLAG = "--custom_option=";
   private static final String OPAQUE_TYPES_FLAG = "--opaque_types=";
   private static final String IGNORE_UNUSED_ROOTS_AND_PRUNES = "--ignore_unused_roots_and_prunes";
+
+  public Map<String, String> getCustomOptions() {
+    return customOptions;
+  }
+
+  public String getCustomOut() {
+    return customOut;
+  }
+
+  public boolean getEmitAppliedOptions() {
+    return emitAppliedOptions;
+  }
+
+  public boolean getEmitCompact() {
+    return emitCompact;
+  }
+
+  public boolean getEmitDeclaredOptions() {
+    return emitDeclaredOptions;
+  }
+
+  public List<String> getEventListenerFactoryClasses() {
+    return eventListenerFactoryClasses;
+  }
+
+  public boolean getJavaExclusive() {
+    return javaExclusive;
+  }
+
+  public String getJavaOut() {
+    return javaOut;
+  }
+
+  public boolean getLoadExhaustively() {
+    return loadExhaustively;
+  }
+
+  public WireLogger getLog() {
+    return log;
+  }
+
+  public Map<String, WireRun.Module> getModules() {
+    return modules;
+  }
+
+  public List<String> getOpaqueTypes() {
+    return opaqueTypes;
+  }
+
+  public boolean getPermitPackageCycles() {
+    return permitPackageCycles;
+  }
+
+  public List<String> getProtoPaths() {
+    return protoPaths;
+  }
+
+  public boolean getRejectUnusedRootsOrPrunes() {
+    return rejectUnusedRootsOrPrunes;
+  }
+
+  public String getSchemaHandlerFactoryClass() {
+    return schemaHandlerFactoryClass;
+  }
+
+  public List<String> getSourceFileNames() {
+    return sourceFileNames;
+  }
+
+  public List<String> getTreeShakingRoots() {
+    return treeShakingRoots;
+  }
+
+  public List<String> getTreeShakingRubbish() {
+    return treeShakingRubbish;
+  }
 
   public static void main(String[] args) {
     try {

@@ -181,4 +181,8 @@ public final class FieldElement {
     int result = java.util.Objects.hashCode(location);
     result = 31 * result + java.util.Objects.hashCode(label);result = 31 * result + java.util.Objects.hashCode(type);result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(defaultValue);result = 31 * result + java.util.Objects.hashCode(jsonName);result = 31 * result + tag;result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(options);    return result;
   }
+
+  @Override public String toString() {
+    return "FieldElement(" + "location=" + location + ", " + "label=" + label + ", " + "type=" + type + ", " + "name=" + name + ", " + "defaultValue=" + defaultValue + ", " + "jsonName=" + jsonName + ", " + "tag=" + tag + ", " + "documentation=" + documentation + ", " + "options=" + options + ")";
+  }
 }

@@ -19,6 +19,7 @@ import com.squareup.wire.FieldEncoding;
 import com.squareup.wire.FieldMask;
 import com.squareup.wire.ProtoAdapter;
 import com.squareup.wire.ProtoReader;
+import com.squareup.wire.ProtoReader32;
 import com.squareup.wire.ProtoWriter;
 import com.squareup.wire.ReverseProtoWriter;
 import okio.Buffer;
@@ -34,9 +35,9 @@ import java.util.Map;
  * Methods for generated code use only. Not subject to public API rules. Upstream declares these
  * as Kotlin file functions on class {@code Internal}; they become static methods here.
  *
- * <p>Batch scope note (TASK-6): the {@code decodePrimitive_*} overloads taking the 32-bit
- * reader stay unported (the reader defaults route through the adapter wrapper, byte-identical
- * and owned by TASK-20 if the direct forms ever matter for performance); the Instant and Duration
+ * <p>Batch scope note (TASK-6): the {@code decodePrimitive_*} and {@code decodeMessageOrMerge}
+ * overloads taking the 32-bit reader delegate to the base reader through
+ * {@code asProtoReader()} (same bytes, TASK-33.2); the Instant and Duration
  * {@code commonEquals}/{@code commonHashCode} helpers exist only for non-JVM platforms where
  * those types are real classes, so they are not ported to the JVM-only artifact.
  */
@@ -151,7 +152,7 @@ public final class Internal {
   }
 
   /** Returns the enum constant of {@code type} with tag 0, or null. */
-  public static <E extends com.squareup.wire.WireEnum> E identityOrNull(Class<E> type) {
+  public static <E extends com.squareup.wire.WireEnum> E getIdentityOrNull(Class<E> type) {
     for (E constant : type.getEnumConstants()) {
       if (constant.getValue() == 0) return constant;
     }
@@ -295,24 +296,18 @@ public final class Internal {
     return (oneOfName + "_keys").toUpperCase(Locale.ROOT);
   }
 
-  /**
-   * Redacts each element in place and returns the list, matching the JVM multifile Internal's
-   * mutating contract that generated Java code relies on (it ignores the return value); the
-   * map-based common variant's only in-repo caller assigns the result, which stays correct.
-   */
-  public static <T> List<T> redactElements(List<T> list, ProtoAdapter<T> adapter) {
+  /** Redacts each element of {@code list} in place, as upstream's JVM {@code Internal} does. */
+  public static <T> void redactElements(List<T> list, ProtoAdapter<T> adapter) {
     for (int i = 0; i < list.size(); i++) {
       list.set(i, adapter.redact(list.get(i)));
     }
-    return list;
   }
 
-  public static <K, V> Map<K, V> redactElements(Map<K, V> map, ProtoAdapter<V> adapter) {
-    Map<K, V> result = new LinkedHashMap<>(map.size());
-    for (Map.Entry<K, V> entry : map.entrySet()) {
-      result.put(entry.getKey(), adapter.redact(entry.getValue()));
+  /** Redacts each value of {@code map} in place, as upstream's JVM {@code Internal} does. */
+  public static <T> void redactElements(Map<?, T> map, ProtoAdapter<T> adapter) {
+    for (Map.Entry<?, T> entry : map.entrySet()) {
+      entry.setValue(adapter.redact(entry.getValue()));
     }
-    return result;
   }
 
   /**
@@ -321,6 +316,11 @@ public final class Internal {
    * merged: repeated fields are concatenated, singular fields take the later value.
    */
   @SuppressWarnings("deprecation") // Engine layer: merge re-encodes through the okio buffer forms (docs/api-surface.md).
+  public static <E> E decodeMessageOrMerge(ProtoAdapter<E> adapter, ProtoReader32 reader, E existing)
+      throws java.io.IOException {
+    return decodeMessageOrMerge(adapter, reader.asProtoReader(), existing);
+  }
+
   public static <E> E decodeMessageOrMerge(ProtoAdapter<E> adapter, ProtoReader reader, E existing)
       throws java.io.IOException {
     if (existing == null) return adapter.decode(reader);
@@ -380,6 +380,54 @@ public final class Internal {
 
   public static long decodePrimitive_uint64(ProtoReader reader) throws java.io.IOException {
     return reader.readVarint64();
+  }
+
+  public static double decodePrimitive_double(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_double(reader.asProtoReader());
+  }
+
+  public static int decodePrimitive_fixed32(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_fixed32(reader.asProtoReader());
+  }
+
+  public static long decodePrimitive_fixed64(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_fixed64(reader.asProtoReader());
+  }
+
+  public static float decodePrimitive_float(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_float(reader.asProtoReader());
+  }
+
+  public static int decodePrimitive_int32(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_int32(reader.asProtoReader());
+  }
+
+  public static long decodePrimitive_int64(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_int64(reader.asProtoReader());
+  }
+
+  public static int decodePrimitive_sfixed32(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_sfixed32(reader.asProtoReader());
+  }
+
+  public static long decodePrimitive_sfixed64(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_sfixed64(reader.asProtoReader());
+  }
+
+  public static int decodePrimitive_sint32(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_sint32(reader.asProtoReader());
+  }
+
+  public static long decodePrimitive_sint64(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_sint64(reader.asProtoReader());
+  }
+
+  public static int decodePrimitive_uint32(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_uint32(reader.asProtoReader());
+  }
+
+  public static long decodePrimitive_uint64(ProtoReader32 reader) throws java.io.IOException {
+    return decodePrimitive_uint64(reader.asProtoReader());
   }
 
   public static void encodeArray_int32(int[] array, ReverseProtoWriter writer, int tag)

@@ -107,20 +107,20 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
 
     List<String> jsonNames = new ArrayList<>(fieldBindingsArray.length);
     for (FieldOrOneOfBinding<M, B> field : fieldBindingsArray) {
-      jsonNames.add(jsonName(field));
+      jsonNames.add(getJsonName(field));
     }
     this.jsonNames = jsonNames;
 
     List<String> jsonAlternateNames = new ArrayList<>(fieldBindingsArray.length);
     for (FieldOrOneOfBinding<M, B> field : fieldBindingsArray) {
       String alternate;
-      if (!jsonName(field).equals(field.getDeclaredName())) {
+      if (!getJsonName(field).equals(field.getDeclaredName())) {
         alternate = field.getDeclaredName();
-      } else if (!jsonName(field).equals(field.getName())) {
+      } else if (!getJsonName(field).equals(field.getName())) {
         alternate = field.getName();
       } else {
         String camelCaseDeclaredName = Internal.camelCase(field.getDeclaredName(), false);
-        if (!jsonName(field).equals(camelCaseDeclaredName)
+        if (!getJsonName(field).equals(camelCaseDeclaredName)
             // Do not shadow an existing jsonName.
             && !jsonNames.contains(camelCaseDeclaredName)) {
           alternate = camelCaseDeclaredName;
@@ -133,7 +133,7 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
     this.jsonAlternateNames = jsonAlternateNames;
   }
 
-  private String jsonName(FieldOrOneOfBinding<M, B> field) {
+  public String getJsonName(FieldOrOneOfBinding<M, B> field) {
     return field.getWireFieldJsonName().isEmpty() || preservingProtoFieldNames
         ? field.getDeclaredName()
         : field.getWireFieldJsonName();
@@ -196,7 +196,7 @@ public final class RuntimeMessageAdapter<M, B> extends ProtoAdapter<M> {
       } else if (isMessage && field.getLabel().isRepeated()) {
         List<Object> values = (List<Object>) field.getFromBuilder(builder);
         ProtoAdapter<Object> adapter = (ProtoAdapter<Object>) field.getSingleAdapter();
-        field.set(builder, Internal.redactElements(values, adapter));
+        Internal.redactElements(values, adapter);
       }
     }
     binding.clearUnknownFields(builder);

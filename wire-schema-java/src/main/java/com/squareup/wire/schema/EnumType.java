@@ -136,10 +136,10 @@ public final class EnumType extends Type {
     return null;
   }
 
-  @Override void linkMembers(Linker linker) {
+  @Override public void linkMembers(Linker linker) {
   }
 
-  @Override void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
+  @Override public void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
     Linker scoped = linker.withContext(this);
     options.link(scoped, location, validate);
     for (EnumConstant constant : constants) {
@@ -149,7 +149,7 @@ public final class EnumType extends Type {
     deprecated = options.get(DEPRECATED);
   }
 
-  @Override void validate(Linker linker, SyntaxRules syntaxRules) {
+  @Override public void validate(Linker linker, SyntaxRules syntaxRules) {
     Linker scoped = linker.withContext(this);
 
     if (!"true".equals(allowAlias)) {
@@ -235,7 +235,7 @@ public final class EnumType extends Type {
     }
   }
 
-  @Override Type retainAll(Schema schema, MarkSet markSet) {
+  @Override public Type retainAll(Schema schema, MarkSet markSet) {
     // If this type is not retained, prune it.
     if (!markSet.contains(type)) return null;
 
@@ -253,7 +253,7 @@ public final class EnumType extends Type {
     return result;
   }
 
-  @Override Type retainLinked(java.util.Set<ProtoType> linkedTypes,
+  @Override public Type retainLinked(java.util.Set<ProtoType> linkedTypes,
       java.util.Set<Field> linkedFields) {
     if (!linkedTypes.contains(type)) {
       return null;
@@ -268,7 +268,7 @@ public final class EnumType extends Type {
         options.retainLinked(), syntax);
   }
 
-  EnumElement toElement() {
+  public EnumElement toElement() {
     return new EnumElement(location, name, documentation, options.getElements(),
         EnumConstant.toElements(constants), Reserved.toElements(reserveds));
   }

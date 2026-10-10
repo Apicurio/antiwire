@@ -18,6 +18,7 @@ package com.squareup.wire.schema;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import okio.BufferedSink;
 import okio.Okio;
 import okio.Path;
@@ -116,5 +117,20 @@ public final class ProtoTarget extends Target {
     @Override public Path handle(Extend extend, Field field, Context context) {
       return null;
     }
+  }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof ProtoTarget)) return false;
+    ProtoTarget that = (ProtoTarget) other;
+    return Objects.equals(outDirectory, that.outDirectory);
+  }
+
+  @Override public int hashCode() {
+    return Objects.hash(outDirectory);
+  }
+
+  @Override public String toString() {
+    return "ProtoTarget(" + "outDirectory=" + outDirectory + ")";
   }
 }

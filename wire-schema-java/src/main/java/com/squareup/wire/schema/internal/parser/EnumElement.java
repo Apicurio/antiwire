@@ -115,4 +115,10 @@ public final class EnumElement implements TypeElement {
     int result = java.util.Objects.hashCode(location);
     result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(options);result = 31 * result + java.util.Objects.hashCode(constants);result = 31 * result + java.util.Objects.hashCode(reserveds);    return result;
   }
+
+  @Override public String toString() {
+    return "EnumElement(location=" + location + ", name=" + name + ", documentation=" + documentation
+        + ", options=" + options + ", constants=" + constants + ", reserveds=" + reserveds
+        + ", nestedTypes=" + getNestedTypes() + ")";
+  }
 }

@@ -58,7 +58,7 @@ public final class MarkSet {
    * Marks {@code protoMember}, throwing if it is explicitly excluded. This implicitly excludes
    * other members of the same type.
    */
-  void root(ProtoMember protoMember) {
+  public void root(ProtoMember protoMember) {
     if (pruningRules.prunes(protoMember)) {
       throw new IllegalStateException("Check failed");
     }
@@ -69,7 +69,7 @@ public final class MarkSet {
   }
 
   /** Marks {@code type}, throwing if it is explicitly excluded. */
-  void root(ProtoType type) {
+  public void root(ProtoType type) {
     if (pruningRules.prunes(type)) {
       throw new IllegalStateException("Check failed");
     }
@@ -83,7 +83,7 @@ public final class MarkSet {
    * <p>If there is an exclude for {@code type}, non-root members referencing it will be pruned.
    * The type itself will also be pruned unless it is referenced by a root member.
    */
-  boolean mark(ProtoType type, ProtoMember reference) {
+  public boolean mark(ProtoType type, ProtoMember reference) {
     memberTypes.put(reference, type);
 
     if (rootMemberTypes.containsKey(reference)) {
@@ -99,7 +99,7 @@ public final class MarkSet {
    * Marks a type as transitively reachable by the includes set. Returns true if the mark is new,
    * the type will be retained, and reachable objects should be traversed.
    */
-  boolean mark(ProtoType type) {
+  public boolean mark(ProtoType type) {
     if (pruningRules.prunes(type)) return false;
     return types.add(type);
   }
@@ -108,7 +108,7 @@ public final class MarkSet {
    * Marks a member as transitively reachable by the includes set. Returns true if the mark is
    * new, the member will be retained, and reachable objects should be traversed.
    */
-  boolean mark(ProtoMember protoMember) {
+  public boolean mark(ProtoMember protoMember) {
     if (pruningRules.prunes(protoMember)) return false;
     types.add(protoMember.getType());
     Set<ProtoMember> memberSet = members.computeIfAbsent(protoMember.getType(), k -> new LinkedHashSet<>());
@@ -116,12 +116,12 @@ public final class MarkSet {
   }
 
   /** Returns true if {@code type} is marked and should be retained. */
-  boolean contains(ProtoType type) {
+  public boolean contains(ProtoType type) {
     return types.contains(type);
   }
 
   /** Returns true if {@code member} is marked and should be retained. */
-  boolean contains(ProtoMember protoMember) {
+  public boolean contains(ProtoMember protoMember) {
     ProtoType memberType = memberTypes.get(protoMember);
 
     // We do not contain non-root members whose referenced type is excluded.

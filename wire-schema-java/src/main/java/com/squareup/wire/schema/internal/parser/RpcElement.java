@@ -127,4 +127,8 @@ public final class RpcElement {
     int result = java.util.Objects.hashCode(location);
     result = 31 * result + java.util.Objects.hashCode(name);result = 31 * result + java.util.Objects.hashCode(documentation);result = 31 * result + java.util.Objects.hashCode(requestType);result = 31 * result + java.util.Objects.hashCode(responseType);result = 31 * result + (requestStreaming ? 1 : 0);result = 31 * result + (responseStreaming ? 1 : 0);result = 31 * result + java.util.Objects.hashCode(options);    return result;
   }
+
+  @Override public String toString() {
+    return "RpcElement(" + "location=" + location + ", " + "name=" + name + ", " + "documentation=" + documentation + ", " + "requestType=" + requestType + ", " + "responseType=" + responseType + ", " + "requestStreaming=" + requestStreaming + ", " + "responseStreaming=" + responseStreaming + ", " + "options=" + options + ")";
+  }
 }

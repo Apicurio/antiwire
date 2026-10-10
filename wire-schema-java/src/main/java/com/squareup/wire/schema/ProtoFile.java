@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public final class ProtoFile {
@@ -154,7 +155,7 @@ public final class ProtoFile {
   }
 
   /** Returns a new proto file that omits types, services, extensions, and options not pruned. */
-  ProtoFile retainAll(Schema schema, MarkSet markSet) {
+  public ProtoFile retainAll(Schema schema, MarkSet markSet) {
     List<Type> retainedTypes = new ArrayList<>();
     for (Type type : types) {
       Type retained = type.retainAll(schema, markSet);
@@ -183,7 +184,7 @@ public final class ProtoFile {
   }
 
   /** Return a copy of this file with only the marked types. */
-  ProtoFile retainLinked(Set<ProtoType> linkedTypes, Set<Field> linkedFields) {
+  public ProtoFile retainLinked(Set<ProtoType> linkedTypes, Set<Field> linkedFields) {
     List<Type> retainedTypes = new ArrayList<>();
     for (Type type : types) {
       Type retained = type.retainLinked(linkedTypes, linkedFields);
@@ -279,8 +280,13 @@ public final class ProtoFile {
     return new ArrayList<>(new LinkedHashSet<>(result));
   }
 
+  /** Returns a new proto file that omits unnecessary imports; kept for upstream compatibility. */
+  public ProtoFile retainImports(List<ProtoFile> retained) {
+    return retainImports(new Schema(retained));
+  }
+
   /** Returns a new proto file that omits unnecessary imports. */
-  ProtoFile retainImports(Schema schema) {
+  public ProtoFile retainImports(Schema schema) {
     List<Type> referenced = new ArrayList<>();
     for (ProtoType protoType : referencedTypes()) {
       if (protoType.isMap()) {
@@ -346,7 +352,7 @@ public final class ProtoFile {
     return this;
   }
 
-  void linkOptions(Linker linker, boolean validate) {
+  public void linkOptions(Linker linker, boolean validate) {
     options.link(linker, location, validate);
     javaPackage = options.get(JAVA_PACKAGE);
     wirePackage = options.get(WIRE_PACKAGE);
@@ -399,5 +405,16 @@ public final class ProtoFile {
     public ProtoMember getWIRE_PACKAGE() {
       return ProtoFile.WIRE_PACKAGE;
     }
+  }
+
+  @Override public boolean equals(Object other) {
+    if (this == other) return true;
+    if (!(other instanceof ProtoFile)) return false;
+    ProtoFile that = (ProtoFile) other;
+    return Objects.equals(location, that.location) && Objects.equals(imports, that.imports) && Objects.equals(publicImports, that.publicImports) && Objects.equals(weakImports, that.weakImports) && Objects.equals(packageName, that.packageName) && Objects.equals(types, that.types) && Objects.equals(services, that.services) && Objects.equals(extendList, that.extendList) && Objects.equals(options, that.options) && Objects.equals(syntax, that.syntax);
+  }
+
+  @Override public int hashCode() {
+    return Objects.hash(location, imports, publicImports, weakImports, packageName, types, services, extendList, options, syntax);
   }
 }

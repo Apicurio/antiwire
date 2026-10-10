@@ -83,22 +83,22 @@ public final class EnclosingType extends Type {
     return syntax;
   }
 
-  @Override void linkMembers(Linker linker) {
+  @Override public void linkMembers(Linker linker) {
   }
 
-  @Override void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
+  @Override public void linkOptions(Linker linker, SyntaxRules syntaxRules, boolean validate) {
     for (Type nested : nestedTypes) {
       nested.linkOptions(linker, syntaxRules, validate);
     }
   }
 
-  @Override void validate(Linker linker, SyntaxRules syntaxRules) {
+  @Override public void validate(Linker linker, SyntaxRules syntaxRules) {
     for (Type nested : nestedTypes) {
       nested.validate(linker, syntaxRules);
     }
   }
 
-  @Override Type retainAll(Schema schema, MarkSet markSet) {
+  @Override public Type retainAll(Schema schema, MarkSet markSet) {
     List<Type> retainedNestedTypes = retainAllTypes(schema, markSet);
     List<Extend> retainedNestedExtends = retainAllExtends(schema, markSet);
     if (retainedNestedTypes.isEmpty() && retainedNestedExtends.isEmpty()) return null;
@@ -106,7 +106,7 @@ public final class EnclosingType extends Type {
         retainedNestedExtends, syntax);
   }
 
-  @Override Type retainLinked(Set<ProtoType> linkedTypes, Set<Field> linkedFields) {
+  @Override public Type retainLinked(Set<ProtoType> linkedTypes, Set<Field> linkedFields) {
     List<Type> retainedNestedTypes = new ArrayList<>();
     for (Type nested : nestedTypes) {
       Type retained = nested.retainLinked(linkedTypes, linkedFields);
@@ -140,7 +140,7 @@ public final class EnclosingType extends Type {
     return result;
   }
 
-  MessageElement toElement() {
+  public MessageElement toElement() {
     return new MessageElement(location, type.getSimpleName(), "", Type.toElements(nestedTypes),
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
         Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
