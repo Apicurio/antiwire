@@ -1,5 +1,8 @@
 # Migrating from Square Wire 7.1.0 to antiwire
 
+Status: nothing is published. `io.apicurio:wire-schema-java:0.1.0-SNAPSHOT` exists only after you
+build and install antiwire yourself (see "Installing" below); the version is a moving snapshot.
+
 Audience: a Java project that today depends on `com.squareup.wire:wire-schema` (and
 `wire-runtime`) and wants `io.apicurio:wire-schema-java` (and `wire-runtime-java`) instead.
 Everything here was observed on a real migration, not guessed: the Apicurio Registry protobuf
@@ -17,18 +20,24 @@ modules, branch `antiwire-integration` of `paoloantinori/apicurio-registry` (log
   reads `ProtoParser.Companion` runs against antiwire. This was added because third-party jars
   compiled against Wire (Confluent `kafka-protobuf-provider` 8.0.0) read that field at runtime.
 - Parsing, linking, pruning, descriptor encoding and the Java generator are covered by the
-  upstream test suites (`scripts/verify.sh`, 990 reconciled upstream cases).
-- Dependencies: `wire-schema-java` pulls only `wire-runtime-java`. No Kotlin, no okio, no Guava
-  on the production classpath of your application.
+  upstream test suites: 990 upstream cases are accounted for, 988 ported and 2 recorded missing,
+  of which about 89 are skipped as DEC-6 exclusions or upstream's own ignores (JSON adapters,
+  the Kotlin and Swift generators, gRPC and the Gradle plugin are out of scope). See
+  `docs/parity-runner.md` and `scripts/verify.sh`.
+- Dependencies: `wire-schema-java` pulls only `wire-runtime-java`. There is no Kotlin, no
+  Guava and no okio Maven artifact on the production classpath. A vendored subset of okio
+  (package `okio`, 42 classes) is bundled inside `wire-runtime-java` as the internal engine
+  (DEC-14); keeping the real `com.squareup.okio` artifact on the same classpath produces
+  duplicate `okio.*` classes, so exclude it.
 
 ## What changes
 
 ### 1. Coordinates
 
 ```xml
-<!-- before -->
+<!-- before (Apicurio used 6.4.0; the comparison in this guide is against 7.1.0) -->
 <dependency><groupId>com.squareup.wire</groupId><artifactId>wire-schema</artifactId>
-  <version>6.4.0</version></dependency>
+  <version>7.1.0</version></dependency>
 <!-- after -->
 <dependency><groupId>io.apicurio</groupId><artifactId>wire-schema-java</artifactId>
   <version>0.1.0-SNAPSHOT</version></dependency>
@@ -36,8 +45,14 @@ modules, branch `antiwire-integration` of `paoloantinori/apicurio-registry` (log
 
 Exclude `com.squareup.wire:*`, `com.squareup.okio:*` and `org.jetbrains.kotlin:*` from other
 dependencies that bring them transitively, so antiwire is the single provider of
-`com.squareup.wire.*`. Nothing is published yet: build antiwire locally and install it
-(`mvn -DskipTests install`).
+`com.squareup.wire.*`.
+
+#### Installing
+
+Build antiwire from a checkout with JDK 17 or newer (the artifacts target Java 11 bytecode) and
+install it into your local repository: `mvn -DskipTests install -DskipITs`. Use `mvn verify`,
+not `mvn test`, for the full test run (see `BUILD.md`). CI jobs of your own project must run this
+install first, or resolve the artifacts from a repository you publish them to.
 
 ### 2. Members that need Kotlin or okio types are not provided
 
@@ -49,8 +64,23 @@ reason, is `config/surface-baseline.tsv` (status `EXCLUDED`). Typical rewrites:
 | Wire | antiwire |
 |---|---|
 | `new ProtoAdapter<>(FieldEncoding, KClass)` | `new ProtoAdapter<>(FieldEncoding, Class)` |
-| `okio.ByteString` in `Message`, `AnyMessage`, `ProtoAdapter` | `com.squareup.wire.Bytes` (okio forms remain as `@Deprecated` bridges) |
+| `okio.ByteString` in `Message`, `AnyMessage`, `ProtoAdapter` | `com.squareup.wire.Bytes` (see "Bytes" below) |
 | `SchemaLoader(FileSystem)` with an okio `FileSystem` | `JdkSchemaLoader` with `java.nio.file.Path` (section 4) |
+
+#### Bytes
+
+Wire exposes `okio.ByteString` in `Message.encodeByteString()`, `ProtoAdapter.decode(ByteString)`
+and similar members. antiwire keeps those okio forms only as `@Deprecated` bridges, for source that
+still calls them, and offers the JDK-typed forms as the supported API:
+
+```java
+byte[] raw = message.encode();              // unchanged in Wire and antiwire
+Bytes bytes = message.encodeToBytes();      // replaces encodeByteString()
+Foo foo = Foo.ADAPTER.decode(bytes);        // decode(Bytes) or decode(byte[]); avoid decode(ByteString)
+```
+
+`ProtoAdapter.decode` has `byte[]`, `okio.ByteString` and `Bytes` overloads, so passing `null`
+literally is ambiguous: cast it. okio types stay legal only inside the vendored engine (DEC-14).
 
 ### 3. Reserved and extension ranges are `int[]` pairs
 
@@ -104,8 +134,10 @@ read methods) keep the checked exception.
 
 Consequence for callers: `catch (IOException e)` around a call that no longer throws it is a
 **compile error** in Java ("exception IOException is never thrown"). Remove the catch, or keep it
-if the same `try` also contains a call that still throws. On the Apicurio migration no site
-needed a change, because every handler guarded a call that still throws.
+if the same `try` also contains a call that still throws. On the Apicurio migration (the
+branch's `ANTIWIRE_MIGRATION.md`, rerun section for antiwire 62c8646) no site needed a change,
+because every `IOException` handler there guarded a call that still throws it (`JdkSchemaLoader`,
+`java.nio`, Guava, protobuf `writeTo`). Your code may differ.
 
 ### 6. Constructors, `ProtoParser`
 
@@ -128,9 +160,15 @@ needed a change, because every handler guarded a call that still throws.
 
 ## Evidence
 
+The Apicurio rows are not reproducible from this repository: they live on a branch of a fork
+(`github.com/paoloantinori/apicurio-registry`, branch `antiwire-integration`, file
+`ANTIWIRE_MIGRATION.md`, pushed; the Wire 6.4.0 per-class baseline is recorded in that file).
+The maintainer's session reproduced the four modules (142 tests) and the Confluent test classes
+(77 tests) on clean clones; the 129-test regression set is the agent's report.
+
 | Check | Result | Where |
 |---|---|---|
-| Apicurio protobuf modules (4), existing tests | 142 pass, same per-class counts as the Wire 6.4.0 baseline | `antiwire-integration` branch, `ANTIWIRE_MIGRATION.md` |
-| Apicurio app regression set | 129 pass | same |
+| Apicurio protobuf modules (4), existing tests | 142 pass, same per-class counts as the Wire 6.4.0 baseline | fork branch above |
+| Apicurio app regression set | 129 pass (agent report) | fork branch above |
 | Confluent 8.0.0 compiled against Wire, run on antiwire | parsing and printing work; range printing is the DEC-15 limit | TASK-33.2 notes |
 | Surface check against the real Wire 7.1.0 jars | 1408 members match, no open gap, 379 documented exclusions | `config/surface-baseline.tsv` |
