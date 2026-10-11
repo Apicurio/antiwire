@@ -48,4 +48,30 @@ public class EnumAndReservedElementTest {
         Arrays.<Object>asList("OLD", "NEW"));
     assertEquals("reserved \"OLD\", \"NEW\";\n", element.toSchema());
   }
+
+  /**
+   * toString must read like upstream's data-class output (measured on the real Wire 7.1.0 jar,
+   * proto2 {@code reserved 5 to 9, 3, "gone"; extensions 100 to 199;}): a range prints as
+   * {@code 5..9}, never as an int[] identity hash. DEC-15 keeps ranges as int[] pairs, so the
+   * rendering is where the difference would leak.
+   */
+  @Test public void reservedAndExtensionsToStringRenderRangesLikeUpstream() {
+    Location location = Location.get("x.proto");
+    ReservedElement reserved = new ReservedElement(location, "",
+        Arrays.<Object>asList(new int[] {5, 9}, 3, "gone"));
+    assertEquals("ReservedElement(location=x.proto, documentation=, values=[5..9, 3, gone])",
+        reserved.toString());
+    ExtensionsElement extensions = new ExtensionsElement(location, "",
+        Collections.<Object>singletonList(new int[] {100, 199}), Collections.emptyList());
+    assertEquals("ExtensionsElement(location=x.proto, documentation=, values=[100..199], options=[])",
+        extensions.toString());
+  }
+
+  /** Upstream's EnumElement data class has no nestedTypes in its constructor, so none is printed. */
+  @Test public void enumElementToStringHasNoNestedTypes() {
+    EnumElement element = new EnumElement(Location.get("x.proto"), "E", "", Collections.emptyList(),
+        Collections.emptyList(), Collections.emptyList());
+    assertEquals("EnumElement(location=x.proto, name=E, documentation=, options=[], constants=[], "
+        + "reserveds=[])", element.toString());
+  }
 }

@@ -118,7 +118,6 @@ public final class EnumElement implements TypeElement {
 
   @Override public String toString() {
     return "EnumElement(location=" + location + ", name=" + name + ", documentation=" + documentation
-        + ", options=" + options + ", constants=" + constants + ", reserveds=" + reserveds
-        + ", nestedTypes=" + getNestedTypes() + ")";
+        + ", options=" + options + ", constants=" + constants + ", reserveds=" + reserveds + ")";
   }
 }

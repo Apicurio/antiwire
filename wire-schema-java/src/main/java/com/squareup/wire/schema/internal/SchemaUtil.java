@@ -105,6 +105,21 @@ public final class SchemaUtil {
     return true;
   }
 
+  /** Renders values like upstream's list of IntRange: a range {@code {5, 9}} prints as {@code 5..9}. */
+  public static String valuesToString(java.util.List<Object> values) {
+    StringBuilder result = new StringBuilder("[");
+    for (Object value : values) {
+      if (result.length() > 1) result.append(", ");
+      if (value instanceof int[]) {
+        int[] range = (int[]) value;
+        result.append(range[0]).append("..").append(range[1]);
+      } else {
+        result.append(value);
+      }
+    }
+    return result.append(']').toString();
+  }
+
   /** Values mix Integers and int[] ranges; hash ranges structurally like IntRange. */
   public static int valuesHashCode(java.util.List<Object> values) {
     int result = 1;

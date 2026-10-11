@@ -112,6 +112,6 @@ public final class ExtensionsElement {
 
   @Override public String toString() {
     return "ExtensionsElement(location=" + location + ", documentation=" + documentation
-        + ", values=" + values + ", options=" + options + ")";
+        + ", values=" + SchemaUtil.valuesToString(values) + ", options=" + options + ")";
   }
 }
