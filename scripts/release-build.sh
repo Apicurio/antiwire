@@ -113,7 +113,7 @@ maintainer_gate() { # <doc> <gate-name> <pending-pattern> <accepted-pattern> <op
 FOOTPRINT_GATE="$(maintainer_gate "$ROOT/docs/footprint.md" 'footprint acceptance' \
   'Acceptance of the measured footprint.*PENDING maintainer signature' \
   'Acceptance of the measured footprint.*ACCEPTED by the maintainer' \
-  'footprint acceptance is unsigned (docs/footprint.md); the maintainer should weigh the section 10 renewal (candidate 0f860ff) and sign or reject it.' \
+  'footprint acceptance is unsigned (docs/footprint.md); the maintainer should weigh docs/footprint.md (latest measurement: section 11, candidate 63503d7; the acceptance row is in section 10.6, bound to 0f860ff) and sign or reject it.' \
   's/.*ACCEPTED by the maintainer (\([^)]*\)): \([^;]*\);.*/ACCEPTED by the maintainer (\1): \2/p')"
 ENCODEFORWARD_GATE="$(maintainer_gate "$ROOT/docs/performance.md" 'encodeForward acceptance' \
   'EmailSearchBench\.encodeForward.*PENDING maintainer' \

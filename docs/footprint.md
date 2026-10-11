@@ -50,7 +50,7 @@ invalidates the corresponding rows in sections 2, 3, and 5 and the checksum bloc
 
 Renewal pointers, appended 2026-10-06: section 9 (candidate c713e9a, 2026-10-03) and
 section 10 (candidate 0f860ff, 2026-10-06) each re-measured the antiwire column after the
-rule fired again. The newest candidate, its measurements, and its acceptance status are
+rule fired again. The newest measurement is section 11 (candidate 63503d7, 2026-10-11, no acceptance recorded); the newest candidate with an acceptance row, and its status, are
 in section 10; the paragraphs above are the original 2026-10-02 record.
 
 ## 1. Method
@@ -1062,3 +1062,234 @@ above. The last recorded full battery on this production content is the TASK-16.
 to the tree that battery ran on. The DEC-3 Java 11 consumer smoke was not run here; it
 remains TASK-21 AC#6 work on the final candidate. Nothing in the port changed during
 this renewal: the working-tree diff at commit time contains this document only.
+
+Dated note 2026-10-11: superseded for measurement purposes by section 11 (candidate `63503d7`); the acceptance state stays as recorded in 10.6.
+
+## 11. Candidate 63503d7 (post TASK-33.x and TASK-34), measured 2026-10-11
+
+The invalidation rule of section 0 fired once more. Since the `0f860ff` build of section 10,
+fourteen commits changed the content of the shipped jars in all three modules (`git log
+0f860ff..HEAD -- wire-runtime-java/src/main wire-schema-java/src/main
+wire-java-generator/src/main`): the license-header correction `7297b66`, the `ProtoTarget`
+containment guard `68823ba`, Eric's `ProtoAdapter` constructors (`d6e6ea6`, merged in
+`0973e52`), the upstream getter names of TASK-33.1 (`61be895`, `efb2060`, `9d6423f`), the
+Kotlin `Companion` form, absent members and file facades of TASK-33.2 (`535270d`, `c72eed4`,
+`ec88cb7`, `d4706fd`), the unchecked exceptions of TASK-33.3 (`de353e9`) and the parser
+element `toString` fixes (`e0decc5`, `556ff13`). Two poms changed since `0f860ff`
+(`git diff --stat 0f860ff..HEAD -- pom.xml wire-runtime-java/pom.xml wire-schema-java/pom.xml
+wire-java-generator/pom.xml`: the root pom and the schema pom), and only in `<name>`,
+`<description>` and comment text; the effective models (`mvn help:effective-pom`, comments,
+names and descriptions removed) of the three shipped modules are byte-identical between
+`0f860ff` and now, so the dependency policy, scopes and the enforcer rules are unchanged.
+This section renews the antiwire column the way section 10 did; everything above stays as
+history (DEC-13). Upstream 6.4.0 and 7.1.0 resolve to the same Maven Central artifacts, so
+their columns are cited unchanged from sections 2, 3 and 5 and were not re-measured.
+
+### 11.1 Measured candidate identity
+
+| Item | Value |
+|---|---|
+| antiwire build revision | `63503d74fcd98bcbb00526e20513c0f84efff49a` (branch `footprint-s11`, a worktree of `main` at `63503d7`); the record below binds to this revision. Production sources have not changed since `556ff13`; the commits after it are backlog and documentation records (`git diff --name-only 556ff13..63503d7`) |
+| Build command | `mvn -B -ntp -pl wire-runtime-java,wire-schema-java,wire-java-generator -am clean install -DskipTests -Dmaven.repo.local=/tmp/m2-foot11` (BUILD SUCCESS, 01:48 min, 2026-10-11T10:07:26+02:00 to 10:09:17+02:00, exit 0; private local repository, `~/.m2` untouched) |
+| Build tool | Apache Maven 3.9.12 (848fbb4bf2d427b72bdb2471c22fced7ebd9a7a1) |
+| Build JDK | OpenJDK 17.0.12, Temurin-17.0.12+7 (`~/.sdkman/candidates/java/17.0.12-tem`), as in sections 9 and 10 |
+| OS | Fedora Linux 44 (Workstation), kernel `7.2.8-200.fc44.x86_64`, x86_64 (same host as section 10) |
+| Size and checksum tools | GNU coreutils: `stat -c %s` and `sha256sum` |
+| Coordinates | `io.apicurio`, version 0.1.0-SNAPSHOT (DEC-8) |
+| Apicurio base and integration | base `25c8b5ce0` (apicurio-registry `origin/main` of 2026-10-09 16:57); integration branch `antiwire-integration` on `paoloantinori/apicurio-registry` at `2e5158fed804ff21de63c04cc91157d9c2ebe172` (pushed; the old local-only branch of sections 4 to 10 is gone, see TASK-18); measured in 11.5 |
+
+All nine release artifacts (main, `-sources`, `-javadoc` of each shipped module), built
+fresh by the command above from the revision above:
+
+| Artifact (0.1.0-SNAPSHOT, `io.apicurio`) | Bytes | MiB | SHA-256 |
+|---|---|---|---|
+| `wire-runtime-java` | 267,516 | 0.255 | `640446d78085f0faaba29957fbad1c219a4ca73de0faccc13820120bc8867ab0` |
+| `wire-runtime-java` (`-sources`) | 173,977 | 0.166 | `a91f6026e1705e232c1e86129f2fc4f46d7ced72e214a0016d7d8e6e57b67eed` |
+| `wire-runtime-java` (`-javadoc`) | 658,282 | 0.628 | `c8bea642af5f819c3c34f1961ca2d73351621e97383764470fc109ed0b29f99e` |
+| `wire-schema-java` | 355,199 | 0.339 | `6f4656e6251137c7a6731bbcb14c42f10b685583ab63dab06d7cefae719b57f2` |
+| `wire-schema-java` (`-sources`) | 218,268 | 0.208 | `4f8a69b9fd5ab0af4ca99ec29d021180b798e84ddfb56fcd7fd5eba5aededafb` |
+| `wire-schema-java` (`-javadoc`) | 767,641 | 0.732 | `5e6ca1a9aa4f8556b40a8b95a10d7074a2f03253306f55ed19c64bb50952d0ea` |
+| `wire-java-generator` | 64,104 | 0.061 | `bff7668ce6bbbe07e449efd0337118647ce96f52c5a0960557817c34353c4620` |
+| `wire-java-generator` (`-sources`) | 40,042 | 0.038 | `5455628310e2bf16a3104c4d24d44d24ca069f10b6e443cc98d5f3320fd8bf80` |
+| `wire-java-generator` (`-javadoc`) | 145,834 | 0.139 | `e4acbf0debf92e177427ae90a94e6e7bea81bb36f700506ea29671166b3a2a63` |
+
+Growth against the `0f860ff` jars of 10.1: `wire-runtime-java` 251,345 to 267,516 (+16,171),
+`wire-schema-java` 325,324 to 355,199 (+29,875), `wire-java-generator` 59,770 to 64,104
+(+4,334). Against the `c713e9a` jars of 9.1 the growth is +18,622, +29,873 and +7,679. The
+causes, by what the commits above changed (the growth was not bisected commit by commit):
+the Kotlin `Companion` form (42 `Companion` classes in the jars: 14 in the runtime, 26 in the
+schema, 2 in the generator), fourteen new Java sources in the shipped modules (file
+facades such as `DurationKt` and `TargetKt`, `MessageSink`, `MessageSource`, `Service`,
+`EmptyWireLogger`, `EmptyWireLoggerFactory`, and the internal `Rethrow`), the getter methods
+that replaced public fields, and `equals`, `hashCode` and `toString` added to classes that
+upstream's data classes provide. The Java source count of the three modules went from 161 to
+175 (`git ls-tree -r --name-only` over `src/main/java` at each revision, and `find`),
+consistent with `docs/license-inventory.md`. The jar-reproducibility caveat of section 0
+applies unchanged: main and `-sources` jars rebuild bitwise from an unchanged tree,
+`-javadoc` jars do not, so acceptance would bind to these checksums plus the revision. The
+jars the probes below copied are byte-identical to the installed jars of the private
+repository (`sha256sum` and `cmp` on both copies). The vendored okio subset inside
+`wire-runtime-java` is 42 classes (`unzip -Z1` and `grep -c '^okio/.*\.class$'`); the three
+jars hold 340 classes in total (165, 158 and 17) and `scripts/check-java11-bytecode.sh`
+reports major versions `{52=43, 55=340}` (the 43 major-52 classes are `javapoet`), so every
+class a Java 11 JVM can select is at or below major 55.
+
+### 11.2 Clean minimal consumer: runtime surface (renewed antiwire column)
+
+Probe `rt-aw` at `/tmp/aw-fp11-consumers/rt-aw`, the pom template of section 1.1 with the
+`io.apicurio:wire-runtime-java:0.1.0-SNAPSHOT` dependency at runtime scope, run with Maven
+3.9.12 on Temurin 17.0.12 against the private repository of 11.1; per-jar sizes taken with
+`stat -c '%s %n'`. Both Maven commands exited 0:
+
+```
+fp.probe:rt-aw:pom:1.0
+\- io.apicurio:wire-runtime-java:jar:0.1.0-SNAPSHOT:runtime
+```
+
+| Baseline | Jars | Bytes | MiB | Change vs antiwire |
+|---|---|---|---|---|
+| upstream wire-runtime-jvm 6.4.0 (cited from section 2.3) | 4 | 2,409,569 | 2.298 | antiwire removes 2,142,053 bytes (88.9%) |
+| upstream wire-runtime-jvm 7.1.0 (cited from section 2.3) | 4 | 2,440,849 | 2.328 | antiwire removes 2,173,333 bytes (89.0%) |
+| antiwire wire-runtime-java (this section) | 1 | 267,516 | 0.255 | baseline for the two rows above |
+
+The removal share is 89.0% against 7.1.0, down from 89.7% in 10.2, only because the antiwire
+jar grew; what disappears is still exactly the Kotlin stack of section 2.
+
+### 11.3 Clean minimal consumer: schema surface (renewed antiwire column)
+
+Probe `sch-aw` at `/tmp/aw-fp11-consumers/sch-aw`, same method:
+
+```
+fp.probe:sch-aw:pom:1.0
+\- io.apicurio:wire-schema-java:jar:0.1.0-SNAPSHOT:runtime
+   \- io.apicurio:wire-runtime-java:jar:0.1.0-SNAPSHOT:runtime
+```
+
+| Baseline | Jars | Bytes | MiB | Change vs antiwire |
+|---|---|---|---|---|
+| upstream wire-schema-jvm 6.4.0 (cited from section 3.3) | 15 | 9,779,888 | 9.327 | antiwire removes 9,157,173 bytes (93.6%) |
+| upstream wire-schema-jvm 7.1.0 (cited from section 3.3) | 14 | 10,166,815 | 9.696 | antiwire removes 9,544,100 bytes (93.9%) |
+| antiwire wire-schema-java (this section) | 2 | 622,715 | 0.594 | baseline for the two rows above |
+
+### 11.4 Optional generator cost (renewed)
+
+Probe `gen-aw` at `/tmp/aw-fp11-consumers/gen-aw`, same method:
+
+```
+fp.probe:gen-aw:pom:1.0
+\- io.apicurio:wire-java-generator:jar:0.1.0-SNAPSHOT:runtime
+   +- io.apicurio:wire-schema-java:jar:0.1.0-SNAPSHOT:runtime
+   +- io.apicurio:wire-runtime-java:jar:0.1.0-SNAPSHOT:runtime
+   \- com.squareup:javapoet:jar:1.13.0:runtime
+```
+
+| Resolved artifact | Bytes |
+|---|---|
+| `io.apicurio:wire-java-generator` (0.1.0-SNAPSHOT) | 64,104 |
+| `io.apicurio:wire-schema-java` (0.1.0-SNAPSHOT) | 355,199 |
+| `io.apicurio:wire-runtime-java` (0.1.0-SNAPSHOT) | 267,516 |
+| `com.squareup:javapoet` (1.13.0) | 106,068 |
+| Total | 792,887 bytes (0.756 MiB), 4 jars |
+
+`javapoet` 1.13.0 is the same artifact as in sections 5, 9.4 and 10.4 (106,068 bytes). Against
+the cited upstream generator baseline of section 5 (15 jars, 10,208,654 bytes, 9.736 MiB)
+the antiwire generator removes 9,415,767 bytes (92.2%), and its only third-party byte cost
+beyond the port itself is `javapoet` at 106,068 bytes (0.101 MiB).
+
+Kotlin, Okio and Guava check, verified mechanically from the three trees above (`grep -ciE
+'kotlin|okio|guava'` on each `tree.txt` returns 0, and the probes resolved 1, 2 and 4 jars
+respectively, all `io.apicurio` plus the one `javapoet`). The enforcer rules of section 6 are
+unchanged in force: the effective models of the shipped modules did not change (11 intro).
+
+### 11.5 Apicurio marginal: renewed against the pushed integration branch
+
+Unlike section 10, this host could renew the marginal, because the integration was redone
+on a pushed branch (TASK-33.4): a clean clone at `/tmp/apv2` (`git clone` of
+`paoloantinori/apicurio-registry`, branch `antiwire-integration`). Base `25c8b5ce0` and
+integration `2e5158fed` are one history (`git merge-base --is-ancestor 25c8b5ce0
+2e5158fed` exits 0; 19 files, 601 insertions and 203 deletions). The Apicurio build needs a
+newer JDK than the port, so this part ran on Temurin 21.0.11 with the repository wrapper:
+
+```bash
+cd /tmp/apv2
+git checkout --detach 2e5158fed          # integration (tip of the branch)
+./mvnw -B -ntp -q -Dmaven.repo.local=/tmp/m2-foot11 -pl utils/protobuf-schema-utilities,schema-util/protobuf -am dependency:tree -DoutputFile=/tmp/fp11-tree-after.txt -DappendOutput=true
+git checkout --detach 25c8b5ce0          # base, Wire 6.4.0
+./mvnw -B -ntp -q -Dmaven.repo.local=/tmp/m2-foot11 -pl utils/protobuf-schema-utilities,schema-util/protobuf -am dependency:tree -DoutputFile=/tmp/fp11-tree-base.txt -DappendOutput=true
+```
+
+Both commands exited 0. The runtime-classpath sets were parsed from the two tree files with
+test and provided subtrees pruned, the rule of section 4; the module's own artifact is not
+counted (for `schema-util/protobuf` the sibling jar `apicurio-registry-protobuf-schema-utilities`,
+174,801 bytes, is a compile dependency and is counted), and jar sizes are `stat -c %s` of the resolved artifacts in the local
+repositories (the antiwire jars from the private repository of 11.1, so they are the exact
+11.1 jars).
+
+| Module | Base 25c8b5ce0 | Integration 2e5158fed | Net |
+|---|---|---|---|
+| `utils/protobuf-schema-utilities` | 20 jars, 30,774,776 bytes | 10 jars, 23,723,752 bytes | minus 7,051,024 bytes (22.9%) |
+| `schema-util/protobuf` | 43 jars, 36,873,207 bytes | 31 jars, 29,533,647 bytes | minus 7,339,560 bytes (19.9%) |
+
+The removed set is identical for both modules, 14 jars totalling 7,962,275 bytes:
+`wire-schema-jvm` 6.4.0 (502,581), `wire-schema` 6.4.0 (72,907), `wire-runtime-jvm` 6.4.0
+(262,388), `wire-runtime` 6.4.0 (39,618), `kotlin-stdlib` 2.4.21 (1,853,315), `kotlin-reflect`
+2.3.10 (3,467,844), `okio-jvm` 3.18.2 (392,462), `okio` 3.18.2 (85,247),
+`okio-fakefilesystem` 3.18.2 (6,387), `okio-fakefilesystem-jvm` 3.18.2 (29,329),
+`kotlinx-datetime-jvm` 0.8.0-0.6.x-compat (753,869), `kotlinpoet-jvm` 2.2.0 (357,262),
+Palantir `javapoet` 0.12.0 (107,896) and `org.jetbrains:annotations` 26.0.2 (31,170). The
+antiwire side that is added is exactly `wire-schema-java` 355,199 plus `wire-runtime-java`
+267,516, 622,715 bytes (0.594 MiB), up 46,046 bytes from the 576,669 bytes of 10.5, plus,
+for `utils/protobuf-schema-utilities` only, `error_prone_annotations` 2.47.0 (20,254) and
+`checker-qual` 3.53.1 (241,633) that arrive with the guava pin described next, and the move
+of `guava` itself from 33.5.0-jre (3,017,283) to 32.1.3-jre (3,043,932), plus 26,649 bytes.
+For that module the net is therefore the removed 7,962,275, minus the added 622,715,
+`error_prone_annotations`, `checker-qual` and the guava difference: minus 7,051,024 bytes.
+
+Three differences from the 9.5 result, so the two are not compared directly. First, the 9.5
+branch was "guava-free" and the current branch is not: `utils/protobuf-schema-utilities`
+declares `com.google.guava:guava:32.1.3-jre` directly (its loader uses
+`MoreFiles.deleteRecursively`, see `ANTIWIRE_MIGRATION.md` on the branch), while the base
+resolves `guava` 33.5.0-jre through `wire-schema-jvm`; both sides carry Guava, so Guava is
+not removed by this switch, unlike the 9.5 claim for that branch. Second, the base now
+resolves `kotlin-stdlib` 2.4.21 where 9.5 had 2.4.20, and the base clone is a newer Apicurio
+commit than `448f845c`. Third, the jar counts here (20 to 10 for the first module and 43 to 31 for the second) use the
+same pruning as 9.5 and are comparable to its 43 to 28 for the second module: the integration
+side has 3 more jars than 9.5's branch (the guava pin of the first point carries
+`error_prone_annotations` and `checker-qual`, and `guava` itself stays). Not measured: the `app` module's protobuf-related jars and Debezium
+distribution trees (TASK-35 found no Wire reference in them).
+
+### 11.6 Verification run
+
+Commands and results, all on this worktree at `63503d7` plus the script fix noted below:
+
+- `mvn -B -ntp -pl wire-runtime-java,wire-schema-java,wire-java-generator -am clean install
+  -DskipTests -Dmaven.repo.local=/tmp/m2-foot11`: exit 0, BUILD SUCCESS (11.1).
+- The six probe commands (`dependency:tree` and `dependency:copy-dependencies` for each of
+  the three probes): exit 0.
+- `scripts/check-java11-bytecode.sh`: exit 0, `bytecode-java11.status=PASS`, 383 classes
+  checked (3 module jars plus the one production dependency jar, `javapoet`), majors
+  `{52=43, 55=340}`.
+- The two `dependency:tree` runs of 11.5: exit 0 each.
+- `mvn help:effective-pom` on the three modules at `0f860ff` (a detached worktree) and at
+  `63503d7`: exit 0, models identical after removing comments, `<name>` and `<description>`.
+- `scripts/verify.sh`: first run exit 1, because `surface-check` failed on a clean cache:
+  `scripts/surface-check.py` `ensure_jars` shadowed its result dictionary `out` with the file
+  handle of the download (`open(part, 'wb') as out`), so `out[name] = path` raised
+  `TypeError`. The defect hides whenever the cache `target/surface-check/jars` already
+  holds the verified jars, which is why the primary working tree never showed it; it is a
+  build-script defect, not a production one. The handle was renamed to `sink` (commit on
+  this branch, scripts only), and after `rm -rf target/surface-check` the second run exits 0:
+  all 13 ACTIVE suites PASS (runtime-tests 923 cases, 4 skipped; schema-tests 636, 6 skipped;
+  protoc-oracle 123, 49 skipped; compiler-tests 196, 31 skipped; parity-coverage 990
+  upstream cases reconciled; surface-check MATCH 1408, GAP 0, EXCLUDED 379, snippets 7/0;
+  java11-consumer on JDK 11.0.24).
+- Every sum, MiB value, growth figure and removal ratio written in this section was
+  recomputed by a script (`/tmp/fp11-recompute.py` and the set-parsing script of 11.5) whose
+  output matches the tables above.
+
+Nothing in the port changed during this renewal: the diff of this branch against `main`
+contains this document and the two-line `surface-check.py` fix only.
+
+Acceptance: not recorded for this candidate; the signature is the maintainer's (TASK-21).
+The candidate to sign, if the maintainer signs, is the one identified in 11.1. A later
+change to the shipped modules re-fires the invalidation rule of section 0.

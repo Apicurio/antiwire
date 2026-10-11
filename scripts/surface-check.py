@@ -131,8 +131,8 @@ def ensure_jars(pins, cache):
             published_sha1 = ''
             try:
                 with urllib.request.urlopen(spec['url'], timeout=FETCH_TIMEOUT) as r, \
-                        open(part, 'wb') as out:
-                    shutil.copyfileobj(r, out)
+                        open(part, 'wb') as sink:
+                    shutil.copyfileobj(r, sink)
                 with urllib.request.urlopen(spec['url'] + '.sha1', timeout=FETCH_TIMEOUT) as r:
                     published_sha1 = r.read().decode().split()[0].strip()
             except Exception as e:  # network or HTTP failure: fail closed, never skip
