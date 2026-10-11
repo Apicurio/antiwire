@@ -67,6 +67,16 @@ public class EnumAndReservedElementTest {
         extensions.toString());
   }
 
+  /** Edge cases measured on the real 7.1.0 jar: an empty first value, a range to max, no values. */
+  @Test public void valuesToStringEdgeCases() {
+    assertEquals("[, b]", SchemaUtil.valuesToString(Arrays.<Object>asList("", "b")));
+    assertEquals("[20..536870911]", SchemaUtil.valuesToString(
+        Collections.<Object>singletonList(new int[] {20, 536870911})));
+    assertEquals("[]", SchemaUtil.valuesToString(Collections.emptyList()));
+    assertEquals("[1, 2..3, x]", SchemaUtil.valuesToString(
+        Arrays.<Object>asList(1, new int[] {2, 3}, "x")));
+  }
+
   /** Upstream's EnumElement data class has no nestedTypes in its constructor, so none is printed. */
   @Test public void enumElementToStringHasNoNestedTypes() {
     EnumElement element = new EnumElement(Location.get("x.proto"), "E", "", Collections.emptyList(),

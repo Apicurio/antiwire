@@ -108,8 +108,10 @@ public final class SchemaUtil {
   /** Renders values like upstream's list of IntRange: a range {@code {5, 9}} prints as {@code 5..9}. */
   public static String valuesToString(java.util.List<Object> values) {
     StringBuilder result = new StringBuilder("[");
+    boolean first = true;
     for (Object value : values) {
-      if (result.length() > 1) result.append(", ");
+      if (!first) result.append(", ");
+      first = false;
       if (value instanceof int[]) {
         int[] range = (int[]) value;
         result.append(range[0]).append("..").append(range[1]);
