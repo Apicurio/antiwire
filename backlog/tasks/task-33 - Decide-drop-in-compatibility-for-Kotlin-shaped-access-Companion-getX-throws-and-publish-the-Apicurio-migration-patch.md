@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-10-09 15:01'
-updated_date: '2026-10-10 09:01'
+updated_date: '2026-10-11 07:23'
 labels:
   - user-feedback
   - compatibility
@@ -36,9 +36,9 @@ Options for the maintainer (policy call under DEC-2): (a) keep the current API s
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The Apicurio migration (TASK-18 branch diff and ANTIWIRE_MIGRATION.md) is available from this repository or a published artifact, with a migration guide listing the Companion, getter and checked-exception changes.
-- [ ] #2 The maintainer's decision on shims (a, b or c) is recorded in docs/decisions.md with the measured counts above.
-- [ ] #3 If shims are chosen, a test proves a class compiled against the real Wire 7.1.0 jar for ProtoParser.Companion.parse (and the chosen getters) runs against the port, and docs/compatibility-matrix.md section G is updated.
+- [x] #1 The Apicurio migration (TASK-18 branch diff and ANTIWIRE_MIGRATION.md) is available from this repository or a published artifact, with a migration guide listing the Companion, getter and checked-exception changes.
+- [x] #2 The maintainer's decision on shims (a, b or c) is recorded in docs/decisions.md with the measured counts above.
+- [x] #3 If shims are chosen, a test proves a class compiled against the real Wire 7.1.0 jar for ProtoParser.Companion.parse (and the chosen getters) runs against the port, and docs/compatibility-matrix.md section G is updated.
 - [ ] #4 Run /code-review at high effort on the final diff
 <!-- AC:END -->
 
@@ -58,6 +58,8 @@ Delivery gap is worse than stated: commits a11d7cfa and 6ce5582c are not valid o
 2026-10-09 verified (supersedes 'may be lost'): the TASK-18 branch existed on the Mac at /tmp/apicurio and was erased (4058 directories, 0 files, empty .git/objects; Mac rebooted 2026-10-02 16:51; likely macOS /tmp cleanup, unconfirmed); it is not on bird. AC#1 therefore means redoing the migration, not locating it. Redo it on a new branch cut from apicurio-registry 3620f08c (the user's commit) in a persistent location, push it, and keep ANTIWIRE_MIGRATION.md and the parity drivers in a tracked path, never /tmp. With the 2026-10-09 getter rename (TASK-33.1) done, the migration no longer needs getter rewrites; what remains for the four protobuf modules at 3620f08c is the ProtoParser.Companion form, the ProtoParser constructor, the OneOf constructor, MessageType.toElement() and Schema.protoFile(okio.Path), plus the loader rewrite onto JdkSchemaLoader.
 
 2026-10-10 decision (maintainer): accept the kotlin.ranges.IntRange limit and document it, open to reconsideration: recorded as DEC-15 in docs/decisions.md (with the measured Confluent effect, the alternative of an optional hand-written kotlin.ranges.IntRange artifact and its costs, and the conditions to reconsider) and in docs/compatibility-matrix.md. TASK-33.2 (Companion form and absent members) is done on branch task-33-2-companion-and-members; the Confluent failure on parsing is fixed, the failure through IntRange is DEC-15. Next: ask the apicurio agent to rerun the three failing app tests against the new antiwire build to see whether they now fail only on this.
+
+2026-10-11 record update after the adversarial audit. AC#1 (migration available with a guide listing the Companion, getter and checked-exception changes): met by docs/migration-from-wire.md (335fca6, simplified in 043b9a1) and the pushed branch antiwire-integration on paoloantinori/apicurio-registry at 2e5158fed with ANTIWIRE_MIGRATION.md (TASK-33.4). AC#2 (the maintainer's decision recorded with measured counts): DEC-14 accessor section, the dated Companion decision, DEC-15 (IntRange) and DEC-16 (checked exceptions) in docs/decisions.md; the options (a), (b), (c) of the description were resolved as: do (a) plus the Companion binary shape and getter names (TASK-33.1, 33.2). AC#3 (a test proves a class compiled against real Wire runs against the port): CompiledAgainstUpstreamTest.companionFormCompiledAgainstUpstreamRunsAgainstThePort and the TASK-34 consumer snippets. AC#4 (/code-review high on the final diff): each subtask carries its own review. This parent stays open only for TASK-33.5 (in-memory loading) and the follow-ups it spawned: TASK-35 (Debezium and Kafka consumer scan), TASK-36 (preserve or discard the /tmp artifacts), TASK-37 (run integration-tests under podman on the fork branch), TASK-38 (local branch and worktree hygiene), and the open design questions in GitHub issues #5 to #10. Adversarial audit 2026-10-11 found three real losses (Debezium scan, this record, the TASK-21 line), the toString differences, and number drift in the docs: all handled in the same turn.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done

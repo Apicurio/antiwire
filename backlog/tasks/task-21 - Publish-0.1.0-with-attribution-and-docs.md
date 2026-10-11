@@ -53,7 +53,7 @@ Renewed since the audit, not yet accepted:
 Still open and owned here:
 1. Maintainer signature on the section 10 footprint, after the final candidate is fixed. The checksums bind to 0f860ff and differ after the license-header correction, so the footprint must be measured on the final candidate.
 2. Performance remeasurement on the final candidate. The JMH harness was lost with the Mac scratch directory and the benchmark must run on a quiet machine to stay comparable with sessions 1 to 5, so it was not run.
-3. Same-candidate Apicurio revalidation and the Apicurio marginal. The integration branch existed only on the Mac.
+3. Same-candidate Apicurio revalidation and the Apicurio marginal. The original TASK-18 integration branch was lost (wiped from the Mac /tmp, see the dated notes below); the integration was redone on a pushed branch, `antiwire-integration` on `paoloantinori/apicurio-registry` (TASK-33.4), which must be rerun against the final candidate.
 4. Regeneration of docs/release-candidate.md for the final candidate, using the repaired builder (scripts/release-build.sh).
 5. The published-artifact Java 11 check, and the release-time check that published dependency metadata contains no Kotlin.
 6. Explicit maintainer approval of publication and of the io.apicurio namespace use.
