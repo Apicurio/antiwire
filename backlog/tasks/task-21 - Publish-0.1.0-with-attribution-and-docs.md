@@ -4,7 +4,7 @@ title: Publish 0.1.0 with attribution and docs
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:23'
-updated_date: '2026-10-09 18:21'
+updated_date: '2026-10-29 10:57'
 labels: []
 milestone: m-11
 dependencies:
@@ -71,6 +71,10 @@ GitHub tracking issue: https://github.com/Apicurio/antiwire/issues/3
 2026-10-09 correction: open item 3 above says the integration branch existed only on the Mac. It is not on the Mac either (a11d7cfa and 6ce5582c are invalid objects in the Apicurio clones on both hosts, no antiwire-integration branch anywhere checked). Same-candidate Apicurio revalidation and the Apicurio footprint marginal now also require locating or redoing the TASK-18 migration; see TASK-33.
 
 2026-10-09 verified finding (supersedes the earlier 2026-10-09 correction): the integration branch was on the Mac at /tmp/apicurio and was wiped (4058 empty directories, 0 files, no git objects; Mac rebooted 2026-10-02 16:51, the last cleanup most likely macOS /tmp housekeeping, mechanism unconfirmed). It is absent from bird as well. Open item 3 therefore means redoing the TASK-18 migration on a fresh Apicurio branch and keeping it in a persistent location (pushed to a branch of a fork or an antiwire-owned repo), not /tmp. Same-candidate Apicurio revalidation and the Apicurio footprint marginal depend on it. See TASK-33 and TASK-18.
+
+2026-10-29 (DEC-18 snapshot publishing review): the parent pom now copies LICENSE and NOTICE into META-INF of every main and test jar and declares Apache-2.0 plus BSD-3-Clause `<licenses>` (verified on a local file deploy: all four published binary jars carry both files, NOTICE byte-identical to the root file). Open for the release audit (AC#5): the -sources and -javadoc jars do not carry LICENSE or NOTICE (sources keep the per-file headers; the javadoc jar has neither), and the poms still lack the `<url>`, `<scm>` and `<developers>` elements Central requires for a release.
+
+2026-10-29 /simplify on the DEC-18 change, finding not applied there: the LICENSE/NOTICE copy uses ${project.basedir}/.. and copy-resources silently copies nothing when its includes match no file, so a future module not sitting directly under the repository root would ship jars without the notices and the build would still pass. Guard to add before the release: a check that every shipped jar (main and tests) contains META-INF/LICENSE and META-INF/NOTICE, either an enforcer requireFilesExist per jar module or a jar-content assertion in scripts/release-build.sh or scripts/test-release-gates.sh.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
