@@ -79,6 +79,13 @@ the DEC-4 production-Kotlin ban holds trivially.
   migration sketch for `ProtobufSchemaLoader` lives in `JdkSchemaLoader`'s javadoc, and
   `JdkSchemaLoaderValidationTest` in wire-schema-java simulates the consumer and enforces the
   no-okio-signature rule by reflection. TASK-18 re-inventories the site list before editing.
+- In-memory loading (TASK-33.5): `JdkSchemaLoader.forFileSystem(java.nio.file.FileSystem)`
+  wraps `FileSystem.asOkioFileSystem` behind the same facade, so a consumer hands over a Jimfs
+  (or zip) filesystem and `initRoots`/`loadSchema` run against it with no host I/O and with the
+  supplied filesystem's own semantics (case sensitivity included). The factory declares no
+  checked exception (it does no I/O); DEC-17 keeps the checked `IOException` on `initRoots`,
+  `loadSchema` and `close`. Proven by `JdkSchemaLoaderInMemoryTest`: a schema plus import load
+  and link entirely from Jimfs, and an import whose path differs only in case fails to resolve.
 - The consumer surface is `JdkSchemaLoader` alone; `SchemaLoader` in the same package keeps its
   okio-typed constructor as the engine surface (the port's own suites build on it, and TASK-25
   is additive). Migrating consumers must not import `SchemaLoader`; the reflection test scopes

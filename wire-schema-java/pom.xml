@@ -36,6 +36,17 @@
       <version>4.36.1</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- TASK-33.5: an in-memory java.nio FileSystem for the JdkSchemaLoader.forFileSystem
+         route tests. Latest release per Maven Central (maven-metadata.xml, checked 2026-10-29);
+         test scope only, so DEC-4's production Kotlin ban and the classpath origin check are
+         untouched (guava arrives test-scoped with it). -->
+    <dependency>
+      <groupId>com.google.jimfs</groupId>
+      <artifactId>jimfs</artifactId>
+      <version>1.3.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
     <build>
       <plugins>

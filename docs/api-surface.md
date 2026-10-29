@@ -111,7 +111,10 @@ Copy costs on the canonical paths:
   either era works: the fixtures' `#BYTES` strings resolve to the deprecated okio adapter,
   port-generated `#WIRE_BYTES` strings to the canonical one.
 - `SchemaLoader`'s okio-typed constructor: the engine loading API; the okio-free consumer
-  facade is `JdkSchemaLoader` (already recorded in docs/loading-api-inventory.md).
+  facade is `JdkSchemaLoader` (already recorded in docs/loading-api-inventory.md), whose
+  `forFileSystem(java.nio.file.FileSystem)` factory (TASK-33.5) routes an in-memory Jimfs
+  filesystem through `asOkioFileSystem` without leaking okio (DEC-14); the facade keeps its
+  checked `IOException` per DEC-17.
 - `SchemaEncoder.encode(ProtoFile)` returning `okio.ByteString` and the schema adapter's
   `unknownFields(...)`: internal packages, engine use.
 - Generated code from the pinned upstream compiler (the fixtures): bytes fields are

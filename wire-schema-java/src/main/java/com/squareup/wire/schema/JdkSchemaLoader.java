@@ -77,6 +77,32 @@ public final class JdkSchemaLoader implements AutoCloseable {
   }
 
   /**
+   * A loader over a caller-supplied {@link java.nio.file.FileSystem} (TASK-33.5), which is how
+   * schemas held in memory are loaded: pass an in-memory filesystem such as Jimfs and the whole
+   * load runs against it, with no host file I/O and with that filesystem's own semantics (Jimfs
+   * is case-sensitive by default, so an import with the wrong case fails the same way on macOS
+   * as on Linux). {@link #initRoots(List, List)} paths must come from the same filesystem and
+   * should be absolute, like {@code fs.getPath("/protos")}. The loader does not close the
+   * supplied filesystem; its lifecycle is the caller's.
+   *
+   * <pre>{@code
+   * java.nio.file.FileSystem fs = Jimfs.newFileSystem();
+   * Files.write(fs.getPath("/protos/com/example/messages.proto"), bytes);
+   * try (JdkSchemaLoader loader = JdkSchemaLoader.forFileSystem(fs)) {
+   *   loader.initRoots(singletonList(fs.getPath("/protos")));
+   *   Schema schema = loader.loadSchema();
+   * }
+   * }</pre>
+   *
+   * <p>The factory itself does no I/O, so it declares no checked exception; DEC-17 otherwise
+   * applies to this facade: {@code initRoots}, {@code loadSchema} and {@code close} keep
+   * {@code throws IOException}.
+   */
+  public static JdkSchemaLoader forFileSystem(java.nio.file.FileSystem fileSystem) {
+    return new JdkSchemaLoader(FileSystem.asOkioFileSystem(fileSystem), null);
+  }
+
+  /**
    * A loader that reads .proto resources from {@code classLoader}. Each element of {@code
    * sourceResources} is the import path of one .proto on the classpath, relative to its root,
    * like {@code "com/example/messages.proto"}; those files form the source path. The whole

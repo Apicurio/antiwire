@@ -199,6 +199,13 @@ public class JdkSchemaLoaderValidationTest {
    * okio-typed constructor for the port's own suites) is deliberately outside the rule and is
    * recorded as such in docs/loading-api-inventory.md.
    */
+  /** TASK-33.5: the in-memory factory is pinned JDK-typed: exactly one java.nio.file.FileSystem parameter, no okio. */
+  @Test public void forFileSystemIsJdkTyped() throws Exception {
+    Method factory = JdkSchemaLoader.class.getMethod("forFileSystem", java.nio.file.FileSystem.class);
+    assertEquals(JdkSchemaLoader.class, factory.getReturnType());
+    assertEquals(0, factory.getExceptionTypes().length, "the factory does no I/O");
+  }
+
   @Test public void noOkioTypesInPublicSignatures() {
     List<String> offenders = new ArrayList<>();
     // Public members only: the rule governs the consumer-facing surface, not private internals.
