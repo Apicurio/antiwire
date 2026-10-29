@@ -78,18 +78,23 @@ public final class JdkSchemaLoader implements AutoCloseable {
 
   /**
    * A loader over a caller-supplied {@link java.nio.file.FileSystem} (TASK-33.5), which is how
-   * schemas held in memory are loaded: pass an in-memory filesystem such as Jimfs and the whole
-   * load runs against it, with no host file I/O and with that filesystem's own semantics (Jimfs
-   * is case-sensitive by default, so an import with the wrong case fails the same way on macOS
-   * as on Linux). {@link #initRoots(List, List)} paths must come from the same filesystem and
+   * schemas held in memory are loaded: pass an in-memory filesystem such as Jimfs and the
+   * schema's own files are read from it, with that filesystem's semantics (Jimfs is
+   * case-sensitive by default, so an import with the wrong case fails the same way on macOS as
+   * on Linux). Two details work exactly like the default route rather than the supplied
+   * filesystem: the bundled well-known Google protos fall through to the classpath when not
+   * present in it, and {@code .zip}/{@code .jar} source-path entries are materialized to a host
+   * temp file. {@link #initRoots(List, List)} paths must come from the same filesystem and
    * should be absolute, like {@code fs.getPath("/protos")}. The loader does not close the
    * supplied filesystem; its lifecycle is the caller's.
    *
    * <pre>{@code
    * java.nio.file.FileSystem fs = Jimfs.newFileSystem();
-   * Files.write(fs.getPath("/protos/com/example/messages.proto"), bytes);
+   * Path proto = fs.getPath("/protos/com/example/messages.proto");
+   * Files.createDirectories(proto.getParent());
+   * Files.write(proto, bytes);
    * try (JdkSchemaLoader loader = JdkSchemaLoader.forFileSystem(fs)) {
-   *   loader.initRoots(singletonList(fs.getPath("/protos")));
+   *   loader.initRoots(singletonList(proto), singletonList(fs.getPath("/protos")));
    *   Schema schema = loader.loadSchema();
    * }
    * }</pre>

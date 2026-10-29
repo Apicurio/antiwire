@@ -81,11 +81,16 @@ the DEC-4 production-Kotlin ban holds trivially.
   no-okio-signature rule by reflection. TASK-18 re-inventories the site list before editing.
 - In-memory loading (TASK-33.5): `JdkSchemaLoader.forFileSystem(java.nio.file.FileSystem)`
   wraps `FileSystem.asOkioFileSystem` behind the same facade, so a consumer hands over a Jimfs
-  (or zip) filesystem and `initRoots`/`loadSchema` run against it with no host I/O and with the
-  supplied filesystem's own semantics (case sensitivity included). The factory declares no
-  checked exception (it does no I/O); DEC-17 keeps the checked `IOException` on `initRoots`,
-  `loadSchema` and `close`. Proven by `JdkSchemaLoaderInMemoryTest`: a schema plus import load
-  and link entirely from Jimfs, and an import whose path differs only in case fails to resolve.
+  (or zip) filesystem and the schema's own files are read from it, with the supplied
+  filesystem's semantics (case sensitivity included). Two details follow the default route
+  instead: the bundled well-known Google protos fall through to the classpath when absent from
+  the supplied filesystem, and zip/jar source-path entries are materialized to a host temp
+  file. The factory declares no checked exception (it does no I/O); DEC-17 keeps the checked
+  `IOException` on `initRoots`, `loadSchema` and `close`. Proven by
+  `JdkSchemaLoaderInMemoryTest`: the imported file sits only on the supplied proto path and
+  resolves from it, and an import whose path differs only in case fails to resolve on a
+  case-sensitive Jimfs while the same fixtures load on a case-insensitive one, with the host
+  fixed, so the decision provably happens inside the supplied filesystem.
 - The consumer surface is `JdkSchemaLoader` alone; `SchemaLoader` in the same package keeps its
   okio-typed constructor as the engine surface (the port's own suites build on it, and TASK-25
   is additive). Migrating consumers must not import `SchemaLoader`; the reflection test scopes

@@ -113,24 +113,31 @@ try (JdkSchemaLoader loader = new JdkSchemaLoader()) {
 
 `JdkSchemaLoader.forClasspath(ClassLoader, String...)` loads from classpath resources.
 For schemas held in memory there is `JdkSchemaLoader.forFileSystem(java.nio.file.FileSystem)`
-(TASK-33.5): pass an in-memory filesystem such as Jimfs and the whole load runs against it.
+(TASK-33.5): pass an in-memory filesystem such as Jimfs and the schema's own files are read
+from it.
 
 ```java
 java.nio.file.FileSystem fs = Jimfs.newFileSystem();
-Files.write(fs.getPath("/protos/com/example/messages.proto"), bytes);
+Path proto = fs.getPath("/protos/com/example/messages.proto");
+Files.createDirectories(proto.getParent());              // parents are not created for you
+Files.write(proto, bytes);
 try (JdkSchemaLoader loader = JdkSchemaLoader.forFileSystem(fs)) {
-  loader.initRoots(List.of(fs.getPath("/protos")));      // Paths from the same filesystem
+  loader.initRoots(List.of(proto), List.of(fs.getPath("/protos")));   // Paths from fs
   Schema schema = loader.loadSchema();
 }
 ```
 
-Without it, code that built an okio `FakeFileSystem` must write its content to a temporary
-directory first. Two consequences observed on the Apicurio migration: each load costs real
-file-system work (about 90 metadata calls on a cold temp directory), and host file-system
-semantics apply (on a case-insensitive host such as macOS an import with the wrong case
-resolves locally and fails on a case-sensitive CI host). The in-memory route removes both: the
-loader holds only the supplied filesystem, and its semantics (Jimfs is case-sensitive by
-default) travel with the code instead of the host.
+Two details work exactly like the default route, not like the supplied filesystem: the bundled
+well-known Google protos fall through to the classpath when not present in it, and
+`.zip`/`.jar` source-path entries are materialized to a host temp file.
+
+Without this route, code that built an okio `FakeFileSystem` must write its content to a
+temporary directory first. Two consequences observed on the Apicurio migration: each load
+costs real file-system work (about 90 metadata calls on a cold temp directory), and host
+file-system semantics apply (on a case-insensitive host such as macOS an import with the
+wrong case resolves locally and fails on a case-sensitive CI host). The in-memory route
+removes both for the schema's own files: resolution follows the supplied filesystem, whose
+semantics (Jimfs is case-sensitive by default) travel with the code instead of the host.
 
 `JdkSchemaLoader` itself still declares `throws IOException` (it does real file I/O); the rule
 in section 6 applies to the Wire-compatible classes.

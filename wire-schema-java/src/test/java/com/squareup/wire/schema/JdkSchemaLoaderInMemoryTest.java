@@ -31,9 +31,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * TASK-33.5: {@link JdkSchemaLoader#forFileSystem(FileSystem)} over an in-memory Jimfs
- * filesystem. This is the route that restores what okio's FakeFileSystem gave consumers before
- * the migration: no staging into a host temp directory, and resolution semantics that belong to
- * the supplied filesystem instead of the host.
+ * filesystem. The imported file sits on the proto path but not the source path, so every test
+ * here exercises import resolution against the supplied filesystem, the route Apicurio's loader
+ * depends on; a schema whose imports are all also source files would take the source-path cache
+ * and prove nothing about resolution.
  */
 public class JdkSchemaLoaderInMemoryTest {
   private FileSystem fs;
@@ -46,33 +47,48 @@ public class JdkSchemaLoaderInMemoryTest {
     fs.close();
   }
 
-  private Path write(String path, String content) throws IOException {
-    Path file = fs.getPath(path);
+  private Path write(FileSystem target, String path, String content) throws IOException {
+    Path file = target.getPath(path);
     Files.createDirectories(file.getParent());
     Files.write(file, content.getBytes(UTF_8));
     return file;
   }
 
+  private void writePet(FileSystem target, String root) throws IOException {
+    write(target, root + "/com/example/cased/pet.proto", ""
+        + "syntax = \"proto3\";\n"
+        + "package com.example.cased;\n"
+        + "message Pet { string name = 1; }\n");
+  }
+
+  private Path writeOwner(FileSystem target, String root, String importPath) throws IOException {
+    return write(target, root + "/com/example/cased/owner.proto", ""
+        + "syntax = \"proto3\";\n"
+        + "package com.example.cased;\n"
+        + "import \"" + importPath + "\";\n"
+        + "message Owner { Pet pet = 1; }\n");
+  }
+
   /**
-   * A schema and its import load and link entirely from memory. No host path is involved: the
-   * facade created by {@code forFileSystem} holds only the supplied filesystem, so there is no
-   * temp-directory staging to observe; the proof that resolution went through memory is that
-   * the imported file exists nowhere on the host (the test never creates it there) yet the
-   * imported type links.
+   * A schema loads and its import resolves entirely from memory: the source path is the single
+   * owner file, the imported common file exists only on the supplied filesystem's proto path and
+   * nowhere on the host, so a linked Common proves resolution went through the supplied
+   * filesystem.
    */
-  @Test public void loadsSchemaAndImportsEntirelyFromMemory() throws Exception {
-    write("/protos/com/example/inmem/common.proto", ""
+  @Test public void resolvesImportsEntirelyFromMemory() throws Exception {
+    write(fs, "/protos/com/example/inmem/common.proto", ""
         + "syntax = \"proto3\";\n"
         + "package com.example.inmem;\n"
         + "message Common { string id = 1; }\n");
-    write("/protos/com/example/inmem/messages.proto", ""
+    Path source = write(fs, "/protos/com/example/inmem/messages.proto", ""
         + "syntax = \"proto3\";\n"
         + "package com.example.inmem;\n"
         + "import \"com/example/inmem/common.proto\";\n"
         + "message Messages { Common common = 1; }\n");
 
     try (JdkSchemaLoader loader = JdkSchemaLoader.forFileSystem(fs)) {
-      loader.initRoots(Collections.singletonList(fs.getPath("/protos")));
+      loader.initRoots(Collections.singletonList(source),
+          Collections.singletonList(fs.getPath("/protos")));
       Schema schema = loader.loadSchema();
 
       assertNotNull(schema.getType("com.example.inmem.Messages"));
@@ -82,43 +98,32 @@ public class JdkSchemaLoaderInMemoryTest {
   }
 
   /**
-   * Resolution follows the supplied filesystem's rules, not the host's. Jimfs is case-sensitive
-   * by design, so the wrong-case import must fail even though the same schema would resolve on a
-   * case-insensitive host through the old temp-directory staging (the macOS APFS leak of the
-   * Apicurio migration). This host is Linux, where the host filesystem is also case-sensitive;
-   * the pair still proves the point that matters here: the decision is made inside the supplied
-   * filesystem, because the file with the exact staged casing is the only one that exists, on
-   * any host. The macOS behavior is stated, not faked.
+   * Resolution follows the supplied filesystem's rules, not the host's, and this host can prove
+   * it. The wrong-case import fails on a case-sensitive Jimfs and loads on a case-insensitive
+   * one, while the host (Linux, case-sensitive) stays fixed: the opposite outcome per filesystem
+   * is only possible if the decision is made inside the supplied filesystem. This is the macOS
+   * APFS leak of the Apicurio migration made mechanical: staging into a host temp directory let
+   * the same wrong-case import resolve locally and fail on case-sensitive CI.
    */
   @Test public void caseSensitivityComesFromTheSuppliedFileSystem() throws Exception {
-    write("/protos/com/example/cased/pet.proto", ""
-        + "syntax = \"proto3\";\n"
-        + "package com.example.cased;\n"
-        + "message Pet { string name = 1; }\n");
+    writePet(fs, "/protos");
+    Path wrongCase = writeOwner(fs, "/protos", "com/example/cased/Pet.proto");
 
-    write("/protos/com/example/cased/owner.proto", ""
-        + "syntax = \"proto3\";\n"
-        + "package com.example.cased;\n"
-        + "import \"com/example/cased/pet.proto\";\n"
-        + "message Owner { Pet pet = 1; }\n");
-    try (JdkSchemaLoader correct = JdkSchemaLoader.forFileSystem(fs)) {
-      correct.initRoots(Collections.singletonList(fs.getPath("/protos")));
-      assertNotNull(correct.loadSchema().getType("com.example.cased.Owner"));
+    try (JdkSchemaLoader loader = JdkSchemaLoader.forFileSystem(fs)) {
+      loader.initRoots(Collections.singletonList(wrongCase),
+          Collections.singletonList(fs.getPath("/protos")));
+      assertThrows(SchemaException.class, loader::loadSchema);
     }
 
-    write("/protos2/com/example/cased/pet.proto", ""
-        + "syntax = \"proto3\";\n"
-        + "package com.example.cased;\n"
-        + "message Pet { string name = 1; }\n");
-    write("/protos2/com/example/cased/owner.proto", ""
-        + "syntax = \"proto3\";\n"
-        + "package com.example.cased;\n"
-        + "import \"com/example/cased/Pet.proto\";\n"
-        + "message Owner { Pet pet = 1; }\n");
-
-    try (JdkSchemaLoader wrongCase = JdkSchemaLoader.forFileSystem(fs)) {
-      wrongCase.initRoots(Collections.singletonList(fs.getPath("/protos2")));
-      assertThrows(SchemaException.class, wrongCase::loadSchema);
+    try (FileSystem macLike = Jimfs.newFileSystem(com.google.common.jimfs.Configuration.osX())) {
+      writePet(macLike, "/protos");
+      Path sameCase = writeOwner(macLike, "/protos", "com/example/cased/Pet.proto");
+      try (JdkSchemaLoader loader = JdkSchemaLoader.forFileSystem(macLike)) {
+        loader.initRoots(Collections.singletonList(sameCase),
+            Collections.singletonList(macLike.getPath("/protos")));
+        assertNotNull(loader.loadSchema().getType("com.example.cased.Owner"),
+            "a case-insensitive supplied filesystem must resolve the wrong-case import");
+      }
     }
   }
 }
