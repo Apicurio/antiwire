@@ -96,12 +96,12 @@ public class JdkSchemaLoaderInMemoryTest {
         + "package com.example.cased;\n"
         + "message Pet { string name = 1; }\n");
 
+    write("/protos/com/example/cased/owner.proto", ""
+        + "syntax = \"proto3\";\n"
+        + "package com.example.cased;\n"
+        + "import \"com/example/cased/pet.proto\";\n"
+        + "message Owner { Pet pet = 1; }\n");
     try (JdkSchemaLoader correct = JdkSchemaLoader.forFileSystem(fs)) {
-      write("/protos/com/example/cased/owner.proto", ""
-          + "syntax = \"proto3\";\n"
-          + "package com.example.cased;\n"
-          + "import \"com/example/cased/pet.proto\";\n"
-          + "message Owner { Pet pet = 1; }\n");
       correct.initRoots(Collections.singletonList(fs.getPath("/protos")));
       assertNotNull(correct.loadSchema().getType("com.example.cased.Owner"));
     }
