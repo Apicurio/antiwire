@@ -27,6 +27,25 @@
     test-only fixture, tests, and protoc-oracle modules. Production compilation uses --release 11 on a JDK 17+ toolchain (DEC-3).
   </description>
 
+  <!-- The port is Apache 2.0. The ProtoReader family, ProtoWriter and internal/MathMethods
+       derive from Google code under BSD-style notices that NOTICE reproduces, and the bundled
+       google/protobuf/*.proto resources carry Google's BSD notice in each file
+       (docs/license-inventory.md). The main jars and the published tests jar carry LICENSE and
+       NOTICE; the sources jars keep the per-file headers. -->
+  <licenses>
+    <license>
+      <name>Apache-2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+    <license>
+      <name>BSD-3-Clause</name>
+      <url>https://opensource.org/license/bsd-3-clause</url>
+      <distribution>repo</distribution>
+      <comments>Google-derived files only; each keeps its notice, and NOTICE reproduces those of the Java sources.</comments>
+    </license>
+  </licenses>
+
   <modules>
     <!-- Declared first: consumers use this never-published test fixture on their test
          classpaths (parity oracle), so it must package before them. -->
@@ -60,7 +79,8 @@
       typeSpec, ParameterizedTypeName.rawType).
     -->
     <javapoet.version>1.13.0</javapoet.version>
-    <!-- Guard for DEC-8: publishing is a separate gate (TASK-21 AC#1); nothing may be deployed before the maintainer approves the release. -->
+    <!-- Guard for DEC-8: publishing a release is a separate gate (TASK-21 AC#1). Only the
+         publish-snapshots profile lifts it, and only for -SNAPSHOT versions (DEC-18). -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
@@ -135,6 +155,11 @@
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.4.2</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>3.1.4</version>
+        </plugin>
         <!--
           TASK-21 release plumbing: versions and shared configuration for the sources and
           javadoc jars. Only the three shipped modules declare the executions (their poms);
@@ -162,6 +187,40 @@
           <configuration>
             <doclint>all,-missing,-html</doclint>
           </configuration>
+        </plugin>
+        <!-- Copies the repository's LICENSE and NOTICE into META-INF of each jar, which the
+             binary-redistribution clauses quoted in NOTICE require. The resources plugin is
+             bound in every jar module's lifecycle, so the execution applies to all modules
+             without being declared there; each module sits directly under the repository
+             root, hence the ${project.basedir}/.. directory. The resources sit in the execution,
+             not at plugin level, where they would replace default-resources and drop each
+             module's src/main/resources. wire-schema-java, the one module that publishes a
+             tests jar, adds the same copy for its test output. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.3.1</version>
+          <executions>
+            <execution>
+              <id>license-notice</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
+                <resources>
+                  <resource>
+                    <directory>${project.basedir}/..</directory>
+                    <includes>
+                      <include>LICENSE</include>
+                      <include>NOTICE</include>
+                    </includes>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -275,4 +334,59 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!--
+      DEC-18: -SNAPSHOT builds of the parent and the three shipped modules may be published to
+      the Central Portal snapshot repository before the first release; releases stay gated by
+      DEC-8 and TASK-21. Three guards: the enforcer rejects a non-SNAPSHOT version, only a
+      snapshotRepository is configured (a release has nowhere to go), and the test-only modules
+      keep their own maven.deploy.skip. Credentials come from the server id below in settings.xml.
+    -->
+    <profile>
+      <id>publish-snapshots</id>
+      <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+      </properties>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>central-portal-snapshots</id>
+          <name>Central Portal Snapshots</name>
+          <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
+      <build>
+        <plugins>
+          <!-- Uploads every module in one final step: a run cancelled or failed during the
+               build uploads nothing, so only that step can leave a mix of old and new modules. -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+              <deployAtEnd>true</deployAtEnd>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>only-snapshots-may-be-published</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireSnapshotVersion>
+                      <message>The publish-snapshots profile publishes -SNAPSHOT versions only; releases are gated by DEC-8 and TASK-21.</message>
+                    </requireSnapshotVersion>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

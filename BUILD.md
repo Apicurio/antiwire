@@ -119,9 +119,23 @@ upload or download.
 ## Coordinates
 
 The groupId is `io.apicurio`, resolved by maintainer directive on 2026-10-02 and reconfirmed
-on 2026-10-06 (DEC-8). Authorization to publish is a separate, still-closed gate: deployment
-is disabled (`maven.deploy.skip` is true in the parent pom) and these coordinates must not be
-published before TASK-21's release gates pass and the maintainer approves.
+on 2026-10-06 (DEC-8). Authorization to publish a release is a separate, still-closed gate:
+deployment is disabled (`maven.deploy.skip` is true in the parent pom) and a release must not
+be published before TASK-21's release gates pass and the maintainer approves.
+
+### Publishing snapshots (DEC-18)
+
+`0.1.0-SNAPSHOT` builds may be published to the Central Portal snapshot repository with the
+`publish-snapshots` profile:
+
+    mvn -B -P publish-snapshots -DskipTests deploy
+
+Credentials come from a `settings.xml` server with id `central-portal-snapshots` (a Central
+Portal user token). To check the published set without credentials, deploy to a local
+directory:
+`mvn -P publish-snapshots -DskipTests -Dmaven.install.skip=true -DaltDeploymentRepository=local::file:///tmp/snapshot-check deploy`.
+What is published, the guards against publishing a release, and the `publish-snapshot` CI job
+are described in DEC-18 (`docs/decisions.md`).
 
 ## Kotlin policy
 

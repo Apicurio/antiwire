@@ -50,6 +50,33 @@
             </execution>
           </executions>
         </plugin>
+        <!-- LICENSE and NOTICE into the tests jar too (DEC-18 publishes it), mirroring the
+             parent's license-notice execution. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>license-notice-tests</id>
+              <phase>process-test-resources</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.testOutputDirectory}/META-INF</outputDirectory>
+                <resources>
+                  <resource>
+                    <directory>${project.basedir}/..</directory>
+                    <includes>
+                      <include>LICENSE</include>
+                      <include>NOTICE</include>
+                    </includes>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
         <!-- TASK-21 release plumbing: attach -sources and -javadoc jars at package for this
              shipped module. Versions and the doclint scoping live in the parent
              pluginManagement. -->

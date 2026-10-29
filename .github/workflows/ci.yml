@@ -13,6 +13,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Weekly run on main: republishes the snapshot before Central's 90-day cleanup (DEC-18).
+  schedule:
+    - cron: '17 4 * * 1'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -64,3 +67,34 @@ jobs:
 
       - name: run the verification entry point
         run: ANTIWIRE_UPSTREAM="$HOME/antiwire-upstream" scripts/verify.sh
+
+  # DEC-18: after a green build of main, publish the -SNAPSHOT to the Central Portal snapshot
+  # repository. Without the two secrets below it only prints a notice and succeeds.
+  publish-snapshot:
+    name: publish the -SNAPSHOT to the Central Portal snapshot repository
+    needs: build-and-verify
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule')
+    runs-on: ubuntu-latest
+    env:
+      CENTRAL_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+      CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+    steps:
+      - name: skip when the Central Portal token is not configured
+        if: env.CENTRAL_TOKEN_USERNAME == ''
+        run: echo "::notice::Snapshot publishing skipped; the CENTRAL_TOKEN_USERNAME and CENTRAL_TOKEN_PASSWORD secrets are not set (DEC-18)."
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          server-id: central-portal-snapshots
+          server-username: CENTRAL_TOKEN_USERNAME
+          server-password: CENTRAL_TOKEN_PASSWORD
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-
+      - name: deploy the snapshot (tests ran in build-and-verify)
+        if: env.CENTRAL_TOKEN_USERNAME != ''
+        run: mvn -B -ntp -P publish-snapshots -DskipTests deploy

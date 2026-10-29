@@ -3,7 +3,7 @@
   TASK-15 protoc interoperability oracle module. Never published (test-only):
   it hosts the protoc-generated reference models and the ported upstream
   wire-protoc-compatibility-tests cases. Maven central deploy is blocked by
-  maven.deploy.skip from the parent.
+  this module's own maven.deploy.skip.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -22,6 +22,11 @@
   <description>protoc 4.36.1 interoperability oracle: reference models from the pinned
     protoc and the pinned upstream wire compiler 7.1.0, plus the ported upstream
     compatibility test cases. Never published.</description>
+
+  <properties>
+    <!-- Test-only module: never deployed, including under the publish-snapshots profile. -->
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
 
   <dependencies>
     <dependency>
