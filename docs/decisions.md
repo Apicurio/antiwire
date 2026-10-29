@@ -284,3 +284,14 @@ Enforcement: `config/surface-baseline.tsv` has no row owned by TASK-33.3 and the
 fails on a new one; `UncheckedExceptionContractTest` pins both halves by reflection and by
 behavior.
 
+
+### DEC-17 JdkSchemaLoader keeps its checked IOException (decided 2026-10-11, confirmed 2026-10-29)
+
+`JdkSchemaLoader` is antiwire's own facade, with no Wire counterpart, so DEC-16's rule (copy
+upstream's `throws` member by member) does not apply to it. It declares `throws IOException` on
+`forClasspath`, `initRoots`, `loadSchema` and `close`, and keeps doing so.
+
+Rationale: the class does real file I/O, and a caller has to deal with failure. This was the
+recommendation of 2026-10-10, MikeEdgar's vote on GitHub issue #8 (2026-10-11, option A), and
+the maintainer's confirmation of 2026-10-29. The Apicurio migration branch needed no change from
+DEC-16 precisely because its `IOException` handlers guard calls on this class.

@@ -6,7 +6,7 @@ title: >-
 status: Done
 assignee: []
 created_date: '2026-10-09 20:54'
-updated_date: '2026-10-29 06:02'
+updated_date: '2026-10-29 06:31'
 labels:
   - user-feedback
   - compatibility
@@ -47,6 +47,8 @@ Findings for antiwire from that log (each gets an owner): (1) OneOf constructor 
 Remaining for TASK-33.4: AC#3, the migration guide in docs/ of this repository (Kotlin-typed members, okio-typed members, JdkSchemaLoader and its staging cost, unchecked exceptions, the IntRange limit DEC-15), written from ANTIWIRE_MIGRATION.md on the branch.
 
 2026-10-29 update on the open JdkSchemaLoader question (GitHub issue #8): MikeEdgar voted for option A (keep the checked IOException; 'It does real file I/O and callers have to deal with failure', 2026-10-11), matching the recommendation recorded here on 2026-10-10. No other votes; the issue stays open. No code change: the port already declares the checked exception. The other five issues (#5, #6, #7, #9, #10) have no comments; the Apicurio fork branch stays at aec50760d; no new PRs on Apicurio/antiwire since #4.
+
+2026-10-29 closure of the JdkSchemaLoader question: the maintainer confirmed option A (keep the checked IOException), after MikeEdgar's vote the same way on issue #8. Recorded as DEC-17 in docs/decisions.md; issue #8 closed with a comment. No code change: the port already declares the checked exception on forClasspath, initRoots, loadSchema and close.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
