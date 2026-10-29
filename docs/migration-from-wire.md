@@ -3,8 +3,9 @@
 For a Java project that depends on `com.squareup.wire:wire-schema` (and `wire-runtime`) and wants
 `io.apicurio:wire-schema-java` (and `wire-runtime-java`) instead.
 
-Status: nothing is published. `io.apicurio:wire-schema-java:0.1.0-SNAPSHOT` exists only after you
-build and install antiwire yourself (section 1), and the version is a moving snapshot.
+Status: no release is published. `io.apicurio:wire-schema-java:0.1.0-SNAPSHOT` exists after you
+build and install antiwire yourself, or from the Central Portal snapshot repository once
+SNAPSHOT publishing is enabled (section 1, DEC-18); the version is a moving snapshot.
 
 Everything here was observed on a real migration: the Apicurio Registry protobuf modules,
 branch `antiwire-integration` of `paoloantinori/apicurio-registry` (log in its
@@ -52,6 +53,27 @@ To install, build antiwire from a checkout with JDK 17 or newer (the artifacts t
 install it into your local repository: `mvn -DskipTests install -DskipITs`. Use `mvn verify`,
 not `mvn test`, for the full test run (see `BUILD.md`). CI jobs of your own project must run this
 install first, or resolve the artifacts from a repository you publish them to.
+
+Once SNAPSHOT publishing is enabled (DEC-18), a build can resolve the current `0.1.0-SNAPSHOT`
+from the snapshot repository instead. The repository cannot be browsed; this command succeeds
+once a snapshot exists:
+`curl -fsS https://central.sonatype.com/repository/maven-snapshots/io/apicurio/wire-schema-java/maven-metadata.xml`.
+
+```xml
+<repositories>
+  <repository>
+    <id>central-portal-snapshots</id>
+    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    <releases><enabled>false</enabled></releases>
+    <snapshots><enabled>true</enabled></snapshots>
+  </repository>
+</repositories>
+```
+
+Central deletes snapshots after 90 days. antiwire's CI republishes on every push to `main` and
+once a week, but GitHub disables scheduled runs after 60 days without repository activity, so a
+dormant repository can let the snapshot expire. Pin a build you depend on by installing it
+locally.
 
 ### 2. Members that need Kotlin or okio types are not provided
 

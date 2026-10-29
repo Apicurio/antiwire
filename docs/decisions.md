@@ -295,3 +295,37 @@ Rationale: the class does real file I/O, and a caller has to deal with failure. 
 recommendation of 2026-10-10, MikeEdgar's vote on GitHub issue #8 (2026-10-11, option A), and
 the maintainer's confirmation of 2026-10-29. The Apicurio migration branch needed no change from
 DEC-16 precisely because its `IOException` handlers guard calls on this class.
+
+### DEC-18 -SNAPSHOT builds may be published before the first release (decided 2026-10-29)
+
+The parent pom and the three shipped modules may be published as `0.1.0-SNAPSHOT` to the Central
+Portal snapshot repository (`https://central.sonatype.com/repository/maven-snapshots/`) before
+the first release. Releases, including pre-release qualifiers such as `-alpha` or `-rc` (which
+Maven and Central treat as releases: immutable and permanent), stay gated by DEC-8 and TASK-21.
+
+Rationale (maintainer, 2026-10-29): consumers such as Apicurio can try a current build without
+installing antiwire locally, while nothing permanent is published. A -SNAPSHOT resolves only
+from the snapshot repository, which a consumer must declare explicitly (Maven Central's release
+repository does not serve it); tooling that filters out SNAPSHOT versions skips it; and Central
+deletes it after 90 days. A snapshot is still a binary distribution, so the main jars and the
+tests jar carry `META-INF/LICENSE` and `META-INF/NOTICE` and the poms declare their licenses;
+the sources jars keep the per-file headers (the sources and javadoc jars without the two files
+are a TASK-21 release-audit item).
+
+Mechanism: the `publish-snapshots` profile of the parent pom lifts `maven.deploy.skip` and has
+three guards. The enforcer rejects a non-SNAPSHOT version; only a `snapshotRepository` is
+configured, so a release has nowhere to go; the test-only modules (`wire-upstream-shaded`,
+`wire-tests-java`, `wire-protoc-compat-java`) keep their own `maven.deploy.skip`. What is
+published: the parent pom, each shipped module's jar, sources, javadoc and pom, plus
+`wire-schema-java`'s `tests` jar (Java test utilities and tests, no Kotlin; it is not part of
+the TASK-21 release set nor of the per-file audit in `docs/license-inventory.md`). Uploads
+happen in one final step (`deployAtEnd`): a run cancelled or failed during the build uploads
+nothing, so only that last step can leave a mix of old and new modules. The `publish-snapshot` CI job republishes after a green build on every push to
+`main` and weekly; GitHub disables the weekly schedule after 60 days without repository
+activity, so a dormant repository can let the snapshot expire.
+
+Not done by the repository: the io.apicurio namespace's SNAPSHOT publishing must be enabled in
+the Central Portal by its namespace administrator, and a Central Portal user token must be
+stored as the `CENTRAL_TOKEN_USERNAME` and `CENTRAL_TOKEN_PASSWORD` repository secrets. Until
+both exist, the CI job only prints a notice and nothing is published.
+
