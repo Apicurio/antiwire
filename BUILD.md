@@ -78,6 +78,11 @@ gap that was fixed and is now stale, fails the suite. After a reviewed change, r
 consumer jars (for example Confluent's kafka-protobuf-provider) and lists every `com.squareup.wire.*`
 member they reference that the port jars do not provide; it reports and does not fail.
 
+`scripts/footprint-tree-sizes.py --repo <m2 root> --module <artifactId> <base tree> [<after tree>]`
+recomputes the classpath sums of `docs/footprint.md` from `mvn dependency:tree -DoutputFile=...`
+output: test, provided and system subtrees pruned, the module's own artifact left out, each jar
+sized from the given local repositories; with two trees it prints the net change, the jars
+removed and added, and the jars whose version changed.
 
 Stale build outputs: after switching revisions, deleted or renamed test classes can survive
 as stale `.class` files under a module's `target/test-classes`, and surefire runs them (or
