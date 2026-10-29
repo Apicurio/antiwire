@@ -6,7 +6,7 @@ title: >-
 status: Done
 assignee: []
 created_date: '2026-10-09 20:54'
-updated_date: '2026-10-10 12:31'
+updated_date: '2026-10-29 06:02'
 labels:
   - user-feedback
   - compatibility
@@ -45,6 +45,8 @@ Findings for antiwire from that log (each gets an owner): (1) OneOf constructor 
 2026-10-10 rerun against antiwire 62c8646 (TASK-33.3, unchecked exceptions) by the apicurio-registry agent on the Mac; branch antiwire-integration at 2e5158fed on the fork (verified by me through the GitHub API). Reported: no 'exception IOException is never thrown' compile error and no call site or test changed (docs-only commit); four protobuf modules 142/142, app regression set 129/129, checkstyle clean, integration-tests test-compiles; the Confluent range gap re-probed unchanged (DEC-15). Why no breakage: every remaining IOException handler on the branch guards a call that still throws it (JdkSchemaLoader.initRoots/loadSchema/close/forClasspath, java.nio Files, Guava MoreFiles, protobuf writeTo); the antiwire calls that 33.3 touched (ProtoParser.parse, element constructors, getters) never declared IOException. My check: JdkSchemaLoader keeps `throws IOException` on forClasspath, initRoots, loadSchema and close (javap of the built class). It is an antiwire-only class with no Wire counterpart, so the TASK-33.3 rule (match upstream's throws) does not apply to it; Wire's own SchemaLoader.initRoots and loadSchema declare no throws and are covered by the surface baseline. Open question for the maintainer: make JdkSchemaLoader consistent with the unchecked policy (UncheckedIOException, no throws) or keep the checked exception on a class that does real file I/O; not decided, no task filed yet beyond TASK-33.5, which touches the same class.
 
 Remaining for TASK-33.4: AC#3, the migration guide in docs/ of this repository (Kotlin-typed members, okio-typed members, JdkSchemaLoader and its staging cost, unchecked exceptions, the IntRange limit DEC-15), written from ANTIWIRE_MIGRATION.md on the branch.
+
+2026-10-29 update on the open JdkSchemaLoader question (GitHub issue #8): MikeEdgar voted for option A (keep the checked IOException; 'It does real file I/O and callers have to deal with failure', 2026-10-11), matching the recommendation recorded here on 2026-10-10. No other votes; the issue stays open. No code change: the port already declares the checked exception. The other five issues (#5, #6, #7, #9, #10) have no comments; the Apicurio fork branch stays at aec50760d; no new PRs on Apicurio/antiwire since #4.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
