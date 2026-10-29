@@ -302,7 +302,12 @@ list goal then tries to download it and fails. The tree is the resolved graph, s
 module dependency sets below were parsed from the tree output with test and provided
 subtrees pruned (a node with scope test or provided removes its whole subtree from the
 runtime-classpath set). This is the standard runtime-classpath semantics `dependency:list
--DincludeScope=runtime` would produce.
+-DincludeScope=runtime` would produce. The tracked tool `scripts/footprint-tree-sizes.py`
+applies this rule (system scope pruned as well) to tree files written with
+`dependency:tree -DoutputFile=<file>` and sums the jar sizes from the local repositories; the
+in-reactor sibling jars must be installed there first, because `dependency:tree` does not
+install them. It was added on 2026-10-29; earlier renewals used scratch scripts that were not
+kept.
 
 ### 4.1 What each module resolves for wire-related artifacts
 
@@ -1059,7 +1064,11 @@ run and checked here: the 10.1 build exited 0 (BUILD SUCCESS); the six probe com
 (`dependency:tree` and `dependency:copy-dependencies` for each of the three probes)
 exited 0; every sum, MiB value, growth figure, and removal ratio written in this section
 was recomputed by a script (`/tmp/aw-foot-recompute.py`) whose output matches the tables
-above. The last recorded full battery on this production content is the TASK-16.2 close:
+above. (2026-10-29: that script, the probe projects and the private Maven repository holding
+the 0f860ff jars all lived only in `/tmp` and were lost in a host reboot, so the recorded
+figures can no longer be recomputed; rebuilt SNAPSHOT jars are not byte-reproducible, so a
+re-run would be a new measurement.) The last
+recorded full battery on this production content is the TASK-16.2 close:
 `scripts/verify.sh` with all 12 ACTIVE suites PASS, run on `ec15e18`; the commits after
 `ec15e18` up to `0f860ff` touch `README.md` and two backlog task files only (verified by
 `git diff --name-only ec15e18..HEAD`), so the production tree measured here is identical
@@ -1288,7 +1297,11 @@ Commands and results, all on this worktree at `63503d7` plus the script fix note
   upstream cases reconciled; surface-check MATCH 1408, GAP 0, EXCLUDED 379, snippets 7/0;
   java11-consumer on JDK 11.0.24).
 - Every sum, MiB value, growth figure and removal ratio written in this section was
-  recomputed by a script (`/tmp/fp11-recompute.py` and the set-parsing script of 11.5) whose
+  recomputed by a script (`/tmp/fp11-recompute.py` and the set-parsing script of 11.5; both
+  lived only in `/tmp`, as did the probe projects, the two 11.5 tree files, the Apicurio clone
+  and the private Maven repository with the 11.1 jars, and all were lost in a host reboot before
+  2026-10-29, so the recorded figures can no longer be recomputed; a re-run of 11.1 to 11.5
+  would be a new measurement, because rebuilt SNAPSHOT jars are not byte-reproducible) whose
   output matches the tables above.
 
 Nothing in the port changed during this renewal: the diff of this branch against `main`
